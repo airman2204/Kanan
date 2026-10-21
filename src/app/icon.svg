@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <rect width="32" height="32" rx="6" fill="#FFFFFF" />
+  <!-- Glifo Prehispánico K (Isotipo Oficial Kanan) -->
+  <!-- Círculos superiores izquierdos -->
+  <circle cx="6.5" cy="5.5" r="2.2" fill="none" stroke="#00B4D8" stroke-width="1.5" />
+  <circle cx="8" cy="10.2" r="1.9" fill="none" stroke="#00B4D8" stroke-width="1.5" />
+  <circle cx="9.2" cy="14.2" r="1.5" fill="none" stroke="#00B4D8" stroke-width="1.4" />
+  <!-- Columna escalonada izquierda -->
+  <path d="M9.5 16.5 H11.5 V28.5 H9.5 M9.5 18.5 H8 M9.5 21 H8 M9.5 23.5 H8 M9.5 26 H8 M9.5 28.5 H8" stroke="#1E3A5F" stroke-width="1.6" stroke-linecap="round" fill="none" />
+  <!-- Bloque trapezoidal superior (Armadura de bioseguridad) -->
+  <polygon points="9,3.5 20.5,3.5 19.5,6.5 10,6.5" fill="#1E3A5F" />
+  <rect x="10.5" y="7.5" width="3" height="3.5" fill="#1E3A5F" />
+  <rect x="14.3" y="7.5" width="3.8" height="3.5" fill="#1E3A5F" />
+  <!-- Cuerpo central y greca inferior -->
+  <rect x="13" y="12.5" width="4.5" height="6" fill="none" stroke="#1E3A5F" stroke-width="1.6" />
+  <polygon points="13,20 17.5,20 19,25.5 13,25.5" fill="none" stroke="#1E3A5F" stroke-width="1.6" />
+  <path d="M12.5 27 H19.5 V29 H12.5 Z" fill="#2B7BB9" />
+  <!-- Brazo diagonal K (Cerúleo y Cian) -->
+  <path d="M22 3.5 L26 3.5 L20.5 16.5 L26 29 L22 29 L17.2 16.5 Z" fill="#2B7BB9" />
+  <polygon points="22.8,8.5 24.8,8.5 22.2,14.8 20.2,14.8" fill="#00B4D8" />
+</svg>
