@@ -110,6 +110,23 @@ export default function AdminCRMPage() {
     }
   };
 
+  const handleToggleHalloween = async (enabled: boolean) => {
+    const res = await fetch("/api/crm", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "TOGGLE_HALLOWEEN", enabled }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      setDb(data.db);
+      showNotice(
+        enabled
+          ? "🎃 Modo Halloween activado en la página pública (Murciélagos y Papel Picado visibles)."
+          : "🍂 Modo Halloween desactivado (Diseño original limpio restablecido)."
+      );
+    }
+  };
+
   const handleUpdateCita = async (
     citaId: string,
     updates: {
@@ -199,14 +216,41 @@ export default function AdminCRMPage() {
             </span>
           </div>
 
-          {/* Botones de Acción Rápida: Volver a Web / Limpiar los 2 ejemplos / Restaurar */}
+          {/* Botones de Acción Rápida: Switch Halloween / Volver a Web / Limpiar ejemplos */}
           <div className="flex flex-wrap items-center gap-2">
+            {/* Switch Selector Modo Halloween */}
+            <div className="flex items-center gap-2 bg-white/10 hover:bg-white/15 px-3 py-1.5 rounded-xl border border-white/15 transition-colors">
+              <span className="text-xs font-heading font-bold flex items-center gap-1 text-orange-400">
+                <span>🎃</span>
+                <span className="hidden sm:inline">Modo Halloween</span>
+              </span>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={db?.config?.modo_halloween ?? true}
+                onClick={() => handleToggleHalloween(!(db?.config?.modo_halloween ?? true))}
+                className={`relative inline-flex h-5 w-10 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                  (db?.config?.modo_halloween ?? true) ? "bg-orange-500" : "bg-slate-600"
+                }`}
+              >
+                <span
+                  className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
+                    (db?.config?.modo_halloween ?? true) ? "translate-x-5" : "translate-x-0"
+                  }`}
+                />
+              </button>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-300">
+                {(db?.config?.modo_halloween ?? true) ? "ON" : "OFF"}
+              </span>
+            </div>
+
             <Link
               href="/"
+              target="_blank"
               className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold transition-colors"
             >
               <ArrowLeft className="w-3.5 h-3.5 text-kanan-cyan" />
-              <span>Ver Sitio Web</span>
+              <span>Ver Sitio</span>
             </Link>
 
             {clientes.length > 0 ? (

@@ -189,6 +189,9 @@ export function getTwoDemoExamples(): KananDatabase {
     servicios_citas,
     recurrencia,
     mensajes_automatizacion,
+    config: {
+      modo_halloween: true,
+    },
   };
 }
 
@@ -253,20 +256,34 @@ export function getDatabase(): KananDatabase {
 }
 
 export function clearAllData(): KananDatabase {
+  const current = getDatabase();
   const emptyDb: KananDatabase = {
     clientes: [],
     servicios_citas: [],
     recurrencia: [],
     mensajes_automatizacion: [],
+    config: current.config || { modo_halloween: true },
   };
   saveDatabase(emptyDb);
   return emptyDb;
 }
 
 export function resetToTwoExamples(): KananDatabase {
+  const current = getDatabase();
   const demoDb = getTwoDemoExamples();
+  demoDb.config = current.config || { modo_halloween: true };
   saveDatabase(demoDb);
   return demoDb;
+}
+
+export function setModoHalloween(enabled: boolean): KananDatabase {
+  const db = getDatabase();
+  db.config = {
+    ...(db.config || {}),
+    modo_halloween: enabled,
+  };
+  saveDatabase(db);
+  return db;
 }
 
 function obtenerRutaPorMunicipio(municipio: MunicipioZMG): string {

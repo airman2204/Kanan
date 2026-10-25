@@ -98,9 +98,14 @@ export interface MensajeAutomatizacion {
   fecha_programada: string;
 }
 
+export interface KananConfig {
+  modo_halloween: boolean;
+}
+
 export interface KananDatabase {
   clientes: Cliente[];
   servicios_citas: ServicioCita[];
   recurrencia: RegistroRecurrencia[];
   mensajes_automatizacion: MensajeAutomatizacion[];
+  config?: KananConfig;
 }

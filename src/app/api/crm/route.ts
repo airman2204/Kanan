@@ -5,6 +5,7 @@ import {
   updateCitaInDb,
   clearAllData,
   resetToTwoExamples,
+  setModoHalloween,
   saveDatabase,
 } from "@/lib/db/store";
 import { generarMensajeWhatsAppReservaCliente, KANAN_WHATSAPP_NUMBER } from "@/lib/whatsapp/templates";
@@ -35,6 +36,17 @@ export async function POST(req: NextRequest) {
         ok: true,
         message: "Se han cargado los 2 ejemplos de demostración.",
         db: demoDb,
+      });
+    }
+
+    // Acción especial: Alternar modo Halloween
+    if (body.action === "TOGGLE_HALLOWEEN") {
+      const updatedDb = setModoHalloween(Boolean(body.enabled));
+      return NextResponse.json({
+        ok: true,
+        message: body.enabled ? "Modo Halloween activado 🎃🦇" : "Modo Halloween desactivado",
+        modo_halloween: updatedDb.config?.modo_halloween ?? true,
+        db: updatedDb,
       });
     }
 
