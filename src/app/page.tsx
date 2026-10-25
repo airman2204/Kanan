@@ -10,6 +10,7 @@ import { BookingWizard } from "@/components/landing/BookingWizard";
 import { SocialProofAndFAQ } from "@/components/landing/SocialProofAndFAQ";
 import { Footer } from "@/components/landing/Footer";
 import { HalloweenBats } from "@/components/landing/HalloweenBats";
+import { PapelPicado } from "@/components/landing/PapelPicado";
 
 export default function HomePage() {
   const [selectedMunicipio, setSelectedMunicipio] = useState<MunicipioZMG>("Guadalajara");
@@ -33,6 +34,7 @@ export default function HomePage() {
         onSelectMunicipio={setSelectedMunicipio}
         onOpenWizard={() => scrollToWizard()}
       />
+      <PapelPicado />
 
       <main className="flex-1">
         <HeroSection
