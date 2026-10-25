@@ -46,6 +46,9 @@ export function StickyHeader({
               <span className="w-2 h-2 rounded-full bg-kanan-cyan animate-ping" />
               Bioseguridad Textil
             </span>
+            <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-heading font-bold px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-600 border border-orange-300/40 shrink-0">
+              🦇 Modo Halloween 🎃
+            </span>
             <span className="truncate font-medium text-slate-600">
               Unidades móviles hoy en <strong className="text-kanan-deep">{selectedMunicipio}</strong> • Secado en 3-4h
             </span>

@@ -9,6 +9,7 @@ import { BeforeAfterGallery } from "@/components/landing/BeforeAfterGallery";
 import { BookingWizard } from "@/components/landing/BookingWizard";
 import { SocialProofAndFAQ } from "@/components/landing/SocialProofAndFAQ";
 import { Footer } from "@/components/landing/Footer";
+import { HalloweenBats } from "@/components/landing/HalloweenBats";
 
 export default function HomePage() {
   const [selectedMunicipio, setSelectedMunicipio] = useState<MunicipioZMG>("Guadalajara");
@@ -25,7 +26,8 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
+    <div className="min-h-screen flex flex-col bg-white relative">
+      <HalloweenBats />
       <StickyHeader
         selectedMunicipio={selectedMunicipio}
         onSelectMunicipio={setSelectedMunicipio}
