@@ -108,7 +108,12 @@ export async function generateMfaQrCode(email: string, secret: string): Promise<
 
 export function verifyMfaToken(token: string, secret: string): boolean {
   try {
-    const result = verifySync({ token, secret });
+    // Permitir ventana de tolerancia de ±1 paso (±30 segundos)
+    const result = verifySync({
+      token: token.trim(),
+      secret: secret.trim(),
+      epochTolerance: 30,
+    });
     return Boolean(result && (result as any).valid === true);
   } catch {
     return false;
