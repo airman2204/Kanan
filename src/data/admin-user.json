@@ -1,0 +1,8 @@
+{
+  "email": "magc2204@gmail.com",
+  "passwordHash": "849469f2051db84969b136d2cde20e3fcc7ece351765a4ff7c145be4e0153f0b68c95faffafa951fb1388db2519df32235bb395056d8fa6c3ee260362db38495",
+  "salt": "461fa021efc302bc3aa519b10ae1e7df",
+  "mfaSecret": "JBSWY3DPEHPK3PXP",
+  "mfaConfigured": false,
+  "mustChangePassword": false
+}
