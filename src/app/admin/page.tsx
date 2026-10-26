@@ -184,13 +184,11 @@ export default function AdminPage() {
         <div className="space-y-8">
           {/* Logo en tamaño grande en la cabecera del menú */}
           <div className="flex items-center justify-between pb-5 border-b border-white/10">
-            <div className="p-2.5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md">
-              <img
-                src="/assets/brand/kanan-logo-white.png"
-                alt="Kanan"
-                className="h-16 sm:h-20 w-auto object-contain drop-shadow"
-              />
-            </div>
+            <img
+              src="/assets/brand/kanan-logo-white.png"
+              alt="Kanan"
+              className="h-16 sm:h-20 w-auto object-contain"
+            />
             <button
               type="button"
               onClick={() => setSidebarOpen(false)}

@@ -129,15 +129,13 @@ export default function AdminLoginPage() {
       {/* Tarjeta Glassmorphic de Alta Fidelidad */}
       <div className="w-full max-w-[460px] relative z-10 bg-white/95 backdrop-blur-xl rounded-[28px] border border-white/60 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.35),0_0_40px_rgba(54,166,222,0.15)] p-7 sm:p-10 space-y-7 transition-all">
         
-        {/* Logotipo en tamaño prominente con insignia y relieve */}
+        {/* Logotipo en PNG transparente en tamaño grande sin recuadro */}
         <div className="flex flex-col items-center">
-          <div className="relative group p-4 rounded-2xl bg-gradient-to-b from-white to-slate-50/80 border border-slate-100 shadow-[0_8px_24px_rgba(53,85,129,0.08)] flex items-center justify-center">
-            <img
-              src="/assets/brand/kanan-logo-oficial.png"
-              alt="Kanan"
-              className="h-28 sm:h-32 w-auto object-contain drop-shadow-sm transition-transform duration-300 group-hover:scale-105"
-            />
-          </div>
+          <img
+            src="/assets/brand/kanan-logo-oficial.png"
+            alt="Kanan"
+            className="h-32 sm:h-36 w-auto object-contain"
+          />
         </div>
 
         {/* Único Título Solicitado: Administrador de negocio */}
