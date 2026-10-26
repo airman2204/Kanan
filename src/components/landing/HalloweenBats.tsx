@@ -113,14 +113,14 @@ export function HalloweenBats() {
               className="drop-shadow-[0_2px_4px_rgba(15,36,56,0.3)]"
             >
               {/* Cuerpo del murciélago */}
-              <ellipse cx="50" cy="30" rx="6" ry="12" fill="#0F2438" />
+              <ellipse cx="50" cy="30" rx="6" ry="12" fill="#355581" />
               {/* Cabeza y orejas */}
-              <circle cx="50" cy="20" r="5.5" fill="#0F2438" />
-              <polygon points="46,18 44,12 48,16" fill="#0F2438" />
-              <polygon points="54,18 56,12 52,16" fill="#0F2438" />
-              {/* Ojos brillantes cian/amarillo sutil */}
-              <circle cx="48" cy="19.5" r="0.9" fill="#00B4D8" />
-              <circle cx="52" cy="19.5" r="0.9" fill="#00B4D8" />
+              <circle cx="50" cy="20" r="5.5" fill="#355581" />
+              <polygon points="46,18 44,12 48,16" fill="#355581" />
+              <polygon points="54,18 56,12 52,16" fill="#355581" />
+              {/* Ojos brillantes cian acento sutil */}
+              <circle cx="48" cy="19.5" r="0.9" fill="#36A6DE" />
+              <circle cx="52" cy="19.5" r="0.9" fill="#36A6DE" />
 
               {/* Ala izquierda con aleteo animado */}
               <g
@@ -131,11 +131,11 @@ export function HalloweenBats() {
               >
                 <path
                   d="M47 28 C38 12, 22 10, 5 18 C12 28, 20 32, 22 42 C28 36, 36 38, 47 34 Z"
-                  fill="#1E3A5F"
+                  fill="#1D71B5"
                 />
                 <path
                   d="M47 28 C36 18, 24 16, 8 20 C14 26, 22 30, 24 38 C30 33, 38 34, 47 32 Z"
-                  fill="#0F2438"
+                  fill="#355581"
                 />
               </g>
 
@@ -148,11 +148,11 @@ export function HalloweenBats() {
               >
                 <path
                   d="M53 28 C62 12, 78 10, 95 18 C88 28, 80 32, 78 42 C72 36, 64 38, 53 34 Z"
-                  fill="#1E3A5F"
+                  fill="#1D71B5"
                 />
                 <path
                   d="M53 28 C64 18, 76 16, 92 20 C86 26, 78 30, 76 38 C70 33, 62 34, 53 32 Z"
-                  fill="#0F2438"
+                  fill="#355581"
                 />
               </g>
             </svg>

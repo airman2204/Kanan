@@ -164,8 +164,8 @@ export function SocialProofAndFAQ() {
 
             {/* Visualización de la Tarjeta Poservicio (Frente y Vuelta según Manual Pág. 4) */}
             <div className="lg:col-span-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Frente: Logotipo sobre fondo Azul Marino mate */}
-              <div className="bg-[#1E3A5F] border border-white/20 rounded-2xl p-5 flex flex-col items-center justify-center text-center min-h-[170px] shadow-lg">
+              {/* Frente: Logotipo sobre fondo Azul Principal mate (#355581) */}
+              <div className="bg-[#355581] border border-white/20 rounded-2xl p-5 flex flex-col items-center justify-center text-center min-h-[170px] shadow-lg">
                 <span className="text-[10px] uppercase tracking-widest text-kanan-cyan font-bold mb-2">
                   Frente — Acabado Mate
                 </span>

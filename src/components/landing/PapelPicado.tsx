@@ -11,17 +11,17 @@ interface PapelItem {
 export function PapelPicado() {
   const flags: PapelItem[] = [
     { color: "#FF7518", pattern: "calavera", animDelay: "0s" },       // Naranja cempasúchil tradicional
-    { color: "#00B4D8", pattern: "glifo", animDelay: "0.2s" },         // Cian Fresco Kanan
+    { color: "#36A6DE", pattern: "glifo", animDelay: "0.2s" },         // 10% Acento Kanan (#36A6DE)
     { color: "#9B51E0", pattern: "murcielago", animDelay: "0.4s" },    // Morado Halloween
-    { color: "#2B7BB9", pattern: "perrito", animDelay: "0.1s" },       // Azul Cerúleo Kanan (Kanan Dog)
+    { color: "#1D71B5", pattern: "perrito", animDelay: "0.1s" },       // 30% Secundario Kanan (#1D71B5)
     { color: "#FF8C00", pattern: "calavera", animDelay: "0.5s" },
-    { color: "#00B4D8", pattern: "glifo", animDelay: "0.3s" },
+    { color: "#36A6DE", pattern: "glifo", animDelay: "0.3s" },
     { color: "#E056FD", pattern: "murcielago", animDelay: "0.6s" },
-    { color: "#1E3A5F", pattern: "perrito", animDelay: "0.15s" },      // Azul Marino Kanan
+    { color: "#355581", pattern: "perrito", animDelay: "0.15s" },      // 60% Principal Kanan (#355581)
     { color: "#FF7518", pattern: "calavera", animDelay: "0.45s" },
-    { color: "#00B4D8", pattern: "glifo", animDelay: "0.25s" },
+    { color: "#36A6DE", pattern: "glifo", animDelay: "0.25s" },
     { color: "#9B51E0", pattern: "murcielago", animDelay: "0.35s" },
-    { color: "#2B7BB9", pattern: "perrito", animDelay: "0.05s" },
+    { color: "#1D71B5", pattern: "perrito", animDelay: "0.05s" },
   ];
 
   return (

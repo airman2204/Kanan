@@ -5,10 +5,16 @@
 :root {
   --font-montserrat: "Montserrat", system-ui, -apple-system, sans-serif;
   --font-inter: "Inter", system-ui, -apple-system, sans-serif;
-  --kanan-navy-deep: #0F2438;
-  --kanan-navy: #1E3A5F;
-  --kanan-cerulean: #2B7BB9;
-  --kanan-cyan: #00B4D8;
+
+  /* Nueva Paleta Oficial Kanan 60 - 30 - 10 */
+  --kanan-principal: #355581;
+  --kanan-secundario: #1D71B5;
+  --kanan-acento: #36A6DE;
+
+  --kanan-navy-deep: #355581;
+  --kanan-navy: #355581;
+  --kanan-cerulean: #1D71B5;
+  --kanan-cyan: #36A6DE;
   --kanan-ice: #F4F7F9;
   --kanan-white: #FFFFFF;
 }
@@ -20,7 +26,7 @@ html {
 
 body {
   font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
-  color: #0F2438;
+  color: #355581;
   background-color: #FFFFFF;
   overflow-x: hidden;
 }
@@ -45,5 +51,5 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #2B7BB9;
+  background: #1D71B5;
 }

@@ -10,12 +10,18 @@ const config: Config = {
     extend: {
       colors: {
         kanan: {
-          deep: "#0F2438",      // Azul Marino Profundo (Brief)
-          navy: "#1E3A5F",      // Azul Marino Corporativo (Manual de Marca)
-          cerulean: "#2B7BB9",  // Azul Cerúleo (Isotipo)
-          cyan: "#00B4D8",      // Cian Fresco (CTA / Acentos)
-          ice: "#F4F7F9",       // Gris Hielo (Fondos UI / Tarjetas)
-          white: "#FFFFFF",     // Blanco Puro
+          // Paleta Oficial Kanan 60 - 30 - 10
+          principal: "#355581",   // 60% Principal (RGB 53, 85, 129)
+          secundario: "#1D71B5",  // 30% Secundario (RGB 28, 113, 181)
+          acento: "#36A6DE",      // 10% Acento (RGB 54, 166, 222)
+
+          // Mapeo semántico para coherencia en componentes existentes
+          deep: "#355581",        // Azul Principal Oficial
+          navy: "#355581",        // Azul Principal Oficial
+          cerulean: "#1D71B5",    // Azul Secundario Oficial
+          cyan: "#36A6DE",        // Azul Acento Oficial
+          ice: "#F4F7F9",         // Gris Hielo (Fondos UI / Tarjetas)
+          white: "#FFFFFF",       // Blanco Puro
         },
       },
       fontFamily: {
@@ -23,9 +29,9 @@ const config: Config = {
         body: ["var(--font-inter)", "sans-serif"],
       },
       boxShadow: {
-        kanan: "0 12px 32px -8px rgba(15, 36, 56, 0.12)",
-        "kanan-lg": "0 20px 48px -12px rgba(15, 36, 56, 0.18)",
-        "cyan-glow": "0 8px 24px -4px rgba(0, 180, 216, 0.45)",
+        kanan: "0 12px 32px -8px rgba(53, 85, 129, 0.12)",
+        "kanan-lg": "0 20px 48px -12px rgba(53, 85, 129, 0.18)",
+        "cyan-glow": "0 8px 24px -4px rgba(54, 166, 222, 0.45)",
       },
     },
   },
