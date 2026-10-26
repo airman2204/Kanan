@@ -24,12 +24,17 @@ export function JaliscoServiceMap({
 }: JaliscoServiceMapProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
+  const markersLayerRef = useRef<any>(null);
+  const onSelectCitaRef = useRef(onSelectCitaForCalendar);
+  onSelectCitaRef.current = onSelectCitaForCalendar;
 
+  // 1. Inicializar el mapa de Leaflet una sola vez (NO recrear en cada render)
   useEffect(() => {
     let isMounted = true;
 
     async function initMap() {
       if (typeof window === "undefined" || !mapContainerRef.current) return;
+      if (mapInstanceRef.current) return; // ya inicializado
 
       // Cargar Leaflet dinámicamente en el cliente
       const L = (await import("leaflet")).default;
@@ -43,29 +48,55 @@ export function JaliscoServiceMap({
         document.head.appendChild(link);
       }
 
-      if (!isMounted || !mapContainerRef.current) return;
-
-      // Si ya hay un mapa creado, limpiarlo
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
-      }
+      if (!isMounted || !mapContainerRef.current || mapInstanceRef.current) return;
 
       // Inicializar mapa centrado en Jalisco (ZMG)
       const map = L.map(mapContainerRef.current, {
         center: [20.6597, -103.3496],
         zoom: 11,
         zoomControl: true,
-        scrollWheelZoom: false,
+        scrollWheelZoom: true,
       });
-      mapInstanceRef.current = map;
 
-      // Capa de teselas de alta calidad con detalle nítido de calles (OpenStreetMap Standard)
+      // Capa de teselas de alta calidad con detalle nítido de calles (OpenStreetMap)
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 19,
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
       }).addTo(map);
 
-      // Icono de Pin Personalizado Kanan (#355581 y #36A6DE)
+      // Crear LayerGroup para pines
+      const markersLayer = L.layerGroup().addTo(map);
+      markersLayerRef.current = markersLayer;
+      mapInstanceRef.current = map;
+
+      // Forzar recalculo de dimensiones
+      setTimeout(() => {
+        if (mapInstanceRef.current) {
+          mapInstanceRef.current.invalidateSize();
+        }
+      }, 250);
+    }
+
+    initMap();
+
+    return () => {
+      isMounted = false;
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+        markersLayerRef.current = null;
+      }
+    };
+  }, []); // Solo al montar
+
+  // 2. Actualizar pines sin reiniciar ni resetear la vista del mapa
+  useEffect(() => {
+    async function updateMarkers() {
+      if (!mapInstanceRef.current || !markersLayerRef.current) return;
+      const L = (await import("leaflet")).default;
+
+      markersLayerRef.current.clearLayers();
+
       const pinIcon = L.divIcon({
         className: "custom-kanan-pin",
         html: `
@@ -95,16 +126,14 @@ export function JaliscoServiceMap({
         popupAnchor: [0, -32],
       });
 
-      // Agregar marcadores para cada cita
       citas.forEach((cita, idx) => {
         const cliente = clientes.find((c) => c.id === cita.cliente_id);
         const baseCoords = (cliente && MUNICIPIO_COORDS[cliente.municipio]) || [20.6597, -103.3496];
-        
-        // Dispersión ligera para evitar superposición exacta de pines en el mismo municipio
+
         const lat = baseCoords[0] + (idx * 0.012 - 0.006);
         const lng = baseCoords[1] + (idx * 0.015 - 0.008);
 
-        const marker = L.marker([lat, lng], { icon: pinIcon }).addTo(map);
+        const marker = L.marker([lat, lng], { icon: pinIcon });
 
         const popupContent = document.createElement("div");
         popupContent.style.minWidth = "190px";
@@ -144,23 +173,17 @@ export function JaliscoServiceMap({
           const btn = document.getElementById(`btn-goto-calendar-${cita.id}`);
           if (btn) {
             btn.onclick = () => {
-              onSelectCitaForCalendar(cita.estatus);
+              onSelectCitaRef.current(cita.estatus);
             };
           }
         });
+
+        markersLayerRef.current.addLayer(marker);
       });
     }
 
-    initMap();
-
-    return () => {
-      isMounted = false;
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
-        mapInstanceRef.current = null;
-      }
-    };
-  }, [citas, clientes, onSelectCitaForCalendar]);
+    updateMarkers();
+  }, [citas, clientes]);
 
   return (
     <div className="w-full h-[400px] sm:h-[480px] rounded-2xl overflow-hidden border border-slate-200 relative">

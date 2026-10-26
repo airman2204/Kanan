@@ -182,20 +182,20 @@ export default function AdminPage() {
         }`}
       >
         <div className="space-y-8">
-          {/* Logo en tamaño grande en la cabecera del menú */}
-          <div className="flex items-center justify-between pb-5 border-b border-white/10">
-            <img
-              src="/assets/brand/kanan-logo-white.png"
-              alt="Kanan"
-              className="h-16 sm:h-20 w-auto object-contain"
-            />
+          {/* Logo en tamaño grande y perfectamente centrado */}
+          <div className="flex flex-col items-center justify-center pb-5 border-b border-white/10 relative">
             <button
               type="button"
               onClick={() => setSidebarOpen(false)}
-              className="md:hidden text-white/70 hover:text-white p-2 rounded-xl hover:bg-white/10 transition-colors"
+              className="md:hidden absolute top-0 right-0 text-white/70 hover:text-white p-2 rounded-xl hover:bg-white/10 transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
+            <img
+              src="/assets/brand/kanan-logo-white.png"
+              alt="Kanan"
+              className="h-16 sm:h-20 w-auto object-contain mx-auto"
+            />
           </div>
 
           {/* Navegación Principal */}
@@ -341,70 +341,95 @@ export default function AdminPage() {
           {activeSection === "resumen" && (
             <div className="space-y-8">
               
-              {/* Tarjetas de Estadísticas Financieras, Citas y Tráfico */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Tarjetas de Métricas de Alto Nivel */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                 
-                {/* Ganancias Totales */}
-                <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm flex flex-col justify-between space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-heading font-bold text-slate-500 uppercase tracking-wider">
+                {/* Ganancias */}
+                <div className="relative overflow-hidden bg-gradient-to-br from-white via-white to-slate-50/80 rounded-[24px] p-6 border border-slate-200/90 shadow-[0_4px_20px_-4px_rgba(53,85,129,0.06)] hover:shadow-[0_12px_28px_-6px_rgba(53,85,129,0.12)] transition-all group">
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-xs font-heading font-extrabold text-[#355581]/70 tracking-wider uppercase">
                       Ganancias
                     </span>
-                    <div className="p-2 rounded-xl bg-[#36A6DE]/15 text-[#1D71B5]">
+                    <div className="p-3 rounded-2xl bg-gradient-to-br from-[#1D71B5] to-[#36A6DE] text-white shadow-md shadow-[#1D71B5]/25">
                       <DollarSign className="w-5 h-5" />
                     </div>
                   </div>
-                  <p className="font-heading text-3xl font-extrabold text-[#355581]">
-                    ${totalGanancias.toLocaleString("es-MX")} <span className="text-xs font-normal text-slate-400">MXN</span>
-                  </p>
+                  <div className="space-y-1">
+                    <p className="font-heading text-3xl font-extrabold text-[#1e293b] tracking-tight">
+                      ${totalGanancias.toLocaleString("es-MX")}
+                    </p>
+                    <span className="inline-block text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/60">
+                      MXN
+                    </span>
+                  </div>
+                  <div className="absolute -bottom-8 -right-8 w-24 h-24 bg-[#36A6DE]/5 rounded-full blur-xl pointer-events-none group-hover:bg-[#36A6DE]/10 transition-colors" />
                 </div>
 
-                {/* Servicios Realizados */}
-                <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm flex flex-col justify-between space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-heading font-bold text-slate-500 uppercase tracking-wider">
+                {/* Servicios */}
+                <div className="relative overflow-hidden bg-gradient-to-br from-white via-white to-slate-50/80 rounded-[24px] p-6 border border-slate-200/90 shadow-[0_4px_20px_-4px_rgba(53,85,129,0.06)] hover:shadow-[0_12px_28px_-6px_rgba(53,85,129,0.12)] transition-all group">
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-xs font-heading font-extrabold text-[#355581]/70 tracking-wider uppercase">
                       Servicios
                     </span>
-                    <div className="p-2 rounded-xl bg-[#1D71B5]/15 text-[#1D71B5]">
+                    <div className="p-3 rounded-2xl bg-gradient-to-br from-[#355581] to-[#1D71B5] text-white shadow-md shadow-[#355581]/25">
                       <TrendingUp className="w-5 h-5" />
                     </div>
                   </div>
-                  <p className="font-heading text-3xl font-extrabold text-[#355581]">
-                    {totalServicios}
-                  </p>
+                  <div className="space-y-1">
+                    <p className="font-heading text-3xl font-extrabold text-[#1e293b] tracking-tight">
+                      {totalServicios}
+                    </p>
+                    <span className="inline-block text-[11px] font-bold text-[#1D71B5] bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200/60">
+                      Total histórico
+                    </span>
+                  </div>
+                  <div className="absolute -bottom-8 -right-8 w-24 h-24 bg-[#1D71B5]/5 rounded-full blur-xl pointer-events-none group-hover:bg-[#1D71B5]/10 transition-colors" />
                 </div>
 
-                {/* Resumen de Citas */}
-                <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm flex flex-col justify-between space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-heading font-bold text-slate-500 uppercase tracking-wider">
+                {/* Citas Agendadas */}
+                <div className="relative overflow-hidden bg-gradient-to-br from-white via-white to-slate-50/80 rounded-[24px] p-6 border border-slate-200/90 shadow-[0_4px_20px_-4px_rgba(53,85,129,0.06)] hover:shadow-[0_12px_28px_-6px_rgba(53,85,129,0.12)] transition-all group">
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-xs font-heading font-extrabold text-[#355581]/70 tracking-wider uppercase">
                       Citas Agendadas
                     </span>
-                    <div className="p-2 rounded-xl bg-[#355581]/15 text-[#355581]">
+                    <div className="p-3 rounded-2xl bg-[#0F172A] text-white shadow-md shadow-slate-900/20">
                       <Calendar className="w-5 h-5" />
                     </div>
                   </div>
-                  <p className="font-heading text-3xl font-extrabold text-[#355581]">
-                    {citas.filter((c) => c.estatus !== "Cancelada").length}
-                  </p>
+                  <div className="space-y-1">
+                    <p className="font-heading text-3xl font-extrabold text-[#1e293b] tracking-tight">
+                      {citas.filter((c) => c.estatus !== "Cancelada").length}
+                    </p>
+                    <span className="inline-block text-[11px] font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200/60">
+                      Activas
+                    </span>
+                  </div>
+                  <div className="absolute -bottom-8 -right-8 w-24 h-24 bg-slate-400/10 rounded-full blur-xl pointer-events-none group-hover:bg-slate-400/20 transition-colors" />
                 </div>
 
-                {/* Tráfico en Tiempo Real */}
-                <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm flex flex-col justify-between space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-heading font-bold text-slate-500 uppercase tracking-wider">
+                {/* Tráfico en Vivo */}
+                <div className="relative overflow-hidden bg-gradient-to-br from-white via-white to-slate-50/80 rounded-[24px] p-6 border border-slate-200/90 shadow-[0_4px_20px_-4px_rgba(53,85,129,0.06)] hover:shadow-[0_12px_28px_-6px_rgba(53,85,129,0.12)] transition-all group">
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-xs font-heading font-extrabold text-emerald-800/70 tracking-wider uppercase">
                       Tráfico en Vivo
                     </span>
-                    <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600">
+                    <div className="p-3 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-md shadow-emerald-500/25">
                       <Activity className="w-5 h-5 animate-pulse" />
                     </div>
                   </div>
-                  <div className="flex items-baseline gap-2">
-                    <p className="font-heading text-3xl font-extrabold text-emerald-600">
-                      {onlineVisitors}
-                    </p>
-                    <span className="text-xs font-bold text-slate-400">personas en línea</span>
+                  <div className="space-y-1">
+                    <div className="flex items-baseline gap-2">
+                      <p className="font-heading text-3xl font-extrabold text-emerald-600 tracking-tight">
+                        {onlineVisitors}
+                      </p>
+                      <span className="text-xs font-bold text-slate-500">en línea</span>
+                    </div>
+                    <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/60">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
+                      Tiempo real
+                    </span>
                   </div>
+                  <div className="absolute -bottom-8 -right-8 w-24 h-24 bg-emerald-500/5 rounded-full blur-xl pointer-events-none group-hover:bg-emerald-500/10 transition-colors" />
                 </div>
               </div>
 
