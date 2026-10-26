@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Lock, Mail, ShieldCheck, KeyRound, Check } from "lucide-react";
 
@@ -10,11 +10,22 @@ export default function AdminLoginPage() {
   // Paso actual: "credentials" | "mfa" | "changePassword"
   const [step, setStep] = useState<"credentials" | "mfa" | "changePassword">("credentials");
 
-  // Credenciales
-  const [email, setEmail] = useState("magc2204@gmail.com");
+  // Credenciales: inicia vacío y recupera de localStorage si el usuario lo guardó
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
+
+  useEffect(() => {
+    try {
+      const savedEmail = localStorage.getItem("kanan_saved_email");
+      if (savedEmail) {
+        setEmail(savedEmail);
+      }
+    } catch {
+      // Ignorar en caso de bloqueo de storage
+    }
+  }, []);
 
   // 2FA
   const [mfaToken, setMfaToken] = useState("");
@@ -48,6 +59,20 @@ export default function AdminLoginPage() {
 
       if (!res.ok || !data.ok) {
         throw new Error(data.error || "Error al iniciar sesión.");
+      }
+
+      if (rememberMe) {
+        try {
+          localStorage.setItem("kanan_saved_email", email.trim());
+        } catch {
+          // ignore
+        }
+      } else {
+        try {
+          localStorage.removeItem("kanan_saved_email");
+        } catch {
+          // ignore
+        }
       }
 
       setMfaPendingToken(data.mfaPendingToken);
