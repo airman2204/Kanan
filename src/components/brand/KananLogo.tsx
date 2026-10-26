@@ -9,10 +9,7 @@ interface KananLogoProps {
 
 /**
  * Imagotipo Oficial Integrado de Kanan Servicios de Limpieza
- * Actualizado con el logotipo oficial original y la nueva paleta 60-30-10:
- * - Principal (60%): #355581
- * - Secundario (30%): #1D71B5
- * - Acento (10%): #36A6DE
+ * Tamaño grande para máxima visibilidad en Header y Login
  */
 export function KananLogo({
   variant = "color",
@@ -22,18 +19,18 @@ export function KananLogo({
 }: KananLogoProps) {
   const isWhite = variant === "white";
 
-  // Tamaños para el renderizado
+  // Tamaños ampliados y visibles
   const heightClasses = {
-    sm: "h-9 sm:h-10",
-    md: "h-12 sm:h-14",
-    lg: "h-16 sm:h-20",
+    sm: "h-12 sm:h-14",
+    md: "h-16 sm:h-20",
+    lg: "h-20 sm:h-28",
   }[size];
 
   if (layout === "stacked") {
     return (
       <div
         className={`inline-flex flex-col items-center select-none ${className}`}
-        style={{ minWidth: "160px" }}
+        style={{ minWidth: "180px" }}
       >
         <img
           src={
@@ -50,8 +47,8 @@ export function KananLogo({
 
   return (
     <div
-      className={`inline-flex items-center gap-2.5 select-none py-0.5 ${className}`}
-      style={{ minWidth: "160px" }}
+      className={`inline-flex items-center gap-2.5 select-none py-1 ${className}`}
+      style={{ minWidth: "180px" }}
       aria-label="Kanan Servicios de Limpieza"
     >
       <img

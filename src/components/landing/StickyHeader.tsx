@@ -77,16 +77,16 @@ export function StickyHeader({
         </div>
       </div>
 
-      {/* Main Navbar */}
+      {/* Main Navbar con Logo Grande */}
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 sm:h-20 gap-3">
-          {/* Imagotipo Oficial (Mínimo 160px de ancho según Manual Pág. 2) */}
+        <div className="flex items-center justify-between h-20 sm:h-24 gap-3">
+          {/* Imagotipo Oficial en Tamaño Grande */}
           <a
             href="#inicio"
             className="shrink-0 focus:outline-none"
             aria-label="Kanan Servicios de Limpieza"
           >
-            <KananLogo variant="color" layout="horizontal" />
+            <KananLogo variant="color" layout="horizontal" size="md" />
           </a>
 
           {/* Selector de Cobertura Tipo Cápsula Flotante (Desktop) */}
