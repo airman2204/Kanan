@@ -120,16 +120,24 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F4F7F9] flex flex-col items-center justify-center p-4">
-      <div className="w-full max-w-md bg-white rounded-3xl border border-slate-200/90 shadow-[0_20px_50px_rgba(53,85,129,0.12)] p-6 sm:p-10 space-y-8">
+    <div className="min-h-screen bg-gradient-to-br from-[#0c1624] via-[#1a2d48] to-[#0d2238] flex flex-col items-center justify-center p-4 sm:p-6 relative overflow-hidden">
+      {/* Elementos ambientales de fondo */}
+      <div className="absolute -top-32 -left-32 w-96 h-96 bg-[#1D71B5]/20 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-[#36A6DE]/15 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(#36A6DE_1px,transparent_1px)] [background-size:24px_24px] opacity-10 pointer-events-none" />
+
+      {/* Tarjeta Glassmorphic de Alta Fidelidad */}
+      <div className="w-full max-w-[460px] relative z-10 bg-white/95 backdrop-blur-xl rounded-[28px] border border-white/60 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.35),0_0_40px_rgba(54,166,222,0.15)] p-7 sm:p-10 space-y-7 transition-all">
         
-        {/* Logotipo en tamaño grande */}
-        <div className="flex justify-center">
-          <img
-            src="/assets/brand/kanan-logo-oficial.png"
-            alt="Kanan"
-            className="h-24 sm:h-28 w-auto object-contain"
-          />
+        {/* Logotipo en tamaño prominente con insignia y relieve */}
+        <div className="flex flex-col items-center">
+          <div className="relative group p-4 rounded-2xl bg-gradient-to-b from-white to-slate-50/80 border border-slate-100 shadow-[0_8px_24px_rgba(53,85,129,0.08)] flex items-center justify-center">
+            <img
+              src="/assets/brand/kanan-logo-oficial.png"
+              alt="Kanan"
+              className="h-28 sm:h-32 w-auto object-contain drop-shadow-sm transition-transform duration-300 group-hover:scale-105"
+            />
+          </div>
         </div>
 
         {/* Único Título Solicitado: Administrador de negocio */}
@@ -158,9 +166,9 @@ export default function AdminLoginPage() {
                   autoComplete="username email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 bg-[#F4F7F9] border border-slate-200 rounded-xl text-sm font-medium text-[#355581] focus:outline-none focus:ring-2 focus:ring-[#36A6DE]"
+                  className="w-full pl-11 pr-4 py-3.5 bg-slate-50/80 hover:bg-slate-50 border border-slate-200/90 rounded-2xl text-sm font-medium text-[#1e293b] placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#1D71B5] focus:ring-4 focus:ring-[#36A6DE]/15 transition-all"
                 />
-                <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <Mail className="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
               </div>
             </div>
 
@@ -176,13 +184,13 @@ export default function AdminLoginPage() {
                   autoComplete="current-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-11 py-3 bg-[#F4F7F9] border border-slate-200 rounded-xl text-sm font-medium text-[#355581] focus:outline-none focus:ring-2 focus:ring-[#36A6DE]"
+                  className="w-full pl-11 pr-12 py-3.5 bg-slate-50/80 hover:bg-slate-50 border border-slate-200/90 rounded-2xl text-sm font-medium text-[#1e293b] placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#1D71B5] focus:ring-4 focus:ring-[#36A6DE]/15 transition-all"
                 />
-                <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <Lock className="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#355581] p-1"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#355581] p-1.5 rounded-lg hover:bg-slate-100 transition-colors"
                   aria-label={showPassword ? "Ocultar contraseña" : "Ver contraseña"}
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -191,12 +199,12 @@ export default function AdminLoginPage() {
             </div>
 
             <div className="flex items-center justify-between pt-1">
-              <label className="flex items-center gap-2 cursor-pointer select-none">
+              <label className="flex items-center gap-2.5 cursor-pointer select-none">
                 <input
                   type="checkbox"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
-                  className="w-4 h-4 rounded text-[#36A6DE] focus:ring-[#36A6DE] border-slate-300"
+                  className="w-4 h-4 rounded text-[#1D71B5] focus:ring-[#36A6DE] border-slate-300"
                 />
                 <span className="text-xs font-medium text-slate-600">
                   Mantener sesión iniciada
@@ -207,7 +215,7 @@ export default function AdminLoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 px-4 bg-[#355581] hover:bg-[#1D71B5] text-white font-heading font-bold text-sm rounded-xl transition-all shadow-md active:scale-[0.99] disabled:opacity-50"
+              className="w-full py-4 px-4 bg-gradient-to-r from-[#355581] to-[#1D71B5] hover:from-[#2a4468] hover:to-[#175c94] text-white font-heading font-bold text-sm rounded-2xl transition-all shadow-[0_10px_20px_rgba(29,113,181,0.25)] hover:shadow-[0_12px_24px_rgba(29,113,181,0.35)] active:scale-[0.99] disabled:opacity-50"
             >
               {loading ? "Verificando..." : "Entrar"}
             </button>

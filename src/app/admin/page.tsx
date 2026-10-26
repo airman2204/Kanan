@@ -173,46 +173,48 @@ export default function AdminPage() {
   const serviciosCompletados = citas.filter((c) => c.estatus === "Completada").length;
 
   return (
-    <div className="min-h-screen bg-[#F4F7F9] flex flex-col md:flex-row">
+    <div className="min-h-screen bg-[#F0F4F8] flex flex-col md:flex-row antialiased text-slate-800">
       
       {/* MENÚ LATERAL (SIDEBAR) */}
       <aside
-        className={`fixed md:sticky top-0 left-0 h-screen z-50 w-72 bg-[#355581] text-white flex flex-col justify-between p-5 transition-transform duration-300 ${
+        className={`fixed md:sticky top-0 left-0 h-screen z-50 w-72 bg-gradient-to-b from-[#101F33] via-[#162D4A] to-[#0D1A2B] text-white flex flex-col justify-between p-6 shadow-2xl border-r border-white/5 transition-transform duration-300 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         }`}
       >
         <div className="space-y-8">
           {/* Logo en tamaño grande en la cabecera del menú */}
-          <div className="flex items-center justify-between pb-4 border-b border-white/10">
-            <img
-              src="/assets/brand/kanan-logo-white.png"
-              alt="Kanan"
-              className="h-14 sm:h-16 w-auto object-contain"
-            />
+          <div className="flex items-center justify-between pb-5 border-b border-white/10">
+            <div className="p-2.5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md">
+              <img
+                src="/assets/brand/kanan-logo-white.png"
+                alt="Kanan"
+                className="h-16 sm:h-20 w-auto object-contain drop-shadow"
+              />
+            </div>
             <button
               type="button"
               onClick={() => setSidebarOpen(false)}
-              className="md:hidden text-white/80 hover:text-white p-1"
+              className="md:hidden text-white/70 hover:text-white p-2 rounded-xl hover:bg-white/10 transition-colors"
             >
-              <X className="w-6 h-6" />
+              <X className="w-5 h-5" />
             </button>
           </div>
 
           {/* Navegación Principal */}
-          <nav className="space-y-1.5">
+          <nav className="space-y-2">
             <button
               type="button"
               onClick={() => {
                 setActiveSection("resumen");
                 setSidebarOpen(false);
               }}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-heading font-bold text-sm transition-all ${
+              className={`w-full flex items-center gap-3.5 px-4 py-3.5 rounded-2xl font-heading font-bold text-sm transition-all duration-200 ${
                 activeSection === "resumen"
-                  ? "bg-[#1D71B5] text-white shadow-md"
-                  : "text-slate-200 hover:bg-white/10"
+                  ? "bg-gradient-to-r from-[#1D71B5] to-[#36A6DE] text-white shadow-[0_8px_20px_rgba(29,113,181,0.4)]"
+                  : "text-slate-300 hover:bg-white/10 hover:text-white"
               }`}
             >
-              <LayoutDashboard className="w-5 h-5 text-[#36A6DE]" />
+              <LayoutDashboard className={`w-5 h-5 ${activeSection === "resumen" ? "text-white" : "text-[#36A6DE]"}`} />
               <span>Resumen</span>
             </button>
 
@@ -222,13 +224,13 @@ export default function AdminPage() {
                 setActiveSection("calendario");
                 setSidebarOpen(false);
               }}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-heading font-bold text-sm transition-all ${
+              className={`w-full flex items-center gap-3.5 px-4 py-3.5 rounded-2xl font-heading font-bold text-sm transition-all duration-200 ${
                 activeSection === "calendario"
-                  ? "bg-[#1D71B5] text-white shadow-md"
-                  : "text-slate-200 hover:bg-white/10"
+                  ? "bg-gradient-to-r from-[#1D71B5] to-[#36A6DE] text-white shadow-[0_8px_20px_rgba(29,113,181,0.4)]"
+                  : "text-slate-300 hover:bg-white/10 hover:text-white"
               }`}
             >
-              <Calendar className="w-5 h-5 text-[#36A6DE]" />
+              <Calendar className={`w-5 h-5 ${activeSection === "calendario" ? "text-white" : "text-[#36A6DE]"}`} />
               <span>Calendario de citas</span>
               {citas.filter((c) => c.estatus === "Por Confirmar").length > 0 && (
                 <span className="ml-auto px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#36A6DE] text-white">
@@ -243,13 +245,13 @@ export default function AdminPage() {
                 setActiveSection("clientes");
                 setSidebarOpen(false);
               }}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-heading font-bold text-sm transition-all ${
+              className={`w-full flex items-center gap-3.5 px-4 py-3.5 rounded-2xl font-heading font-bold text-sm transition-all duration-200 ${
                 activeSection === "clientes"
-                  ? "bg-[#1D71B5] text-white shadow-md"
-                  : "text-slate-200 hover:bg-white/10"
+                  ? "bg-gradient-to-r from-[#1D71B5] to-[#36A6DE] text-white shadow-[0_8px_20px_rgba(29,113,181,0.4)]"
+                  : "text-slate-300 hover:bg-white/10 hover:text-white"
               }`}
             >
-              <Users className="w-5 h-5 text-[#36A6DE]" />
+              <Users className={`w-5 h-5 ${activeSection === "clientes" ? "text-white" : "text-[#36A6DE]"}`} />
               <span>Clientes</span>
             </button>
 
@@ -259,24 +261,24 @@ export default function AdminPage() {
                 setActiveSection("whatsapp");
                 setSidebarOpen(false);
               }}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-heading font-bold text-sm transition-all ${
+              className={`w-full flex items-center gap-3.5 px-4 py-3.5 rounded-2xl font-heading font-bold text-sm transition-all duration-200 ${
                 activeSection === "whatsapp"
-                  ? "bg-[#1D71B5] text-white shadow-md"
-                  : "text-slate-200 hover:bg-white/10"
+                  ? "bg-gradient-to-r from-[#1D71B5] to-[#36A6DE] text-white shadow-[0_8px_20px_rgba(29,113,181,0.4)]"
+                  : "text-slate-300 hover:bg-white/10 hover:text-white"
               }`}
             >
-              <MessageSquare className="w-5 h-5 text-[#36A6DE]" />
+              <MessageSquare className={`w-5 h-5 ${activeSection === "whatsapp" ? "text-white" : "text-[#36A6DE]"}`} />
               <span>WhatsApp</span>
             </button>
           </nav>
         </div>
 
         {/* Pie de Menú Lateral */}
-        <div className="space-y-4 pt-6 border-t border-white/10">
+        <div className="space-y-3 pt-6 border-t border-white/10">
           {/* Switch Modo Halloween */}
-          <div className="flex items-center justify-between px-3 py-2 bg-white/10 rounded-xl">
-            <span className="text-xs font-heading font-bold flex items-center gap-1.5 text-orange-300">
-              <span>🎃</span>
+          <div className="flex items-center justify-between px-3.5 py-2.5 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-md">
+            <span className="text-xs font-heading font-bold flex items-center gap-2 text-orange-300">
+              <span className="text-base">🎃</span>
               <span>Modo Halloween</span>
             </span>
             <button
@@ -285,7 +287,7 @@ export default function AdminPage() {
               aria-checked={db?.config?.modo_halloween ?? true}
               onClick={() => handleToggleHalloween(!(db?.config?.modo_halloween ?? true))}
               className={`relative inline-flex h-5 w-10 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
-                (db?.config?.modo_halloween ?? true) ? "bg-orange-500" : "bg-slate-500"
+                (db?.config?.modo_halloween ?? true) ? "bg-orange-500" : "bg-slate-600"
               }`}
             >
               <span
@@ -299,7 +301,7 @@ export default function AdminPage() {
           <Link
             href="/"
             target="_blank"
-            className="flex items-center justify-center gap-2 w-full py-2.5 px-3 rounded-xl bg-white/10 hover:bg-white/15 text-xs font-heading font-bold text-white transition-colors"
+            className="flex items-center justify-center gap-2 w-full py-3 px-4 rounded-2xl bg-white/10 hover:bg-white/15 text-xs font-heading font-bold text-white transition-all border border-white/10"
           >
             <span>Ver Sitio Web</span>
           </Link>
@@ -307,7 +309,7 @@ export default function AdminPage() {
           <button
             type="button"
             onClick={handleLogout}
-            className="flex items-center justify-center gap-2 w-full py-2.5 px-3 rounded-xl bg-red-500/80 hover:bg-red-600 text-xs font-heading font-bold text-white transition-colors"
+            className="flex items-center justify-center gap-2 w-full py-3 px-4 rounded-2xl bg-rose-500/20 hover:bg-rose-500/30 text-xs font-heading font-bold text-rose-200 hover:text-white transition-all border border-rose-500/30"
           >
             <LogOut className="w-4 h-4" />
             <span>Cerrar sesión</span>
@@ -319,18 +321,18 @@ export default function AdminPage() {
       <div className="flex-1 flex flex-col min-w-0">
         
         {/* Barra Superior Móvil */}
-        <div className="md:hidden bg-[#355581] text-white p-4 flex items-center justify-between sticky top-0 z-40">
+        <div className="md:hidden bg-[#101F33] text-white p-4 flex items-center justify-between sticky top-0 z-40 border-b border-white/10">
           <button
             type="button"
             onClick={() => setSidebarOpen(true)}
-            className="p-1.5 rounded-lg bg-white/10"
+            className="p-2 rounded-xl bg-white/10"
           >
-            <Menu className="w-6 h-6" />
+            <Menu className="w-5 h-5" />
           </button>
           <img
             src="/assets/brand/kanan-logo-white.png"
             alt="Kanan"
-            className="h-10 w-auto object-contain"
+            className="h-12 w-auto object-contain"
           />
           <div className="w-6" />
         </div>
