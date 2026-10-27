@@ -6,16 +6,19 @@ import {
   Share2, 
   BarChart3, 
   Search, 
-  TrendingUp, 
   RefreshCw, 
   Settings2,
   DollarSign,
   MousePointerClick,
   Eye,
   Target,
-  Sparkles,
-  Layers,
-  ArrowUpRight
+  CheckCircle2,
+  ExternalLink,
+  ChevronRight,
+  ShieldCheck,
+  HelpCircle,
+  Copy,
+  Check
 } from "lucide-react";
 import { MarketingMetrics, MetaConnection, GoogleAdsConnection, SeoAnalytics } from "@/types/crm";
 
@@ -34,6 +37,8 @@ export function MarketingAnalyticsView({
   const [metaConn, setMetaConn] = useState<MetaConnection>(
     metrics?.meta || {
       conectado: false,
+      app_id: "",
+      app_secret: "",
       page_name: "",
       ig_account_name: "",
     }
@@ -63,9 +68,10 @@ export function MarketingAnalyticsView({
 
   // Form Inputs
   const [metaForm, setMetaForm] = useState({
+    appId: metaConn.app_id || "",
+    appSecret: metaConn.app_secret || "",
     pageName: metaConn.page_name || "",
     igHandle: metaConn.ig_account_name || "",
-    accessToken: "",
   });
 
   const [googleForm, setGoogleForm] = useState({
@@ -79,17 +85,27 @@ export function MarketingAnalyticsView({
     serviceAccountKey: "",
   });
 
+  const [copiedUrl, setCopiedUrl] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  const copyRedirectUri = () => {
+    navigator.clipboard.writeText("https://admin.kananlimpieza.mx/api/auth/meta/callback");
+    setCopiedUrl(true);
+    setTimeout(() => setCopiedUrl(false), 2000);
+  };
 
   const handleSaveMeta = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     try {
+      const isConnected = Boolean(metaForm.appId && metaForm.appSecret);
       const updated: MetaConnection = {
-        conectado: Boolean(metaForm.pageName && metaForm.igHandle),
-        page_name: metaForm.pageName,
+        conectado: isConnected,
+        app_id: metaForm.appId,
+        app_secret: metaForm.appSecret,
+        page_name: metaForm.pageName || "Kanan Limpieza",
         ig_account_name: metaForm.igHandle.replace("@", ""),
-        connected_at: new Date().toISOString(),
+        connected_at: isConnected ? new Date().toISOString() : undefined,
         metricas_reales: metaConn.metricas_reales || {
           seguidores_fb: 0,
           seguidores_ig: 0,
@@ -278,7 +294,7 @@ export function MarketingAnalyticsView({
                       : "bg-slate-100 text-slate-600 border border-slate-200"
                   }`}
                 >
-                  {metaConn.conectado ? "Conectado" : "Desconectado"}
+                  {metaConn.conectado ? "Conectado" : "Pendiente"}
                 </span>
               </div>
 
@@ -302,8 +318,9 @@ export function MarketingAnalyticsView({
                   </div>
                 </div>
               ) : (
-                <div className="py-6 text-center text-xs text-slate-400">
-                  Sin credenciales configuradas
+                <div className="py-4 text-center">
+                  <p className="text-xs text-amber-600 font-semibold mb-1">Requiere App ID de Meta</p>
+                  <p className="text-[11px] text-slate-400">Configura tus credenciales para activar la sincronización oficial.</p>
                 </div>
               )}
 
@@ -312,7 +329,7 @@ export function MarketingAnalyticsView({
                 className="mt-4 w-full py-2 bg-slate-50 hover:bg-slate-100 text-xs font-semibold text-slate-700 border border-slate-200 rounded-xl transition flex items-center justify-center gap-1.5"
               >
                 <Settings2 className="w-3.5 h-3.5" />
-                {metaConn.conectado ? "Administrar Conexión" : "Vincular Cuentas"}
+                {metaConn.conectado ? "Administrar Conexión" : "Vincular Meta Suite"}
               </button>
             </div>
 
@@ -335,7 +352,7 @@ export function MarketingAnalyticsView({
                       : "bg-slate-100 text-slate-600 border border-slate-200"
                   }`}
                 >
-                  {googleAdsConn.conectado ? "Conectado" : "Desconectado"}
+                  {googleAdsConn.conectado ? "Conectado" : "Pendiente"}
                 </span>
               </div>
 
@@ -359,8 +376,9 @@ export function MarketingAnalyticsView({
                   </div>
                 </div>
               ) : (
-                <div className="py-6 text-center text-xs text-slate-400">
-                  Sin credenciales configuradas
+                <div className="py-4 text-center">
+                  <p className="text-xs text-slate-500 font-semibold mb-1">Sin Customer ID</p>
+                  <p className="text-[11px] text-slate-400">Ingresa tu identificador de cuenta de Google Ads.</p>
                 </div>
               )}
 
@@ -392,7 +410,7 @@ export function MarketingAnalyticsView({
                       : "bg-slate-100 text-slate-600 border border-slate-200"
                   }`}
                 >
-                  {seoConn.conectado ? "Conectado" : "Desconectado"}
+                  {seoConn.conectado ? "Conectado" : "Pendiente"}
                 </span>
               </div>
 
@@ -416,8 +434,9 @@ export function MarketingAnalyticsView({
                   </div>
                 </div>
               ) : (
-                <div className="py-6 text-center text-xs text-slate-400">
-                  Sin credenciales configuradas
+                <div className="py-4 text-center">
+                  <p className="text-xs text-slate-500 font-semibold mb-1">Sin Dominio Vinculado</p>
+                  <p className="text-[11px] text-slate-400">Verifica la propiedad de kananlimpieza.mx.</p>
                 </div>
               )}
 
@@ -486,22 +505,100 @@ export function MarketingAnalyticsView({
       {/* META TAB */}
       {activeTab === "meta" && (
         <div className="space-y-6">
-          <div className="flex items-center justify-between bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-            <div>
-              <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                <Share2 className="w-5 h-5 text-[#1877F2]" />
-                Meta Business & Instagram Insights
-              </h3>
-            </div>
-            <button
-              onClick={() => setShowMetaModal(true)}
-              className="px-4 py-2 bg-[#1877F2] hover:bg-[#1877F2]/90 text-white text-xs font-semibold rounded-xl transition flex items-center gap-2 shadow-sm"
-            >
-              <Settings2 className="w-4 h-4" />
-              {metaConn.conectado ? "Reconfigurar Conexión" : "Conectar Cuentas"}
-            </button>
-          </div>
+          {/* INSTRUCCIONES GUÍA PARA EL CLIENTE: SOLO SE MUESTRAN SI NO ESTÁ CONECTADO */}
+          {!metaConn.conectado ? (
+            <div className="bg-gradient-to-br from-blue-50/80 via-white to-slate-50 border-2 border-blue-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-blue-100">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-[#1877F2] text-white flex items-center justify-center shadow-lg shadow-blue-500/30">
+                    <Share2 className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className="font-heading font-extrabold text-xl text-slate-900">
+                      Instrucciones para Vincular Facebook e Instagram
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Sigue estos sencillos pasos para que tu CRM lea automáticamente las métricas reales. Una vez vinculado, esta guía desaparecerá.
+                    </p>
+                  </div>
+                </div>
 
+                <a
+                  href="https://developers.facebook.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#1877F2] hover:bg-blue-600 text-white font-heading font-bold text-xs transition shadow-md shadow-blue-500/20 w-fit"
+                >
+                  <span>Abrir Meta Developers</span>
+                  <ExternalLink className="w-4 h-4" />
+                </a>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div className="bg-white p-5 rounded-2xl border border-blue-100 shadow-sm space-y-2">
+                  <div className="w-7 h-7 rounded-xl bg-blue-100 text-[#1877F2] font-black text-xs flex items-center justify-center">
+                    1
+                  </div>
+                  <h4 className="font-bold text-slate-900 text-sm">Crear tu App en Meta</h4>
+                  <p className="text-xs text-slate-600 leading-relaxed">
+                    Entra a <strong>developers.facebook.com</strong> con tu cuenta administradora. Da clic en <strong>Mis apps</strong> &gt; <strong>Crear app</strong> y elige la opción <strong>Negocio</strong>.
+                  </p>
+                </div>
+
+                <div className="bg-white p-5 rounded-2xl border border-blue-100 shadow-sm space-y-2">
+                  <div className="w-7 h-7 rounded-xl bg-blue-100 text-[#1877F2] font-black text-xs flex items-center justify-center">
+                    2
+                  </div>
+                  <h4 className="font-bold text-slate-900 text-sm">Configuración Básica</h4>
+                  <p className="text-xs text-slate-600 leading-relaxed">
+                    En el menú lateral ve a <strong>Configuración de la app &gt; Básica</strong>. En <i>Dominio</i> escribe <code className="bg-slate-100 px-1 py-0.5 rounded font-mono text-[11px]">admin.kananlimpieza.mx</code>.
+                  </p>
+                </div>
+
+                <div className="bg-white p-5 rounded-2xl border border-blue-100 shadow-sm space-y-2">
+                  <div className="w-7 h-7 rounded-xl bg-blue-100 text-[#1877F2] font-black text-xs flex items-center justify-center">
+                    3
+                  </div>
+                  <h4 className="font-bold text-slate-900 text-sm">Copiar tus Claves</h4>
+                  <p className="text-xs text-slate-600 leading-relaxed">
+                    Copia el <strong>Identificador de la app (App ID)</strong> y la <strong>Clave secreta (App Secret)</strong> y pégalos en el botón de abajo.
+                  </p>
+                </div>
+              </div>
+
+              <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 bg-blue-50/50 p-4 rounded-2xl border border-blue-100">
+                <div className="flex items-center gap-2 text-xs text-slate-700">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>Tus claves se resguardan de forma segura y solo se usan para leer tus alcances e interacciones.</span>
+                </div>
+                <button
+                  onClick={() => setShowMetaModal(true)}
+                  className="w-full sm:w-auto px-6 py-2.5 bg-[#1877F2] hover:bg-blue-600 text-white font-heading font-bold text-xs rounded-xl transition shadow-md shadow-blue-500/20"
+                >
+                  Ingresar Claves de Meta
+                </button>
+              </div>
+            </div>
+          ) : (
+            /* BANNER DE CONEXIÓN ACTIVA CUANDO YA ESTÁ VINCULADO */
+            <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-5 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                <div>
+                  <h4 className="font-bold text-emerald-950 text-sm">Meta Business Suite Conectado</h4>
+                  <p className="text-xs text-emerald-800">Sincronizado con Graph API oficial. Las métricas se actualizan de forma continua.</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowMetaModal(true)}
+                className="px-4 py-2 bg-white hover:bg-emerald-100/50 text-emerald-800 border border-emerald-300 text-xs font-semibold rounded-xl transition"
+              >
+                Reconfigurar Claves
+              </button>
+            </div>
+          )}
+
+          {/* TARJETAS DE FACEBOOK E INSTAGRAM */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
               <div className="flex items-center justify-between">
@@ -511,11 +608,15 @@ export function MarketingAnalyticsView({
                   </div>
                   <div>
                     <h4 className="font-bold text-slate-900 text-base">Página de Facebook</h4>
-                    <p className="text-xs text-slate-500">{metaConn.page_name || "No vinculada"}</p>
+                    <p className="text-xs text-slate-500">{metaConn.page_name || "Kanan Limpieza Especializada"}</p>
                   </div>
                 </div>
-                <span className="text-xs px-2.5 py-1 bg-slate-100 rounded-full text-slate-600 border border-slate-200">
-                  {metaConn.conectado ? "Activa" : "Inactiva"}
+                <span className={`text-xs px-2.5 py-1 rounded-full border ${
+                  metaConn.conectado 
+                    ? "bg-emerald-50 text-emerald-700 border-emerald-200" 
+                    : "bg-slate-100 text-slate-600 border-slate-200"
+                }`}>
+                  {metaConn.conectado ? "Sincronizada" : "Sin vincular"}
                 </span>
               </div>
 
@@ -543,11 +644,15 @@ export function MarketingAnalyticsView({
                   </div>
                   <div>
                     <h4 className="font-bold text-slate-900 text-base">Instagram Profesional</h4>
-                    <p className="text-xs text-slate-500">@{metaConn.ig_account_name || "No vinculado"}</p>
+                    <p className="text-xs text-slate-500">@{metaConn.ig_account_name || "kananlimpieza"}</p>
                   </div>
                 </div>
-                <span className="text-xs px-2.5 py-1 bg-slate-100 rounded-full text-slate-600 border border-slate-200">
-                  {metaConn.conectado ? "Activa" : "Inactiva"}
+                <span className={`text-xs px-2.5 py-1 rounded-full border ${
+                  metaConn.conectado 
+                    ? "bg-emerald-50 text-emerald-700 border-emerald-200" 
+                    : "bg-slate-100 text-slate-600 border-slate-200"
+                }`}>
+                  {metaConn.conectado ? "Sincronizada" : "Sin vincular"}
                 </span>
               </div>
 
@@ -672,52 +777,77 @@ export function MarketingAnalyticsView({
         </div>
       )}
 
-      {/* MODAL META */}
+      {/* MODAL CONFIGURACIÓN META */}
       {showMetaModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-          <div className="bg-white border border-slate-200 rounded-2xl max-w-md w-full p-6 shadow-2xl">
-            <h3 className="font-bold text-lg text-slate-900 mb-4 flex items-center gap-2">
-              <Share2 className="w-5 h-5 text-[#1877F2]" />
-              Configurar Meta Business Suite
-            </h3>
+          <div className="bg-white border border-slate-200 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <h3 className="font-bold text-lg text-slate-900 flex items-center gap-2">
+                <Share2 className="w-5 h-5 text-[#1877F2]" />
+                Credenciales de Meta Developers
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowMetaModal(false)}
+                className="text-slate-400 hover:text-slate-600 text-sm font-bold"
+              >
+                ✕
+              </button>
+            </div>
 
             <form onSubmit={handleSaveMeta} className="space-y-4 text-xs">
               <div>
-                <label className="block text-slate-700 font-medium mb-1">Nombre de la Página de Facebook</label>
+                <label className="block text-slate-700 font-bold mb-1">
+                  Identificador de la App (App ID) *
+                </label>
                 <input
                   type="text"
-                  placeholder="Kanan Limpieza Especializada"
-                  value={metaForm.pageName}
-                  onChange={(e) => setMetaForm({ ...metaForm, pageName: e.target.value })}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-slate-900 focus:outline-none focus:border-[#1877F2]"
+                  placeholder="Ej: 148294829104829"
+                  value={metaForm.appId}
+                  onChange={(e) => setMetaForm({ ...metaForm, appId: e.target.value })}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 font-mono focus:outline-none focus:border-[#1877F2]"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-slate-700 font-medium mb-1">Usuario de Instagram (@)</label>
-                <input
-                  type="text"
-                  placeholder="@kananlimpieza"
-                  value={metaForm.igHandle}
-                  onChange={(e) => setMetaForm({ ...metaForm, igHandle: e.target.value })}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-slate-900 focus:outline-none focus:border-[#1877F2]"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-slate-700 font-medium mb-1">Token de Acceso de Graph API (Opcional)</label>
+                <label className="block text-slate-700 font-bold mb-1">
+                  Clave secreta de la App (App Secret) *
+                </label>
                 <input
                   type="password"
-                  placeholder="EAA..."
-                  value={metaForm.accessToken}
-                  onChange={(e) => setMetaForm({ ...metaForm, accessToken: e.target.value })}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-slate-900 font-mono focus:outline-none focus:border-[#1877F2]"
+                  placeholder="Ej: a9f8e7d6c5b4..."
+                  value={metaForm.appSecret}
+                  onChange={(e) => setMetaForm({ ...metaForm, appSecret: e.target.value })}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-900 font-mono focus:outline-none focus:border-[#1877F2]"
+                  required
                 />
               </div>
 
-              <div className="flex gap-2 pt-2">
+              <div className="grid grid-cols-2 gap-3 pt-1">
+                <div>
+                  <label className="block text-slate-700 font-bold mb-1">Nombre Página FB</label>
+                  <input
+                    type="text"
+                    placeholder="Kanan Limpieza Especializada"
+                    value={metaForm.pageName}
+                    onChange={(e) => setMetaForm({ ...metaForm, pageName: e.target.value })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:border-[#1877F2]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-700 font-bold mb-1">Usuario Instagram (@)</label>
+                  <input
+                    type="text"
+                    placeholder="@kananlimpieza"
+                    value={metaForm.igHandle}
+                    onChange={(e) => setMetaForm({ ...metaForm, igHandle: e.target.value })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:border-[#1877F2]"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-2 pt-3">
                 <button
                   type="button"
                   onClick={() => setShowMetaModal(false)}
@@ -728,9 +858,9 @@ export function MarketingAnalyticsView({
                 <button
                   type="submit"
                   disabled={saving}
-                  className="w-1/2 py-2.5 bg-[#1877F2] hover:bg-[#1877F2]/90 rounded-xl font-semibold text-white transition disabled:opacity-50"
+                  className="w-1/2 py-2.5 bg-[#1877F2] hover:bg-blue-600 rounded-xl font-semibold text-white transition disabled:opacity-50 shadow-md shadow-blue-500/20"
                 >
-                  {saving ? "Guardando..." : "Guardar Parámetros"}
+                  {saving ? "Guardando..." : "Guardar y Vincular"}
                 </button>
               </div>
             </form>
@@ -768,17 +898,6 @@ export function MarketingAnalyticsView({
                   value={googleForm.accountName}
                   onChange={(e) => setGoogleForm({ ...googleForm, accountName: e.target.value })}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-slate-900 focus:outline-none focus:border-[#4285F4]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-slate-700 font-medium mb-1">Developer Token (Opcional)</label>
-                <input
-                  type="password"
-                  placeholder="Token de API..."
-                  value={googleForm.developerToken}
-                  onChange={(e) => setGoogleForm({ ...googleForm, developerToken: e.target.value })}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-slate-900 font-mono focus:outline-none focus:border-[#4285F4]"
                 />
               </div>
 
@@ -822,17 +941,6 @@ export function MarketingAnalyticsView({
                   onChange={(e) => setSeoForm({ ...seoForm, siteUrl: e.target.value })}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-slate-900 focus:outline-none focus:border-[#10B981]"
                   required
-                />
-              </div>
-
-              <div>
-                <label className="block text-slate-700 font-medium mb-1">Credencial JSON de Cuenta de Servicio (Opcional)</label>
-                <textarea
-                  placeholder='{"type": "service_account", ...}'
-                  rows={3}
-                  value={seoForm.serviceAccountKey}
-                  onChange={(e) => setSeoForm({ ...seoForm, serviceAccountKey: e.target.value })}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-slate-900 font-mono text-[11px] focus:outline-none focus:border-[#10B981]"
                 />
               </div>
 

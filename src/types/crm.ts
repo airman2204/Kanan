@@ -105,6 +105,8 @@ export interface MensajeAutomatizacion {
 
 export interface MetaConnection {
   conectado: boolean;
+  app_id?: string;
+  app_secret?: string;
   page_id?: string;
   page_name?: string;
   ig_account_name?: string;
