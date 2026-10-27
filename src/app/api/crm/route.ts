@@ -2,18 +2,20 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   getDatabase,
   createBookingFromWizard,
+  createClienteManual,
+  createCitaManual,
   updateCitaInDb,
+  cancelCita,
+  deleteCliente,
   clearAllData,
   resetToTwoExamples,
   setModoHalloween,
+  updateMarketingConfig,
   saveDatabase,
 } from "@/lib/db/store";
 import { generarMensajeWhatsAppReservaCliente, KANAN_WHATSAPP_NUMBER } from "@/lib/whatsapp/templates";
 import { verifySessionToken } from "@/lib/auth/security";
 
-/**
- * Validador de sesión para proteger endpoints del CRM
- */
 function isAuthenticatedAdmin(req: NextRequest): boolean {
   const cookie = req.cookies.get("kanan_admin_session")?.value;
   if (!cookie) return false;
@@ -22,7 +24,6 @@ function isAuthenticatedAdmin(req: NextRequest): boolean {
 }
 
 export async function GET(req: NextRequest) {
-  // Proteger datos sensibles (clientes, teléfonos, ingresos)
   if (!isAuthenticatedAdmin(req)) {
     return NextResponse.json(
       { ok: false, error: "No autorizado. Sesión de administrador requerida." },
@@ -37,45 +38,77 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
 
-    // Las acciones administrativas (CLEAR_ALL, RESET_DEMO_2, TOGGLE_HALLOWEEN) requieren autenticación
-    if (body.action === "CLEAR_ALL" || body.action === "RESET_DEMO_2" || body.action === "TOGGLE_HALLOWEEN") {
+    // 1. Cancelación de cita por el cliente (pública, con regla de 2 horas)
+    if (body.action === "CLIENT_CANCEL_CITA") {
+      const res = cancelCita(body.citaId, true, body.motivo);
+      if (!res.ok) {
+        return NextResponse.json({ ok: false, error: res.error }, { status: 400 });
+      }
+      return NextResponse.json({ ok: true, cita: res.cita, message: "Cita cancelada con éxito." });
+    }
+
+    // 2. Acciones del Administrador (requieren autenticación)
+    if (
+      body.action === "CREATE_CLIENTE_MANUAL" ||
+      body.action === "CREATE_CITA_MANUAL" ||
+      body.action === "ADMIN_CANCEL_CITA" ||
+      body.action === "DELETE_CLIENTE" ||
+      body.action === "UPDATE_MARKETING" ||
+      body.action === "CLEAR_ALL" ||
+      body.action === "RESET_DEMO_2" ||
+      body.action === "TOGGLE_HALLOWEEN"
+    ) {
       if (!isAuthenticatedAdmin(req)) {
         return NextResponse.json({ ok: false, error: "No autorizado." }, { status: 401 });
       }
     }
 
-    // Acción especial: Borrar todos los ejemplos y dejar el CRM limpio
+    if (body.action === "CREATE_CLIENTE_MANUAL") {
+      const cliente = createClienteManual(body.cliente);
+      return NextResponse.json({ ok: true, cliente, db: getDatabase() });
+    }
+
+    if (body.action === "CREATE_CITA_MANUAL") {
+      const { cita, cliente } = createCitaManual(body.cita);
+      return NextResponse.json({ ok: true, cita, cliente, db: getDatabase() });
+    }
+
+    if (body.action === "ADMIN_CANCEL_CITA") {
+      const res = cancelCita(body.citaId, false, body.motivo);
+      return NextResponse.json({ ok: true, cita: res.cita, db: getDatabase() });
+    }
+
+    if (body.action === "DELETE_CLIENTE") {
+      const ok = deleteCliente(body.clienteId);
+      return NextResponse.json({ ok, db: getDatabase() });
+    }
+
+    if (body.action === "UPDATE_MARKETING") {
+      const db = updateMarketingConfig(body.marketing);
+      return NextResponse.json({ ok: true, db });
+    }
+
     if (body.action === "CLEAR_ALL") {
       const emptyDb = clearAllData();
-      return NextResponse.json({
-        ok: true,
-        message: "Todos los datos de ejemplo han sido eliminados. CRM en blanco.",
-        db: emptyDb,
-      });
+      return NextResponse.json({ ok: true, message: "CRM en blanco.", db: emptyDb });
     }
 
-    // Acción especial: Restaurar los 2 ejemplos de demostración
     if (body.action === "RESET_DEMO_2") {
       const demoDb = resetToTwoExamples();
-      return NextResponse.json({
-        ok: true,
-        message: "Se han cargado los 2 ejemplos de demostración.",
-        db: demoDb,
-      });
+      return NextResponse.json({ ok: true, message: "Se cargaron los 2 ejemplos de demostración.", db: demoDb });
     }
 
-    // Acción especial: Alternar modo Halloween
     if (body.action === "TOGGLE_HALLOWEEN") {
       const updatedDb = setModoHalloween(Boolean(body.enabled));
       return NextResponse.json({
         ok: true,
-        message: body.enabled ? "Modo Halloween activado 🎃🦇" : "Modo Halloween desactivado",
+        message: body.enabled ? "Modo Halloween activado" : "Modo Halloween desactivado",
         modo_halloween: updatedDb.config?.modo_halloween ?? true,
         db: updatedDb,
       });
     }
 
-    // Crear nueva cita desde el Wizard de 4 pasos
+    // 3. Crear nueva cita desde el Wizard público
     const { cita, cliente } = createBookingFromWizard({
       nombre: body.nombre,
       whatsapp: body.whatsapp,
@@ -90,9 +123,7 @@ export async function POST(req: NextRequest) {
     });
 
     const textoWhatsApp = generarMensajeWhatsAppReservaCliente(cita, cliente);
-    const whatsappUrl = `https://wa.me/${KANAN_WHATSAPP_NUMBER}?text=${encodeURIComponent(
-      textoWhatsApp
-    )}`;
+    const whatsappUrl = `https://wa.me/${KANAN_WHATSAPP_NUMBER}?text=${encodeURIComponent(textoWhatsApp)}`;
 
     return NextResponse.json({
       ok: true,
@@ -109,7 +140,6 @@ export async function POST(req: NextRequest) {
 
 export async function PATCH(req: NextRequest) {
   try {
-    // Proteger modificaciones de citas, clientes o recurrencias
     if (!isAuthenticatedAdmin(req)) {
       return NextResponse.json(
         { ok: false, error: "No autorizado. Sesión de administrador requerida." },
@@ -126,6 +156,9 @@ export async function PATCH(req: NextRequest) {
         monto_total: body.monto_total,
         calificacion: body.calificacion,
         notas_servicio: body.notas_servicio,
+        fecha: body.fecha,
+        turno: body.turno,
+        hora_especifica: body.hora_especifica,
       });
       return NextResponse.json({
         ok: Boolean(updated),
@@ -138,6 +171,11 @@ export async function PATCH(req: NextRequest) {
       const db = getDatabase();
       const cli = db.clientes.find((c) => c.id === body.clienteId);
       if (cli) {
+        if (body.nombre !== undefined) cli.nombre = body.nombre.trim();
+        if (body.whatsapp !== undefined) cli.whatsapp = body.whatsapp.replace(/\D/g, "");
+        if (body.direccion !== undefined) cli.direccion = body.direccion.trim();
+        if (body.municipio !== undefined) cli.municipio = body.municipio;
+        if (body.email !== undefined) cli.email = body.email.trim();
         if (body.notas_especiales !== undefined) cli.notas_especiales = body.notas_especiales;
         if (body.mascotas !== undefined) cli.mascotas = Boolean(body.mascotas);
         saveDatabase(db);

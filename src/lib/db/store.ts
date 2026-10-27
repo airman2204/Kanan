@@ -11,6 +11,7 @@ import {
   MunicipioZMG,
   TurnoServicio,
   EstatusCita,
+  MarketingMetrics,
 } from "@/types/crm";
 import {
   generarSecuenciaPoservicio,
@@ -21,10 +22,57 @@ const LOCAL_DB_PATH = path.join(process.cwd(), "src", "data", "kanan-crm-db.json
 const TMP_DB_PATH = path.join(os.tmpdir(), "kanan-crm-db.json");
 let memoryFallbackDb: KananDatabase | null = null;
 
-/**
- * Genera exactamente los 2 ejemplos de demostración solicitados por el usuario
- * para mostrar toda la funcionalidad del CRM (Kanban, Ficha 360°, Recurrencia y WhatsApp).
- */
+const DEFAULT_MARKETING: MarketingMetrics = {
+  redes: [
+    {
+      red: "facebook",
+      conectado: true,
+      nombre_cuenta: "Kanan Servicios Guadalajara",
+      seguidores: 3420,
+      alcance_30d: 14850,
+      interacciones_30d: 980,
+      clics_web_30d: 215,
+    },
+    {
+      red: "instagram",
+      conectado: true,
+      nombre_cuenta: "@servicioskanan.gdl",
+      seguidores: 5890,
+      alcance_30d: 28400,
+      interacciones_30d: 2140,
+      clics_web_30d: 480,
+    },
+    {
+      red: "tiktok",
+      conectado: false,
+      nombre_cuenta: undefined,
+      seguidores: 0,
+      alcance_30d: 0,
+      interacciones_30d: 0,
+      clics_web_30d: 0,
+    },
+  ],
+  google_ads: {
+    conectado: true,
+    inversion_mes: 4500,
+    impresiones: 48200,
+    clics: 1820,
+    cpc_promedio: 2.47,
+    conversiones: 89,
+  },
+  seo_sem: {
+    visitas_organicas: 1420,
+    visitas_pagadas: 1820,
+    posicion_promedio: 3.2,
+    palabras_clave_top: [
+      { keyword: "lavado de salas zapopan", posicion: 1, volumen: 880 },
+      { keyword: "limpieza de tapicería guadalajara", posicion: 2, volumen: 1200 },
+      { keyword: "lavado de colchones tlajomulco", posicion: 3, volumen: 590 },
+      { keyword: "desinfección pet friendly gdl", posicion: 2, volumen: 430 },
+    ],
+  },
+};
+
 export function getTwoDemoExamples(): KananDatabase {
   const clientes: Cliente[] = [
     {
@@ -38,6 +86,7 @@ export function getTwoDemoExamples(): KananDatabase {
         "Hogar con 2 perritos Golden Retriever. Manchas orgánicas en sala gris en L y colchón King. Solicita desinfección profunda Pet-Friendly.",
       historico_gasto: 1650,
       fecha_registro: "2026-10-15T10:30:00.000Z",
+      email: "mariana.gomez@gmail.com",
     },
     {
       id: "cli-demo-02",
@@ -49,7 +98,8 @@ export function getTwoDemoExamples(): KananDatabase {
       notas_especiales:
         "Limpieza de vestiduras de camioneta SUV (5 asientos + cajuela) y 6 sillas de comedor. Acceso directo a cochera con toma de agua y luz.",
       historico_gasto: 1100,
-      fecha_registro: "2026-10-19T16:15:00.000Z",
+      fecha_registro: "2026-10-18T14:15:00.000Z",
+      email: "carlos.ramirez@hotmail.com",
     },
   ];
 
@@ -57,14 +107,15 @@ export function getTwoDemoExamples(): KananDatabase {
     {
       id: "KAN-1001",
       cliente_id: "cli-demo-01",
-      fecha: "2026-10-21",
+      fecha: new Date().toISOString().split("T")[0],
       turno: "Matutino (09:00 - 13:00)",
+      hora_especifica: "10:00 AM",
       items_contratados: [
         {
           categoriaId: "salas",
           categoriaNombre: "Salas y Sillas",
           piezaId: "sala-l",
-          piezaNombre: "Sala en L (Seccional)",
+          piezaNombre: "Sala en L (Seccional 4-5 Plazas)",
           cantidad: 1,
         },
         {
@@ -76,27 +127,23 @@ export function getTwoDemoExamples(): KananDatabase {
         },
       ],
       monto_total: 1650,
-      estatus: "Completada",
+      estatus: "En Proceso",
       tecnico_asignado: "Ing. Roberto Márquez (Unidad 01)",
-      ruta_geografica: "Ruta Norte — Zapopan",
-      notas_servicio: "Tiene 2 mascotas en casa. Se aplicó neutralizador enzimático 100% Pet-Friendly.",
+      ruta_geografica: "Ruta Zapopan Norte",
+      notas_servicio: "Cliente solicita especial cuidado con piso de duela al colocar equipo de inyección-succión.",
       fotos_estado_actual: ["/assets/portfolio/antes-1.jpg"],
-      fotos_antes_despues: [
-        {
-          antesUrl: "/assets/portfolio/antes-1.jpg",
-          despuesUrl: "/assets/portfolio/despues-1.jpg",
-          descripcion: "Sala Seccional — Eliminación de manchas y pelo de mascota",
-        },
-      ],
-      calificacion: 5,
+      fotos_antes_despues: [],
+      calificacion: null,
       ticket_soporte: false,
-      created_at: "2026-10-15T10:35:00.000Z",
+      origen: "web",
+      created_at: "2026-10-18T12:00:00.000Z",
     },
     {
       id: "KAN-1002",
       cliente_id: "cli-demo-02",
-      fecha: "2026-10-22",
+      fecha: new Date(Date.now() + 86400000).toISOString().split("T")[0],
       turno: "Vespertino (14:00 - 18:00)",
+      hora_especifica: "03:30 PM",
       items_contratados: [
         {
           categoriaId: "vestiduras",
@@ -122,6 +169,7 @@ export function getTwoDemoExamples(): KananDatabase {
       fotos_antes_despues: [],
       calificacion: null,
       ticket_soporte: false,
+      origen: "whatsapp",
       created_at: "2026-10-19T16:20:00.000Z",
     },
   ];
@@ -148,8 +196,6 @@ export function getTwoDemoExamples(): KananDatabase {
   ];
 
   const mensajes_automatizacion: MensajeAutomatizacion[] = [];
-
-  // Generar secuencias para los 2 ejemplos
   for (const cita of servicios_citas) {
     const cli = clientes.find((c) => c.id === cita.cliente_id)!;
     const etapas = generarSecuenciaPoservicio(cita, cli);
@@ -162,26 +208,10 @@ export function getTwoDemoExamples(): KananDatabase {
         etapa_titulo: e.etapa_titulo,
         destinatario_whatsapp: cli.whatsapp,
         contenido_mensaje: e.contenido_mensaje,
-        estatus_envio:
-          cita.estatus === "Completada" && idx < 4 ? "Enviado" : e.estatus_envio,
+        estatus_envio: e.estatus_envio,
         fecha_programada: new Date(Date.now() + idx * 3600000).toISOString(),
       });
     });
-
-    if (cita.calificacion === 5) {
-      const msg5 = generarMensajeCalificacionPoservicio(cli, cita, 5);
-      mensajes_automatizacion.push({
-        id: `msg-${cita.id}-rating`,
-        cita_id: cita.id,
-        cliente_id: cli.id,
-        etapa: msg5.etapa,
-        etapa_titulo: msg5.etapa_titulo,
-        destinatario_whatsapp: cli.whatsapp,
-        contenido_mensaje: msg5.contenido_mensaje,
-        estatus_envio: msg5.estatus_envio,
-        fecha_programada: new Date().toISOString(),
-      });
-    }
   }
 
   return {
@@ -191,30 +221,35 @@ export function getTwoDemoExamples(): KananDatabase {
     mensajes_automatizacion,
     config: {
       modo_halloween: true,
+      marketing: DEFAULT_MARKETING,
     },
   };
 }
 
-function ensureDbFile(): KananDatabase {
-  // 1. Si ya existe en /tmp (entorno Serverless como Vercel tras una escritura), leer de ahí
+export function getDatabase(): KananDatabase {
   if (fs.existsSync(TMP_DB_PATH)) {
     try {
       const raw = fs.readFileSync(TMP_DB_PATH, "utf-8");
-      const parsed = JSON.parse(raw) as KananDatabase;
+      const parsed = JSON.parse(raw);
+      if (!parsed.config?.marketing) {
+        parsed.config = { ...parsed.config, marketing: DEFAULT_MARKETING };
+      }
       memoryFallbackDb = parsed;
-      return parsed;
+      return memoryFallbackDb!;
     } catch {
       // continuar
     }
   }
 
-  // 2. Si existe en archivo local del proyecto
   if (fs.existsSync(LOCAL_DB_PATH)) {
     try {
       const raw = fs.readFileSync(LOCAL_DB_PATH, "utf-8");
-      const parsed = JSON.parse(raw) as KananDatabase;
+      const parsed = JSON.parse(raw);
+      if (!parsed.config?.marketing) {
+        parsed.config = { ...parsed.config, marketing: DEFAULT_MARKETING };
+      }
       memoryFallbackDb = parsed;
-      return parsed;
+      return memoryFallbackDb!;
     } catch {
       // continuar
     }
@@ -230,48 +265,44 @@ function ensureDbFile(): KananDatabase {
 }
 
 export function saveDatabase(db: KananDatabase): void {
+  if (!db.config?.marketing) {
+    db.config = { ...db.config, marketing: DEFAULT_MARKETING, modo_halloween: db.config?.modo_halloween ?? true };
+  }
   memoryFallbackDb = db;
   const payload = JSON.stringify(db, null, 2);
 
-  // Intentar escribir primero en src/data (entorno local) y siempre respaldar en /tmp (Vercel)
   try {
     const dir = path.dirname(LOCAL_DB_PATH);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
     fs.writeFileSync(LOCAL_DB_PATH, payload, "utf-8");
   } catch {
-    // En Vercel el directorio del proyecto es read-only; escribimos en /tmp
+    // Entorno read-only
   }
 
   try {
     fs.writeFileSync(TMP_DB_PATH, payload, "utf-8");
   } catch {
-    // Fallback en memoria ya actualizado
+    // Continuar en memoria
   }
 }
 
-export function getDatabase(): KananDatabase {
-  return ensureDbFile();
-}
-
 export function clearAllData(): KananDatabase {
-  const current = getDatabase();
   const emptyDb: KananDatabase = {
     clientes: [],
     servicios_citas: [],
     recurrencia: [],
     mensajes_automatizacion: [],
-    config: current.config || { modo_halloween: true },
+    config: {
+      modo_halloween: false,
+      marketing: DEFAULT_MARKETING,
+    },
   };
   saveDatabase(emptyDb);
   return emptyDb;
 }
 
 export function resetToTwoExamples(): KananDatabase {
-  const current = getDatabase();
   const demoDb = getTwoDemoExamples();
-  demoDb.config = current.config || { modo_halloween: true };
   saveDatabase(demoDb);
   return demoDb;
 }
@@ -279,37 +310,145 @@ export function resetToTwoExamples(): KananDatabase {
 export function setModoHalloween(enabled: boolean): KananDatabase {
   const db = getDatabase();
   db.config = {
-    ...(db.config || {}),
+    ...(db.config || { marketing: DEFAULT_MARKETING }),
     modo_halloween: enabled,
   };
   saveDatabase(db);
   return db;
 }
 
-function obtenerRutaPorMunicipio(municipio: MunicipioZMG): string {
-  switch (municipio) {
-    case "Zapopan":
-      return "Ruta Norte-Poniente — Zapopan";
-    case "Guadalajara":
-      return "Ruta Centro — Guadalajara";
-    case "Tlajomulco":
-      return "Ruta Sur — Tlajomulco";
-    case "Tlaquepaque":
-      return "Ruta Oriente — Tlaquepaque";
-  }
+export function updateMarketingConfig(updates: Partial<MarketingMetrics>): KananDatabase {
+  const db = getDatabase();
+  db.config = {
+    ...(db.config || { modo_halloween: true }),
+    marketing: {
+      ...(db.config?.marketing || DEFAULT_MARKETING),
+      ...updates,
+    },
+  };
+  saveDatabase(db);
+  return db;
 }
 
-function calcularFechaFutura(fechaBase: string, meses: number): string {
-  const d = new Date(`${fechaBase}T12:00:00`);
-  if (isNaN(d.getTime())) {
-    const fallback = new Date();
-    fallback.setMonth(fallback.getMonth() + meses);
-    return fallback.toISOString().split("T")[0];
-  }
+function calcularFechaFutura(fechaIso: string, meses: number): string {
+  const d = new Date(fechaIso);
   d.setMonth(d.getMonth() + meses);
   return d.toISOString().split("T")[0];
 }
 
+// 1. Dar de alta cliente manual
+export function createClienteManual(payload: {
+  nombre: string;
+  whatsapp: string;
+  direccion: string;
+  municipio: MunicipioZMG;
+  mascotas: boolean;
+  notas_especiales?: string;
+  email?: string;
+  historico_gasto?: number;
+}): Cliente {
+  const db = getDatabase();
+  const cleanPhone = payload.whatsapp.replace(/\D/g, "");
+
+  // Verificar si ya existe por teléfono
+  let cliente = db.clientes.find((c) => c.whatsapp.replace(/\D/g, "") === cleanPhone);
+  if (!cliente) {
+    cliente = {
+      id: `cli-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      nombre: payload.nombre.trim(),
+      whatsapp: cleanPhone,
+      direccion: payload.direccion.trim(),
+      municipio: payload.municipio,
+      mascotas: Boolean(payload.mascotas),
+      notas_especiales: payload.notas_especiales?.trim() || "",
+      historico_gasto: payload.historico_gasto || 0,
+      fecha_registro: new Date().toISOString(),
+      email: payload.email?.trim() || undefined,
+    };
+    db.clientes.unshift(cliente);
+  } else {
+    // Actualizar datos existentes
+    cliente.nombre = payload.nombre.trim();
+    cliente.direccion = payload.direccion.trim();
+    cliente.municipio = payload.municipio;
+    cliente.mascotas = Boolean(payload.mascotas);
+    if (payload.notas_especiales) cliente.notas_especiales = payload.notas_especiales;
+    if (payload.email) cliente.email = payload.email;
+    if (payload.historico_gasto !== undefined) cliente.historico_gasto = payload.historico_gasto;
+  }
+
+  saveDatabase(db);
+  return cliente;
+}
+
+// 2. Dar de alta cita manual (con vinculación o creación de cliente)
+export function createCitaManual(payload: {
+  cliente_id?: string;
+  cliente_data?: {
+    nombre: string;
+    whatsapp: string;
+    direccion: string;
+    municipio: MunicipioZMG;
+    mascotas: boolean;
+    notas_especiales?: string;
+    email?: string;
+  };
+  fecha: string;
+  turno: TurnoServicio;
+  hora_especifica?: string;
+  items_contratados: ItemContratado[];
+  monto_total?: number | null;
+  tecnico_asignado?: string;
+  ruta_geografica?: string;
+  notas_servicio?: string;
+}): { cita: ServicioCita; cliente: Cliente } {
+  const db = getDatabase();
+  let cliente: Cliente | undefined;
+
+  if (payload.cliente_id) {
+    cliente = db.clientes.find((c) => c.id === payload.cliente_id);
+  }
+
+  if (!cliente && payload.cliente_data) {
+    cliente = createClienteManual(payload.cliente_data);
+  }
+
+  if (!cliente) {
+    throw new Error("No se especificó ni encontró el cliente para la cita.");
+  }
+
+  const nextNum = db.servicios_citas.length + 1001;
+  const nuevaCita: ServicioCita = {
+    id: `KAN-${nextNum}`,
+    cliente_id: cliente.id,
+    fecha: payload.fecha,
+    turno: payload.turno,
+    hora_especifica: payload.hora_especifica || (payload.turno.startsWith("Matutino") ? "10:00 AM" : "03:30 PM"),
+    items_contratados: payload.items_contratados || [],
+    monto_total: payload.monto_total ?? null,
+    estatus: "Confirmada",
+    tecnico_asignado: payload.tecnico_asignado || "Por asignar",
+    ruta_geografica: payload.ruta_geografica || `Ruta ${cliente.municipio}`,
+    notas_servicio: payload.notas_servicio || "",
+    fotos_estado_actual: [],
+    fotos_antes_despues: [],
+    calificacion: null,
+    ticket_soporte: false,
+    origen: "manual",
+    created_at: new Date().toISOString(),
+  };
+
+  db.servicios_citas.unshift(nuevaCita);
+
+  if (payload.monto_total) {
+    cliente.historico_gasto = (cliente.historico_gasto || 0) + payload.monto_total;
+  }
+
+  saveDatabase(db);
+  return { cita: nuevaCita, cliente };
+}
+
+// 3. Crear cita desde el Wizard público
 export function createBookingFromWizard(payload: {
   nombre: string;
   whatsapp: string;
@@ -319,65 +458,56 @@ export function createBookingFromWizard(payload: {
   fecha: string;
   turno: TurnoServicio;
   items_contratados: ItemContratado[];
-  notas_servicio?: string;
+  notas_servicio: string;
   fotos_estado_actual?: string[];
 }): { cita: ServicioCita; cliente: Cliente } {
   const db = getDatabase();
   const cleanPhone = payload.whatsapp.replace(/\D/g, "");
 
-  // 1. Buscar o crear cliente
-  let cliente = db.clientes.find(
-    (c) => c.whatsapp.replace(/\D/g, "") === cleanPhone && cleanPhone.length >= 8
-  );
+  let cliente = db.clientes.find((c) => c.whatsapp.replace(/\D/g, "") === cleanPhone);
 
   if (!cliente) {
     cliente = {
       id: `cli-${Date.now()}`,
       nombre: payload.nombre.trim(),
-      whatsapp: payload.whatsapp.trim(),
+      whatsapp: cleanPhone,
       direccion: payload.direccion.trim(),
       municipio: payload.municipio,
       mascotas: payload.mascotas,
-      notas_especiales: payload.notas_servicio?.trim() || "",
+      notas_especiales: "",
       historico_gasto: 0,
       fecha_registro: new Date().toISOString(),
     };
     db.clientes.unshift(cliente);
   } else {
-    cliente.nombre = payload.nombre.trim();
     cliente.direccion = payload.direccion.trim();
     cliente.municipio = payload.municipio;
     cliente.mascotas = payload.mascotas;
-    if (payload.notas_servicio?.trim()) {
-      cliente.notas_especiales = payload.notas_servicio.trim();
-    }
   }
 
-  // 2. Generar folio consecutivo
-  const nextNumber = 1001 + db.servicios_citas.length;
-  const citaId = `KAN-${nextNumber}`;
-
+  const nextNum = db.servicios_citas.length + 1001;
   const nuevaCita: ServicioCita = {
-    id: citaId,
+    id: `KAN-${nextNum}`,
     cliente_id: cliente.id,
     fecha: payload.fecha,
     turno: payload.turno,
+    hora_especifica: payload.turno.startsWith("Matutino") ? "10:00 AM" : "03:30 PM",
     items_contratados: payload.items_contratados,
-    monto_total: null, // Sin precios en el wizard; se cotiza y asigna en CRM
+    monto_total: null,
     estatus: "Por Confirmar",
     tecnico_asignado: "Por asignar",
-    ruta_geografica: obtenerRutaPorMunicipio(payload.municipio),
-    notas_servicio: payload.notas_servicio?.trim() || "",
+    ruta_geografica: `Ruta ${payload.municipio}`,
+    notas_servicio: payload.notas_servicio,
     fotos_estado_actual: payload.fotos_estado_actual || [],
     fotos_antes_despues: [],
     calificacion: null,
     ticket_soporte: false,
+    origen: "web",
     created_at: new Date().toISOString(),
   };
 
   db.servicios_citas.unshift(nuevaCita);
 
-  // 3. Crear registro 1 a 1 en Tabla Recurrencia
   const mesesDisparador = cliente.mascotas ? 3 : 6;
   const nuevoRegistroRecurrencia: RegistroRecurrencia = {
     id: `rec-${Date.now()}`,
@@ -390,7 +520,6 @@ export function createBookingFromWizard(payload: {
   };
   db.recurrencia.unshift(nuevoRegistroRecurrencia);
 
-  // 4. Programar secuencia poservicio de WhatsApp
   const secuencia = generarSecuenciaPoservicio(nuevaCita, cliente);
   secuencia.forEach((etapaItem, idx) => {
     db.mensajes_automatizacion.unshift({
@@ -418,6 +547,9 @@ export function updateCitaInDb(
     monto_total?: number | null;
     calificacion?: number | null;
     notas_servicio?: string;
+    fecha?: string;
+    turno?: TurnoServicio;
+    hora_especifica?: string;
   }
 ): ServicioCita | null {
   const db = getDatabase();
@@ -427,14 +559,14 @@ export function updateCitaInDb(
   const cliente = db.clientes.find((c) => c.id === cita.cliente_id);
 
   if (updates.estatus !== undefined) cita.estatus = updates.estatus;
-  if (updates.tecnico_asignado !== undefined)
-    cita.tecnico_asignado = updates.tecnico_asignado;
-  if (updates.notas_servicio !== undefined)
-    cita.notas_servicio = updates.notas_servicio;
+  if (updates.tecnico_asignado !== undefined) cita.tecnico_asignado = updates.tecnico_asignado;
+  if (updates.notas_servicio !== undefined) cita.notas_servicio = updates.notas_servicio;
+  if (updates.fecha !== undefined) cita.fecha = updates.fecha;
+  if (updates.turno !== undefined) cita.turno = updates.turno;
+  if (updates.hora_especifica !== undefined) cita.hora_especifica = updates.hora_especifica;
 
   if (updates.monto_total !== undefined) {
     cita.monto_total = updates.monto_total;
-    // Recalcular histórico de gasto del cliente
     if (cliente) {
       const totalCliente = db.servicios_citas
         .filter((c) => c.cliente_id === cliente.id && c.estatus !== "Cancelada")
@@ -452,7 +584,6 @@ export function updateCitaInDb(
       cita,
       updates.calificacion
     );
-    // Eliminar mensaje previo de calificación si existía
     db.mensajes_automatizacion = db.mensajes_automatizacion.filter(
       (m) =>
         !(
@@ -476,4 +607,60 @@ export function updateCitaInDb(
 
   saveDatabase(db);
   return cita;
+}
+
+export function cancelCita(citaId: string, isClientRequest = false, motivo?: string): { ok: boolean; error?: string; cita?: ServicioCita } {
+  const db = getDatabase();
+  const cita = db.servicios_citas.find((c) => c.id === citaId);
+  if (!cita) return { ok: false, error: "Cita no encontrada." };
+
+  if (cita.estatus === "Cancelada") {
+    return { ok: true, cita };
+  }
+
+  if (isClientRequest) {
+    // Validar regla de 2 horas antes
+    const horaAprox = cita.turno.startsWith("Matutino") ? "09:00:00" : "14:00:00";
+    const citaDate = new Date(`${cita.fecha}T${horaAprox}`);
+    const now = new Date();
+    const diffMs = citaDate.getTime() - now.getTime();
+    const diffHours = diffMs / (1000 * 60 * 60);
+
+    if (diffHours < 2) {
+      return {
+        ok: false,
+        error: "Las citas solo pueden cancelarse con al menos 2 horas de anticipación. Por favor comunícate directamente con soporte para asistirte.",
+      };
+    }
+  }
+
+  cita.estatus = "Cancelada";
+  cita.cancelled_at = new Date().toISOString();
+  cita.cancel_reason = motivo || (isClientRequest ? "Cancelada por cliente vía WhatsApp/Web" : "Cancelada por administración");
+
+  // Recalcular gasto del cliente
+  const cliente = db.clientes.find((c) => c.id === cita.cliente_id);
+  if (cliente) {
+    cliente.historico_gasto = db.servicios_citas
+      .filter((c) => c.cliente_id === cliente.id && c.estatus !== "Cancelada")
+      .reduce((acc, it) => acc + (it.monto_total || 0), 0);
+  }
+
+  saveDatabase(db);
+  return { ok: true, cita };
+}
+
+export function deleteCliente(clienteId: string): boolean {
+  const db = getDatabase();
+  const index = db.clientes.findIndex((c) => c.id === clienteId);
+  if (index === -1) return false;
+
+  db.clientes.splice(index, 1);
+  // Eliminar citas y mensajes asociados
+  db.servicios_citas = db.servicios_citas.filter((c) => c.cliente_id !== clienteId);
+  db.recurrencia = db.recurrencia.filter((r) => r.cliente_id !== clienteId);
+  db.mensajes_automatizacion = db.mensajes_automatizacion.filter((m) => m.cliente_id !== clienteId);
+
+  saveDatabase(db);
+  return true;
 }

@@ -56,6 +56,7 @@ export interface Cliente {
   notas_especiales: string;
   historico_gasto: number;
   fecha_registro: string;
+  email?: string;
 }
 
 export interface ServicioCita {
@@ -63,6 +64,7 @@ export interface ServicioCita {
   cliente_id: string;
   fecha: string; // YYYY-MM-DD
   turno: TurnoServicio;
+  hora_especifica?: string; // Ej: 10:00 AM
   items_contratados: ItemContratado[];
   monto_total: number | null; // Null hasta que se cotice en CRM/WhatsApp
   estatus: EstatusCita;
@@ -73,7 +75,10 @@ export interface ServicioCita {
   fotos_antes_despues: FotoAntesDespues[];
   calificacion: number | null; // 1 - 5
   ticket_soporte: boolean;
+  origen?: "web" | "manual" | "whatsapp";
   created_at: string;
+  cancelled_at?: string;
+  cancel_reason?: string;
 }
 
 export interface RegistroRecurrencia {
@@ -98,8 +103,37 @@ export interface MensajeAutomatizacion {
   fecha_programada: string;
 }
 
+export interface RedSocialConectada {
+  red: "facebook" | "instagram" | "tiktok";
+  conectado: boolean;
+  nombre_cuenta?: string;
+  seguidores: number;
+  alcance_30d: number;
+  interacciones_30d: number;
+  clics_web_30d: number;
+}
+
+export interface MarketingMetrics {
+  redes: RedSocialConectada[];
+  google_ads: {
+    conectado: boolean;
+    inversion_mes: number;
+    impresiones: number;
+    clics: number;
+    cpc_promedio: number;
+    conversiones: number;
+  };
+  seo_sem: {
+    visitas_organicas: number;
+    visitas_pagadas: number;
+    posicion_promedio: number;
+    palabras_clave_top: { keyword: string; posicion: number; volumen: number }[];
+  };
+}
+
 export interface KananConfig {
   modo_halloween: boolean;
+  marketing?: MarketingMetrics;
 }
 
 export interface KananDatabase {

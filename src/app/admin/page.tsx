@@ -8,52 +8,49 @@ import {
   Calendar,
   Users,
   MessageSquare,
+  BarChart3,
+  Settings,
   LogOut,
   MapPin,
   Clock,
   DollarSign,
   TrendingUp,
   Activity,
-  UserCheck,
-  Star,
-  AlertTriangle,
-  ArrowRight,
   Menu,
   X,
-  Plus,
+  Shield,
+  Sparkles,
 } from "lucide-react";
-import { KananDatabase, ServicioCita, Cliente, EstatusCita } from "@/types/crm";
+import {
+  KananDatabase,
+  ServicioCita,
+  Cliente,
+  EstatusCita,
+  TurnoServicio,
+  MunicipioZMG,
+  MarketingMetrics,
+} from "@/types/crm";
 import { JaliscoServiceMap } from "@/components/admin/JaliscoServiceMap";
 import { WhatsAppFoxdrop } from "@/components/admin/WhatsAppFoxdrop";
-
-const ESTATUS_COLUMNS: EstatusCita[] = [
-  "Por Confirmar",
-  "Confirmada",
-  "En Ruta",
-  "En Proceso",
-  "Completada",
-];
-
-const TECNICOS_ZMG = [
-  "Por asignar",
-  "Ing. Roberto Márquez (Unidad 01)",
-  "Téc. Alejandro Silva (Unidad 02)",
-  "Téc. Daniel Orozco (Unidad 03)",
-];
+import { ClientesTable } from "@/components/admin/ClientesTable";
+import { CalendarCitasView } from "@/components/admin/CalendarCitasView";
+import { MarketingAnalyticsView } from "@/components/admin/MarketingAnalyticsView";
 
 export default function AdminPage() {
   const router = useRouter();
 
-  // Estados de sesión y datos
+  // Estados de sesión y base de datos
   const [authChecking, setAuthChecking] = useState(true);
   const [db, setDb] = useState<KananDatabase | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Navegación en el Menú Lateral
-  const [activeSection, setActiveSection] = useState<"resumen" | "calendario" | "clientes" | "whatsapp">("resumen");
+  const [activeSection, setActiveSection] = useState<
+    "resumen" | "calendario" | "clientes" | "whatsapp" | "marketing" | "configuracion"
+  >("resumen");
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Tráfico simulado en tiempo real
+  // Tráfico en tiempo real simulado
   const [onlineVisitors, setOnlineVisitors] = useState(7);
 
   // Filtro de calendario
@@ -82,8 +79,10 @@ export default function AdminPage() {
     setLoading(true);
     try {
       const res = await fetch("/api/crm");
-      const data = (await res.json()) as KananDatabase;
-      setDb(data);
+      if (res.ok) {
+        const data = (await res.json()) as KananDatabase;
+        setDb(data);
+      }
     } finally {
       setLoading(false);
     }
@@ -93,7 +92,6 @@ export default function AdminPage() {
     checkAuth();
     fetchCrmData();
 
-    // Actualizar visitantes en tiempo real sutilmente
     const interval = setInterval(() => {
       setOnlineVisitors((prev) => Math.max(3, Math.min(18, prev + Math.floor(Math.random() * 3) - 1)));
     }, 8000);
@@ -118,13 +116,76 @@ export default function AdminPage() {
     }
   };
 
+  // Crear cliente manual
+  const handleCreateClienteManual = async (cliente: {
+    nombre: string;
+    whatsapp: string;
+    direccion: string;
+    municipio: MunicipioZMG;
+    mascotas: boolean;
+    notas_especiales?: string;
+    email?: string;
+    historico_gasto?: number;
+  }) => {
+    const res = await fetch("/api/crm", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "CREATE_CLIENTE_MANUAL", cliente }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      setDb(data.db);
+    }
+  };
+
+  // Actualizar cliente
+  const handleUpdateCliente = async (clienteId: string, updates: Partial<Cliente>) => {
+    const res = await fetch("/api/crm", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "UPDATE_CLIENTE", clienteId, ...updates }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      setDb(data.db);
+    }
+  };
+
+  // Eliminar cliente
+  const handleDeleteCliente = async (clienteId: string) => {
+    const res = await fetch("/api/crm", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "DELETE_CLIENTE", clienteId }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      setDb(data.db);
+    }
+  };
+
+  // Crear cita manual
+  const handleCreateCitaManual = async (citaData: any) => {
+    const res = await fetch("/api/crm", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "CREATE_CITA_MANUAL", cita: citaData }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      setDb(data.db);
+    }
+  };
+
+  // Actualizar cita
   const handleUpdateCita = async (
     citaId: string,
     updates: {
       estatus?: EstatusCita;
       tecnico_asignado?: string;
       monto_total?: number | null;
-      calificacion?: number | null;
+      fecha?: string;
+      turno?: TurnoServicio;
     }
   ) => {
     const res = await fetch("/api/crm", {
@@ -135,6 +196,32 @@ export default function AdminPage() {
         citaId,
         ...updates,
       }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      setDb(data.db);
+    }
+  };
+
+  // Cancelar cita por administrador
+  const handleCancelCita = async (citaId: string, motivo?: string) => {
+    const res = await fetch("/api/crm", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "ADMIN_CANCEL_CITA", citaId, motivo }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      setDb(data.db);
+    }
+  };
+
+  // Actualizar configuración de marketing
+  const handleUpdateMarketing = async (updates: Partial<MarketingMetrics>) => {
+    const res = await fetch("/api/crm", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "UPDATE_MARKETING", marketing: updates }),
     });
     const data = await res.json();
     if (data.ok) {
@@ -157,7 +244,7 @@ export default function AdminPage() {
 
   if (authChecking) {
     return (
-      <div className="min-h-screen bg-[#F4F7F9] flex items-center justify-center">
+      <div className="min-h-screen bg-[#F0F4F8] flex items-center justify-center">
         <div className="w-10 h-10 border-4 border-[#355581] border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -166,11 +253,27 @@ export default function AdminPage() {
   const clientes = db?.clientes || [];
   const citas = db?.servicios_citas || [];
   const mensajes = db?.mensajes_automatizacion || [];
+  const marketing = db?.config?.marketing || {
+    redes: [],
+    google_ads: {
+      conectado: false,
+      inversion_mes: 0,
+      impresiones: 0,
+      clics: 0,
+      cpc_promedio: 0,
+      conversiones: 0,
+    },
+    seo_sem: {
+      visitas_organicas: 0,
+      visitas_pagadas: 0,
+      posicion_promedio: 0,
+      palabras_clave_top: [],
+    },
+  };
 
   // Cálculos Financieros
   const totalGanancias = clientes.reduce((acc, c) => acc + (c.historico_gasto || 0), 0);
   const totalServicios = citas.length;
-  const serviciosCompletados = citas.filter((c) => c.estatus === "Completada").length;
 
   return (
     <div className="min-h-screen bg-[#F0F4F8] flex flex-col md:flex-row antialiased text-slate-800">
@@ -199,20 +302,20 @@ export default function AdminPage() {
           </div>
 
           {/* Navegación Principal */}
-          <nav className="space-y-2">
+          <nav className="space-y-1.5">
             <button
               type="button"
               onClick={() => {
                 setActiveSection("resumen");
                 setSidebarOpen(false);
               }}
-              className={`w-full flex items-center gap-3.5 px-4 py-3.5 rounded-2xl font-heading font-bold text-sm transition-all duration-200 ${
+              className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl font-heading font-bold text-xs transition-all duration-200 ${
                 activeSection === "resumen"
                   ? "bg-gradient-to-r from-[#1D71B5] to-[#36A6DE] text-white shadow-[0_8px_20px_rgba(29,113,181,0.4)]"
                   : "text-slate-300 hover:bg-white/10 hover:text-white"
               }`}
             >
-              <LayoutDashboard className={`w-5 h-5 ${activeSection === "resumen" ? "text-white" : "text-[#36A6DE]"}`} />
+              <LayoutDashboard className={`w-4 h-4 ${activeSection === "resumen" ? "text-white" : "text-[#36A6DE]"}`} />
               <span>Resumen</span>
             </button>
 
@@ -222,13 +325,13 @@ export default function AdminPage() {
                 setActiveSection("calendario");
                 setSidebarOpen(false);
               }}
-              className={`w-full flex items-center gap-3.5 px-4 py-3.5 rounded-2xl font-heading font-bold text-sm transition-all duration-200 ${
+              className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl font-heading font-bold text-xs transition-all duration-200 ${
                 activeSection === "calendario"
                   ? "bg-gradient-to-r from-[#1D71B5] to-[#36A6DE] text-white shadow-[0_8px_20px_rgba(29,113,181,0.4)]"
                   : "text-slate-300 hover:bg-white/10 hover:text-white"
               }`}
             >
-              <Calendar className={`w-5 h-5 ${activeSection === "calendario" ? "text-white" : "text-[#36A6DE]"}`} />
+              <Calendar className={`w-4 h-4 ${activeSection === "calendario" ? "text-white" : "text-[#36A6DE]"}`} />
               <span>Calendario de citas</span>
               {citas.filter((c) => c.estatus === "Por Confirmar").length > 0 && (
                 <span className="ml-auto px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#36A6DE] text-white">
@@ -243,13 +346,13 @@ export default function AdminPage() {
                 setActiveSection("clientes");
                 setSidebarOpen(false);
               }}
-              className={`w-full flex items-center gap-3.5 px-4 py-3.5 rounded-2xl font-heading font-bold text-sm transition-all duration-200 ${
+              className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl font-heading font-bold text-xs transition-all duration-200 ${
                 activeSection === "clientes"
                   ? "bg-gradient-to-r from-[#1D71B5] to-[#36A6DE] text-white shadow-[0_8px_20px_rgba(29,113,181,0.4)]"
                   : "text-slate-300 hover:bg-white/10 hover:text-white"
               }`}
             >
-              <Users className={`w-5 h-5 ${activeSection === "clientes" ? "text-white" : "text-[#36A6DE]"}`} />
+              <Users className={`w-4 h-4 ${activeSection === "clientes" ? "text-white" : "text-[#36A6DE]"}`} />
               <span>Clientes</span>
             </button>
 
@@ -259,47 +362,57 @@ export default function AdminPage() {
                 setActiveSection("whatsapp");
                 setSidebarOpen(false);
               }}
-              className={`w-full flex items-center gap-3.5 px-4 py-3.5 rounded-2xl font-heading font-bold text-sm transition-all duration-200 ${
+              className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl font-heading font-bold text-xs transition-all duration-200 ${
                 activeSection === "whatsapp"
                   ? "bg-gradient-to-r from-[#1D71B5] to-[#36A6DE] text-white shadow-[0_8px_20px_rgba(29,113,181,0.4)]"
                   : "text-slate-300 hover:bg-white/10 hover:text-white"
               }`}
             >
-              <MessageSquare className={`w-5 h-5 ${activeSection === "whatsapp" ? "text-white" : "text-[#36A6DE]"}`} />
+              <MessageSquare className={`w-4 h-4 ${activeSection === "whatsapp" ? "text-white" : "text-[#36A6DE]"}`} />
               <span>WhatsApp</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setActiveSection("marketing");
+                setSidebarOpen(false);
+              }}
+              className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl font-heading font-bold text-xs transition-all duration-200 ${
+                activeSection === "marketing"
+                  ? "bg-gradient-to-r from-[#1D71B5] to-[#36A6DE] text-white shadow-[0_8px_20px_rgba(29,113,181,0.4)]"
+                  : "text-slate-300 hover:bg-white/10 hover:text-white"
+              }`}
+            >
+              <BarChart3 className={`w-4 h-4 ${activeSection === "marketing" ? "text-white" : "text-[#36A6DE]"}`} />
+              <span>Métricas & Marketing</span>
+            </button>
+
+            {/* SECCIÓN CONFIGURACIÓN EN LA PARTE INFERIOR DEL MENÚ */}
+            <button
+              type="button"
+              onClick={() => {
+                setActiveSection("configuracion");
+                setSidebarOpen(false);
+              }}
+              className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl font-heading font-bold text-xs transition-all duration-200 ${
+                activeSection === "configuracion"
+                  ? "bg-gradient-to-r from-[#1D71B5] to-[#36A6DE] text-white shadow-[0_8px_20px_rgba(29,113,181,0.4)]"
+                  : "text-slate-300 hover:bg-white/10 hover:text-white"
+              }`}
+            >
+              <Settings className={`w-4 h-4 ${activeSection === "configuracion" ? "text-white" : "text-[#36A6DE]"}`} />
+              <span>Configuración</span>
             </button>
           </nav>
         </div>
 
         {/* Pie de Menú Lateral */}
         <div className="space-y-3 pt-6 border-t border-white/10">
-          {/* Switch Modo Halloween */}
-          <div className="flex items-center justify-between px-3.5 py-2.5 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-md">
-            <span className="text-xs font-heading font-bold flex items-center gap-2 text-orange-300">
-              <span className="text-base">🎃</span>
-              <span>Modo Halloween</span>
-            </span>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={db?.config?.modo_halloween ?? true}
-              onClick={() => handleToggleHalloween(!(db?.config?.modo_halloween ?? true))}
-              className={`relative inline-flex h-5 w-10 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
-                (db?.config?.modo_halloween ?? true) ? "bg-orange-500" : "bg-slate-600"
-              }`}
-            >
-              <span
-                className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                  (db?.config?.modo_halloween ?? true) ? "translate-x-5" : "translate-x-0"
-                }`}
-              />
-            </button>
-          </div>
-
           <Link
             href="/"
             target="_blank"
-            className="flex items-center justify-center gap-2 w-full py-3 px-4 rounded-2xl bg-white/10 hover:bg-white/15 text-xs font-heading font-bold text-white transition-all border border-white/10"
+            className="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-2xl bg-white/10 hover:bg-white/15 text-xs font-heading font-bold text-white transition-all border border-white/10"
           >
             <span>Ver Sitio Web</span>
           </Link>
@@ -307,7 +420,7 @@ export default function AdminPage() {
           <button
             type="button"
             onClick={handleLogout}
-            className="flex items-center justify-center gap-2 w-full py-3 px-4 rounded-2xl bg-rose-500/20 hover:bg-rose-500/30 text-xs font-heading font-bold text-rose-200 hover:text-white transition-all border border-rose-500/30"
+            className="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-2xl bg-rose-500/20 hover:bg-rose-500/30 text-xs font-heading font-bold text-rose-200 hover:text-white transition-all border border-rose-500/30"
           >
             <LogOut className="w-4 h-4" />
             <span>Cerrar sesión</span>
@@ -337,7 +450,7 @@ export default function AdminPage() {
 
         <main className="flex-1 p-4 sm:p-8 max-w-7xl w-full mx-auto space-y-8">
           
-          {/* SECCIÓN 1: RESUMEN (PÁGINA PRINCIPAL) */}
+          {/* SECCIÓN 1: RESUMEN */}
           {activeSection === "resumen" && (
             <div className="space-y-8">
               
@@ -433,7 +546,7 @@ export default function AdminPage() {
                 </div>
               </div>
 
-              {/* MAPA DE JALISCO DE ALTA CALIDAD CON CALLES Y PINES */}
+              {/* MAPA DE JALISCO DE ALTA CALIDAD */}
               <div className="bg-white rounded-3xl p-5 sm:p-7 border border-slate-200 shadow-sm space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -443,13 +556,12 @@ export default function AdminPage() {
                     </h2>
                   </div>
                   <span className="text-xs font-bold bg-[#F4F7F9] px-3 py-1 rounded-full text-[#1D71B5] border border-slate-200">
-                    {citas.length} pines registrados
+                    {citas.filter((c) => c.estatus !== "Cancelada").length} servicios activos
                   </span>
                 </div>
 
-                {/* Componente del Mapa con Leaflet & Calles */}
                 <JaliscoServiceMap
-                  citas={citas}
+                  citas={citas.filter((c) => c.estatus !== "Cancelada")}
                   clientes={clientes}
                   onSelectCitaForCalendar={(status) => {
                     setCalendarHighlightStatus(status);
@@ -463,225 +575,38 @@ export default function AdminPage() {
           {/* SECCIÓN 2: CALENDARIO DE CITAS */}
           {activeSection === "calendario" && (
             <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h1 className="font-heading font-extrabold text-2xl text-[#355581]">
-                  Calendario de citas
-                </h1>
-                {calendarHighlightStatus && (
-                  <button
-                    type="button"
-                    onClick={() => setCalendarHighlightStatus(null)}
-                    className="text-xs font-bold text-[#1D71B5] underline"
-                  >
-                    Mostrar todas las columnas
-                  </button>
-                )}
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4 items-start">
-                {ESTATUS_COLUMNS.map((colStatus) => {
-                  const isHighlighted = calendarHighlightStatus === colStatus;
-                  const colCitas = citas.filter((c) => c.estatus === colStatus);
-
-                  return (
-                    <div
-                      key={colStatus}
-                      className={`bg-slate-100 rounded-3xl p-3.5 border transition-all space-y-3 ${
-                        isHighlighted ? "border-[#36A6DE] ring-2 ring-[#36A6DE]/30 bg-[#36A6DE]/5" : "border-slate-200"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between px-1">
-                        <span className="font-heading font-extrabold text-xs uppercase tracking-wider text-[#355581]">
-                          {colStatus}
-                        </span>
-                        <span className="px-2 py-0.5 rounded-full bg-white text-[#355581] font-bold text-xs border border-slate-200">
-                          {colCitas.length}
-                        </span>
-                      </div>
-
-                      {colCitas.length === 0 ? (
-                        <div className="bg-white/60 border border-dashed border-slate-200 rounded-2xl p-4 text-center text-xs text-slate-400">
-                          Sin citas
-                        </div>
-                      ) : (
-                        colCitas.map((cita) => {
-                          const cli = clientes.find((c) => c.id === cita.cliente_id);
-
-                          return (
-                            <div
-                              key={cita.id}
-                              className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-3"
-                            >
-                              <div className="flex items-center justify-between">
-                                <span className="font-heading font-extrabold text-xs text-[#1D71B5] bg-[#F4F7F9] px-2.5 py-1 rounded-lg">
-                                  {cita.id}
-                                </span>
-                                {cli?.mascotas && (
-                                  <span className="text-[10px] font-bold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full border border-emerald-200">
-                                    🐾 Pet
-                                  </span>
-                                )}
-                              </div>
-
-                              <div>
-                                <p className="font-heading font-bold text-sm text-[#355581]">
-                                  {cli?.nombre || "Cliente"}
-                                </p>
-                                <p className="text-xs text-slate-500 mt-0.5">
-                                  📍 {cita.ruta_geografica}
-                                </p>
-                              </div>
-
-                              <div className="bg-[#F4F7F9] rounded-xl p-2.5 text-xs space-y-1 text-[#355581]">
-                                <p className="font-semibold">{cita.fecha} ({cita.turno})</p>
-                                <div className="pt-1 border-t border-slate-200/80">
-                                  {cita.items_contratados.map((it, idx) => (
-                                    <p key={idx} className="truncate">
-                                      • {it.cantidad}x {it.piezaNombre}
-                                    </p>
-                                  ))}
-                                </div>
-                              </div>
-
-                              {/* Asignar Técnico */}
-                              <div className="space-y-1">
-                                <label className="text-[10px] font-bold uppercase text-slate-400">
-                                  Técnico:
-                                </label>
-                                <select
-                                  value={cita.tecnico_asignado}
-                                  onChange={(e) =>
-                                    handleUpdateCita(cita.id, {
-                                      tecnico_asignado: e.target.value,
-                                    })
-                                  }
-                                  className="w-full text-xs rounded-lg border border-slate-200 bg-[#F4F7F9] px-2 py-1.5 font-medium text-[#355581]"
-                                >
-                                  {TECNICOS_ZMG.map((t) => (
-                                    <option key={t} value={t}>
-                                      {t}
-                                    </option>
-                                  ))}
-                                </select>
-                              </div>
-
-                              {/* Monto Cotizado */}
-                              <div className="space-y-1">
-                                <label className="text-[10px] font-bold uppercase text-slate-400">
-                                  Monto (MXN):
-                                </label>
-                                <input
-                                  type="number"
-                                  placeholder="Cotizar"
-                                  defaultValue={cita.monto_total ?? ""}
-                                  onBlur={(e) => {
-                                    const val = e.target.value === "" ? null : Number(e.target.value);
-                                    if (val !== cita.monto_total) {
-                                      handleUpdateCita(cita.id, { monto_total: val });
-                                    }
-                                  }}
-                                  className="w-full text-xs rounded-lg border border-slate-200 bg-white px-2 py-1.5 font-semibold text-[#355581]"
-                                />
-                              </div>
-
-                              {/* Cambiar Estatus */}
-                              <div className="space-y-1">
-                                <label className="text-[10px] font-bold uppercase text-slate-400">
-                                  Estatus:
-                                </label>
-                                <select
-                                  value={cita.estatus}
-                                  onChange={(e) =>
-                                    handleUpdateCita(cita.id, {
-                                      estatus: e.target.value as EstatusCita,
-                                    })
-                                  }
-                                  className="w-full text-xs rounded-lg border border-[#355581]/30 bg-white px-2 py-1.5 font-bold text-[#355581]"
-                                >
-                                  {ESTATUS_COLUMNS.map((st) => (
-                                    <option key={st} value={st}>
-                                      {st}
-                                    </option>
-                                  ))}
-                                </select>
-                              </div>
-                            </div>
-                          );
-                        })
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+              <h1 className="font-heading font-extrabold text-2xl text-[#355581]">
+                Calendario de citas
+              </h1>
+              <CalendarCitasView
+                citas={citas}
+                clientes={clientes}
+                highlightStatus={calendarHighlightStatus}
+                onClearHighlight={() => setCalendarHighlightStatus(null)}
+                onUpdateCita={handleUpdateCita}
+                onCancelCita={handleCancelCita}
+                onCreateCitaManual={handleCreateCitaManual}
+              />
             </div>
           )}
 
-          {/* SECCIÓN 3: CLIENTES */}
+          {/* SECCIÓN 3: CLIENTES EN TABLA ESTRUCTURADA */}
           {activeSection === "clientes" && (
             <div className="space-y-6">
               <h1 className="font-heading font-extrabold text-2xl text-[#355581]">
                 Clientes ({clientes.length})
               </h1>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {clientes.map((cli) => {
-                  const cliCitas = citas.filter((c) => c.cliente_id === cli.id);
-
-                  return (
-                    <div
-                      key={cli.id}
-                      className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-4"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="w-12 h-12 rounded-full bg-[#355581] text-white font-heading font-bold text-base flex items-center justify-center">
-                          {cli.nombre.slice(0, 2).toUpperCase()}
-                        </div>
-                        {cli.mascotas && (
-                          <span className="text-xs font-bold bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full border border-emerald-200">
-                            🐾 Hogar Pet-Friendly
-                          </span>
-                        )}
-                      </div>
-
-                      <div>
-                        <h3 className="font-heading font-bold text-base text-[#355581]">
-                          {cli.nombre}
-                        </h3>
-                        <p className="text-xs text-slate-500 mt-1">
-                          📍 {cli.direccion}, {cli.municipio}
-                        </p>
-                        <p className="text-xs text-slate-500 mt-0.5">
-                          📱 {cli.whatsapp}
-                        </p>
-                      </div>
-
-                      <div className="p-3 bg-[#F4F7F9] rounded-2xl flex items-center justify-between text-xs">
-                        <span className="text-slate-500">Histórico de gasto:</span>
-                        <span className="font-heading font-bold text-[#355581]">
-                          ${cli.historico_gasto.toLocaleString("es-MX")} MXN
-                        </span>
-                      </div>
-
-                      <div className="border-t border-slate-100 pt-3 space-y-1.5">
-                        <span className="text-[10px] font-heading font-bold uppercase text-slate-400">
-                          Servicios ({cliCitas.length}):
-                        </span>
-                        {cliCitas.map((c) => (
-                          <div key={c.id} className="text-xs flex items-center justify-between bg-slate-50 px-2.5 py-1.5 rounded-lg">
-                            <span className="font-bold text-[#1D71B5]">{c.id}</span>
-                            <span className="text-slate-500">{c.fecha}</span>
-                            <span className="text-[11px] font-semibold text-slate-700">{c.estatus}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+              <ClientesTable
+                clientes={clientes}
+                citas={citas}
+                onUpdateCliente={handleUpdateCliente}
+                onDeleteCliente={handleDeleteCliente}
+                onCreateClienteManual={handleCreateClienteManual}
+              />
             </div>
           )}
 
-          {/* SECCIÓN 4: WHATSAPP (ESTILO FOXDROP) */}
+          {/* SECCIÓN 4: WHATSAPP */}
           {activeSection === "whatsapp" && (
             <div className="space-y-4">
               <h1 className="font-heading font-extrabold text-2xl text-[#355581]">
@@ -693,6 +618,95 @@ export default function AdminPage() {
                 mensajes={mensajes}
                 onTriggerMessage={handleTriggerWhatsApp}
               />
+            </div>
+          )}
+
+          {/* SECCIÓN 5: MÉTRICAS Y MARKETING DIGITAL */}
+          {activeSection === "marketing" && (
+            <div className="space-y-6">
+              <h1 className="font-heading font-extrabold text-2xl text-[#355581]">
+                Métricas & Marketing
+              </h1>
+              <MarketingAnalyticsView
+                metrics={marketing}
+                onUpdateMarketing={handleUpdateMarketing}
+              />
+            </div>
+          )}
+
+          {/* SECCIÓN 6: CONFIGURACIÓN (UBICADA AL FINAL) */}
+          {activeSection === "configuracion" && (
+            <div className="space-y-6">
+              <h1 className="font-heading font-extrabold text-2xl text-[#355581]">
+                Configuración
+              </h1>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Ajustes de Campaña Temporal (Modo Halloween) */}
+                <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-5">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-orange-100 text-orange-600 flex items-center justify-center text-lg">
+                      🎃
+                    </div>
+                    <div>
+                      <h3 className="font-heading font-bold text-sm text-slate-800">
+                        Campaña de Temporada
+                      </h3>
+                      <p className="text-xs text-slate-400">
+                        Efectos visuales en el sitio web público
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                    <div>
+                      <p className="text-xs font-bold text-slate-800">Modo Halloween & Papel Picado</p>
+                      <p className="text-[11px] text-slate-500">Muestra los murciélagos y decoración temática</p>
+                    </div>
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={db?.config?.modo_halloween ?? true}
+                      onClick={() => handleToggleHalloween(!(db?.config?.modo_halloween ?? true))}
+                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
+                        (db?.config?.modo_halloween ?? true) ? "bg-orange-500" : "bg-slate-300"
+                      }`}
+                    >
+                      <span
+                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                          (db?.config?.modo_halloween ?? true) ? "translate-x-5" : "translate-x-0"
+                        }`}
+                      />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Políticas Operativas y Cancelaciones */}
+                <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-5">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-blue-100 text-[#1D71B5] flex items-center justify-center">
+                      <Shield className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="font-heading font-bold text-sm text-slate-800">
+                        Políticas de Cancelación
+                      </h3>
+                      <p className="text-xs text-slate-400">
+                        Reglas automáticas para clientes
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-2 text-xs">
+                    <p className="font-semibold text-slate-800">
+                      Regla de cancelación de 2 Horas:
+                    </p>
+                    <p className="text-[11px] text-slate-500">
+                      Los clientes pueden auto-cancelar sus servicios desde WhatsApp o enlace directo hasta 2 horas antes de la cita. Pasado ese tiempo, solo el administrador puede autorizar la cancelación.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 
