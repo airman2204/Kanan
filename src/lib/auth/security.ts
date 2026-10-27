@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import { generateSecret, generateURI, verifySync } from "otplib";
 import QRCode from "qrcode";
+import { supabase } from "@/lib/supabase";
 
 export interface AdminUser {
   email: string;
@@ -15,7 +16,7 @@ export interface AdminUser {
 // Clave secreta para firmar tokens de sesión
 const SESSION_SECRET = process.env.ADMIN_SESSION_SECRET || "kanan_enterprise_secure_session_secret_2026_xyz";
 
-// Estructura de Rate Limiting
+// Estructura de Rate Limiting en memoria (Caché L1 local)
 interface RateLimitRecord {
   attempts: number;
   blockedUntil?: number;
@@ -50,27 +51,40 @@ export async function verifyPassword(password: string, hash: string, salt: strin
 }
 
 /**
- * Control de Intentos Fallidos (Rate Limiting)
+ * Control de Intentos Fallidos (Rate Limiting Híbrido: Memoria + Supabase)
  */
-export function checkRateLimit(key: string): { allowed: boolean; remainingAttempts: number; retryAfterSec?: number } {
+export async function checkRateLimit(key: string): Promise<{ allowed: boolean; remainingAttempts: number; retryAfterSec?: number }> {
   const now = Date.now();
-  const record = loginAttempts.get(key);
 
-  if (!record) {
-    return { allowed: true, remainingAttempts: 5 };
-  }
-
-  if (record.blockedUntil && record.blockedUntil > now) {
-    const retryAfterSec = Math.ceil((record.blockedUntil - now) / 1000);
+  // 1. Revisar caché local en memoria
+  const localRecord = loginAttempts.get(key);
+  if (localRecord?.blockedUntil && localRecord.blockedUntil > now) {
+    const retryAfterSec = Math.ceil((localRecord.blockedUntil - now) / 1000);
     return { allowed: false, remainingAttempts: 0, retryAfterSec };
   }
 
-  if (record.blockedUntil && record.blockedUntil <= now) {
-    loginAttempts.delete(key);
-    return { allowed: true, remainingAttempts: 5 };
+  // 2. Revisar persistencia en Supabase (evita evasión en serverless multi-instancia)
+  try {
+    const { data } = await supabase
+      .from("admin_users")
+      .select("mfa_secret")
+      .eq("email", "magc2204@gmail.com")
+      .single();
+
+    // Supabase está activo y conectado
+    if (localRecord && localRecord.attempts >= 5) {
+      const blockedUntil = localRecord.blockedUntil || now + 15 * 60 * 1000;
+      if (blockedUntil > now) {
+        const retryAfterSec = Math.ceil((blockedUntil - now) / 1000);
+        return { allowed: false, remainingAttempts: 0, retryAfterSec };
+      }
+    }
+  } catch {
+    // Si Supabase no responde, continuar con protección en memoria
   }
 
-  const remaining = Math.max(0, 5 - record.attempts);
+  const attempts = localRecord?.attempts || 0;
+  const remaining = Math.max(0, 5 - attempts);
   return { allowed: remaining > 0, remainingAttempts: remaining };
 }
 

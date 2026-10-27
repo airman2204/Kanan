@@ -9,8 +9,26 @@ import {
   saveDatabase,
 } from "@/lib/db/store";
 import { generarMensajeWhatsAppReservaCliente, KANAN_WHATSAPP_NUMBER } from "@/lib/whatsapp/templates";
+import { verifySessionToken } from "@/lib/auth/security";
 
-export async function GET() {
+/**
+ * Validador de sesión para proteger endpoints del CRM
+ */
+function isAuthenticatedAdmin(req: NextRequest): boolean {
+  const cookie = req.cookies.get("kanan_admin_session")?.value;
+  if (!cookie) return false;
+  const session = verifySessionToken(cookie);
+  return Boolean(session && session.mfaVerified);
+}
+
+export async function GET(req: NextRequest) {
+  // Proteger datos sensibles (clientes, teléfonos, ingresos)
+  if (!isAuthenticatedAdmin(req)) {
+    return NextResponse.json(
+      { ok: false, error: "No autorizado. Sesión de administrador requerida." },
+      { status: 401 }
+    );
+  }
   const db = getDatabase();
   return NextResponse.json(db);
 }
@@ -18,6 +36,13 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
+
+    // Las acciones administrativas (CLEAR_ALL, RESET_DEMO_2, TOGGLE_HALLOWEEN) requieren autenticación
+    if (body.action === "CLEAR_ALL" || body.action === "RESET_DEMO_2" || body.action === "TOGGLE_HALLOWEEN") {
+      if (!isAuthenticatedAdmin(req)) {
+        return NextResponse.json({ ok: false, error: "No autorizado." }, { status: 401 });
+      }
+    }
 
     // Acción especial: Borrar todos los ejemplos y dejar el CRM limpio
     if (body.action === "CLEAR_ALL") {
@@ -84,6 +109,14 @@ export async function POST(req: NextRequest) {
 
 export async function PATCH(req: NextRequest) {
   try {
+    // Proteger modificaciones de citas, clientes o recurrencias
+    if (!isAuthenticatedAdmin(req)) {
+      return NextResponse.json(
+        { ok: false, error: "No autorizado. Sesión de administrador requerida." },
+        { status: 401 }
+      );
+    }
+
     const body = await req.json();
 
     if (body.type === "UPDATE_CITA") {

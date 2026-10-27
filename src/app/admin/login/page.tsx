@@ -286,13 +286,27 @@ export default function AdminLoginPage() {
               </div>
             </div>
 
-            <button
-              type="submit"
-              disabled={loading || mfaToken.length < 6}
-              className="w-full py-3.5 px-4 bg-[#355581] hover:bg-[#1D71B5] text-white font-heading font-bold text-sm rounded-xl transition-all shadow-md active:scale-[0.99] disabled:opacity-50"
-            >
-              {loading ? "Comprobando..." : "Verificar"}
-            </button>
+            <div className="space-y-3">
+              <button
+                type="submit"
+                disabled={loading || mfaToken.length < 6}
+                className="w-full py-3.5 px-4 bg-[#355581] hover:bg-[#1D71B5] text-white font-heading font-bold text-sm rounded-xl transition-all shadow-md active:scale-[0.99] disabled:opacity-50"
+              >
+                {loading ? "Comprobando..." : "Verificar"}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setStep("credentials");
+                  setMfaToken("");
+                  setError(null);
+                }}
+                className="w-full py-2.5 text-xs font-semibold text-slate-500 hover:text-[#355581] transition-colors"
+              >
+                ← Volver al inicio de sesión
+              </button>
+            </div>
           </form>
         )}
 

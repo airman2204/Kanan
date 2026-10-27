@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     }
 
     const rateKey = `${ip}_${email.trim().toLowerCase()}`;
-    const rateCheck = checkRateLimit(rateKey);
+    const rateCheck = await checkRateLimit(rateKey);
     if (!rateCheck.allowed) {
       return NextResponse.json(
         {
