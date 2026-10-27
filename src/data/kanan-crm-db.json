@@ -1,256 +1,51 @@
 {
-  "clientes": [
-    {
-      "id": "cli-demo-01",
-      "nombre": "Mariana Gómez Villaseñor",
-      "whatsapp": "3314528910",
-      "direccion": "Av. Patria 1840, Col. Jardines del Valle",
-      "municipio": "Zapopan",
-      "mascotas": true,
-      "notas_especiales": "Hogar con 2 perritos Golden Retriever. Manchas orgánicas en sala gris en L y colchón King. Solicita desinfección profunda Pet-Friendly.",
-      "historico_gasto": 1650,
-      "fecha_registro": "2026-10-15T10:30:00.000Z"
-    },
-    {
-      "id": "cli-demo-02",
-      "nombre": "Carlos Eduardo Ramírez",
-      "whatsapp": "3338901124",
-      "direccion": "Calle Paseo de los Adobes 412, Lomas de San Agustín",
-      "municipio": "Tlajomulco",
-      "mascotas": false,
-      "notas_especiales": "Limpieza de vestiduras de camioneta SUV (5 asientos + cajuela) y 6 sillas de comedor. Acceso directo a cochera con toma de agua y luz.",
-      "historico_gasto": 1100,
-      "fecha_registro": "2026-10-19T16:15:00.000Z"
-    }
-  ],
-  "servicios_citas": [
-    {
-      "id": "KAN-1001",
-      "cliente_id": "cli-demo-01",
-      "fecha": "2026-10-21",
-      "turno": "Matutino (09:00 - 13:00)",
-      "items_contratados": [
+  "clientes": [],
+  "servicios_citas": [],
+  "recurrencia": [],
+  "mensajes_automatizacion": [],
+  "config": {
+    "modo_halloween": true,
+    "marketing": {
+      "redes": [
         {
-          "categoriaId": "salas",
-          "categoriaNombre": "Salas y Sillas",
-          "piezaId": "sala-l",
-          "piezaNombre": "Sala en L (Seccional)",
-          "cantidad": 1
+          "red": "facebook",
+          "conectado": false,
+          "seguidores": 0,
+          "alcance_30d": 0,
+          "interacciones_30d": 0,
+          "clics_web_30d": 0
         },
         {
-          "categoriaId": "colchones",
-          "categoriaNombre": "Colchones",
-          "piezaId": "colchon-king",
-          "piezaNombre": "Colchón King Size",
-          "cantidad": 1
-        }
-      ],
-      "monto_total": 1650,
-      "estatus": "Completada",
-      "tecnico_asignado": "Ing. Roberto Márquez (Unidad 01)",
-      "ruta_geografica": "Ruta Norte — Zapopan",
-      "notas_servicio": "Tiene 2 mascotas en casa. Se aplicó neutralizador enzimático 100% Pet-Friendly.",
-      "fotos_estado_actual": [
-        "/assets/portfolio/antes-1.jpg"
-      ],
-      "fotos_antes_despues": [
-        {
-          "antesUrl": "/assets/portfolio/antes-1.jpg",
-          "despuesUrl": "/assets/portfolio/despues-1.jpg",
-          "descripcion": "Sala Seccional — Eliminación de manchas y pelo de mascota"
-        }
-      ],
-      "calificacion": 5,
-      "ticket_soporte": false,
-      "created_at": "2026-10-15T10:35:00.000Z"
-    },
-    {
-      "id": "KAN-1002",
-      "cliente_id": "cli-demo-02",
-      "fecha": "2026-10-22",
-      "turno": "Vespertino (14:00 - 18:00)",
-      "items_contratados": [
-        {
-          "categoriaId": "vestiduras",
-          "categoriaNombre": "Vestiduras de Autos",
-          "piezaId": "auto-suv",
-          "piezaNombre": "Camioneta SUV (Asientos + Alfombra + Cajuela)",
-          "cantidad": 1
+          "red": "instagram",
+          "conectado": false,
+          "seguidores": 0,
+          "alcance_30d": 0,
+          "interacciones_30d": 0,
+          "clics_web_30d": 0
         },
         {
-          "categoriaId": "salas",
-          "categoriaNombre": "Salas y Sillas",
-          "piezaId": "silla-comedor",
-          "piezaNombre": "Sillas de Comedor Tapizadas",
-          "cantidad": 6
+          "red": "tiktok",
+          "conectado": false,
+          "seguidores": 0,
+          "alcance_30d": 0,
+          "interacciones_30d": 0,
+          "clics_web_30d": 0
         }
       ],
-      "monto_total": 1100,
-      "estatus": "Confirmada",
-      "tecnico_asignado": "Téc. Alejandro Silva (Unidad 02)",
-      "ruta_geografica": "Ruta Sur — Tlajomulco",
-      "notas_servicio": "Confirmado por WhatsApp. Requiere secado rápido de 3-4 horas para usar camioneta al día siguiente.",
-      "fotos_estado_actual": [
-        "/assets/portfolio/antes-2.jpg"
-      ],
-      "fotos_antes_despues": [],
-      "calificacion": null,
-      "ticket_soporte": false,
-      "created_at": "2026-10-19T16:20:00.000Z"
+      "google_ads": {
+        "conectado": false,
+        "inversion_mes": 0,
+        "impresiones": 0,
+        "clics": 0,
+        "cpc_promedio": 0,
+        "conversiones": 0
+      },
+      "seo_sem": {
+        "visitas_organicas": 0,
+        "visitas_pagadas": 0,
+        "posicion_promedio": 0,
+        "palabras_clave_top": []
+      }
     }
-  ],
-  "recurrencia": [
-    {
-      "id": "rec-demo-01",
-      "cliente_id": "cli-demo-01",
-      "cita_id": "KAN-1001",
-      "ultimo_servicio": "2026-10-21",
-      "disparador": "3 Meses (Mascotas)",
-      "proxima_fecha_contacto": "2027-01-21",
-      "estatus_contacto": "Programado"
-    },
-    {
-      "id": "rec-demo-02",
-      "cliente_id": "cli-demo-02",
-      "cita_id": "KAN-1002",
-      "ultimo_servicio": "2026-10-22",
-      "disparador": "6 Meses (Semestral)",
-      "proxima_fecha_contacto": "2027-04-22",
-      "estatus_contacto": "Programado"
-    }
-  ],
-  "mensajes_automatizacion": [
-    {
-      "id": "msg-KAN-1001-1",
-      "cita_id": "KAN-1001",
-      "cliente_id": "cli-demo-01",
-      "etapa": "1_confirmacion_inmediata",
-      "etapa_titulo": "1. Inmediato a la Reserva — Confirmación",
-      "destinatario_whatsapp": "3314528910",
-      "contenido_mensaje": "¡Hola Mariana Gómez Villaseñor! 🛡️ Tu reserva *KAN-1001* en *Kanan Servicios de Limpieza* ha sido registrada.\n• *Servicio:* 1x Sala en L (Seccional), 1x Colchón King Size\n• *Fecha y Turno:* 2026-10-21 (Matutino (09:00 - 13:00))\n• *Técnico asignado:* Ing. Roberto Márquez (Unidad 01)\n• *Zona:* Zapopan\nSi necesitas modificar algún dato, responde a este mensaje.",
-      "estatus_envio": "Enviado",
-      "fecha_programada": "2026-10-21T22:28:29.497Z"
-    },
-    {
-      "id": "msg-KAN-1001-2",
-      "cita_id": "KAN-1001",
-      "cliente_id": "cli-demo-01",
-      "etapa": "2_recordatorio_24h_antes",
-      "etapa_titulo": "2. 24 Horas Antes — Recordatorio y Preparación",
-      "destinatario_whatsapp": "3314528910",
-      "contenido_mensaje": "¡Hola Mariana Gómez Villaseñor! 🐾 Kanan Dog y nuestro equipo te recuerdan tu cita de mañana (2026-10-21, turno Matutino (09:00 - 13:00)).\n\n*Recomendaciones previas:*\n1️⃣ Despejar el área alrededor de tus muebles.\n2️⃣ Tener accesible una toma de agua y contacto de luz.\n¡Recuerda que nuestros productos son 100% Pet-Friendly y el secado toma solo 3 a 4 horas!",
-      "estatus_envio": "Enviado",
-      "fecha_programada": "2026-10-21T23:28:29.497Z"
-    },
-    {
-      "id": "msg-KAN-1001-3",
-      "cita_id": "KAN-1001",
-      "cliente_id": "cli-demo-01",
-      "etapa": "3_encuesta_3h_poservicio",
-      "etapa_titulo": "3. +3 Horas Poservicio — Encuesta 1-5 Estrellas",
-      "destinatario_whatsapp": "3314528910",
-      "contenido_mensaje": "¡Hola Mariana Gómez Villaseñor! Gracias por confiar en *Kanan*. Tus muebles están en proceso final de secado.\n\nDel *1 al 5* (donde 5 es Excelente 🌟), ¿cómo calificarías el resultado y la atención de Ing. Roberto Márquez (Unidad 01)?",
-      "estatus_envio": "Enviado",
-      "fecha_programada": "2026-10-22T00:28:29.497Z"
-    },
-    {
-      "id": "msg-KAN-1001-4",
-      "cita_id": "KAN-1001",
-      "cliente_id": "cli-demo-01",
-      "etapa": "4_guia_derrames_24h_poservicio",
-      "etapa_titulo": "4. +24 Horas Poservicio — Guía Ante Derrames",
-      "destinatario_whatsapp": "3314528910",
-      "contenido_mensaje": "¡Hola Mariana Gómez Villaseñor! 🐶✨ Para que tus muebles se mantengan impecables por más tiempo, te regalamos nuestra *\"Guía Digital de Cuidados Rápidos ante Derrames Accidentales\"* aprobada por Kanan Dog:\n👉 https://servicioskanan.com/guia-cuidados",
-      "estatus_envio": "Enviado",
-      "fecha_programada": "2026-10-22T01:28:29.497Z"
-    },
-    {
-      "id": "msg-KAN-1001-5",
-      "cita_id": "KAN-1001",
-      "cliente_id": "cli-demo-01",
-      "etapa": "5_checkin_mes_3_mascotas",
-      "etapa_titulo": "5. Mes 3 — Check-in Preventivo (Hogar con Mascotas)",
-      "destinatario_whatsapp": "3314528910",
-      "contenido_mensaje": "¡Hola Mariana Gómez Villaseñor! 🐾 Sabemos que compartir casa con mascotas es increíble, pero el pelo y los alérgenos se acumulan cada trimestre. Han pasado 3 meses desde tu servicio (KAN-1001). ¿Te gustaría agendar un mantenimiento preventivo Pet-Friendly esta semana?",
-      "estatus_envio": "Programado",
-      "fecha_programada": "2026-10-22T02:28:29.497Z"
-    },
-    {
-      "id": "msg-KAN-1001-6",
-      "cita_id": "KAN-1001",
-      "cliente_id": "cli-demo-01",
-      "etapa": "6_reactivacion_mes_6_semestral",
-      "etapa_titulo": "6. Mes 6 — Campaña de Reactivación y Beneficio Semestral",
-      "destinatario_whatsapp": "3314528910",
-      "contenido_mensaje": "¡Hola Mariana Gómez Villaseñor! 🛡️ En *Kanan* protegemos lo que más tocas. Se cumplen 6 meses desde la desinfección profunda de tus muebles (1x Sala en L (Seccional), 1x Colchón King Size). Agenda tu mantenimiento semestral este mes y recibe un *15% de beneficio exclusivo de cliente recurrente*. ¡Escríbenos para reservar tu turno!",
-      "estatus_envio": "Programado",
-      "fecha_programada": "2026-10-22T03:28:29.497Z"
-    },
-    {
-      "id": "msg-KAN-1001-rating",
-      "cita_id": "KAN-1001",
-      "cliente_id": "cli-demo-01",
-      "etapa": "3a_invitacion_google_maps_5_estrellas",
-      "etapa_titulo": "3A. [5 Estrellas] → Invitación Directa a Google Maps",
-      "destinatario_whatsapp": "3314528910",
-      "contenido_mensaje": "¡Muchísimas gracias por tus 5 estrellas, Mariana Gómez Villaseñor! 🌟🐾 Nos ayudas enormemente compartiendo tu experiencia de 30 segundos en nuestro Google Maps oficial:\n👉 https://www.google.com/maps/search/?api=1&query=Kanan+Servicios+de+Limpieza+Guadalajara",
-      "estatus_envio": "Enviado",
-      "fecha_programada": "2026-10-21T22:28:29.497Z"
-    },
-    {
-      "id": "msg-KAN-1002-1",
-      "cita_id": "KAN-1002",
-      "cliente_id": "cli-demo-02",
-      "etapa": "1_confirmacion_inmediata",
-      "etapa_titulo": "1. Inmediato a la Reserva — Confirmación",
-      "destinatario_whatsapp": "3338901124",
-      "contenido_mensaje": "¡Hola Carlos Eduardo Ramírez! 🛡️ Tu reserva *KAN-1002* en *Kanan Servicios de Limpieza* ha sido registrada.\n• *Servicio:* 1x Camioneta SUV (Asientos + Alfombra + Cajuela), 6x Sillas de Comedor Tapizadas\n• *Fecha y Turno:* 2026-10-22 (Vespertino (14:00 - 18:00))\n• *Técnico asignado:* Téc. Alejandro Silva (Unidad 02)\n• *Zona:* Tlajomulco\nSi necesitas modificar algún dato, responde a este mensaje.",
-      "estatus_envio": "Enviado",
-      "fecha_programada": "2026-10-21T22:28:29.497Z"
-    },
-    {
-      "id": "msg-KAN-1002-2",
-      "cita_id": "KAN-1002",
-      "cliente_id": "cli-demo-02",
-      "etapa": "2_recordatorio_24h_antes",
-      "etapa_titulo": "2. 24 Horas Antes — Recordatorio y Preparación",
-      "destinatario_whatsapp": "3338901124",
-      "contenido_mensaje": "¡Hola Carlos Eduardo Ramírez! 🐾 Kanan Dog y nuestro equipo te recuerdan tu cita de mañana (2026-10-22, turno Vespertino (14:00 - 18:00)).\n\n*Recomendaciones previas:*\n1️⃣ Despejar el área alrededor de tus muebles.\n2️⃣ Tener accesible una toma de agua y contacto de luz.\n¡Recuerda que nuestros productos son 100% Pet-Friendly y el secado toma solo 3 a 4 horas!",
-      "estatus_envio": "Programado",
-      "fecha_programada": "2026-10-21T23:28:29.497Z"
-    },
-    {
-      "id": "msg-KAN-1002-3",
-      "cita_id": "KAN-1002",
-      "cliente_id": "cli-demo-02",
-      "etapa": "3_encuesta_3h_poservicio",
-      "etapa_titulo": "3. +3 Horas Poservicio — Encuesta 1-5 Estrellas",
-      "destinatario_whatsapp": "3338901124",
-      "contenido_mensaje": "¡Hola Carlos Eduardo Ramírez! Gracias por confiar en *Kanan*. Tus muebles están en proceso final de secado.\n\nDel *1 al 5* (donde 5 es Excelente 🌟), ¿cómo calificarías el resultado y la atención de Téc. Alejandro Silva (Unidad 02)?",
-      "estatus_envio": "Programado",
-      "fecha_programada": "2026-10-22T00:28:29.497Z"
-    },
-    {
-      "id": "msg-KAN-1002-4",
-      "cita_id": "KAN-1002",
-      "cliente_id": "cli-demo-02",
-      "etapa": "4_guia_derrames_24h_poservicio",
-      "etapa_titulo": "4. +24 Horas Poservicio — Guía Ante Derrames",
-      "destinatario_whatsapp": "3338901124",
-      "contenido_mensaje": "¡Hola Carlos Eduardo Ramírez! 🐶✨ Para que tus muebles se mantengan impecables por más tiempo, te regalamos nuestra *\"Guía Digital de Cuidados Rápidos ante Derrames Accidentales\"* aprobada por Kanan Dog:\n👉 https://servicioskanan.com/guia-cuidados",
-      "estatus_envio": "Programado",
-      "fecha_programada": "2026-10-22T01:28:29.497Z"
-    },
-    {
-      "id": "msg-KAN-1002-5",
-      "cita_id": "KAN-1002",
-      "cliente_id": "cli-demo-02",
-      "etapa": "6_reactivacion_mes_6_semestral",
-      "etapa_titulo": "6. Mes 6 — Campaña de Reactivación y Beneficio Semestral",
-      "destinatario_whatsapp": "3338901124",
-      "contenido_mensaje": "¡Hola Carlos Eduardo Ramírez! 🛡️ En *Kanan* protegemos lo que más tocas. Se cumplen 6 meses desde la desinfección profunda de tus muebles (1x Camioneta SUV (Asientos + Alfombra + Cajuela), 6x Sillas de Comedor Tapizadas). Agenda tu mantenimiento semestral este mes y recibe un *15% de beneficio exclusivo de cliente recurrente*. ¡Escríbenos para reservar tu turno!",
-      "estatus_envio": "Programado",
-      "fecha_programada": "2026-10-22T02:28:29.497Z"
-    }
-  ]
+  }
 }

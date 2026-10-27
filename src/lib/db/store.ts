@@ -26,21 +26,21 @@ const DEFAULT_MARKETING: MarketingMetrics = {
   redes: [
     {
       red: "facebook",
-      conectado: true,
-      nombre_cuenta: "Kanan Servicios Guadalajara",
-      seguidores: 3420,
-      alcance_30d: 14850,
-      interacciones_30d: 980,
-      clics_web_30d: 215,
+      conectado: false,
+      nombre_cuenta: undefined,
+      seguidores: 0,
+      alcance_30d: 0,
+      interacciones_30d: 0,
+      clics_web_30d: 0,
     },
     {
       red: "instagram",
-      conectado: true,
-      nombre_cuenta: "@servicioskanan.gdl",
-      seguidores: 5890,
-      alcance_30d: 28400,
-      interacciones_30d: 2140,
-      clics_web_30d: 480,
+      conectado: false,
+      nombre_cuenta: undefined,
+      seguidores: 0,
+      alcance_30d: 0,
+      interacciones_30d: 0,
+      clics_web_30d: 0,
     },
     {
       red: "tiktok",
@@ -53,172 +53,27 @@ const DEFAULT_MARKETING: MarketingMetrics = {
     },
   ],
   google_ads: {
-    conectado: true,
-    inversion_mes: 4500,
-    impresiones: 48200,
-    clics: 1820,
-    cpc_promedio: 2.47,
-    conversiones: 89,
+    conectado: false,
+    inversion_mes: 0,
+    impresiones: 0,
+    clics: 0,
+    cpc_promedio: 0,
+    conversiones: 0,
   },
   seo_sem: {
-    visitas_organicas: 1420,
-    visitas_pagadas: 1820,
-    posicion_promedio: 3.2,
-    palabras_clave_top: [
-      { keyword: "lavado de salas zapopan", posicion: 1, volumen: 880 },
-      { keyword: "limpieza de tapicería guadalajara", posicion: 2, volumen: 1200 },
-      { keyword: "lavado de colchones tlajomulco", posicion: 3, volumen: 590 },
-      { keyword: "desinfección pet friendly gdl", posicion: 2, volumen: 430 },
-    ],
+    visitas_organicas: 0,
+    visitas_pagadas: 0,
+    posicion_promedio: 0,
+    palabras_clave_top: [],
   },
 };
 
 export function getTwoDemoExamples(): KananDatabase {
-  const clientes: Cliente[] = [
-    {
-      id: "cli-demo-01",
-      nombre: "Mariana Gómez Villaseñor",
-      whatsapp: "3314528910",
-      direccion: "Av. Patria 1840, Col. Jardines del Valle",
-      municipio: "Zapopan",
-      mascotas: true,
-      notas_especiales:
-        "Hogar con 2 perritos Golden Retriever. Manchas orgánicas en sala gris en L y colchón King. Solicita desinfección profunda Pet-Friendly.",
-      historico_gasto: 1650,
-      fecha_registro: "2026-10-15T10:30:00.000Z",
-      email: "mariana.gomez@gmail.com",
-    },
-    {
-      id: "cli-demo-02",
-      nombre: "Carlos Eduardo Ramírez",
-      whatsapp: "3338901124",
-      direccion: "Calle Paseo de los Adobes 412, Lomas de San Agustín",
-      municipio: "Tlajomulco",
-      mascotas: false,
-      notas_especiales:
-        "Limpieza de vestiduras de camioneta SUV (5 asientos + cajuela) y 6 sillas de comedor. Acceso directo a cochera con toma de agua y luz.",
-      historico_gasto: 1100,
-      fecha_registro: "2026-10-18T14:15:00.000Z",
-      email: "carlos.ramirez@hotmail.com",
-    },
-  ];
-
-  const servicios_citas: ServicioCita[] = [
-    {
-      id: "KAN-1001",
-      cliente_id: "cli-demo-01",
-      fecha: new Date().toISOString().split("T")[0],
-      turno: "Matutino (09:00 - 13:00)",
-      hora_especifica: "10:00 AM",
-      items_contratados: [
-        {
-          categoriaId: "salas",
-          categoriaNombre: "Salas y Sillas",
-          piezaId: "sala-l",
-          piezaNombre: "Sala en L (Seccional 4-5 Plazas)",
-          cantidad: 1,
-        },
-        {
-          categoriaId: "colchones",
-          categoriaNombre: "Colchones",
-          piezaId: "colchon-king",
-          piezaNombre: "Colchón King Size",
-          cantidad: 1,
-        },
-      ],
-      monto_total: 1650,
-      estatus: "En Proceso",
-      tecnico_asignado: "Ing. Roberto Márquez (Unidad 01)",
-      ruta_geografica: "Ruta Zapopan Norte",
-      notas_servicio: "Cliente solicita especial cuidado con piso de duela al colocar equipo de inyección-succión.",
-      fotos_estado_actual: ["/assets/portfolio/antes-1.jpg"],
-      fotos_antes_despues: [],
-      calificacion: null,
-      ticket_soporte: false,
-      origen: "web",
-      created_at: "2026-10-18T12:00:00.000Z",
-    },
-    {
-      id: "KAN-1002",
-      cliente_id: "cli-demo-02",
-      fecha: new Date(Date.now() + 86400000).toISOString().split("T")[0],
-      turno: "Vespertino (14:00 - 18:00)",
-      hora_especifica: "03:30 PM",
-      items_contratados: [
-        {
-          categoriaId: "vestiduras",
-          categoriaNombre: "Vestiduras de Autos",
-          piezaId: "auto-suv",
-          piezaNombre: "Camioneta SUV (Asientos + Alfombra + Cajuela)",
-          cantidad: 1,
-        },
-        {
-          categoriaId: "salas",
-          categoriaNombre: "Salas y Sillas",
-          piezaId: "silla-comedor",
-          piezaNombre: "Sillas de Comedor Tapizadas",
-          cantidad: 6,
-        },
-      ],
-      monto_total: 1100,
-      estatus: "Confirmada",
-      tecnico_asignado: "Téc. Alejandro Silva (Unidad 02)",
-      ruta_geografica: "Ruta Sur — Tlajomulco",
-      notas_servicio: "Confirmado por WhatsApp. Requiere secado rápido de 3-4 horas para usar camioneta al día siguiente.",
-      fotos_estado_actual: ["/assets/portfolio/antes-2.jpg"],
-      fotos_antes_despues: [],
-      calificacion: null,
-      ticket_soporte: false,
-      origen: "whatsapp",
-      created_at: "2026-10-19T16:20:00.000Z",
-    },
-  ];
-
-  const recurrencia: RegistroRecurrencia[] = [
-    {
-      id: "rec-demo-01",
-      cliente_id: "cli-demo-01",
-      cita_id: "KAN-1001",
-      ultimo_servicio: "2026-10-21",
-      disparador: "3 Meses (Mascotas)",
-      proxima_fecha_contacto: "2027-01-21",
-      estatus_contacto: "Programado",
-    },
-    {
-      id: "rec-demo-02",
-      cliente_id: "cli-demo-02",
-      cita_id: "KAN-1002",
-      ultimo_servicio: "2026-10-22",
-      disparador: "6 Meses (Semestral)",
-      proxima_fecha_contacto: "2027-04-22",
-      estatus_contacto: "Programado",
-    },
-  ];
-
-  const mensajes_automatizacion: MensajeAutomatizacion[] = [];
-  for (const cita of servicios_citas) {
-    const cli = clientes.find((c) => c.id === cita.cliente_id)!;
-    const etapas = generarSecuenciaPoservicio(cita, cli);
-    etapas.forEach((e, idx) => {
-      mensajes_automatizacion.push({
-        id: `msg-${cita.id}-${idx + 1}`,
-        cita_id: cita.id,
-        cliente_id: cli.id,
-        etapa: e.etapa,
-        etapa_titulo: e.etapa_titulo,
-        destinatario_whatsapp: cli.whatsapp,
-        contenido_mensaje: e.contenido_mensaje,
-        estatus_envio: e.estatus_envio,
-        fecha_programada: new Date(Date.now() + idx * 3600000).toISOString(),
-      });
-    });
-  }
-
   return {
-    clientes,
-    servicios_citas,
-    recurrencia,
-    mensajes_automatizacion,
+    clientes: [],
+    servicios_citas: [],
+    recurrencia: [],
+    mensajes_automatizacion: [],
     config: {
       modo_halloween: true,
       marketing: DEFAULT_MARKETING,
