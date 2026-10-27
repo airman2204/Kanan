@@ -50,9 +50,6 @@ export default function AdminPage() {
   >("resumen");
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Tráfico en tiempo real simulado
-  const [onlineVisitors, setOnlineVisitors] = useState(7);
-
   // Filtro de calendario
   const [calendarHighlightStatus, setCalendarHighlightStatus] = useState<string | null>(null);
 
@@ -91,12 +88,6 @@ export default function AdminPage() {
   useEffect(() => {
     checkAuth();
     fetchCrmData();
-
-    const interval = setInterval(() => {
-      setOnlineVisitors((prev) => Math.max(3, Math.min(18, prev + Math.floor(Math.random() * 3) - 1)));
-    }, 8000);
-
-    return () => clearInterval(interval);
   }, [checkAuth, fetchCrmData]);
 
   const handleLogout = async () => {
@@ -519,26 +510,22 @@ export default function AdminPage() {
                   <div className="absolute -bottom-8 -right-8 w-24 h-24 bg-slate-400/10 rounded-full blur-xl pointer-events-none group-hover:bg-slate-400/20 transition-colors" />
                 </div>
 
-                {/* Tráfico en Vivo */}
+                {/* Clientes Registrados (Dato 100% Real del CRM) */}
                 <div className="relative overflow-hidden bg-gradient-to-br from-white via-white to-slate-50/80 rounded-[24px] p-6 border border-slate-200/90 shadow-[0_4px_20px_-4px_rgba(53,85,129,0.06)] hover:shadow-[0_12px_28px_-6px_rgba(53,85,129,0.12)] transition-all group">
                   <div className="flex items-center justify-between mb-4">
                     <span className="text-xs font-heading font-extrabold text-emerald-800/70 tracking-wider uppercase">
-                      Tráfico en Vivo
+                      Clientes Registrados
                     </span>
                     <div className="p-3 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-md shadow-emerald-500/25">
-                      <Activity className="w-5 h-5 animate-pulse" />
+                      <Users className="w-5 h-5" />
                     </div>
                   </div>
                   <div className="space-y-1">
-                    <div className="flex items-baseline gap-2">
-                      <p className="font-heading text-3xl font-extrabold text-emerald-600 tracking-tight">
-                        {onlineVisitors}
-                      </p>
-                      <span className="text-xs font-bold text-slate-500">en línea</span>
-                    </div>
-                    <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/60">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
-                      Tiempo real
+                    <p className="font-heading text-3xl font-extrabold text-emerald-600 tracking-tight">
+                      {clientes.length}
+                    </p>
+                    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/60">
+                      Base de datos
                     </span>
                   </div>
                   <div className="absolute -bottom-8 -right-8 w-24 h-24 bg-emerald-500/5 rounded-full blur-xl pointer-events-none group-hover:bg-emerald-500/10 transition-colors" />
