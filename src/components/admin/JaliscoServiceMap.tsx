@@ -28,13 +28,16 @@ export function JaliscoServiceMap({
   const onSelectCitaRef = useRef(onSelectCitaForCalendar);
   onSelectCitaRef.current = onSelectCitaForCalendar;
 
-  // 1. Inicializar el mapa de Leaflet una sola vez (NO recrear en cada render)
+  const dataRef = useRef({ citas, clientes });
+  dataRef.current = { citas, clientes };
+
+  // 1. Inicializar el mapa de Leaflet una sola vez y renderizar pines
   useEffect(() => {
     let isMounted = true;
 
     async function initMap() {
       if (typeof window === "undefined" || !mapContainerRef.current) return;
-      if (mapInstanceRef.current) return; // ya inicializado
+      if (mapInstanceRef.current) return;
 
       // Cargar Leaflet dinámicamente en el cliente
       const L = (await import("leaflet")).default;
@@ -58,18 +61,110 @@ export function JaliscoServiceMap({
         scrollWheelZoom: true,
       });
 
-      // Capa de teselas de alta calidad con detalle nítido de calles (OpenStreetMap)
+      // Capa de calles nítidas
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 19,
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
       }).addTo(map);
 
-      // Crear LayerGroup para pines
+      // Crear LayerGroup para pines persistentes
       const markersLayer = L.layerGroup().addTo(map);
       markersLayerRef.current = markersLayer;
       mapInstanceRef.current = map;
 
-      // Forzar recalculo de dimensiones
+      // Función interna de renderizado de pines
+      const renderMarkers = (itemsCitas: ServicioCita[], itemsClientes: Cliente[]) => {
+        markersLayer.clearLayers();
+
+        const pinIcon = L.divIcon({
+          className: "custom-kanan-pin",
+          html: `
+            <div style="
+              width: 32px;
+              height: 32px;
+              background: #355581;
+              border: 3px solid #36A6DE;
+              border-radius: 50% 50% 50% 0;
+              transform: rotate(-45deg);
+              box-shadow: 0 4px 12px rgba(53,85,129,0.4);
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            ">
+              <div style="
+                width: 10px;
+                height: 10px;
+                background: #FFFFFF;
+                border-radius: 50%;
+                transform: rotate(45deg);
+              "></div>
+            </div>
+          `,
+          iconSize: [32, 32],
+          iconAnchor: [16, 32],
+          popupAnchor: [0, -32],
+        });
+
+        itemsCitas.forEach((cita, idx) => {
+          const cliente = itemsClientes.find((c) => c.id === cita.cliente_id);
+          const baseCoords = (cliente && MUNICIPIO_COORDS[cliente.municipio]) || [20.6597, -103.3496];
+
+          const lat = baseCoords[0] + (idx * 0.012 - 0.006);
+          const lng = baseCoords[1] + (idx * 0.015 - 0.008);
+
+          const marker = L.marker([lat, lng], { icon: pinIcon });
+
+          const popupContent = document.createElement("div");
+          popupContent.style.minWidth = "190px";
+          popupContent.innerHTML = `
+            <div style="font-family: inherit; color: #355581;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <span style="font-weight: 800; font-size: 13px; color: #355581;">${cita.id}</span>
+                <span style="font-size: 10px; font-weight: 700; background: #F4F7F9; border: 1px solid #CBD5E1; padding: 2px 6px; border-radius: 8px;">
+                  ${cita.estatus}
+                </span>
+              </div>
+              <div style="font-size: 12px; font-weight: 700; margin-bottom: 2px;">
+                ${cliente?.nombre || "Cliente"}
+              </div>
+              <div style="font-size: 11px; color: #64748B; margin-bottom: 8px;">
+                📍 ${cliente?.municipio || "Jalisco"} • ${cita.fecha}
+              </div>
+              <button id="btn-goto-calendar-${cita.id}" style="
+                width: 100%;
+                padding: 6px 10px;
+                background: #355581;
+                color: #FFFFFF;
+                font-size: 11px;
+                font-weight: 700;
+                border: none;
+                border-radius: 8px;
+                cursor: pointer;
+              ">
+                Ver en Calendario →
+              </button>
+            </div>
+          `;
+
+          marker.bindPopup(popupContent);
+
+          marker.on("popupopen", () => {
+            const btn = document.getElementById(`btn-goto-calendar-${cita.id}`);
+            if (btn) {
+              btn.onclick = () => {
+                onSelectCitaRef.current(cita.estatus);
+              };
+            }
+          });
+
+          markersLayer.addLayer(marker);
+        });
+      };
+
+      // Dibujar marcadores iniciales
+      renderMarkers(dataRef.current.citas, dataRef.current.clientes);
+
+      // Recalcular tamaño
       setTimeout(() => {
         if (mapInstanceRef.current) {
           mapInstanceRef.current.invalidateSize();
@@ -89,11 +184,14 @@ export function JaliscoServiceMap({
     };
   }, []); // Solo al montar
 
-  // 2. Actualizar pines sin reiniciar ni resetear la vista del mapa
+  // 2. Si las citas cambian de cantidad o contenido real, actualizar sin borrar innecesariamente
   useEffect(() => {
+    if (!mapInstanceRef.current || !markersLayerRef.current) return;
+    if (citas.length === 0) return; // Si llega un array vacío por carga transitoria, NO borrar los pines existentes
+
     async function updateMarkers() {
-      if (!mapInstanceRef.current || !markersLayerRef.current) return;
       const L = (await import("leaflet")).default;
+      if (!markersLayerRef.current) return;
 
       markersLayerRef.current.clearLayers();
 
