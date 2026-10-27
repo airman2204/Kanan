@@ -23,48 +23,47 @@ const TMP_DB_PATH = path.join(os.tmpdir(), "kanan-crm-db.json");
 let memoryFallbackDb: KananDatabase | null = null;
 
 const DEFAULT_MARKETING: MarketingMetrics = {
-  redes: [
-    {
-      red: "facebook",
-      conectado: false,
-      nombre_cuenta: undefined,
-      seguidores: 0,
+  meta: {
+    conectado: false,
+    page_name: "",
+    ig_account_name: "",
+    metricas_reales: {
+      seguidores_fb: 0,
+      seguidores_ig: 0,
       alcance_30d: 0,
+      impresiones_30d: 0,
       interacciones_30d: 0,
-      clics_web_30d: 0,
+      clics_al_sitio: 0,
+      tasa_engagement: 0,
+      visitas_al_perfil: 0,
     },
-    {
-      red: "instagram",
-      conectado: false,
-      nombre_cuenta: undefined,
-      seguidores: 0,
-      alcance_30d: 0,
-      interacciones_30d: 0,
-      clics_web_30d: 0,
-    },
-    {
-      red: "tiktok",
-      conectado: false,
-      nombre_cuenta: undefined,
-      seguidores: 0,
-      alcance_30d: 0,
-      interacciones_30d: 0,
-      clics_web_30d: 0,
-    },
-  ],
+  },
   google_ads: {
     conectado: false,
-    inversion_mes: 0,
-    impresiones: 0,
-    clics: 0,
-    cpc_promedio: 0,
-    conversiones: 0,
+    customer_id: "",
+    account_name: "",
+    metricas_reales: {
+      inversion_30d: 0,
+      impresiones: 0,
+      clics: 0,
+      cpc_promedio: 0,
+      ctr_promedio: 0,
+      conversiones: 0,
+      costo_por_conversion: 0,
+      campanias_activas: [],
+    },
   },
   seo_sem: {
-    visitas_organicas: 0,
-    visitas_pagadas: 0,
-    posicion_promedio: 0,
-    palabras_clave_top: [],
+    conectado: false,
+    search_console_property: "kananlimpieza.mx",
+    metricas_reales: {
+      clics_organicos: 0,
+      impresiones_organicas: 0,
+      ctr_organico: 0,
+      posicion_promedio: 0,
+      top_consultas: [],
+      top_paginas: [],
+    },
   },
 };
 

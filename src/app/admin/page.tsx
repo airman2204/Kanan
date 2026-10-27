@@ -253,21 +253,20 @@ export default function AdminPage() {
   const clientes = db?.clientes || [];
   const citas = db?.servicios_citas || [];
   const mensajes = db?.mensajes_automatizacion || [];
-  const marketing = db?.config?.marketing || {
-    redes: [],
+  const marketing: MarketingMetrics = db?.config?.marketing || {
+    meta: {
+      conectado: false,
+      page_name: "",
+      ig_account_name: "",
+    },
     google_ads: {
       conectado: false,
-      inversion_mes: 0,
-      impresiones: 0,
-      clics: 0,
-      cpc_promedio: 0,
-      conversiones: 0,
+      customer_id: "",
+      account_name: "",
     },
     seo_sem: {
-      visitas_organicas: 0,
-      visitas_pagadas: 0,
-      posicion_promedio: 0,
-      palabras_clave_top: [],
+      conectado: false,
+      search_console_property: "kananlimpieza.mx",
     },
   };
 
@@ -629,7 +628,7 @@ export default function AdminPage() {
               </h1>
               <MarketingAnalyticsView
                 metrics={marketing}
-                onUpdateMarketing={handleUpdateMarketing}
+                onRefresh={fetchCrmData}
               />
             </div>
           )}

@@ -60,20 +60,20 @@ export interface Cliente {
 }
 
 export interface ServicioCita {
-  id: string; // Ej: KAN-1001
+  id: string;
   cliente_id: string;
-  fecha: string; // YYYY-MM-DD
+  fecha: string;
   turno: TurnoServicio;
-  hora_especifica?: string; // Ej: 10:00 AM
+  hora_especifica?: string;
   items_contratados: ItemContratado[];
-  monto_total: number | null; // Null hasta que se cotice en CRM/WhatsApp
+  monto_total: number | null;
   estatus: EstatusCita;
   tecnico_asignado: string;
   ruta_geografica: string;
   notas_servicio: string;
   fotos_estado_actual: string[];
   fotos_antes_despues: FotoAntesDespues[];
-  calificacion: number | null; // 1 - 5
+  calificacion: number | null;
   ticket_soporte: boolean;
   origen?: "web" | "manual" | "whatsapp";
   created_at: string;
@@ -85,9 +85,9 @@ export interface RegistroRecurrencia {
   id: string;
   cliente_id: string;
   cita_id: string;
-  ultimo_servicio: string; // YYYY-MM-DD
+  ultimo_servicio: string;
   disparador: DisparadorRecurrencia;
-  proxima_fecha_contacto: string; // YYYY-MM-DD
+  proxima_fecha_contacto: string;
   estatus_contacto: EstatusRecurrencia;
 }
 
@@ -103,32 +103,59 @@ export interface MensajeAutomatizacion {
   fecha_programada: string;
 }
 
-export interface RedSocialConectada {
-  red: "facebook" | "instagram" | "tiktok";
+export interface MetaConnection {
   conectado: boolean;
-  nombre_cuenta?: string;
-  seguidores: number;
-  alcance_30d: number;
-  interacciones_30d: number;
-  clics_web_30d: number;
+  page_id?: string;
+  page_name?: string;
+  ig_account_name?: string;
+  access_token?: string;
+  connected_at?: string;
+  metricas_reales?: {
+    seguidores_fb: number;
+    seguidores_ig: number;
+    alcance_30d: number;
+    impresiones_30d: number;
+    interacciones_30d: number;
+    clics_al_sitio: number;
+    tasa_engagement: number;
+    visitas_al_perfil: number;
+  };
 }
 
-export interface MarketingMetrics {
-  redes: RedSocialConectada[];
-  google_ads: {
-    conectado: boolean;
-    inversion_mes: number;
+export interface GoogleAdsConnection {
+  conectado: boolean;
+  customer_id?: string;
+  account_name?: string;
+  connected_at?: string;
+  metricas_reales?: {
+    inversion_30d: number;
     impresiones: number;
     clics: number;
     cpc_promedio: number;
+    ctr_promedio: number;
     conversiones: number;
+    costo_por_conversion: number;
+    campanias_activas: { nombre: string; presupuesto_diario: number; estado: string; conversiones: number }[];
   };
-  seo_sem: {
-    visitas_organicas: number;
-    visitas_pagadas: number;
+}
+
+export interface SeoAnalytics {
+  conectado: boolean;
+  search_console_property?: string;
+  metricas_reales?: {
+    clics_organicos: number;
+    impresiones_organicas: number;
+    ctr_organico: number;
     posicion_promedio: number;
-    palabras_clave_top: { keyword: string; posicion: number; volumen: number }[];
+    top_consultas: { query: string; clics: number; impresiones: number; posicion: number }[];
+    top_paginas: { url: string; clics: number }[];
   };
+}
+
+export interface MarketingMetrics {
+  meta: MetaConnection;
+  google_ads: GoogleAdsConnection;
+  seo_sem: SeoAnalytics;
 }
 
 export interface KananConfig {
