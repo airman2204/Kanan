@@ -14,13 +14,27 @@ import {
   Target,
   CheckCircle2,
   ExternalLink,
-  ChevronRight,
   ShieldCheck,
-  HelpCircle,
-  Copy,
-  Check
+  Play,
+  Bookmark,
+  Share,
+  Heart,
+  MessageCircle,
+  Clock,
+  Flame,
+  Repeat2,
+  TrendingUp,
+  SlidersHorizontal,
+  ChevronDown,
+  Layers
 } from "lucide-react";
-import { MarketingMetrics, MetaConnection, GoogleAdsConnection, SeoAnalytics } from "@/types/crm";
+import { 
+  MarketingMetrics, 
+  MetaConnection, 
+  GoogleAdsConnection, 
+  SeoAnalytics,
+  ReelMetricItem 
+} from "@/types/crm";
 
 interface MarketingAnalyticsViewProps {
   metrics?: MarketingMetrics;
@@ -32,6 +46,7 @@ export function MarketingAnalyticsView({
   onRefresh,
 }: MarketingAnalyticsViewProps) {
   const [activeTab, setActiveTab] = useState<"overview" | "meta" | "google_ads" | "seo">("overview");
+  const [reelsSortBy, setReelsSortBy] = useState<"plays" | "saved" | "watch_time" | "reach">("plays");
 
   // Meta connection state
   const [metaConn, setMetaConn] = useState<MetaConnection>(
@@ -77,22 +92,13 @@ export function MarketingAnalyticsView({
   const [googleForm, setGoogleForm] = useState({
     customerId: googleAdsConn.customer_id || "",
     accountName: googleAdsConn.account_name || "",
-    developerToken: "",
   });
 
   const [seoForm, setSeoForm] = useState({
     siteUrl: seoConn.search_console_property || "kananlimpieza.mx",
-    serviceAccountKey: "",
   });
 
-  const [copiedUrl, setCopiedUrl] = useState(false);
   const [saving, setSaving] = useState(false);
-
-  const copyRedirectUri = () => {
-    navigator.clipboard.writeText("https://admin.kananlimpieza.mx/api/auth/meta/callback");
-    setCopiedUrl(true);
-    setTimeout(() => setCopiedUrl(false), 2000);
-  };
 
   const handleSaveMeta = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -100,22 +106,13 @@ export function MarketingAnalyticsView({
     try {
       const isConnected = Boolean(metaForm.appId && metaForm.appSecret);
       const updated: MetaConnection = {
+        ...metaConn,
         conectado: isConnected,
         app_id: metaForm.appId,
         app_secret: metaForm.appSecret,
         page_name: metaForm.pageName || "Kanan Limpieza",
         ig_account_name: metaForm.igHandle.replace("@", ""),
         connected_at: isConnected ? new Date().toISOString() : undefined,
-        metricas_reales: metaConn.metricas_reales || {
-          seguidores_fb: 0,
-          seguidores_ig: 0,
-          alcance_30d: 0,
-          impresiones_30d: 0,
-          interacciones_30d: 0,
-          clics_al_sitio: 0,
-          tasa_engagement: 0,
-          visitas_al_perfil: 0,
-        },
       };
       setMetaConn(updated);
 
@@ -140,20 +137,11 @@ export function MarketingAnalyticsView({
     setSaving(true);
     try {
       const updated: GoogleAdsConnection = {
+        ...googleAdsConn,
         conectado: Boolean(googleForm.customerId),
         customer_id: googleForm.customerId,
         account_name: googleForm.accountName || "Kanan Campañas",
         connected_at: new Date().toISOString(),
-        metricas_reales: googleAdsConn.metricas_reales || {
-          inversion_30d: 0,
-          impresiones: 0,
-          clics: 0,
-          cpc_promedio: 0,
-          ctr_promedio: 0,
-          conversiones: 0,
-          costo_por_conversion: 0,
-          campanias_activas: [],
-        },
       };
       setGoogleAdsConn(updated);
 
@@ -178,16 +166,9 @@ export function MarketingAnalyticsView({
     setSaving(true);
     try {
       const updated: SeoAnalytics = {
+        ...seoConn,
         conectado: Boolean(seoForm.siteUrl),
         search_console_property: seoForm.siteUrl,
-        metricas_reales: seoConn.metricas_reales || {
-          clics_organicos: 0,
-          impresiones_organicas: 0,
-          ctr_organico: 0,
-          posicion_promedio: 0,
-          top_consultas: [],
-          top_paginas: [],
-        },
       };
       setSeoConn(updated);
 
@@ -210,10 +191,23 @@ export function MarketingAnalyticsView({
   const metaM = metaConn.metricas_reales;
   const adsM = googleAdsConn.metricas_reales;
   const seoM = seoConn.metricas_reales;
+  const advM = metaConn.analitica_avanzada;
+  const reelsResumen = advM?.reels_resumen;
+  const topReels = advM?.top_reels || [];
+  const igPerfil = advM?.perfil_instagram;
+  const fbPagina = advM?.pagina_facebook;
+
+  // Ordenar Reels según selección del usuario
+  const sortedReels = [...topReels].sort((a, b) => {
+    if (reelsSortBy === "plays") return b.reproducciones - a.reproducciones;
+    if (reelsSortBy === "saved") return b.guardados - a.guardados;
+    if (reelsSortBy === "watch_time") return b.tiempo_medio_segundos - a.tiempo_medio_segundos;
+    return b.alcance - a.alcance;
+  });
 
   return (
     <div className="space-y-6">
-      {/* Navigation Tabs */}
+      {/* Barra de Navegación de Pestañas */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-4">
         <div className="flex gap-2">
           <button
@@ -235,7 +229,7 @@ export function MarketingAnalyticsView({
             }`}
           >
             <Share2 className="w-4 h-4" />
-            Meta (Facebook & Instagram)
+            Meta (Reels, FB & Instagram)
           </button>
           <button
             onClick={() => setActiveTab("google_ads")}
@@ -270,12 +264,11 @@ export function MarketingAnalyticsView({
         </button>
       </div>
 
-      {/* OVERVIEW TAB */}
+      {/* PESTAÑA 1: VISTA EJECUTIVA */}
       {activeTab === "overview" && (
         <div className="space-y-6">
-          {/* Integration Status Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {/* Meta Card */}
+            {/* Tarjeta Meta */}
             <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm relative overflow-hidden">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
@@ -309,12 +302,12 @@ export function MarketingAnalyticsView({
                     <span className="text-slate-800 font-medium">@{metaConn.ig_account_name || "—"}</span>
                   </div>
                   <div className="flex justify-between py-1 border-b border-slate-100">
-                    <span className="text-slate-500">Alcance mensual:</span>
-                    <span className="text-slate-800 font-medium">{(metaM?.alcance_30d || 0).toLocaleString()}</span>
+                    <span className="text-slate-500">Reproducciones de Reels:</span>
+                    <span className="text-slate-800 font-medium">{(reelsResumen?.reproducciones_totales_30d || 0).toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between py-1">
-                    <span className="text-slate-500">Interacciones:</span>
-                    <span className="text-slate-800 font-medium">{(metaM?.interacciones_30d || 0).toLocaleString()}</span>
+                    <span className="text-slate-500">Alcance de Reels:</span>
+                    <span className="text-slate-800 font-medium">{(reelsResumen?.alcance_reels_30d || 0).toLocaleString()}</span>
                   </div>
                 </div>
               ) : (
@@ -333,7 +326,7 @@ export function MarketingAnalyticsView({
               </button>
             </div>
 
-            {/* Google Ads Card */}
+            {/* Tarjeta Google Ads */}
             <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm relative overflow-hidden">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
@@ -391,7 +384,7 @@ export function MarketingAnalyticsView({
               </button>
             </div>
 
-            {/* SEO Card */}
+            {/* Tarjeta SEO */}
             <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm relative overflow-hidden">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
@@ -450,7 +443,7 @@ export function MarketingAnalyticsView({
             </div>
           </div>
 
-          {/* Consolidated Performance Matrix */}
+          {/* Métricas Globales de Adquisición */}
           <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
             <h4 className="font-bold text-slate-900 text-base mb-6">Métricas Globales de Adquisición</h4>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -502,10 +495,10 @@ export function MarketingAnalyticsView({
         </div>
       )}
 
-      {/* META TAB */}
+      {/* PESTAÑA 2: META SUITE (ESPECIALIZADA EN REELS, CONTENIDO Y PÁGINAS) */}
       {activeTab === "meta" && (
         <div className="space-y-6">
-          {/* INSTRUCCIONES GUÍA PARA EL CLIENTE: SOLO SE MUESTRAN SI NO ESTÁ CONECTADO */}
+          {/* GUÍA DE INSTRUCCIONES: SOLO SI NO ESTÁ CONECTADO */}
           {!metaConn.conectado ? (
             <div className="bg-gradient-to-br from-blue-50/80 via-white to-slate-50 border-2 border-blue-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-blue-100">
@@ -515,10 +508,10 @@ export function MarketingAnalyticsView({
                   </div>
                   <div>
                     <h3 className="font-heading font-extrabold text-xl text-slate-900">
-                      Instrucciones para Vincular Facebook e Instagram
+                      Vincular Analítica de Reels, Facebook e Instagram
                     </h3>
                     <p className="text-xs text-slate-500 mt-0.5">
-                      Sigue estos sencillos pasos para que tu CRM lea automáticamente las métricas reales. Una vez vinculado, esta guía desaparecerá.
+                      Ingresa tus credenciales de Meta Developers para leer reproducciones, guardados y visitas a páginas. Una vez vinculado, esta guía desaparecerá.
                     </p>
                   </div>
                 </div>
@@ -569,7 +562,7 @@ export function MarketingAnalyticsView({
               <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 bg-blue-50/50 p-4 rounded-2xl border border-blue-100">
                 <div className="flex items-center gap-2 text-xs text-slate-700">
                   <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>Tus claves se resguardan de forma segura y solo se usan para leer tus alcances e interacciones.</span>
+                  <span>Tus claves se resguardan de forma segura para consultar la Graph API oficial.</span>
                 </div>
                 <button
                   onClick={() => setShowMetaModal(true)}
@@ -580,13 +573,14 @@ export function MarketingAnalyticsView({
               </div>
             </div>
           ) : (
-            /* BANNER DE CONEXIÓN ACTIVA CUANDO YA ESTÁ VINCULADO */
             <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-5 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <CheckCircle2 className="w-5 h-5 text-emerald-600" />
                 <div>
                   <h4 className="font-bold text-emerald-950 text-sm">Meta Business Suite Conectado</h4>
-                  <p className="text-xs text-emerald-800">Sincronizado con Graph API oficial. Las métricas se actualizan de forma continua.</p>
+                  <p className="text-xs text-emerald-800">
+                    Sincronización activa con Graph API v20.0 para Reels, Página de Facebook y Perfil de Instagram.
+                  </p>
                 </div>
               </div>
               <button
@@ -598,8 +592,166 @@ export function MarketingAnalyticsView({
             </div>
           )}
 
-          {/* TARJETAS DE FACEBOOK E INSTAGRAM */}
+          {/* SECCIÓN 1: PANEL RESUMEN DE REELS Y VIDEO (30 DÍAS) */}
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h4 className="font-bold text-slate-900 text-base flex items-center gap-2">
+                  <Play className="w-5 h-5 text-pink-600 fill-pink-600" />
+                  Rendimiento General de Reels (Últimos 30 días)
+                </h4>
+              </div>
+              <span className="text-xs font-medium text-slate-500 bg-slate-100 px-3 py-1 rounded-full w-fit">
+                {reelsResumen?.total_reels_publicados || 0} Reels publicados
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                <div className="flex items-center gap-2 text-slate-500 text-xs mb-1.5">
+                  <Play className="w-4 h-4 text-pink-600" />
+                  Reproducciones Totales
+                </div>
+                <div className="text-2xl font-bold text-slate-900">
+                  {(reelsResumen?.reproducciones_totales_30d || 0).toLocaleString()}
+                </div>
+                <div className="text-[11px] text-slate-400 mt-1">Plays + Replays</div>
+              </div>
+
+              <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                <div className="flex items-center gap-2 text-slate-500 text-xs mb-1.5">
+                  <Eye className="w-4 h-4 text-blue-600" />
+                  Cuentas Alcanzadas
+                </div>
+                <div className="text-2xl font-bold text-slate-900">
+                  {(reelsResumen?.alcance_reels_30d || 0).toLocaleString()}
+                </div>
+                <div className="text-[11px] text-slate-400 mt-1">Personas únicas</div>
+              </div>
+
+              <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                <div className="flex items-center gap-2 text-slate-500 text-xs mb-1.5">
+                  <Bookmark className="w-4 h-4 text-purple-600" />
+                  Guardados Totales
+                </div>
+                <div className="text-2xl font-bold text-slate-900">
+                  {(reelsResumen?.guardados_totales_30d || 0).toLocaleString()}
+                </div>
+                <div className="text-[11px] text-purple-600 font-medium mt-1">Intención de compra</div>
+              </div>
+
+              <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                <div className="flex items-center gap-2 text-slate-500 text-xs mb-1.5">
+                  <Clock className="w-4 h-4 text-amber-600" />
+                  Tiempo Promedio Visto
+                </div>
+                <div className="text-2xl font-bold text-slate-900">
+                  {reelsResumen?.tiempo_promedio_general || 0}s
+                </div>
+                <div className="text-[11px] text-slate-400 mt-1">Retención de video</div>
+              </div>
+            </div>
+          </div>
+
+          {/* SECCIÓN 2: DESGLOSE DE REELS (TOP REELS CON MÉTRICAS CLAVE) */}
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h4 className="font-bold text-slate-900 text-base flex items-center gap-2">
+                  <Flame className="w-5 h-5 text-amber-500" />
+                  Desglose de Reels y Videos
+                </h4>
+              </div>
+
+              {/* Filtro de ordenación */}
+              <div className="flex items-center gap-2 text-xs">
+                <span className="text-slate-500 font-medium">Ordenar por:</span>
+                <select
+                  value={reelsSortBy}
+                  onChange={(e) => setReelsSortBy(e.target.value as any)}
+                  className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-slate-700 font-semibold focus:outline-none focus:border-[#1877F2]"
+                >
+                  <option value="plays">Más Reproducciones</option>
+                  <option value="saved">Más Guardados (Compras)</option>
+                  <option value="watch_time">Mayor Retención (Segundos)</option>
+                  <option value="reach">Mayor Alcance</option>
+                </select>
+              </div>
+            </div>
+
+            {sortedReels.length > 0 ? (
+              <div className="divide-y divide-slate-100">
+                {sortedReels.map((reel) => (
+                  <div key={reel.id} className="py-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      {reel.thumbnail_url ? (
+                        <img
+                          src={reel.thumbnail_url}
+                          alt="Thumbnail"
+                          className="w-12 h-16 object-cover rounded-xl border border-slate-200 shadow-sm"
+                        />
+                      ) : (
+                        <div className="w-12 h-16 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400">
+                          <Play className="w-5 h-5" />
+                        </div>
+                      )}
+                      <div>
+                        <a
+                          href={reel.permalink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs font-bold text-slate-900 hover:text-[#1877F2] transition line-clamp-1 max-w-sm flex items-center gap-1.5"
+                        >
+                          {reel.caption || "Reel de Limpieza Especializada"}
+                          <ExternalLink className="w-3 h-3 text-slate-400" />
+                        </a>
+                        <p className="text-[11px] text-slate-400 mt-0.5">
+                          Publicado el {new Date(reel.timestamp).toLocaleDateString("es-MX", { day: "numeric", month: "short" })}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-6 text-xs w-full md:w-auto justify-between md:justify-end">
+                      <div>
+                        <span className="text-slate-400 block text-[10px]">Reproducciones</span>
+                        <strong className="text-slate-900 text-sm font-bold">{reel.reproducciones.toLocaleString()}</strong>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 block text-[10px]">Alcance</span>
+                        <strong className="text-slate-900 text-sm font-bold">{reel.alcance.toLocaleString()}</strong>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 block text-[10px]">Guardados</span>
+                        <strong className="text-purple-600 text-sm font-bold">{reel.guardados.toLocaleString()}</strong>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 block text-[10px]">Retención media</span>
+                        <strong className="text-amber-600 text-sm font-bold">{reel.tiempo_medio_segundos}s</strong>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 block text-[10px]">Engagement</span>
+                        <span className="inline-block bg-emerald-50 text-emerald-700 font-bold px-2 py-0.5 rounded text-[11px] border border-emerald-200">
+                          {reel.engagement_rate}%
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="py-10 text-center text-xs text-slate-400 border border-dashed border-slate-200 rounded-2xl">
+                <Play className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                <p className="font-semibold text-slate-600">No hay Reels registrados todavía.</p>
+                <p className="text-[11px] text-slate-400 mt-1">
+                  Al vincular tu cuenta oficial de Meta, los videos publicados se sincronizarán con sus reproducciones, alcance y guardados reales.
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* SECCIÓN 3: PÁGINAS Y PERFILES (VISITAS Y CLICS AL SITIO) */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Página de Facebook */}
             <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -622,7 +774,21 @@ export function MarketingAnalyticsView({
 
               <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-100">
                 <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
-                  <div className="text-xs text-slate-500">Seguidores</div>
+                  <div className="text-xs text-slate-500">Visitas a la Página (30d)</div>
+                  <div className="text-xl font-bold text-slate-900 mt-1">
+                    {(fbPagina?.visitas_a_la_pagina_30d || 0).toLocaleString()}
+                  </div>
+                  <div className="text-[10px] text-slate-400 mt-0.5">Personas que revisaron la página</div>
+                </div>
+                <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                  <div className="text-xs text-slate-500">Clics Botón Contacto</div>
+                  <div className="text-xl font-bold text-slate-900 mt-1">
+                    {(fbPagina?.clics_boton_contacto_30d || 0).toLocaleString()}
+                  </div>
+                  <div className="text-[10px] text-emerald-600 mt-0.5 font-medium">Llamadas o WhatsApp directo</div>
+                </div>
+                <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                  <div className="text-xs text-slate-500">Seguidores de Página</div>
                   <div className="text-xl font-bold text-slate-900 mt-1">
                     {(metaM?.seguidores_fb || 0).toLocaleString()}
                   </div>
@@ -636,6 +802,7 @@ export function MarketingAnalyticsView({
               </div>
             </div>
 
+            {/* Perfil de Instagram */}
             <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -643,7 +810,7 @@ export function MarketingAnalyticsView({
                     <Instagram className="w-5 h-5" />
                   </div>
                   <div>
-                    <h4 className="font-bold text-slate-900 text-base">Instagram Profesional</h4>
+                    <h4 className="font-bold text-slate-900 text-base">Perfil de Instagram</h4>
                     <p className="text-xs text-slate-500">@{metaConn.ig_account_name || "kananlimpieza"}</p>
                   </div>
                 </div>
@@ -652,13 +819,27 @@ export function MarketingAnalyticsView({
                     ? "bg-emerald-50 text-emerald-700 border-emerald-200" 
                     : "bg-slate-100 text-slate-600 border-slate-200"
                 }`}>
-                  {metaConn.conectado ? "Sincronizada" : "Sin vincular"}
+                  {metaConn.conectado ? "Sincronizado" : "Sin vincular"}
                 </span>
               </div>
 
               <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-100">
                 <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
-                  <div className="text-xs text-slate-500">Seguidores</div>
+                  <div className="text-xs text-slate-500">Visitas al Perfil (30d)</div>
+                  <div className="text-xl font-bold text-slate-900 mt-1">
+                    {(igPerfil?.visitas_al_perfil_30d || metaM?.visitas_al_perfil || 0).toLocaleString()}
+                  </div>
+                  <div className="text-[10px] text-slate-400 mt-0.5">Usuarios que vieron la bio</div>
+                </div>
+                <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                  <div className="text-xs text-slate-500">Clics en Link de la Bio</div>
+                  <div className="text-xl font-bold text-slate-900 mt-1">
+                    {(igPerfil?.clics_al_sitio_30d || metaM?.clics_al_sitio || 0).toLocaleString()}
+                  </div>
+                  <div className="text-[10px] text-emerald-600 mt-0.5 font-medium">Tráfico hacia cotizador</div>
+                </div>
+                <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                  <div className="text-xs text-slate-500">Seguidores en Instagram</div>
                   <div className="text-xl font-bold text-slate-900 mt-1">
                     {(metaM?.seguidores_ig || 0).toLocaleString()}
                   </div>
@@ -675,7 +856,7 @@ export function MarketingAnalyticsView({
         </div>
       )}
 
-      {/* GOOGLE ADS TAB */}
+      {/* PESTAÑA 3: GOOGLE ADS */}
       {activeTab === "google_ads" && (
         <div className="space-y-6">
           <div className="flex items-center justify-between bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
@@ -720,7 +901,7 @@ export function MarketingAnalyticsView({
         </div>
       )}
 
-      {/* SEO TAB */}
+      {/* PESTAÑA 4: GOOGLE SEO */}
       {activeTab === "seo" && (
         <div className="space-y-6">
           <div className="flex items-center justify-between bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">

@@ -103,6 +103,48 @@ export interface MensajeAutomatizacion {
   fecha_programada: string;
 }
 
+export interface ReelMetricItem {
+  id: string;
+  caption: string;
+  thumbnail_url: string;
+  permalink: string;
+  timestamp: string;
+  reproducciones: number;       // plays
+  alcance: number;              // reach
+  tasa_repeticion: number;      // plays / reach
+  tiempo_medio_segundos: number;// ig_reels_avg_watch_time
+  guardados: number;            // saved
+  compartidos: number;          // shares
+  likes: number;
+  comentarios: number;
+  engagement_rate: number;      // (likes + comments + saved + shares) / reach * 100
+}
+
+export interface MetaDetailedAnalytics {
+  reels_resumen: {
+    total_reels_publicados: number;
+    reproducciones_totales_30d: number;
+    alcance_reels_30d: number;
+    guardados_totales_30d: number;
+    compartidos_totales_30d: number;
+    tiempo_promedio_general: number; // segundos
+  };
+  top_reels: ReelMetricItem[];
+  perfil_instagram: {
+    visitas_al_perfil_30d: number;
+    clics_al_sitio_30d: number;
+    tasa_conversion_perfil: number;
+    seguidores_netos_30d: number;
+  };
+  pagina_facebook: {
+    visitas_a_la_pagina_30d: number;
+    clics_boton_contacto_30d: number;
+    alcance_organico_30d: number;
+    alcance_pagado_30d: number;
+    interacciones_publicaciones_30d: number;
+  };
+}
+
 export interface MetaConnection {
   conectado: boolean;
   app_id?: string;
@@ -122,6 +164,7 @@ export interface MetaConnection {
     tasa_engagement: number;
     visitas_al_perfil: number;
   };
+  analitica_avanzada?: MetaDetailedAnalytics;
 }
 
 export interface GoogleAdsConnection {

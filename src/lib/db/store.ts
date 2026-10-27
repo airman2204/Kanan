@@ -37,6 +37,30 @@ const DEFAULT_MARKETING: MarketingMetrics = {
       tasa_engagement: 0,
       visitas_al_perfil: 0,
     },
+    analitica_avanzada: {
+      reels_resumen: {
+        total_reels_publicados: 0,
+        reproducciones_totales_30d: 0,
+        alcance_reels_30d: 0,
+        guardados_totales_30d: 0,
+        compartidos_totales_30d: 0,
+        tiempo_promedio_general: 0,
+      },
+      top_reels: [],
+      perfil_instagram: {
+        visitas_al_perfil_30d: 0,
+        clics_al_sitio_30d: 0,
+        tasa_conversion_perfil: 0,
+        seguidores_netos_30d: 0,
+      },
+      pagina_facebook: {
+        visitas_a_la_pagina_30d: 0,
+        clics_boton_contacto_30d: 0,
+        alcance_organico_30d: 0,
+        alcance_pagado_30d: 0,
+        interacciones_publicaciones_30d: 0,
+      },
+    },
   },
   google_ads: {
     conectado: false,
