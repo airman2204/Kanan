@@ -9,12 +9,13 @@ import {
   MapPin, 
   Clock, 
   AlertTriangle, 
-  CheckCircle2, 
-  MessageSquare, 
   Receipt,
   Car,
   ChevronRight,
-  ExternalLink
+  Sofa,
+  Sparkles,
+  ArrowUpRight,
+  MessageSquare
 } from "lucide-react";
 import { Cliente, ServicioCita } from "@/types/crm";
 import { JaliscoServiceMap } from "@/components/admin/JaliscoServiceMap";
@@ -32,7 +33,8 @@ export function ResumenDashboard({
   onNavigateToCalendar,
   onNavigateToWhatsApp,
 }: ResumenDashboardProps) {
-  const hoyStr = useMemo(() => new Date().toISOString().split("T")[0], []);
+  const hoy = useMemo(() => new Date(), []);
+  const hoyStr = useMemo(() => hoy.toISOString().split("T")[0], [hoy]);
 
   // 1. Cálculos Financieros y de Citas
   const citasActivas = useMemo(() => citas.filter((c) => c.estatus !== "Cancelada"), [citas]);
@@ -40,6 +42,42 @@ export function ResumenDashboard({
   const ticketPromedio = useMemo(() => {
     return citasActivas.length > 0 ? Math.round(totalGanancias / citasActivas.length) : 0;
   }, [totalGanancias, citasActivas]);
+
+  // Comparativa Mes Actual vs Mes Anterior (Opción 2)
+  const comparativaMes = useMemo(() => {
+    const mesActualNum = hoy.getMonth();
+    const anioActual = hoy.getFullYear();
+
+    const mesAnteriorNum = mesActualNum === 0 ? 11 : mesActualNum - 1;
+    const anioAnterior = mesActualNum === 0 ? anioActual - 1 : anioActual;
+
+    let totalMesActual = 0;
+    let totalMesAnterior = 0;
+
+    citasActivas.forEach((c) => {
+      if (c.monto_total) {
+        const d = new Date(c.fecha);
+        if (d.getMonth() === mesActualNum && d.getFullYear() === anioActual) {
+          totalMesActual += c.monto_total;
+        } else if (d.getMonth() === mesAnteriorNum && d.getFullYear() === anioAnterior) {
+          totalMesAnterior += c.monto_total;
+        }
+      }
+    });
+
+    let porcentaje = 0;
+    if (totalMesAnterior > 0) {
+      porcentaje = Math.round(((totalMesActual - totalMesAnterior) / totalMesAnterior) * 100);
+    } else if (totalMesActual > 0) {
+      porcentaje = 100;
+    }
+
+    return {
+      mesActual: totalMesActual,
+      mesAnterior: totalMesAnterior,
+      porcentaje,
+    };
+  }, [citasActivas, hoy]);
 
   // 2. Citas del Día de Hoy
   const citasHoy = useMemo(() => {
@@ -52,7 +90,6 @@ export function ResumenDashboard({
   }, [citasActivas]);
 
   // 4. Desglose DINÁMICO de Servicios por Municipio
-  // Solo se listan los municipios que realmente tienen servicios registrados
   const distribucionMunicipios = useMemo(() => {
     const counts: Record<string, number> = {};
     citasActivas.forEach((c) => {
@@ -60,9 +97,31 @@ export function ResumenDashboard({
       const mun = (cli?.municipio || "Sin Municipio").trim();
       counts[mun] = (counts[mun] || 0) + 1;
     });
-    // Ordenar de mayor a menor volumen
     return Object.entries(counts).sort((a, b) => b[1] - a[1]);
   }, [citasActivas, clientes]);
+
+  // 5. TOP PIEZAS / SERVICIOS MÁS SOLICITADOS (Opción 4)
+  const topServiciosSolicitados = useMemo(() => {
+    const counts: Record<string, number> = {};
+    let totalPiezas = 0;
+
+    citasActivas.forEach((c) => {
+      c.items_contratados.forEach((item) => {
+        const nombre = item.piezaNombre || "Servicio General";
+        counts[nombre] = (counts[nombre] || 0) + item.cantidad;
+        totalPiezas += item.cantidad;
+      });
+    });
+
+    return Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([nombre, cantidad]) => ({
+        nombre,
+        cantidad,
+        porcentaje: totalPiezas > 0 ? Math.round((cantidad / totalPiezas) * 100) : 0,
+      }));
+  }, [citasActivas]);
 
   return (
     <div className="space-y-6">
@@ -92,9 +151,9 @@ export function ResumenDashboard({
         </div>
       )}
 
-      {/* 2. FILA DE TARJETAS DE ALTO NIVEL (KPIS REALES) */}
+      {/* 2. FILA DE TARJETAS DE ALTO NIVEL (KPIS REALES CON COMPARATIVA DE MES) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        {/* Ganancias Totales */}
+        {/* Ganancias Totales con Comparativa vs Mes Anterior */}
         <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-sm relative overflow-hidden group">
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-extrabold text-[#355581]/70 tracking-wider uppercase">
@@ -108,9 +167,19 @@ export function ResumenDashboard({
             <p className="font-heading text-2xl sm:text-3xl font-extrabold text-[#1e293b] tracking-tight">
               ${totalGanancias.toLocaleString("es-MX")}
             </p>
-            <span className="inline-block text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/60">
-              MXN Cobrado
-            </span>
+            <div className="flex items-center gap-1.5 pt-0.5">
+              <span className="inline-block text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/60">
+                MXN Cobrado
+              </span>
+              {comparativaMes.mesAnterior > 0 && (
+                <span className={`text-[10px] font-bold flex items-center gap-0.5 ${
+                  comparativaMes.porcentaje >= 0 ? "text-emerald-600" : "text-rose-600"
+                }`}>
+                  <ArrowUpRight className="w-3 h-3" />
+                  {comparativaMes.porcentaje >= 0 ? `+${comparativaMes.porcentaje}%` : `${comparativaMes.porcentaje}%`} vs mes anterior
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
@@ -282,10 +351,54 @@ export function ResumenDashboard({
         </div>
       </div>
 
-      {/* 4. FILA INFERIOR: DISTRIBUCIÓN DINÁMICA DE SERVICIOS POR ZONA / MUNICIPIO */}
-      {distribucionMunicipios.length > 0 && (
+      {/* 4. FILA INFERIOR: DEMANDA POR ZONAS + TOP SERVICIOS MÁS SOLICITADOS */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Módulo A: Top Muebles / Servicios Más Solicitados (Opción 4) */}
         <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-sm space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+            <div className="flex items-center gap-2">
+              <Sofa className="w-5 h-5 text-[#1D71B5]" />
+              <h3 className="font-heading font-extrabold text-base text-slate-900">
+                Top Servicios Más Solicitados
+              </h3>
+            </div>
+            <span className="text-xs text-slate-400 font-medium">Por volumen de piezas</span>
+          </div>
+
+          {topServiciosSolicitados.length > 0 ? (
+            <div className="space-y-3 pt-1">
+              {topServiciosSolicitados.map((srv, idx) => (
+                <div key={idx} className="space-y-1.5">
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="font-bold text-slate-700 flex items-center gap-2">
+                      <span className="w-5 h-5 rounded-lg bg-slate-100 text-[#1D71B5] flex items-center justify-center font-mono font-bold text-[10px]">
+                        #{idx + 1}
+                      </span>
+                      {srv.nombre}
+                    </span>
+                    <span className="font-bold text-slate-800">
+                      {srv.cantidad} <span className="text-slate-400 font-normal">({srv.porcentaje}%)</span>
+                    </span>
+                  </div>
+                  <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                    <div
+                      className="bg-gradient-to-r from-[#1D71B5] to-[#36A6DE] h-1.5 rounded-full"
+                      style={{ width: `${srv.porcentaje}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="py-8 text-center text-xs text-slate-400">
+              Aún no hay servicios registrados en la base de datos.
+            </div>
+          )}
+        </div>
+
+        {/* Módulo B: Distribución Dinámica por Zonas / Municipios */}
+        <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-sm space-y-4">
+          <div className="flex items-center justify-between pb-2 border-b border-slate-100">
             <div className="flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-emerald-600" />
               <h3 className="font-heading font-extrabold text-base text-slate-900">
@@ -293,34 +406,40 @@ export function ResumenDashboard({
               </h3>
             </div>
             <span className="text-xs text-slate-400 font-medium">
-              {distribucionMunicipios.length} {distribucionMunicipios.length === 1 ? "zona registrada" : "zonas registradas"}
+              {distribucionMunicipios.length} {distribucionMunicipios.length === 1 ? "zona" : "zonas"}
             </span>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-            {distribucionMunicipios.map(([muni, count]) => {
-              const pct = citasActivas.length > 0 ? Math.round((count / citasActivas.length) * 100) : 0;
-              return (
-                <div key={muni} className="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-2">
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="font-bold text-slate-700 truncate mr-2" title={muni}>{muni}</span>
-                    <span className="font-semibold text-slate-400 shrink-0">{pct}%</span>
+          {distribucionMunicipios.length > 0 ? (
+            <div className="grid grid-cols-2 gap-3 pt-1">
+              {distribucionMunicipios.map(([muni, count]) => {
+                const pct = citasActivas.length > 0 ? Math.round((count / citasActivas.length) * 100) : 0;
+                return (
+                  <div key={muni} className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80 space-y-1.5">
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="font-bold text-slate-700 truncate mr-2" title={muni}>{muni}</span>
+                      <span className="font-semibold text-slate-400 shrink-0">{pct}%</span>
+                    </div>
+                    <div className="text-xl font-extrabold text-slate-900">
+                      {count} <span className="text-[11px] font-normal text-slate-500">servicios</span>
+                    </div>
+                    <div className="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
+                      <div
+                        className="bg-[#1D71B5] h-1.5 rounded-full"
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
                   </div>
-                  <div className="text-2xl font-extrabold text-slate-900">
-                    {count} <span className="text-xs font-normal text-slate-500">servicios</span>
-                  </div>
-                  <div className="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
-                    <div
-                      className="bg-[#1D71B5] h-1.5 rounded-full transition-all duration-500"
-                      style={{ width: `${pct}%` }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="py-8 text-center text-xs text-slate-400">
+              Las zonas aparecerán conforme se registren servicios con su código postal.
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }

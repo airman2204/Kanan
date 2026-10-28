@@ -17,6 +17,7 @@ import {
   X,
 } from "lucide-react";
 import { ServicioCita, Cliente, EstatusCita, TurnoServicio, MunicipioZMG } from "@/types/crm";
+import { CATALOGO_SERVICIOS_KANAN, ServicioItemCatalogo } from "@/data/catalogoServicios";
 
 interface CalendarViewProps {
   citas: ServicioCita[];
@@ -114,10 +115,22 @@ export function CalendarCitasView({
   const [newTurno, setNewTurno] = useState<TurnoServicio>("Matutino (09:00 - 13:00)");
   const [newHora, setNewHora] = useState("10:00 AM");
   const [newTecnico, setNewTecnico] = useState("Por asignar");
-  const [newMonto, setNewMonto] = useState<number | "">("");
-  const [newPiezaNombre, setNewPiezaNombre] = useState("Sala en L (4-5 Plazas)");
+  const [selectedCatalogoId, setSelectedCatalogoId] = useState<string>(CATALOGO_SERVICIOS_KANAN[0].id);
+  const [newPiezaNombre, setNewPiezaNombre] = useState(CATALOGO_SERVICIOS_KANAN[0].piezaNombre);
+  const [newMonto, setNewMonto] = useState<number | "">(CATALOGO_SERVICIOS_KANAN[0].precioSugerido || "");
   const [newPiezaCantidad, setNewPiezaCantidad] = useState(1);
   const [newNotasServicio, setNewNotasServicio] = useState("");
+
+  const handleSelectCatalogoItem = (itemId: string) => {
+    setSelectedCatalogoId(itemId);
+    const item = CATALOGO_SERVICIOS_KANAN.find((c) => c.id === itemId);
+    if (item) {
+      setNewPiezaNombre(item.piezaNombre);
+      if (item.precioSugerido) {
+        setNewMonto(item.precioSugerido);
+      }
+    }
+  };
 
   // Modal Confirmar Cancelación
   const [cancellingCita, setCancellingCita] = useState<ServicioCita | null>(null);
@@ -668,28 +681,68 @@ export function CalendarCitasView({
                 </div>
               </div>
 
-              {/* Servicio y Monto */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* Catálogo de Servicios y Monto */}
+              <div className="space-y-3">
                 <div className="space-y-1">
-                  <label className="text-xs font-heading font-bold text-slate-700">Servicio / Pieza</label>
-                  <input
-                    type="text"
-                    required
-                    value={newPiezaNombre}
-                    onChange={(e) => setNewPiezaNombre(e.target.value)}
-                    placeholder="Ej: Sala 3 plazas, Colchón..."
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800"
-                  />
+                  <label className="text-xs font-heading font-bold text-slate-700">Seleccionar Servicio del Catálogo</label>
+                  <select
+                    value={selectedCatalogoId}
+                    onChange={(e) => handleSelectCatalogoItem(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:bg-white"
+                  >
+                    <optgroup label="Salas y Sillas">
+                      {CATALOGO_SERVICIOS_KANAN.filter((s) => s.categoriaId === "salas").map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.piezaNombre} {s.precioSugerido ? `($${s.precioSugerido} MXN)` : ""}
+                        </option>
+                      ))}
+                    </optgroup>
+                    <optgroup label="Colchones">
+                      {CATALOGO_SERVICIOS_KANAN.filter((s) => s.categoriaId === "colchones").map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.piezaNombre} {s.precioSugerido ? `($${s.precioSugerido} MXN)` : ""}
+                        </option>
+                      ))}
+                    </optgroup>
+                    <optgroup label="Vestiduras Automotrices">
+                      {CATALOGO_SERVICIOS_KANAN.filter((s) => s.categoriaId === "vestiduras").map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.piezaNombre} {s.precioSugerido ? `($${s.precioSugerido} MXN)` : ""}
+                        </option>
+                      ))}
+                    </optgroup>
+                    <optgroup label="Tapetes y Alfombras">
+                      {CATALOGO_SERVICIOS_KANAN.filter((s) => s.categoriaId === "tapetes").map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.piezaNombre} {s.precioSugerido ? `($${s.precioSugerido} MXN)` : ""}
+                        </option>
+                      ))}
+                    </optgroup>
+                  </select>
                 </div>
-                <div className="space-y-1">
-                  <label className="text-xs font-heading font-bold text-slate-700">Monto cotizado (MXN)</label>
-                  <input
-                    type="number"
-                    value={newMonto}
-                    onChange={(e) => setNewMonto(e.target.value === "" ? "" : Number(e.target.value))}
-                    placeholder="Ej: 1450"
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800"
-                  />
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-xs font-heading font-bold text-slate-700">Descripción o Edición del Servicio</label>
+                    <input
+                      type="text"
+                      required
+                      value={newPiezaNombre}
+                      onChange={(e) => setNewPiezaNombre(e.target.value)}
+                      placeholder="Ej: Sala 3 plazas, Colchón..."
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-heading font-bold text-slate-700">Monto cotizado final (MXN)</label>
+                    <input
+                      type="number"
+                      value={newMonto}
+                      onChange={(e) => setNewMonto(e.target.value === "" ? "" : Number(e.target.value))}
+                      placeholder="Ej: 1450"
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 font-bold text-emerald-700"
+                    />
+                  </div>
                 </div>
               </div>
 
