@@ -51,21 +51,17 @@ export function ResumenDashboard({
     return citasActivas.filter((c) => c.estatus === "Por Confirmar");
   }, [citasActivas]);
 
-  // 4. Desglose de Servicios por Municipio (ZMG)
+  // 4. Desglose DINÁMICO de Servicios por Municipio
+  // Solo se listan los municipios que realmente tienen servicios registrados
   const distribucionMunicipios = useMemo(() => {
-    const counts: Record<string, number> = {
-      Zapopan: 0,
-      Guadalajara: 0,
-      Tlajomulco: 0,
-      Tlaquepaque: 0,
-    };
+    const counts: Record<string, number> = {};
     citasActivas.forEach((c) => {
       const cli = clientes.find((cl) => cl.id === c.cliente_id);
-      if (cli && counts[cli.municipio] !== undefined) {
-        counts[cli.municipio]++;
-      }
+      const mun = (cli?.municipio || "Sin Municipio").trim();
+      counts[mun] = (counts[mun] || 0) + 1;
     });
-    return counts;
+    // Ordenar de mayor a menor volumen
+    return Object.entries(counts).sort((a, b) => b[1] - a[1]);
   }, [citasActivas, clientes]);
 
   return (
@@ -286,41 +282,45 @@ export function ResumenDashboard({
         </div>
       </div>
 
-      {/* 4. FILA INFERIOR: DISTRIBUCIÓN POR MUNICIPIO EN ZMG */}
-      <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-sm space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-emerald-600" />
-            <h3 className="font-heading font-extrabold text-base text-slate-900">
-              Distribución de Servicios por Municipio (ZMG)
-            </h3>
+      {/* 4. FILA INFERIOR: DISTRIBUCIÓN DINÁMICA DE SERVICIOS POR ZONA / MUNICIPIO */}
+      {distribucionMunicipios.length > 0 && (
+        <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-sm space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-emerald-600" />
+              <h3 className="font-heading font-extrabold text-base text-slate-900">
+                Demanda por Municipio y Zona
+              </h3>
+            </div>
+            <span className="text-xs text-slate-400 font-medium">
+              {distribucionMunicipios.length} {distribucionMunicipios.length === 1 ? "zona registrada" : "zonas registradas"}
+            </span>
           </div>
-          <span className="text-xs text-slate-400 font-medium">Volumen acumulado</span>
-        </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {Object.entries(distribucionMunicipios).map(([muni, count]) => {
-            const pct = citasActivas.length > 0 ? Math.round((count / citasActivas.length) * 100) : 0;
-            return (
-              <div key={muni} className="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-2">
-                <div className="flex justify-between items-center text-xs">
-                  <span className="font-bold text-slate-700">{muni}</span>
-                  <span className="font-semibold text-slate-400">{pct}%</span>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            {distribucionMunicipios.map(([muni, count]) => {
+              const pct = citasActivas.length > 0 ? Math.round((count / citasActivas.length) * 100) : 0;
+              return (
+                <div key={muni} className="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-2">
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="font-bold text-slate-700 truncate mr-2" title={muni}>{muni}</span>
+                    <span className="font-semibold text-slate-400 shrink-0">{pct}%</span>
+                  </div>
+                  <div className="text-2xl font-extrabold text-slate-900">
+                    {count} <span className="text-xs font-normal text-slate-500">servicios</span>
+                  </div>
+                  <div className="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
+                    <div
+                      className="bg-[#1D71B5] h-1.5 rounded-full transition-all duration-500"
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
                 </div>
-                <div className="text-2xl font-extrabold text-slate-900">
-                  {count} <span className="text-xs font-normal text-slate-500">servicios</span>
-                </div>
-                <div className="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
-                  <div
-                    className="bg-[#1D71B5] h-1.5 rounded-full transition-all duration-500"
-                    style={{ width: `${pct}%` }}
-                  />
-                </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

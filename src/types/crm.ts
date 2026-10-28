@@ -1,4 +1,4 @@
-export type MunicipioZMG = "Guadalajara" | "Zapopan" | "Tlajomulco" | "Tlaquepaque";
+export type MunicipioZMG = string;
 
 export type TurnoServicio = "Matutino (09:00 - 13:00)" | "Vespertino (14:00 - 18:00)";
 
@@ -51,7 +51,9 @@ export interface Cliente {
   nombre: string;
   whatsapp: string;
   direccion: string;
-  municipio: MunicipioZMG;
+  municipio: string;
+  codigo_postal?: string;
+  colonia?: string;
   mascotas: boolean;
   notas_especiales: string;
   historico_gasto: number;

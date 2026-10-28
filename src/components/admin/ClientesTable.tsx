@@ -17,8 +17,10 @@ import {
   AlertCircle,
   X,
   Check,
+  Loader2,
 } from "lucide-react";
 import { Cliente, ServicioCita, MunicipioZMG } from "@/types/crm";
+import { lookupPostalCode } from "@/lib/utils/postalCode";
 
 interface ClientesTableProps {
   clientes: Cliente[];
@@ -55,11 +57,32 @@ export function ClientesTable({
   const [newNombre, setNewNombre] = useState("");
   const [newWhatsapp, setNewWhatsapp] = useState("");
   const [newEmail, setNewEmail] = useState("");
+  const [newCp, setNewCp] = useState("");
+  const [loadingCp, setLoadingCp] = useState(false);
   const [newDireccion, setNewDireccion] = useState("");
-  const [newMunicipio, setNewMunicipio] = useState<MunicipioZMG>("Guadalajara");
+  const [newMunicipio, setNewMunicipio] = useState<string>("Guadalajara");
+  const [coloniasSugeridas, setColoniasSugeridas] = useState<string[]>([]);
   const [newMascotas, setNewMascotas] = useState(false);
   const [newNotas, setNewNotas] = useState("");
   const [newGasto, setNewGasto] = useState<number | "">("");
+
+  // Manejador de autocompletado por Código Postal
+  const handleCpChange = async (cpInput: string) => {
+    setNewCp(cpInput);
+    const clean = cpInput.trim().replace(/\D/g, "");
+    if (clean.length === 5) {
+      setLoadingCp(true);
+      try {
+        const data = await lookupPostalCode(clean);
+        if (data && data.municipio) {
+          setNewMunicipio(data.municipio);
+          setColoniasSugeridas(data.colonias);
+        }
+      } finally {
+        setLoadingCp(false);
+      }
+    }
+  };
 
   // Modal Editar
   const [editingClient, setEditingClient] = useState<Cliente | null>(null);
@@ -449,41 +472,77 @@ export function ClientesTable({
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* Código Postal y Municipio Automático */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="space-y-1">
-                  <label className="text-xs font-heading font-bold text-slate-700">
-                    Municipio
-                  </label>
-                  <select
-                    value={newMunicipio}
-                    onChange={(e) => setNewMunicipio(e.target.value as MunicipioZMG)}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#36A6DE]/20"
-                  >
-                    {MUNICIPIOS.map((m) => (
-                      <option key={m} value={m}>
-                        {m}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-heading font-bold text-slate-700">
+                      Código Postal (CP)
+                    </label>
+                    {loadingCp && <Loader2 className="w-3 h-3 text-[#1D71B5] animate-spin" />}
+                  </div>
+                  <input
+                    type="text"
+                    maxLength={5}
+                    placeholder="Ej. 45050"
+                    value={newCp}
+                    onChange={(e) => handleCpChange(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono font-bold text-slate-800 focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#36A6DE]/20"
+                  />
                 </div>
 
-                <div className="space-y-1">
+                <div className="space-y-1 sm:col-span-2">
                   <label className="text-xs font-heading font-bold text-slate-700">
-                    Histórico de gasto inicial (MXN)
+                    Municipio (Autocompletado con CP)
                   </label>
                   <input
-                    type="number"
-                    placeholder="0"
-                    value={newGasto}
-                    onChange={(e) => setNewGasto(e.target.value === "" ? "" : Number(e.target.value))}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#36A6DE]/20"
+                    type="text"
+                    required
+                    placeholder="Ej. Zapopan, Guadalajara, Tonalá..."
+                    value={newMunicipio}
+                    onChange={(e) => setNewMunicipio(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#36A6DE]/20"
                   />
                 </div>
               </div>
 
+              {/* Sugerencias de colonias si el CP las devuelve */}
+              {coloniasSugeridas.length > 0 && (
+                <div className="space-y-1">
+                  <span className="text-[11px] font-semibold text-slate-500">Colonias detectadas para este CP:</span>
+                  <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto p-1 bg-slate-50 rounded-xl border border-slate-100">
+                    {coloniasSugeridas.map((col, idx) => (
+                      <button
+                        type="button"
+                        key={idx}
+                        onClick={() => {
+                          setNewDireccion((prev) => (prev ? `${prev}, Col. ${col}` : `Col. ${col}`));
+                        }}
+                        className="text-[10px] px-2 py-0.5 bg-white hover:bg-blue-50 text-slate-700 hover:text-[#1D71B5] border border-slate-200 rounded-lg transition"
+                      >
+                        + {col}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="space-y-1">
                 <label className="text-xs font-heading font-bold text-slate-700">
-                  Dirección y Colonia
+                  Histórico de gasto inicial (MXN)
+                </label>
+                <input
+                  type="number"
+                  placeholder="0"
+                  value={newGasto}
+                  onChange={(e) => setNewGasto(e.target.value === "" ? "" : Number(e.target.value))}
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#36A6DE]/20"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-heading font-bold text-slate-700">
+                  Dirección exacta (Calle y Número)
                 </label>
                 <input
                   type="text"
