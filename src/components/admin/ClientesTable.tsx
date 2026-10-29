@@ -18,6 +18,7 @@ import {
   X,
   Check,
   Loader2,
+  Download,
 } from "lucide-react";
 import { Cliente, ServicioCita, MunicipioZMG } from "@/types/crm";
 import { lookupPostalCode } from "@/lib/utils/postalCode";
@@ -166,6 +167,57 @@ export function ClientesTable({
     setNewGasto("");
   };
 
+  const handleExportCSV = () => {
+    if (filteredClientes.length === 0) return;
+
+    // Encabezados en español
+    const headers = [
+      "ID Cliente",
+      "Nombre Completo",
+      "Teléfono WhatsApp",
+      "Email",
+      "Municipio",
+      "Código Postal",
+      "Colonia",
+      "Dirección Completa",
+      "Tiene Mascotas",
+      "Total Gastado (MXN)",
+      "Número de Servicios",
+      "Fecha de Registro",
+      "Notas Especiales"
+    ];
+
+    const rows = filteredClientes.map((cli) => {
+      const cliCitas = citas.filter((c) => c.cliente_id === cli.id);
+      return [
+        `"${cli.id}"`,
+        `"${(cli.nombre || "").replace(/"/g, '""')}"`,
+        `"${(cli.whatsapp || "").replace(/"/g, '""')}"`,
+        `"${(cli.email || "").replace(/"/g, '""')}"`,
+        `"${(cli.municipio || "").replace(/"/g, '""')}"`,
+        `"${(cli.codigo_postal || "").replace(/"/g, '""')}"`,
+        `"${(cli.colonia || "").replace(/"/g, '""')}"`,
+        `"${(cli.direccion || "").replace(/"/g, '""')}"`,
+        cli.mascotas ? "Sí" : "No",
+        cli.historico_gasto || 0,
+        cliCitas.length,
+        `"${(cli.fecha_registro || "").replace(/"/g, '""')}"`,
+        `"${(cli.notas_especiales || "").replace(/"/g, '""')}"`,
+      ];
+    });
+
+    const csvContent = "\uFEFF" + [headers.join(","), ...rows.map((r) => r.join(","))].join("\r\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    const hoyStr = new Date().toISOString().split("T")[0];
+    link.setAttribute("href", url);
+    link.setAttribute("download", `clientes-kanan-${hoyStr}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="space-y-6">
       {/* Barra Superior: Búsqueda, Filtro y Botón Alta */}
@@ -196,14 +248,27 @@ export function ClientesTable({
           </select>
         </div>
 
-        <button
-          type="button"
-          onClick={() => setShowCreateModal(true)}
-          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#355581] to-[#1D71B5] hover:from-[#2a4468] hover:to-[#175c94] text-white font-heading font-bold text-xs rounded-2xl transition-all shadow-md active:scale-[0.99] shrink-0"
-        >
-          <Plus className="w-4 h-4" />
-          <span>+ Dar de alta cliente</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleExportCSV}
+            disabled={filteredClientes.length === 0}
+            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 bg-white hover:bg-slate-50 text-slate-700 font-heading font-bold text-xs rounded-2xl border border-slate-200 shadow-sm transition active:scale-[0.99] disabled:opacity-50 shrink-0"
+            title="Descargar lista de clientes en formato CSV para Excel"
+          >
+            <Download className="w-4 h-4 text-emerald-600" />
+            <span>Exportar CSV</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setShowCreateModal(true)}
+            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#355581] to-[#1D71B5] hover:from-[#2a4468] hover:to-[#175c94] text-white font-heading font-bold text-xs rounded-2xl transition-all shadow-md active:scale-[0.99] shrink-0"
+          >
+            <Plus className="w-4 h-4" />
+            <span>+ Dar de alta cliente</span>
+          </button>
+        </div>
       </div>
 
       {/* Tabla Estructurada Legible */}

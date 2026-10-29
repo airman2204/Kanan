@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   Calendar as CalendarIcon,
   Clock,
@@ -23,7 +23,9 @@ import {
   Zap,
   Info,
   Sparkles,
-  Layers
+  Layers,
+  PenTool,
+  RotateCcw
 } from "lucide-react";
 import { ServicioCita, Cliente, EstatusCita, TurnoServicio, MunicipioZMG, MetodoPago, FotoAntesDespues } from "@/types/crm";
 import { CATALOGO_SERVICIOS_KANAN, ServicioItemCatalogo } from "@/data/catalogoServicios";
@@ -50,6 +52,7 @@ interface CalendarViewProps {
       instrucciones_acceso?: string;
       cuenta_con_agua_y_luz?: boolean;
       fotos_antes_despues?: FotoAntesDespues[];
+      firma_conformidad?: string;
       fecha?: string;
       turno?: TurnoServicio;
       hora_especifica?: string;
@@ -169,6 +172,11 @@ export function CalendarCitasView({
   const [selectedCitaDetalle, setSelectedCitaDetalle] = useState<ServicioCita | null>(null);
   const [fotoAntesUrl, setFotoAntesUrl] = useState("");
   const [fotoDespuesUrl, setFotoDespuesUrl] = useState("");
+
+  // Firma Digital en Pantalla
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [hasSignatureDrawn, setHasSignatureDrawn] = useState(false);
 
   // Modal Confirmar Cancelación
   const [cancellingCita, setCancellingCita] = useState<ServicioCita | null>(null);
@@ -319,6 +327,75 @@ export function CalendarCitasView({
     }
     setFotoAntesUrl("");
     setFotoDespuesUrl("");
+  };
+
+  // Métodos para Canvas de Firma Digital
+  const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
+    const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
+
+    ctx.beginPath();
+    ctx.moveTo(clientX - rect.left, clientY - rect.top);
+    ctx.lineWidth = 2.5;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.strokeStyle = "#1e293b";
+    setIsDrawing(true);
+    setHasSignatureDrawn(true);
+  };
+
+  const draw = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+    if (!isDrawing) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
+    const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
+
+    ctx.lineTo(clientX - rect.left, clientY - rect.top);
+    ctx.stroke();
+  };
+
+  const stopDrawing = () => {
+    setIsDrawing(false);
+  };
+
+  const clearSignatureCanvas = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    setHasSignatureDrawn(false);
+  };
+
+  const handleGuardarFirma = async (citaId: string) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const firmaDataUrl = canvas.toDataURL("image/png");
+
+    await onUpdateCita(citaId, {
+      firma_conformidad: firmaDataUrl,
+      estatus: "Completada"
+    });
+
+    if (selectedCitaDetalle) {
+      setSelectedCitaDetalle({
+        ...selectedCitaDetalle,
+        firma_conformidad: firmaDataUrl,
+        estatus: "Completada"
+      });
+    }
+    clearSignatureCanvas();
   };
 
   const handleConfirmCancel = async () => {
@@ -826,6 +903,82 @@ export function CalendarCitasView({
                 >
                   Guardar Evidencia Fotográfica
                 </button>
+              )}
+            </div>
+
+            {/* Bloque 4: Firma Digital de Conformidad del Cliente */}
+            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="font-heading font-extrabold text-xs text-slate-800 flex items-center gap-2">
+                  <PenTool className="w-4 h-4 text-[#1D71B5]" />
+                  Firma Digital de Conformidad del Servicio
+                </span>
+                {selectedCitaDetalle.firma_conformidad ? (
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 flex items-center gap-1">
+                    <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                    Firmado por el cliente
+                  </span>
+                ) : (
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
+                    Pendiente de firma
+                  </span>
+                )}
+              </div>
+
+              {selectedCitaDetalle.firma_conformidad ? (
+                <div className="bg-white p-3 rounded-xl border border-slate-200 text-center space-y-1">
+                  <img
+                    src={selectedCitaDetalle.firma_conformidad}
+                    alt="Firma del cliente"
+                    className="max-h-24 mx-auto object-contain"
+                  />
+                  <p className="text-[10px] text-slate-400">
+                    El cliente avaló la entrega del servicio en óptimas condiciones.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <div className="bg-white rounded-xl border-2 border-dashed border-slate-300 p-1 relative">
+                    <canvas
+                      ref={canvasRef}
+                      width={480}
+                      height={130}
+                      className="w-full touch-none cursor-crosshair rounded-lg bg-slate-50/50"
+                      onMouseDown={startDrawing}
+                      onMouseMove={draw}
+                      onMouseUp={stopDrawing}
+                      onMouseLeave={stopDrawing}
+                      onTouchStart={startDrawing}
+                      onTouchMove={draw}
+                      onTouchEnd={stopDrawing}
+                    />
+                    {!hasSignatureDrawn && (
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none text-slate-300 text-xs font-medium">
+                        Firmar aquí con el dedo o puntero
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <button
+                      type="button"
+                      onClick={clearSignatureCanvas}
+                      disabled={!hasSignatureDrawn}
+                      className="px-2.5 py-1 text-slate-500 hover:text-slate-700 text-xs font-semibold rounded-lg flex items-center gap-1 transition disabled:opacity-40"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" />
+                      <span>Limpiar trazo</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleGuardarFirma(selectedCitaDetalle.id)}
+                      disabled={!hasSignatureDrawn}
+                      className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm disabled:opacity-50"
+                    >
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      <span>Guardar Firma y Finalizar</span>
+                    </button>
+                  </div>
+                </div>
               )}
             </div>
 

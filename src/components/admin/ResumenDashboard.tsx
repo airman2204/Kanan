@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useState, useMemo } from "react";
 import { 
   DollarSign, 
   TrendingUp, 
@@ -15,7 +15,14 @@ import {
   Sofa,
   Sparkles,
   ArrowUpRight,
-  MessageSquare
+  MessageSquare,
+  FileText,
+  Printer,
+  Copy,
+  Check,
+  X,
+  ExternalLink,
+  ShieldCheck
 } from "lucide-react";
 import { Cliente, ServicioCita } from "@/types/crm";
 import { JaliscoServiceMap } from "@/components/admin/JaliscoServiceMap";
@@ -33,6 +40,8 @@ export function ResumenDashboard({
   onNavigateToCalendar,
   onNavigateToWhatsApp,
 }: ResumenDashboardProps) {
+  const [showHojaRutaModal, setShowHojaRutaModal] = useState(false);
+  const [copiadoRuta, setCopiadoRuta] = useState(false);
   const hoy = useMemo(() => new Date(), []);
   const hoyStr = useMemo(() => hoy.toISOString().split("T")[0], [hoy]);
 
@@ -122,6 +131,38 @@ export function ResumenDashboard({
         porcentaje: totalPiezas > 0 ? Math.round((cantidad / totalPiezas) * 100) : 0,
       }));
   }, [citasActivas]);
+
+  const copiarRutaWhatsApp = () => {
+    if (citasHoy.length === 0) return;
+    const fechaTexto = new Date().toLocaleDateString("es-MX", { weekday: "long", day: "numeric", month: "long" });
+    let texto = `*HOJA DE RUTA KANAN* 🚐\nFecha: ${fechaTexto}\nTotal servicios: ${citasHoy.length}\n`;
+    texto += `------------------------------------\n\n`;
+
+    citasHoy.forEach((cita, idx) => {
+      const cli = clientes.find((c) => c.id === cita.cliente_id);
+      const items = cita.items_contratados.map((it) => `${it.cantidad}x ${it.piezaNombre}`).join(", ");
+      texto += `*PARADA ${idx + 1} (${cita.turno.includes("Matutino") ? "TURNO MAÑANA" : "TURNO TARDE"})*\n`;
+      texto += `👤 Cliente: ${cli?.nombre || "Sin nombre"}\n`;
+      texto += `📞 WhatsApp: ${cli?.whatsapp || "N/D"}\n`;
+      texto += `📍 Dirección: ${cli?.direccion || "N/D"}, ${cli?.municipio || ""}${cli?.codigo_postal ? ` (CP ${cli.codigo_postal})` : ""}\n`;
+      if (cita.instrucciones_acceso) {
+        texto += `🔑 Acceso / Coto: ${cita.instrucciones_acceso}\n`;
+      }
+      texto += `🛋️ Items: ${items || "Limpieza general"}\n`;
+      if (cita.tipo_tela) texto += `🧵 Tela: ${cita.tipo_tela}\n`;
+      if (cita.cuenta_con_agua_y_luz !== undefined) {
+        texto += `⚡ Agua/Luz: ${cita.cuenta_con_agua_y_luz ? "Sí disponible" : "No disponible"}\n`;
+      }
+      texto += `💰 Cobro: ${cita.monto_total ? `$${cita.monto_total.toLocaleString("es-MX")} MXN` : "Por cotizar en sitio"}`;
+      if (cita.metodo_pago) texto += ` (${cita.metodo_pago})`;
+      texto += `\n\n`;
+    });
+
+    texto += `Buen turno y a dejar todo impecable ✨`;
+    navigator.clipboard.writeText(texto);
+    setCopiadoRuta(true);
+    setTimeout(() => setCopiadoRuta(false), 2500);
+  };
 
   return (
     <div className="space-y-6">
@@ -277,9 +318,21 @@ export function ResumenDashboard({
                   Ruta de Hoy
                 </h3>
               </div>
-              <span className="text-xs text-slate-500 font-medium">
-                {new Date().toLocaleDateString("es-MX", { weekday: "short", day: "numeric", month: "short" })}
-              </span>
+              <div className="flex items-center gap-2">
+                {citasHoy.length > 0 && (
+                  <button
+                    onClick={() => setShowHojaRutaModal(true)}
+                    className="px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-[#1D71B5] text-[11px] font-bold rounded-lg transition flex items-center gap-1 border border-blue-200/80"
+                    title="Ver hoja de ruta para imprimir o enviar"
+                  >
+                    <FileText className="w-3.5 h-3.5" />
+                    <span>Hoja de Ruta</span>
+                  </button>
+                )}
+                <span className="text-xs text-slate-500 font-medium">
+                  {new Date().toLocaleDateString("es-MX", { weekday: "short", day: "numeric", month: "short" })}
+                </span>
+              </div>
             </div>
 
             {citasHoy.length > 0 ? (
@@ -440,6 +493,152 @@ export function ResumenDashboard({
           )}
         </div>
       </div>
+
+      {/* MODAL HOJA DE RUTA DEL DÍA (OPTIMIZADO PARA 1 TÉCNICO EN CALLE / IMPRESIÓN / WHATSAPP) */}
+      {showHojaRutaModal && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 border border-slate-200 shadow-2xl relative my-8 print:p-0 print:border-none print:shadow-none print:max-w-none">
+            {/* Cabecera del modal */}
+            <div className="flex items-center justify-between pb-4 border-b border-slate-200 print:border-b-2">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="font-heading font-black text-xl text-[#355581] tracking-tight">KANAN</span>
+                  <span className="text-xs font-bold px-2 py-0.5 rounded bg-blue-50 text-[#1D71B5] border border-blue-200">
+                    Hoja de Ruta de Campo
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500 mt-1">
+                  {new Date().toLocaleDateString("es-MX", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+                </p>
+              </div>
+              <div className="flex items-center gap-2 print:hidden">
+                <button
+                  onClick={copiarRutaWhatsApp}
+                  className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs rounded-xl transition flex items-center gap-1.5 border border-emerald-200"
+                >
+                  {copiadoRuta ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+                  <span>{copiadoRuta ? "¡Copiado!" : "Copiar para WhatsApp"}</span>
+                </button>
+                <button
+                  onClick={() => window.print()}
+                  className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition flex items-center gap-1.5"
+                >
+                  <Printer className="w-4 h-4" />
+                  <span>Imprimir / PDF</span>
+                </button>
+                <button
+                  onClick={() => setShowHojaRutaModal(false)}
+                  className="p-1.5 hover:bg-slate-100 text-slate-400 hover:text-slate-600 rounded-xl transition"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Resumen Superior */}
+            <div className="grid grid-cols-3 gap-3 my-4 p-3 bg-slate-50 rounded-2xl border border-slate-200/80 text-center">
+              <div>
+                <p className="text-[10px] uppercase font-bold text-slate-400">Técnico Operativo</p>
+                <p className="text-xs font-extrabold text-slate-800">1 Unidad Móvil Kanan</p>
+              </div>
+              <div>
+                <p className="text-[10px] uppercase font-bold text-slate-400">Total Paradas</p>
+                <p className="text-xs font-extrabold text-[#1D71B5]">{citasHoy.length} asignadas</p>
+              </div>
+              <div>
+                <p className="text-[10px] uppercase font-bold text-slate-400">Monto Estimado</p>
+                <p className="text-xs font-extrabold text-emerald-600">
+                  ${citasHoy.reduce((acc, c) => acc + (c.monto_total || 0), 0).toLocaleString("es-MX")} MXN
+                </p>
+              </div>
+            </div>
+
+            {/* Listado de Paradas de la Ruta */}
+            <div className="space-y-4">
+              {citasHoy.map((cita, idx) => {
+                const cli = clientes.find((c) => c.id === cita.cliente_id);
+                return (
+                  <div
+                    key={cita.id}
+                    className="p-4 rounded-2xl border border-slate-200/90 bg-white space-y-3 shadow-sm break-inside-avoid"
+                  >
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                      <div className="flex items-center gap-2">
+                        <span className="w-6 h-6 rounded-lg bg-[#355581] text-white flex items-center justify-center font-bold text-xs">
+                          {idx + 1}
+                        </span>
+                        <span className="font-bold text-sm text-slate-900">
+                          {cita.turno}
+                        </span>
+                      </div>
+                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+                        cita.estatus === "Completada" ? "bg-emerald-50 text-emerald-700" :
+                        cita.estatus === "Confirmada" ? "bg-blue-50 text-blue-700" :
+                        "bg-amber-50 text-amber-700"
+                      }`}>
+                        {cita.estatus}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                      <div className="space-y-1">
+                        <p className="text-[10px] uppercase font-bold text-slate-400">Cliente y Contacto</p>
+                        <p className="font-bold text-slate-900">{cli?.nombre || "Sin nombre"}</p>
+                        <p className="text-slate-600 font-mono flex items-center gap-1">
+                          📞 {cli?.whatsapp || "N/D"}
+                        </p>
+                      </div>
+
+                      <div className="space-y-1">
+                        <p className="text-[10px] uppercase font-bold text-slate-400">Dirección y Zona</p>
+                        <p className="font-semibold text-slate-800">
+                          📍 {cli?.direccion || "N/D"}
+                        </p>
+                        <p className="text-slate-500">
+                          {cli?.municipio} {cli?.codigo_postal ? `· CP ${cli.codigo_postal}` : ""}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Especificaciones de coto y acceso */}
+                    {cita.instrucciones_acceso && (
+                      <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-200/60 text-xs text-amber-900 flex items-start gap-2">
+                        <ShieldCheck className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                        <div>
+                          <span className="font-bold">Acceso / Coto / Vigilancia:</span> {cita.instrucciones_acceso}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Piezas y Servicios */}
+                    <div className="p-3 rounded-xl bg-slate-50 text-xs space-y-1.5">
+                      <p className="text-[10px] uppercase font-bold text-slate-400">Servicios Contratados</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {cita.items_contratados.map((it, itIdx) => (
+                          <span key={itIdx} className="bg-white px-2 py-0.5 rounded-md border border-slate-200 font-medium text-slate-800">
+                            {it.cantidad}x {it.piezaNombre}
+                          </span>
+                        ))}
+                      </div>
+                      <div className="flex flex-wrap gap-3 pt-1 text-[11px] text-slate-500">
+                        {cita.tipo_tela && <span>🧵 <strong className="text-slate-700">Tela:</strong> {cita.tipo_tela}</span>}
+                        {cita.cuenta_con_agua_y_luz !== undefined && (
+                          <span>⚡ <strong className="text-slate-700">Agua/Luz:</strong> {cita.cuenta_con_agua_y_luz ? "Sí" : "No"}</span>
+                        )}
+                        <span>💰 <strong className="text-slate-700">Cobro:</strong> {cita.monto_total ? `$${cita.monto_total.toLocaleString("es-MX")} MXN` : "Por cotizar"} {cita.metodo_pago ? `(${cita.metodo_pago})` : ""}</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="mt-6 pt-4 border-t border-slate-200 text-center text-[11px] text-slate-400">
+              Kanan Limpieza Especializada · Hoja de ruta para el personal de campo · Guía operativa ZMG
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

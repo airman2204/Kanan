@@ -165,6 +165,7 @@ export async function PATCH(req: NextRequest) {
         instrucciones_acceso: body.instrucciones_acceso,
         cuenta_con_agua_y_luz: body.cuenta_con_agua_y_luz,
         fotos_antes_despues: body.fotos_antes_despues,
+        firma_conformidad: body.firma_conformidad,
         fecha: body.fecha,
         turno: body.turno,
         hora_especifica: body.hora_especifica,

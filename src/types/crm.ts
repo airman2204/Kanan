@@ -86,6 +86,7 @@ export interface ServicioCita {
   cuenta_con_agua_y_luz?: boolean;
   fotos_estado_actual: string[];
   fotos_antes_despues: FotoAntesDespues[];
+  firma_conformidad?: string;
   calificacion: number | null;
   ticket_soporte: boolean;
   origen?: "web" | "manual" | "whatsapp";

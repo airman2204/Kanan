@@ -445,6 +445,7 @@ export function updateCitaInDb(
     instrucciones_acceso?: string;
     cuenta_con_agua_y_luz?: boolean;
     fotos_antes_despues?: FotoAntesDespues[];
+    firma_conformidad?: string;
     fecha?: string;
     turno?: TurnoServicio;
     hora_especifica?: string;
@@ -468,6 +469,7 @@ export function updateCitaInDb(
   if (updates.rfc_factura !== undefined) cita.rfc_factura = updates.rfc_factura;
   if (updates.razon_social !== undefined) cita.razon_social = updates.razon_social;
   if (updates.fotos_antes_despues !== undefined) cita.fotos_antes_despues = updates.fotos_antes_despues;
+  if (updates.firma_conformidad !== undefined) cita.firma_conformidad = updates.firma_conformidad;
   if (updates.fecha !== undefined) cita.fecha = updates.fecha;
   if (updates.turno !== undefined) cita.turno = updates.turno;
   if (updates.hora_especifica !== undefined) cita.hora_especifica = updates.hora_especifica;
