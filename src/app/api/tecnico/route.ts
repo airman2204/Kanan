@@ -2,16 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 import { getDatabase, updateCitaInDb } from "@/lib/db/store";
 import { ServicioCita, Cliente } from "@/types/crm";
 
-// PIN de acceso operativo por defecto para el personal de campo (configurable)
-const PIN_TECNICO_CORRECTO = process.env.PIN_TECNICO || "2026";
+function getPinConfigurado(): string {
+  const db = getDatabase();
+  return db.config?.pin_tecnico || process.env.PIN_TECNICO || "2026";
+}
 
 export async function GET(req: NextRequest) {
   try {
+    const pinValido = getPinConfigurado();
     const { searchParams } = new URL(req.url);
     const pin = searchParams.get("pin");
     const cookiePin = req.cookies.get("kanan_pin_tecnico")?.value;
 
-    if (pin !== PIN_TECNICO_CORRECTO && cookiePin !== PIN_TECNICO_CORRECTO) {
+    if (pin !== pinValido && cookiePin !== pinValido) {
       return NextResponse.json(
         { ok: false, error: "PIN incorrecto o sesión no autorizada." },
         { status: 401 }
@@ -43,7 +46,7 @@ export async function GET(req: NextRequest) {
     });
 
     // Asegurar cookie de 30 días para que el técnico no tenga que volver a escribir el PIN
-    res.cookies.set("kanan_pin_tecnico", PIN_TECNICO_CORRECTO, {
+    res.cookies.set("kanan_pin_tecnico", pinValido, {
       path: "/",
       maxAge: 60 * 60 * 24 * 30, // 30 días
       httpOnly: true,
@@ -59,13 +62,14 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    const pinValido = getPinConfigurado();
     const body = await req.json();
 
     // Verificación de PIN para login
     if (body.action === "VERIFY_PIN") {
-      if (body.pin === PIN_TECNICO_CORRECTO) {
+      if (body.pin === pinValido) {
         const res = NextResponse.json({ ok: true, message: "PIN correcto" });
-        res.cookies.set("kanan_pin_tecnico", PIN_TECNICO_CORRECTO, {
+        res.cookies.set("kanan_pin_tecnico", pinValido, {
           path: "/",
           maxAge: 60 * 60 * 24 * 30,
           httpOnly: true,
@@ -85,10 +89,11 @@ export async function POST(req: NextRequest) {
 
 export async function PATCH(req: NextRequest) {
   try {
+    const pinValido = getPinConfigurado();
     const cookiePin = req.cookies.get("kanan_pin_tecnico")?.value;
     const body = await req.json();
 
-    if (cookiePin !== PIN_TECNICO_CORRECTO && body.pin !== PIN_TECNICO_CORRECTO) {
+    if (cookiePin !== pinValido && body.pin !== pinValido) {
       return NextResponse.json({ ok: false, error: "No autorizado." }, { status: 401 });
     }
 

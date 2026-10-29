@@ -2,12 +2,14 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { ServicioCita, Cliente, MetodoPago, FotoAntesDespues } from "@/types/crm";
+import { KananLogo } from "@/components/brand/KananLogo";
 
 interface CitaConCliente extends ServicioCita {
   cliente: Cliente | null;
 }
 
 export default function TecnicoPage() {
+  const [isMobileDevice, setIsMobileDevice] = useState<boolean | null>(null);
   const [pinAutenticado, setPinAutenticado] = useState<boolean | null>(null);
   const [pinInput, setPinInput] = useState("");
   const [pinError, setPinError] = useState("");
@@ -58,7 +60,20 @@ export default function TecnicoPage() {
   };
 
   useEffect(() => {
+    // Detección estricta de dispositivo móvil (pantalla táctil o ancho móvil)
+    const checkIsMobile = () => {
+      const userAgent = navigator.userAgent || "";
+      const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+      const isSmallScreen = window.innerWidth <= 768;
+      const isTouch = "ontouchstart" in window || navigator.maxTouchPoints > 0;
+      setIsMobileDevice(isMobileUA || (isSmallScreen && isTouch));
+    };
+
+    checkIsMobile();
+    window.addEventListener("resize", checkIsMobile);
     cargarRuta();
+
+    return () => window.removeEventListener("resize", checkIsMobile);
   }, []);
 
   // Cita actual según el turno seleccionado
@@ -240,7 +255,7 @@ export default function TecnicoPage() {
   };
 
   // PANTALLA 1: LOADING
-  if (loading) {
+  if (loading || isMobileDevice === null) {
     return (
       <div className="min-h-screen bg-[#F4F7F9] flex flex-col items-center justify-center p-4">
         <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#355581] to-[#1D71B5] text-white flex items-center justify-center font-bold text-xl animate-pulse">
@@ -253,18 +268,59 @@ export default function TecnicoPage() {
     );
   }
 
-  // PANTALLA 2: INGRESO DE PIN RÁPIDO (4 DÍGITOS)
+  // PANTALLA BLOQUEADA: SOLO DISPOSITIVOS MÓVILES (NO PC/WEB DE ESCRITORIO)
+  if (!isMobileDevice) {
+    return (
+      <div className="min-h-screen bg-[#F4F7F9] flex flex-col items-center justify-center p-4 selection:bg-[#36A6DE]/20">
+        <div className="w-full max-w-md bg-white border border-slate-200/90 rounded-[2.5rem] p-8 shadow-xl text-center space-y-6">
+          <div className="w-16 h-16 rounded-3xl bg-blue-50 text-[#1D71B5] flex items-center justify-center text-3xl mx-auto border border-blue-200">
+            📱
+          </div>
+
+          <div className="space-y-2">
+            <h1 className="font-heading font-black text-xl text-[#355581] tracking-tight">
+              Vista Exclusiva para Celular
+            </h1>
+            <p className="text-xs text-slate-500 leading-relaxed">
+              Esta herramienta está diseñada únicamente para uso táctil del técnico en ruta desde su smartphone.
+            </p>
+          </div>
+
+          <div className="p-4 bg-[#F4F7F9] rounded-2xl border border-slate-200 text-xs text-slate-600 space-y-2 text-left">
+            <p className="font-bold text-slate-800 flex items-center gap-1.5">
+              <span>💡</span> Para ingresar:
+            </p>
+            <p className="text-[11px] text-slate-500">
+              Abre este enlace directamente desde el navegador de tu celular:
+            </p>
+            <p className="font-mono font-bold text-[#1D71B5] bg-white p-2 rounded-xl border border-slate-200 text-center break-all">
+              admin.kananlimpieza.mx/tecnico
+            </p>
+          </div>
+
+          <p className="text-[11px] text-slate-400">
+            Si eres administrador, ingresa desde el panel de control en tu computadora.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // PANTALLA 2: INGRESO DE PIN RÁPIDO CON LOGO DE KANAN
   if (pinAutenticado === false) {
     return (
       <div className="min-h-screen bg-[#F4F7F9] flex flex-col items-center justify-center p-4 selection:bg-[#36A6DE]/20">
         <div className="w-full max-w-sm bg-white border border-slate-200/90 rounded-[2.5rem] p-6 sm:p-8 shadow-xl text-center space-y-6">
-          <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-[#355581] to-[#1D71B5] text-white flex items-center justify-center font-bold text-3xl mx-auto shadow-md">
-            🚐
+          {/* Logo Oficial de Kanan */}
+          <div className="flex justify-center pt-2">
+            <KananLogo variant="color" layout="stacked" size="sm" />
           </div>
 
           <div className="space-y-1">
-            <h1 className="font-heading font-black text-xl text-[#355581] tracking-tight">KANAN MÓVIL</h1>
-            <p className="text-xs text-slate-500 font-medium">Ingresa el PIN de tu unidad de campo</p>
+            <h1 className="font-heading font-black text-base text-[#355581] tracking-tight uppercase">
+              Ruta Operativa de Campo
+            </h1>
+            <p className="text-xs text-slate-500 font-medium">Ingresa el PIN de tu unidad móvil</p>
           </div>
 
           <form onSubmit={handleVerificarPin} className="space-y-4">

@@ -221,6 +221,20 @@ export default function AdminPage() {
     }
   };
 
+  // Actualizar PIN de campo para la app del técnico
+  const handleUpdatePinTecnico = async (nuevoPin: string) => {
+    const res = await fetch("/api/crm", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "SET_PIN_TECNICO", pin: nuevoPin }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      setDb(data.db);
+      alert("✅ PIN del técnico actualizado a: " + nuevoPin);
+    }
+  };
+
   const handleTriggerWhatsApp = async (mensajeId: string) => {
     const res = await fetch("/api/webhooks/whatsapp", {
       method: "POST",
@@ -586,6 +600,71 @@ export default function AdminPage() {
                     <p className="text-[11px] text-slate-500">
                       Los clientes pueden auto-cancelar sus servicios desde WhatsApp o enlace directo hasta 2 horas antes de la cita. Pasado ese tiempo, solo el administrador puede autorizar la cancelación.
                     </p>
+                  </div>
+                </div>
+
+                {/* Administración del PIN y App Móvil del Técnico */}
+                <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-5 md:col-span-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-2xl bg-blue-50 text-[#1D71B5] flex items-center justify-center text-lg">
+                        🚐
+                      </div>
+                      <div>
+                        <h3 className="font-heading font-bold text-sm text-slate-800">
+                          App Móvil del Técnico de Campo
+                        </h3>
+                        <p className="text-xs text-slate-400">
+                          Control de acceso seguro para la unidad en ruta (/tecnico)
+                        </p>
+                      </div>
+                    </div>
+
+                    <a
+                      href="/tecnico"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-[#1D71B5] font-bold text-xs rounded-xl border border-blue-200 transition flex items-center gap-1.5"
+                    >
+                      <span>Abrir App Técnico</span>
+                      <Sparkles className="w-3.5 h-3.5" />
+                    </a>
+                  </div>
+
+                  <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100 space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div>
+                        <p className="text-xs font-bold text-slate-800">PIN Numérico de Acceso en Campo</p>
+                        <p className="text-[11px] text-slate-500">
+                          Código de 4 a 6 dígitos que el técnico teclea en su celular para ver su ruta y tomar firmas.
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          maxLength={6}
+                          defaultValue={db?.config?.pin_tecnico || "2026"}
+                          id="inputPinTecnico"
+                          className="w-28 px-3 py-2 text-center font-mono font-extrabold text-sm bg-white border border-slate-300 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#1D71B5]"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const val = (document.getElementById("inputPinTecnico") as HTMLInputElement)?.value;
+                            if (val) handleUpdatePinTecnico(val);
+                          }}
+                          className="px-4 py-2 bg-[#1D71B5] hover:bg-[#175c94] text-white text-xs font-bold rounded-xl shadow-sm transition"
+                        >
+                          Guardar PIN
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="pt-3 border-t border-slate-200/80 text-[11px] text-slate-500 flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                      <span>URL para el celular del técnico: <strong className="text-slate-700">admin.kananlimpieza.mx/tecnico</strong> (o kananlimpieza.mx/tecnico)</span>
+                    </div>
                   </div>
                 </div>
               </div>

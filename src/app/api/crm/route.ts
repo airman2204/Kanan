@@ -10,6 +10,7 @@ import {
   clearAllData,
   resetToTwoExamples,
   setModoHalloween,
+  setPinTecnico,
   updateMarketingConfig,
   saveDatabase,
 } from "@/lib/db/store";
@@ -56,7 +57,8 @@ export async function POST(req: NextRequest) {
       body.action === "UPDATE_MARKETING" ||
       body.action === "CLEAR_ALL" ||
       body.action === "RESET_DEMO_2" ||
-      body.action === "TOGGLE_HALLOWEEN"
+      body.action === "TOGGLE_HALLOWEEN" ||
+      body.action === "SET_PIN_TECNICO"
     ) {
       if (!isAuthenticatedAdmin(req)) {
         return NextResponse.json({ ok: false, error: "No autorizado." }, { status: 401 });
@@ -104,6 +106,16 @@ export async function POST(req: NextRequest) {
         ok: true,
         message: body.enabled ? "Modo Halloween activado" : "Modo Halloween desactivado",
         modo_halloween: updatedDb.config?.modo_halloween ?? true,
+        db: updatedDb,
+      });
+    }
+
+    if (body.action === "SET_PIN_TECNICO") {
+      const updatedDb = setPinTecnico(body.pin || "2026");
+      return NextResponse.json({
+        ok: true,
+        message: "PIN del técnico actualizado con éxito.",
+        pin_tecnico: updatedDb.config?.pin_tecnico || "2026",
         db: updatedDb,
       });
     }

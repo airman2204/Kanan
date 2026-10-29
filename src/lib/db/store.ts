@@ -573,3 +573,13 @@ export function deleteCliente(clienteId: string): boolean {
   saveDatabase(db);
   return true;
 }
+
+export function setPinTecnico(pin: string): KananDatabase {
+  const db = getDatabase();
+  if (!db.config) {
+    db.config = { modo_halloween: false };
+  }
+  db.config.pin_tecnico = pin;
+  saveDatabase(db);
+  return db;
+}

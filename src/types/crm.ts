@@ -219,6 +219,7 @@ export interface MarketingMetrics {
 
 export interface KananConfig {
   modo_halloween: boolean;
+  pin_tecnico?: string;
   marketing?: MarketingMetrics;
 }
 
