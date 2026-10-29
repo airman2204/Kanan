@@ -12,6 +12,7 @@ import {
   TurnoServicio,
   EstatusCita,
   MarketingMetrics,
+  FotoAntesDespues,
 } from "@/types/crm";
 import {
   generarSecuenciaPoservicio,
@@ -276,6 +277,11 @@ export function createCitaManual(payload: {
   hora_especifica?: string;
   items_contratados: ItemContratado[];
   monto_total?: number | null;
+  metodo_pago?: any;
+  tipo_tela?: string;
+  manchas_dificiles?: string[];
+  instrucciones_acceso?: string;
+  cuenta_con_agua_y_luz?: boolean;
   tecnico_asignado?: string;
   ruta_geografica?: string;
   notas_servicio?: string;
@@ -304,8 +310,13 @@ export function createCitaManual(payload: {
     hora_especifica: payload.hora_especifica || (payload.turno.startsWith("Matutino") ? "10:00 AM" : "03:30 PM"),
     items_contratados: payload.items_contratados || [],
     monto_total: payload.monto_total ?? null,
+    metodo_pago: payload.metodo_pago || "Pendiente",
+    tipo_tela: payload.tipo_tela || "",
+    manchas_dificiles: payload.manchas_dificiles || [],
+    instrucciones_acceso: payload.instrucciones_acceso || "",
+    cuenta_con_agua_y_luz: payload.cuenta_con_agua_y_luz ?? true,
     estatus: "Confirmada",
-    tecnico_asignado: payload.tecnico_asignado || "Por asignar",
+    tecnico_asignado: payload.tecnico_asignado || "Técnico 1 (Ruta ZMG)",
     ruta_geografica: payload.ruta_geografica || `Ruta ${cliente.municipio}`,
     notas_servicio: payload.notas_servicio || "",
     fotos_estado_actual: [],
@@ -423,8 +434,17 @@ export function updateCitaInDb(
     estatus?: EstatusCita;
     tecnico_asignado?: string;
     monto_total?: number | null;
+    metodo_pago?: any;
+    requiere_factura?: boolean;
+    rfc_factura?: string;
+    razon_social?: string;
     calificacion?: number | null;
     notas_servicio?: string;
+    tipo_tela?: string;
+    manchas_dificiles?: string[];
+    instrucciones_acceso?: string;
+    cuenta_con_agua_y_luz?: boolean;
+    fotos_antes_despues?: FotoAntesDespues[];
     fecha?: string;
     turno?: TurnoServicio;
     hora_especifica?: string;
@@ -439,6 +459,15 @@ export function updateCitaInDb(
   if (updates.estatus !== undefined) cita.estatus = updates.estatus;
   if (updates.tecnico_asignado !== undefined) cita.tecnico_asignado = updates.tecnico_asignado;
   if (updates.notas_servicio !== undefined) cita.notas_servicio = updates.notas_servicio;
+  if (updates.tipo_tela !== undefined) cita.tipo_tela = updates.tipo_tela;
+  if (updates.manchas_dificiles !== undefined) cita.manchas_dificiles = updates.manchas_dificiles;
+  if (updates.instrucciones_acceso !== undefined) cita.instrucciones_acceso = updates.instrucciones_acceso;
+  if (updates.cuenta_con_agua_y_luz !== undefined) cita.cuenta_con_agua_y_luz = updates.cuenta_con_agua_y_luz;
+  if (updates.metodo_pago !== undefined) cita.metodo_pago = updates.metodo_pago;
+  if (updates.requiere_factura !== undefined) cita.requiere_factura = updates.requiere_factura;
+  if (updates.rfc_factura !== undefined) cita.rfc_factura = updates.rfc_factura;
+  if (updates.razon_social !== undefined) cita.razon_social = updates.razon_social;
+  if (updates.fotos_antes_despues !== undefined) cita.fotos_antes_despues = updates.fotos_antes_despues;
   if (updates.fecha !== undefined) cita.fecha = updates.fecha;
   if (updates.turno !== undefined) cita.turno = updates.turno;
   if (updates.hora_especifica !== undefined) cita.hora_especifica = updates.hora_especifica;

@@ -61,6 +61,8 @@ export interface Cliente {
   email?: string;
 }
 
+export type MetodoPago = "Efectivo" | "Transferencia SPEI" | "Tarjeta / Terminal" | "Pendiente";
+
 export interface ServicioCita {
   id: string;
   cliente_id: string;
@@ -69,10 +71,19 @@ export interface ServicioCita {
   hora_especifica?: string;
   items_contratados: ItemContratado[];
   monto_total: number | null;
+  metodo_pago?: MetodoPago;
+  requiere_factura?: boolean;
+  rfc_factura?: string;
+  razon_social?: string;
   estatus: EstatusCita;
   tecnico_asignado: string;
   ruta_geografica: string;
   notas_servicio: string;
+  // Especificaciones técnicas de la tela y acceso
+  tipo_tela?: string;
+  manchas_dificiles?: string[];
+  instrucciones_acceso?: string;
+  cuenta_con_agua_y_luz?: boolean;
   fotos_estado_actual: string[];
   fotos_antes_despues: FotoAntesDespues[];
   calificacion: number | null;
