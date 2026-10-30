@@ -10,16 +10,18 @@ import {
   Sparkles,
   LayoutDashboard,
   PhoneCall,
+  MessageSquare,
   BookOpen,
   Check,
 } from "lucide-react";
 import { KananLogo } from "@/components/brand/KananLogo";
 import { MunicipioZMG } from "@/types/crm";
+import { KANAN_PHONE_CALL, KANAN_WHATSAPP_NUMBER } from "@/lib/whatsapp/templates";
 
 const MUNICIPIOS: MunicipioZMG[] = [
-  "Guadalajara",
-  "Zapopan",
   "Tlajomulco",
+  "Zapopan",
+  "Guadalajara",
   "Tlaquepaque",
 ];
 
@@ -131,8 +133,30 @@ export function StickyHeader({
             </a>
           </nav>
 
-          {/* Botón CTA Fresco */}
+          {/* Botones de Contacto Rápido y CTA */}
           <div className="flex items-center gap-2">
+            {/* Botón de Llamada Telefónica Directa */}
+            <a
+              href={`tel:${KANAN_PHONE_CALL}`}
+              className="hidden md:inline-flex items-center gap-1.5 bg-kanan-ice hover:bg-slate-200/80 text-kanan-deep font-heading font-bold text-xs px-3.5 py-2.5 rounded-full border border-slate-200 transition-all shadow-sm active:scale-95"
+              title="Llamar al 33 4016 0684"
+            >
+              <PhoneCall className="w-3.5 h-3.5 text-kanan-cerulean" />
+              <span>33 4016 0684</span>
+            </a>
+
+            {/* Botón de WhatsApp Directo */}
+            <a
+              href={`https://wa.me/${KANAN_WHATSAPP_NUMBER}?text=${encodeURIComponent("Hola Kanan Limpieza, deseo cotizar un servicio a domicilio.")}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-white font-heading font-bold text-xs px-3.5 py-2.5 rounded-full shadow-sm transition-all active:scale-95"
+              title="Chat en WhatsApp: 33 4335 9207"
+            >
+              <MessageSquare className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">WhatsApp</span>
+            </a>
+
             <button
               type="button"
               onClick={onOpenWizard}
@@ -233,22 +257,20 @@ export function StickyHeader({
           </nav>
 
           <div className="grid grid-cols-2 gap-2 pt-2">
-            <button
-              type="button"
-              onClick={() => {
-                setMobileMenuOpen(false);
-                onOpenWizard();
-              }}
-              className="py-3 px-4 rounded-2xl bg-kanan-cyan text-white font-heading font-bold text-xs flex items-center justify-center gap-1.5 shadow-cyan-glow"
-            >
-              <CalendarCheck className="w-4 h-4" />
-              <span>Agendar Cita</span>
-            </button>
             <a
-              href="tel:3340160684"
-              className="py-3 px-4 rounded-2xl bg-kanan-ice text-kanan-deep font-heading font-bold text-xs flex items-center justify-center gap-1.5 border border-slate-200"
+              href={`https://wa.me/${KANAN_WHATSAPP_NUMBER}?text=${encodeURIComponent("Hola Kanan Limpieza, deseo cotizar un servicio a domicilio.")}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="py-3 px-3 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-heading font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm"
             >
-              <PhoneCall className="w-4 h-4 text-kanan-cyan" />
+              <MessageSquare className="w-4 h-4" />
+              <span>WhatsApp</span>
+            </a>
+            <a
+              href={`tel:${KANAN_PHONE_CALL}`}
+              className="py-3 px-3 rounded-2xl bg-kanan-ice text-kanan-deep font-heading font-bold text-xs flex items-center justify-center gap-1.5 border border-slate-200"
+            >
+              <PhoneCall className="w-4 h-4 text-kanan-cerulean" />
               <span>33 4016 0684</span>
             </a>
           </div>

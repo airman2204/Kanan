@@ -13,7 +13,7 @@ import {
 
 interface ComparisonItem {
   id: string;
-  category: "salas" | "colchones" | "vestiduras";
+  category: "salas" | "colchones" | "vestiduras" | "tapetes";
   categoryLabel: string;
   zone: string;
   title: string;
@@ -35,7 +35,7 @@ const COMPARISONS: ComparisonItem[] = [
     subtitle:
       "Extracción profunda de manchas acumuladas por uso diario y neutralización de olores orgánicos.",
     stainType: "Tráfico alto + Mascotas",
-    dryingTime: "3.5 horas",
+    dryingTime: "3 a 4 hrs*",
     formula: "Enzimática 100% Pet-Friendly",
     beforeImg: "/assets/portfolio/antes-1.jpg",
     afterImg: "/assets/portfolio/despues-1.jpg",
@@ -49,64 +49,64 @@ const COMPARISONS: ComparisonItem[] = [
     subtitle:
       "Devolvemos el tono uniforme original de la tapicería mediante inyección-succión controlada.",
     stainType: "Derrames de bebidas y polvo",
-    dryingTime: "3 horas",
+    dryingTime: "3 a 4 hrs*",
     formula: "Oxi-Bioseguridad Textil",
     beforeImg: "/assets/portfolio/antes-2.jpg",
     afterImg: "/assets/portfolio/despues-2.jpg",
   },
   {
     id: "comp-3",
-    category: "colchones",
-    categoryLabel: "Colchones",
+    category: "salas",
+    categoryLabel: "Salas y Sillas",
     zone: "Tlajomulco • Lomas de San Agustín",
-    title: "Sanitización y Desmanchado de Colchón",
+    title: "Desmanchado de Sillón Ocre Individual",
     subtitle:
-      "Eliminación de aureolas, sudor, ácaros y alérgenos con cepillado suave de alta precisión.",
-    stainType: "Aureolas + Ácaros",
-    dryingTime: "3.5 horas",
-    formula: "Hipoalergénica Anti-Ácaros",
+      "Extracción profunda de aureolas y suciedad incrustada en tapicería ocre con inyección-succión.",
+    stainType: "Aureolas y polvo acumulado",
+    dryingTime: "3 a 4 hrs*",
+    formula: "Enzimática Kanan",
     beforeImg: "/assets/portfolio/antes-3.jpg",
     afterImg: "/assets/portfolio/despues-3.jpg",
   },
   {
     id: "comp-4",
-    category: "salas",
-    categoryLabel: "Salas y Sillas",
+    category: "vestiduras",
+    categoryLabel: "Vestiduras Auto",
     zone: "Zapopan • Puerta de Hierro",
-    title: "Limpieza Profunda Hogar Pet-Friendly",
+    title: "Limpieza Integral de Asientos Automotrices",
     subtitle:
-      "Extracción de pelo incrustado y manchas orgánicas dejando aroma fresco y fibras suaves.",
-    stainType: "Huellas y grasa orgánica",
-    dryingTime: "3 horas",
-    formula: "Bio-Enzimática Kanan Dog",
+      "Extracción profunda de sudor, polvo y derrames en vestiduras de tela dejándolas como de agencia.",
+    stainType: "Uso diario y polvo incrustado",
+    dryingTime: "3 a 4 hrs*",
+    formula: "Espuma Activa Baja Humedad",
     beforeImg: "/assets/portfolio/antes-4.jpg",
     afterImg: "/assets/portfolio/despues-4.jpg",
   },
   {
     id: "comp-5",
-    category: "vestiduras",
-    categoryLabel: "Vestiduras y Tapicería",
+    category: "salas",
+    categoryLabel: "Salas y Sillas",
     zone: "Guadalajara • Chapalita",
-    title: "Renovación de Tapicería en Tonos Claros",
+    title: "Renovación de Sillón Capitón en Tela Clara",
     subtitle:
-      "Restauración luminosa de tejidos claros sin dejar cercos de humedad gracias al alto vacío.",
+      "Restauración luminosa de tapicería clara sin dejar cercos de humedad gracias al alto vacío.",
     stainType: "Oscurecimiento por roce",
-    dryingTime: "3.5 horas",
-    formula: "Espuma Activa de Baja Humedad",
+    dryingTime: "3 a 4 hrs*",
+    formula: "Bioseguridad Textil",
     beforeImg: "/assets/portfolio/antes-5.jpg",
     afterImg: "/assets/portfolio/despues-5.jpg",
   },
   {
     id: "comp-6",
-    category: "colchones",
-    categoryLabel: "Colchones y Descanso",
+    category: "tapetes",
+    categoryLabel: "Tapetes",
     zone: "Tlaquepaque • Residencial",
-    title: "Restauración de Higiene para el Descanso",
+    title: "Lavado y Desinfección de Tapete Decorativo",
     subtitle:
-      "Desinfección integral que devuelve la blancura y frescura para dormir esa misma noche.",
-    stainType: "Manchas profundas y polvo",
-    dryingTime: "4 horas",
-    formula: "Sanitizante Clínico Textil",
+      "Despolvado profundo y extracción de suciedad en fibras geométricas devolviendo sus colores vivos.",
+    stainType: "Tráfico de calzado y polvo",
+    dryingTime: "Secado en Taller (3 días)",
+    formula: "Sanitizante Especializado",
     beforeImg: "/assets/portfolio/antes-6.jpg",
     afterImg: "/assets/portfolio/despues-6.jpg",
   },
@@ -268,6 +268,9 @@ export function BeforeAfterGallery({ onOpenWizard }: { onOpenWizard: () => void 
                   </span>
                   <span className="font-heading font-bold text-xs text-kanan-deep">
                     {selectedCase.dryingTime}
+                  </span>
+                  <span className="block text-[9px] text-slate-400 leading-tight">
+                    *Sujeto a ventilación y clima
                   </span>
                 </div>
               </div>

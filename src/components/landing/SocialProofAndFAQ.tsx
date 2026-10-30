@@ -30,7 +30,7 @@ const GOOGLE_REVIEWS = [
     date: "Hace 2 semanas",
     rating: 5,
     service: "Sala 3 piezas + 8 Sillas de Comedor",
-    text: "Muy profesionales. Utilizan maquinaria industrial de inyección-succión que realmente saca toda la tierra acumulada. Además entregan garantía por escrito al terminar.",
+    text: "Muy profesionales. Utilizan maquinaria industrial de inyección-succión que realmente saca toda la tierra acumulada. Además entregan tarjeta con recomendaciones y garantía de satisfacción al terminar.",
   },
   {
     id: "rev-3",
@@ -46,7 +46,7 @@ const GOOGLE_REVIEWS = [
 const FAQS = [
   {
     q: "¿Cuánto tiempo tardan en secar mis muebles, colchones o vestiduras?",
-    a: "Gracias a nuestras máquinas profesionales de inyección-succión de alta potencia, extraemos hasta el 90% de la humedad durante el proceso. El tiempo de secado total es de tan solo 3 a 4 horas a temperatura ambiente, listos para usarse el mismo día.",
+    a: "Gracias a nuestras máquinas profesionales de inyección-succión de alta potencia, extraemos hasta el 90% de la humedad durante el proceso. El tiempo promedio de secado es de 3 a 4 horas a temperatura ambiente (este tiempo dependerá de la ventilación y las condiciones del clima), listos para usarse el mismo día.",
   },
   {
     q: "¿Los productos que utilizan son seguros para mis mascotas y niños?",
@@ -61,12 +61,12 @@ const FAQS = [
     a: "En el caso de tapetes decorativos, nuestro equipo acude a tu domicilio para recolectarlos, realizamos el lavado profundo y secado controlado en taller, y te los entregamos limpios, desinfectados y listos para usarse en 3 días hábiles.",
   },
   {
-    q: "¿Qué cubre la Garantía de Satisfacción por Escrito?",
-    a: "Al finalizar cada servicio, nuestro técnico realiza la revisión de calidad junto contigo y entrega nuestra Tarjeta de Garantía Kanan. Si al secarse por completo notas algún detalle pendiente, acudimos a revisarlo sin costo adicional.",
+    q: "¿Qué cubre la Garantía de Satisfacción?",
+    a: "Al finalizar cada servicio, nuestro técnico realiza la revisión de calidad junto contigo y entrega nuestra Tarjeta Kanan con recomendaciones y fecha sugerida para tu próximo mantenimiento. Si al secarse por completo notas algún detalle pendiente, acudimos a revisarlo sin costo adicional.",
   },
   {
     q: "¿En qué zonas tienen cobertura a domicilio?",
-    a: "Cubrimos toda la Zona Metropolitana de Guadalajara (ZMG): Guadalajara, Zapopan, Tlajomulco de Zúñiga y San Pedro Tlaquepaque.",
+    a: "Cubrimos toda la Zona Metropolitana de Guadalajara (ZMG): Tlajomulco de Zúñiga, Zapopan, Guadalajara y San Pedro Tlaquepaque.",
   },
 ];
 
@@ -153,12 +153,12 @@ export function SocialProofAndFAQ() {
                 Respaldo Oficial Kanan
               </span>
               <h3 className="font-heading text-2xl sm:text-3xl font-extrabold leading-tight">
-                Tarjeta de Garantía por Escrito y Mantenimiento Programado
+                Tarjeta de Recomendaciones y Próximo Servicio
               </h3>
               <p className="text-slate-200 text-xs sm:text-sm leading-relaxed">
-                Al finalizar cada visita entregamos nuestra tarjeta oficial poservicio con sello de
-                garantía, fecha de desinfección y recordatorio de mantenimiento semestral (6 meses)
-                o trimestral para hogares con mascotas.
+                Al finalizar cada visita entregamos nuestra tarjeta física oficial con recomendaciones
+                de cuidado y la sugerencia de fecha para tu próximo mantenimiento preventivo (6 meses o
+                trimestral si tienes mascotas en casa).
               </p>
             </div>
 
@@ -180,7 +180,7 @@ export function SocialProofAndFAQ() {
                 <div className="flex items-start justify-between gap-2">
                   <div>
                     <span className="text-[10px] uppercase tracking-wider font-extrabold text-kanan-cerulean">
-                      Certificado de Garantía
+                      Recomendaciones y Cuidado
                     </span>
                     <p className="font-heading font-bold text-xs text-kanan-deep mt-0.5">
                       Sello de Calidad Kanan ✓

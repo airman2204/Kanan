@@ -60,7 +60,7 @@ export function HeroSection({ selectedMunicipio, onOpenWizard }: HeroSectionProp
               </h1>
               <p className="text-slate-600 text-base sm:text-lg leading-relaxed">
                 Transformamos la higiene de tu hogar con tecnología industrial de{" "}
-                <strong className="text-kanan-deep">inyección-succión ultrasónica</strong> y
+                <strong className="text-kanan-deep">inyección-succión profunda</strong> y
                 bioseguridad textil <strong className="text-kanan-cerulean">100% Pet-Friendly</strong>.
                 Eliminamos el 99.9% de ácaros, manchas difíciles y olores desde la primera sesión.
               </p>
@@ -81,9 +81,9 @@ export function HeroSection({ selectedMunicipio, onOpenWizard }: HeroSectionProp
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {[
                   { id: "salas", label: "Salas y Sillas", icon: Sofa },
-                  { id: "colchones", label: "Colchones", icon: BedDouble },
-                  { id: "vestiduras", label: "Vestiduras Auto", icon: CarFront },
                   { id: "tapetes", label: "Tapetes", icon: Sparkles },
+                  { id: "colchones", label: "Colchones", icon: BedDouble },
+                  { id: "vestiduras", label: "Vestiduras", icon: CarFront },
                 ].map((item) => {
                   const Icon = item.icon;
                   return (
@@ -121,20 +121,22 @@ export function HeroSection({ selectedMunicipio, onOpenWizard }: HeroSectionProp
 
             {/* 3 Pilares de Valor (Tarjetas Frescas y Luminosas) */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div className="bg-white rounded-2xl p-3.5 border border-slate-200/80 shadow-sm flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-kanan-cyan/15 text-kanan-cyan flex items-center justify-center shrink-0">
+              <div className="bg-white rounded-2xl p-3.5 border border-slate-200/80 shadow-sm flex items-start gap-3">
+                <div className="w-10 h-10 rounded-xl bg-kanan-cyan/15 text-kanan-cyan flex items-center justify-center shrink-0 mt-0.5">
                   <Timer className="w-5 h-5" />
                 </div>
                 <div>
                   <h2 className="font-heading font-bold text-xs sm:text-sm text-kanan-deep">
-                    Secado en 3-4 horas
+                    Secado en 3-4 horas*
                   </h2>
-                  <p className="text-[11px] text-slate-500">Usa tus muebles hoy mismo</p>
+                  <p className="text-[11px] text-slate-500 leading-snug">
+                    Usa tus muebles hoy mismo. *Este tiempo dependerá de la ventilación y las condiciones del clima.
+                  </p>
                 </div>
               </div>
 
-              <div className="bg-white rounded-2xl p-3.5 border border-slate-200/80 shadow-sm flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-600 flex items-center justify-center shrink-0">
+              <div className="bg-white rounded-2xl p-3.5 border border-slate-200/80 shadow-sm flex items-start gap-3">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5">
                   <PawPrint className="w-5 h-5" />
                 </div>
                 <div>
@@ -145,13 +147,13 @@ export function HeroSection({ selectedMunicipio, onOpenWizard }: HeroSectionProp
                 </div>
               </div>
 
-              <div className="bg-white rounded-2xl p-3.5 border border-slate-200/80 shadow-sm flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-kanan-cerulean/15 text-kanan-cerulean flex items-center justify-center shrink-0">
+              <div className="bg-white rounded-2xl p-3.5 border border-slate-200/80 shadow-sm flex items-start gap-3">
+                <div className="w-10 h-10 rounded-xl bg-kanan-cerulean/15 text-kanan-cerulean flex items-center justify-center shrink-0 mt-0.5">
                   <FileCheck2 className="w-5 h-5" />
                 </div>
                 <div>
                   <h2 className="font-heading font-bold text-xs sm:text-sm text-kanan-deep">
-                    Garantía por escrito
+                    Garantía de Satisfacción
                   </h2>
                   <p className="text-[11px] text-slate-500">Sello oficial poservicio</p>
                 </div>
@@ -213,10 +215,13 @@ export function HeroSection({ selectedMunicipio, onOpenWizard }: HeroSectionProp
                 </div>
                 <div className="my-2">
                   <p className="font-heading text-2xl font-extrabold text-white leading-none">
-                    3 a 4 hrs
+                    3 a 4 hrs*
                   </p>
                   <p className="text-xs text-slate-300 mt-1">
                     Extracción del 90% de humedad al instante
+                  </p>
+                  <p className="text-[10px] text-cyan-200/90 mt-1 leading-snug">
+                    *Este tiempo dependerá de la ventilación y las condiciones del clima.
                   </p>
                 </div>
                 <div className="w-full bg-white/15 h-2 rounded-full overflow-hidden">

@@ -1,7 +1,9 @@
 import { Cliente, ServicioCita, EtapaWhatsApp } from "@/types/crm";
 
-export const KANAN_WHATSAPP_NUMBER = "523340160684";
+export const KANAN_WHATSAPP_NUMBER = "523343359207";
+export const KANAN_PHONE_CALL = "3340160684";
 export const KANAN_PHONE_DISPLAY = "33 4016 0684";
+export const KANAN_WHATSAPP_DISPLAY = "33 4335 9207";
 export const KANAN_GOOGLE_MAPS_REVIEW_URL = "https://www.google.com/maps/search/?api=1&query=Kanan+Servicios+de+Limpieza+Guadalajara";
 
 export function generarMensajeWhatsAppReservaCliente(
@@ -61,14 +63,14 @@ export function generarSecuenciaPoservicio(
       etapa_titulo: "2. 24 Horas Antes — Recordatorio y Preparación",
       estatus_envio: "Programado",
       offset_descripcion: "-24 horas antes de la cita",
-      contenido_mensaje: `¡Hola ${cliente.nombre}! 🐾 Kanan Dog y nuestro equipo te recuerdan tu cita de mañana (${cita.fecha}, turno ${cita.turno}).\n\n*Recomendaciones previas:*\n1️⃣ Despejar el área alrededor de tus muebles.\n2️⃣ Tener accesible una toma de agua y contacto de luz.\n¡Recuerda que nuestros productos son 100% Pet-Friendly y el secado toma solo 3 a 4 horas!`,
+      contenido_mensaje: `¡Hola ${cliente.nombre}! 🐾 Kanan Dog y nuestro equipo te recuerdan tu cita de mañana (${cita.fecha}, turno ${cita.turno}).\n\n*Recomendaciones previas:*\n1️⃣ Despejar el área alrededor de tus muebles.\n2️⃣ Tener accesible una toma de agua y contacto de luz.\n¡Recuerda que nuestros productos son 100% Pet-Friendly y el secado toma solo 3 a 4 horas (este tiempo dependerá de la ventilación y las condiciones del clima)!`,
     },
     {
       etapa: "3_encuesta_3h_poservicio",
       etapa_titulo: "3. +3 Horas Poservicio — Encuesta 1-5 Estrellas",
       estatus_envio: "Programado",
       offset_descripcion: "+3 horas tras finalizar",
-      contenido_mensaje: `¡Hola ${cliente.nombre}! Gracias por confiar en *Kanan*. Tus muebles están en proceso final de secado.\n\nDel *1 al 5* (donde 5 es Excelente 🌟), ¿cómo calificarías el resultado y la atención de ${cita.tecnico_asignado}?`,
+      contenido_mensaje: `¡Hola ${cliente.nombre}! Gracias por confiar en *Kanan*. Tus muebles están en proceso final de secado (recuerda que el tiempo exacto dependerá de la ventilación y del clima).\n\nDel *1 al 5* (donde 5 es Excelente 🌟), ¿cómo calificarías el resultado y la atención de ${cita.tecnico_asignado}?`,
     },
     {
       etapa: "4_guia_derrames_24h_poservicio",
@@ -121,6 +123,6 @@ export function generarMensajeCalificacionPoservicio(
     etapa: "3b_alerta_soporte_menor_4_estrellas",
     etapa_titulo: `3B. [${estrellas} Estrellas] → Alerta Prioritaria a Soporte y Garantía`,
     estatus_envio: "Alerta Soporte",
-    contenido_mensaje: `Hola ${cliente.nombre}, lamentamos que tu experiencia en el folio *${cita.id}* no haya sido de 5 estrellas. Hemos activado un *Ticket Prioritario de Garantía por Escrito*; nuestro supervisor de calidad te contactará en breve para resolver cualquier detalle sin costo.`,
+    contenido_mensaje: `Hola ${cliente.nombre}, lamentamos que tu experiencia en el folio *${cita.id}* no haya sido de 5 estrellas. Hemos activado un *Ticket Prioritario de Garantía de Satisfacción*; nuestro supervisor de calidad te contactará en breve para resolver cualquier detalle sin costo.`,
   };
 }

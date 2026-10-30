@@ -32,10 +32,10 @@ const SERVICES = [
     metrics: [
       { label: "Extracción de Humedad", value: "90%" },
       { label: "Fórmula Enzimática", value: "100% Pet-Friendly" },
-      { label: "Tiempo de Secado", value: "3 a 4 hrs" },
+      { label: "Tiempo de Secado*", value: "3 a 4 hrs" },
     ],
     description:
-      "Renovación profunda mediante inyección-succión ultrasónica que desincrusta grasa corporal, manchas de alimentos, accidentes de mascotas y polvo profundo sin maltratar las fibras.",
+      "Renovación profunda mediante inyección-succión que desincrusta grasa corporal, manchas de alimentos, accidentes de mascotas y polvo profundo sin maltratar las fibras.",
     chips: ["Salas en L", "Salas 3-2-1", "Sofá Cama", "Sillón Reclinable", "Sillas de Comedor"],
   },
   {
@@ -66,7 +66,7 @@ const SERVICES = [
     metrics: [
       { label: "Alcance Interior", value: "Cabina + Cajuela" },
       { label: "Neutralización Olores", value: "Activa" },
-      { label: "Tiempo de Secado", value: "3 a 4 hrs" },
+      { label: "Tiempo de Secado*", value: "3 a 4 hrs" },
     ],
     description:
       "Llevamos nuestro equipo móvil hasta tu cochera para devolverle el aroma y la limpieza de agencia a los asientos, cabeceras, alfombra, tapetes y cajuela de tu vehículo.",
@@ -127,7 +127,7 @@ export function ServicesSection({ onSelectCategoryForWizard }: ServicesSectionPr
                 Aspirado Turbinado
               </h3>
               <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-                Remoción en seco de polvo fino, pelo de mascota y ácaros alojados hasta 10 cm dentro
+                Remoción en seco de polvo fino, pelo de mascota y ácaros alojados hasta 5 cm dentro
                 de la espuma.
               </p>
             </div>
@@ -156,11 +156,11 @@ export function ServicesSection({ onSelectCategoryForWizard }: ServicesSectionPr
             <div>
               <h3 className="font-heading font-bold text-sm sm:text-base text-kanan-deep flex items-center gap-1.5">
                 <Droplets className="w-4 h-4 text-kanan-cyan" />
-                Inyección-Succión (3-4h)
+                Inyección-Succión (3-4h*)
               </h3>
               <p className="text-xs text-slate-600 mt-1 leading-relaxed">
                 Enjuague profundo y succión de alto vacío que deja tus muebles listos para usarse esa
-                misma tarde.
+                misma tarde. <span className="block text-slate-400 text-[11px] mt-1">*Este tiempo dependerá de la ventilación y las condiciones del clima.</span>
               </p>
             </div>
           </div>
@@ -258,6 +258,67 @@ export function ServicesSection({ onSelectCategoryForWizard }: ServicesSectionPr
               </div>
             );
           })}
+        </div>
+
+        {/* Bloque de Maquinaria Industrial Oficial */}
+        <div className="bg-kanan-ice rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-sm space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-3">
+            <div>
+              <span className="text-[11px] font-heading font-extrabold uppercase tracking-wider text-kanan-cerulean">
+                Tecnología de Grado Profesional
+              </span>
+              <h3 className="font-heading text-lg sm:text-xl font-extrabold text-kanan-deep">
+                Maquinaria y Equipo Oficial que Ocupamos
+              </h3>
+            </div>
+            <span className="text-xs text-slate-500 font-medium">Potencia alemana y extracción de alto vacío</span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+            <div className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-kanan-navy/10 text-kanan-navy font-bold flex items-center justify-center text-base shrink-0">
+                🌪️
+              </div>
+              <div>
+                <p className="font-heading font-bold text-slate-900">Kärcher WD1 Classic</p>
+                <p className="text-[11px] text-slate-500">Aspirado turbinado seco-húmedo</p>
+              </div>
+            </div>
+
+            <div className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-kanan-cerulean/10 text-kanan-cerulean font-bold flex items-center justify-center text-base shrink-0">
+                💧
+              </div>
+              <div>
+                <p className="font-heading font-bold text-slate-900">Kärcher Puzzi 8/1 C</p>
+                <p className="text-[11px] text-slate-500">Inyección-succión compacta</p>
+              </div>
+            </div>
+
+            <div className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-kanan-cyan/15 text-kanan-cyan font-bold flex items-center justify-center text-base shrink-0">
+                ⚡
+              </div>
+              <div>
+                <p className="font-heading font-bold text-slate-900">Kärcher Puzzi 10/1</p>
+                <p className="text-[11px] text-slate-500">Inyección-succión industrial</p>
+              </div>
+            </div>
+
+            <div className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-600 font-bold flex items-center justify-center text-base shrink-0">
+                💨
+              </div>
+              <div>
+                <p className="font-heading font-bold text-slate-900">XPOWER P-230AT</p>
+                <p className="text-[11px] text-slate-500">Turbina centrífuga de secado</p>
+              </div>
+            </div>
+          </div>
+
+          <p className="text-[11px] text-slate-500 text-center pt-1">
+            *El tiempo de secado dependerá de la ventilación natural y las condiciones climáticas del domicilio.
+          </p>
         </div>
       </div>
     </section>

@@ -40,7 +40,7 @@ interface ClientesTableProps {
   }) => Promise<void>;
 }
 
-const MUNICIPIOS: MunicipioZMG[] = ["Guadalajara", "Zapopan", "Tlajomulco", "Tlaquepaque"];
+const MUNICIPIOS: MunicipioZMG[] = ["Tlajomulco", "Zapopan", "Guadalajara", "Tlaquepaque"];
 
 export function ClientesTable({
   clientes,

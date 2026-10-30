@@ -1,6 +1,12 @@
 export type MunicipioZMG = string;
 
-export type TurnoServicio = "Matutino (09:00 - 13:00)" | "Vespertino (14:00 - 18:00)";
+export type TurnoServicio =
+  | "Matutino (09:00 - 13:00)"
+  | "Vespertino (14:00 - 18:00)"
+  | "Lunes a Viernes (09:00 - 14:00)"
+  | "Sábado y Domingo (08:00 - 13:00)"
+  | "Lunes a Domingo (09:00 - 16:00)"
+  | string;
 
 export type EstatusCita =
   | "Por Confirmar"

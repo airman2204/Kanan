@@ -73,6 +73,23 @@ const CATALOGO_KANAN: CatalogCategory[] = [
     ],
   },
   {
+    id: "tapetes",
+    nombre: "Tapetes (Recolección a Domicilio)",
+    icon: Sparkles,
+    piezas: [
+      {
+        id: "tapete-chico",
+        nombre: "Tapete Mediano / Estándar (hasta 2x1.5m)",
+        descripcion: "Recolección y entrega en 3 días hábiles",
+      },
+      {
+        id: "tapete-grande",
+        nombre: "Tapete Grande / Sala (más de 2x1.5m)",
+        descripcion: "Lavado profundo y entrega en 3 días hábiles",
+      },
+    ],
+  },
+  {
     id: "colchones",
     nombre: "Colchones",
     icon: BedDouble,
@@ -90,7 +107,7 @@ const CATALOGO_KANAN: CatalogCategory[] = [
       {
         id: "colchon-queen",
         nombre: "Colchón Queen Size",
-        descripcion: "Lavado con cepillos suaves y secado en 3-4h",
+        descripcion: "Lavado con cepillos suaves y secado en 3-4h*",
       },
       {
         id: "colchon-king",
@@ -101,7 +118,7 @@ const CATALOGO_KANAN: CatalogCategory[] = [
   },
   {
     id: "vestiduras",
-    nombre: "Vestiduras de Autos",
+    nombre: "Vestiduras",
     icon: CarFront,
     piezas: [
       {
@@ -118,23 +135,6 @@ const CATALOGO_KANAN: CatalogCategory[] = [
         id: "auto-familiar",
         nombre: "Camioneta 3 Filas (7 pasajeros) / Pick-up",
         descripcion: "Servicio completo de cabina y cajuela",
-      },
-    ],
-  },
-  {
-    id: "tapetes",
-    nombre: "Tapetes (Recolección a Domicilio)",
-    icon: Sparkles,
-    piezas: [
-      {
-        id: "tapete-chico",
-        nombre: "Tapete Mediano / Estándar (hasta 2x1.5m)",
-        descripcion: "Recolección y entrega en 3 días hábiles",
-      },
-      {
-        id: "tapete-grande",
-        nombre: "Tapete Grande / Sala (más de 2x1.5m)",
-        descripcion: "Lavado profundo y entrega en 3 días hábiles",
       },
     ],
   },
@@ -199,11 +199,61 @@ export function BookingWizard({
   } | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (preselectedCategory) {
-      setActiveCategory(preselectedCategory);
+  // Helper para obtener los turnos disponibles según el municipio y la fecha seleccionada
+  const obtenerTurnosPorMunicipioYFecha = (): { turno: TurnoServicio; horario: string; secadoInfo: string }[] => {
+    const muniLower = selectedMunicipio.toLowerCase();
+    // Determinar día de la semana a partir de la fecha (0 = Domingo, 6 = Sábado)
+    let esFinDeSemana = false;
+    if (fecha) {
+      const parts = fecha.split("-");
+      if (parts.length === 3) {
+        const d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+        const dayOfWeek = d.getDay();
+        esFinDeSemana = dayOfWeek === 0 || dayOfWeek === 6;
+      }
     }
-  }, [preselectedCategory]);
+
+    if (muniLower.includes("tlajomulco")) {
+      return [
+        {
+          turno: "Lunes a Domingo (09:00 - 16:00)",
+          horario: "09:00 am a 4:00 pm",
+          secadoInfo: "Secado listo esa misma tarde-noche*",
+        },
+      ];
+    }
+
+    // Guadalajara y Zapopan (y Tlaquepaque como parte de ZMG central)
+    if (esFinDeSemana) {
+      return [
+        {
+          turno: "Sábado y Domingo (08:00 - 13:00)",
+          horario: "08:00 am a 1:00 pm (Fin de Semana)",
+          secadoInfo: "Secado listo entre 1:00 PM y 4:00 PM*",
+        },
+      ];
+    }
+
+    return [
+      {
+        turno: "Lunes a Viernes (09:00 - 14:00)",
+        horario: "09:00 am a 2:00 pm (Entre Semana)",
+        secadoInfo: "Secado listo entre 2:00 PM y 5:00 PM*",
+      },
+    ];
+  };
+
+  const turnosDisponibles = obtenerTurnosPorMunicipioYFecha();
+
+  // Mantener el turno sincronizado si cambia la fecha o municipio
+  useEffect(() => {
+    if (turnosDisponibles.length > 0) {
+      const existe = turnosDisponibles.some((t) => t.turno === turno);
+      if (!existe) {
+        setTurno(turnosDisponibles[0].turno);
+      }
+    }
+  }, [selectedMunicipio, fecha]);
 
   const updatePieceQuantity = (piezaId: string, delta: number) => {
     setQuantities((prev) => {
@@ -491,6 +541,32 @@ export function BookingWizard({
 
                     {/* Lista de Piezas de la Categoría Activa */}
                     <div className="space-y-3">
+                      {/* Nota especial para Colchones */}
+                      {activeCategory === "colchones" && (
+                        <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200/90 text-amber-900 text-xs flex items-start gap-2.5 shadow-sm">
+                          <span className="text-base shrink-0">⚠️</span>
+                          <div>
+                            <strong className="font-heading font-bold block">Nota importante para colchones:</strong>
+                            <p className="text-[11px] text-amber-800 mt-0.5 leading-relaxed">
+                              En caso de que el colchón sea <strong>doble vista</strong>, el precio aumentará dependiendo del tamaño del colchón.
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Nota especial para Vestiduras */}
+                      {activeCategory === "vestiduras" && (
+                        <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200/90 text-amber-900 text-xs flex items-start gap-2.5 shadow-sm">
+                          <span className="text-base shrink-0">⚠️</span>
+                          <div>
+                            <strong className="font-heading font-bold block">Nota importante para vestiduras:</strong>
+                            <p className="text-[11px] text-amber-800 mt-0.5 leading-relaxed">
+                              En caso de que las vestiduras sean de <strong>piel</strong>, el precio incrementará dependiendo del modelo y del color.
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
                       {CATALOGO_KANAN.find((c) => c.id === activeCategory)?.piezas.map((pieza) => {
                         const qty = quantities[pieza.id] || 0;
                         return (
@@ -755,21 +831,16 @@ export function BookingWizard({
                       <div>
                         <label className="block font-heading font-bold text-sm text-kanan-deep mb-2">
                           <Clock className="w-4 h-4 inline mr-1.5 text-kanan-cyan" />
-                          2. Elige tu Turno Preferido
+                          2. Turno y Horario Disponible para {selectedMunicipio}
                         </label>
                         <div className="space-y-2.5">
-                          {(
-                            [
-                              "Matutino (09:00 - 13:00)",
-                              "Vespertino (14:00 - 18:00)",
-                            ] as TurnoServicio[]
-                          ).map((t) => {
-                            const active = turno === t;
+                          {turnosDisponibles.map((item) => {
+                            const active = turno === item.turno;
                             return (
                               <button
-                                key={t}
+                                key={item.turno}
                                 type="button"
-                                onClick={() => setTurno(t)}
+                                onClick={() => setTurno(item.turno)}
                                 className={`w-full p-3.5 rounded-2xl border text-left transition-all flex items-center justify-between ${
                                   active
                                     ? "bg-kanan-navy text-white border-kanan-navy shadow-sm"
@@ -777,19 +848,19 @@ export function BookingWizard({
                                 }`}
                               >
                                 <div>
-                                  <p className="font-heading font-bold text-xs sm:text-sm">{t}</p>
+                                  <p className="font-heading font-bold text-xs sm:text-sm">
+                                    ⏰ {item.horario}
+                                  </p>
                                   <p
                                     className={`text-[11px] mt-0.5 ${
                                       active ? "text-kanan-cyan" : "text-slate-500"
                                     }`}
                                   >
-                                    {t.startsWith("Matutino")
-                                      ? "Secado listo entre 1:00 PM y 4:00 PM"
-                                      : "Secado listo esa misma noche"}
+                                    {item.secadoInfo}
                                   </p>
                                 </div>
                                 <span
-                                  className={`text-xs font-bold px-2.5 py-1 rounded-full ${
+                                  className={`text-xs font-bold px-2.5 py-1 rounded-full shrink-0 ${
                                     active
                                       ? "bg-kanan-cyan text-white"
                                       : "bg-emerald-100 text-emerald-700"
@@ -801,6 +872,9 @@ export function BookingWizard({
                             );
                           })}
                         </div>
+                        <p className="text-[10px] text-slate-400 mt-2">
+                          *El tiempo de secado dependerá de la ventilación y las condiciones del clima.
+                        </p>
                       </div>
                     </div>
 
@@ -937,8 +1011,8 @@ export function BookingWizard({
                         <div className="bg-white rounded-xl p-3 border border-slate-200/80 flex items-center gap-2.5 text-xs text-kanan-navy">
                           <ShieldCheck className="w-5 h-5 text-kanan-cyan shrink-0" />
                           <span>
-                            Incluye <strong>Garantía de Satisfacción por Escrito</strong> y secado
-                            rápido de 3 a 4 horas.
+                            Incluye <strong>Garantía de Satisfacción</strong> y secado
+                            rápido de 3 a 4 horas (sujeto a ventilación y clima).
                           </span>
                         </div>
                       </div>

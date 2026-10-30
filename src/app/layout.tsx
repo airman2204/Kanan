@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     template: "%s | Kanan Servicios de Limpieza",
   },
   description:
-    "Protegemos lo que más tocas. Limpieza y desinfección profunda de salas, colchones, vestiduras y tapetes a domicilio en Guadalajara, Zapopan, Tlajomulco y Tlaquepaque. 100% Pet-Friendly y secado en 3-4 horas.",
+    "Protegemos lo que más tocas. Limpieza y desinfección profunda de salas, colchones, vestiduras y tapetes a domicilio en Tlajomulco, Zapopan, Guadalajara y Tlaquepaque. 100% Pet-Friendly y secado rápido.",
   keywords: [
     "limpieza de salas guadalajara",
     "lavado de salas zapopan",
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Kanan Servicios de Limpieza | Protegemos lo que más tocas",
     description:
-      "Limpieza y desinfección profunda a domicilio en Guadalajara, Zapopan y ZMG. Secado rápido en 3-4 horas, 100% Pet-Friendly y garantía por escrito.",
+      "Limpieza y desinfección profunda a domicilio en Tlajomulco, Zapopan, Guadalajara y Tlaquepaque. Secado rápido en 3-4 horas (según clima), 100% Pet-Friendly y Garantía de Satisfacción.",
     url: "https://kananlimpieza.mx",
     siteName: "Kanan Servicios de Limpieza",
     locale: "es_MX",
