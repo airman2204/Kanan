@@ -19,12 +19,15 @@ import {
   MessageCircle,
   Trash2,
   ShieldCheck,
+  AlertCircle,
+  Building2,
 } from "lucide-react";
 import {
   MunicipioZMG,
   TurnoServicio,
   ItemContratado,
 } from "@/types/crm";
+import { consultarCodigoPostal } from "@/lib/utils/postalCodes";
 
 interface CatalogPiece {
   id: string;
@@ -176,7 +179,12 @@ export function BookingWizard({
     "sala-l": 1,
   });
 
-  // Paso 2: Ubicación y Fotos
+  // Paso 2: Ubicación Inteligente por Código Postal y Fotos
+  const [codigoPostal, setCodigoPostal] = useState("");
+  const [colonia, setColonia] = useState("");
+  const [coloniasDisponibles, setColoniasDisponibles] = useState<string[]>([]);
+  const [calleNumero, setCalleNumero] = useState("");
+  const [cpError, setCpError] = useState<string | null>(null);
   const [direccion, setDireccion] = useState("");
   const [notasServicio, setNotasServicio] = useState("");
   const [fotosPreview, setFotosPreview] = useState<string[]>([]);
@@ -199,7 +207,40 @@ export function BookingWizard({
   } | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // Helper para obtener los turnos disponibles según el municipio y la fecha seleccionada
+  // Manejar búsqueda automática y validación de Código Postal
+  const handleCodigoPostalChange = (val: string) => {
+    const clean = val.replace(/\D/g, "").slice(0, 5);
+    setCodigoPostal(clean);
+    setCpError(null);
+
+    if (clean.length === 5) {
+      const info = consultarCodigoPostal(clean);
+      if (!info.valido) {
+        setCpError(info.mensajeError || "Código postal fuera de nuestra zona de cobertura en Jalisco.");
+        setColoniasDisponibles([]);
+      } else {
+        if (info.municipio) {
+          onSelectMunicipio(info.municipio);
+        }
+        if (info.colonias && info.colonias.length > 0) {
+          setColoniasDisponibles(info.colonias);
+          setColonia(info.colonias[0]);
+        } else {
+          setColoniasDisponibles([]);
+        }
+      }
+    }
+  };
+
+  // Mantener sincronizado el campo direccion completo
+  useEffect(() => {
+    const partes = [];
+    if (calleNumero.trim()) partes.push(calleNumero.trim());
+    if (colonia.trim()) partes.push(`Col. ${colonia.trim()}`);
+    if (codigoPostal.trim()) partes.push(`CP ${codigoPostal.trim()}`);
+    partes.push(selectedMunicipio);
+    setDireccion(partes.join(", "));
+  }, [calleNumero, colonia, codigoPostal, selectedMunicipio]);
   const obtenerTurnosPorMunicipioYFecha = (): { turno: TurnoServicio; horario: string; secadoInfo: string }[] => {
     const muniLower = selectedMunicipio.toLowerCase();
     // Determinar día de la semana a partir de la fecha (0 = Domingo, 6 = Sábado)
@@ -661,56 +702,107 @@ export function BookingWizard({
                   </div>
                 )}
 
-                {/* PASO 2: UBICACIÓN Y CARGA OPCIONAL DE FOTOS DEL ESTADO ACTUAL */}
+                {/* PASO 2: UBICACIÓN INTELIGENTE POR CÓDIGO POSTAL Y FOTOS */}
                 {step === 2 && (
                   <div className="space-y-6">
-                    <div>
-                      <label className="block font-heading font-bold text-sm text-kanan-deep mb-2">
-                        1. Selecciona tu Municipio de Cobertura
-                      </label>
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                        {(
-                          [
-                            "Tlajomulco",
-                            "Zapopan",
-                            "Guadalajara",
-                            "Tlaquepaque",
-                          ] as MunicipioZMG[]
-                        ).map((mun) => {
-                          const active = selectedMunicipio === mun;
-                          return (
-                            <button
-                              key={mun}
-                              type="button"
-                              onClick={() => onSelectMunicipio(mun)}
-                              className={`py-3 px-3 rounded-2xl border font-heading font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all ${
-                                active
-                                  ? "bg-kanan-navy text-white border-kanan-navy shadow-sm"
-                                  : "bg-kanan-ice text-kanan-deep border-slate-200 hover:bg-slate-200/70"
-                              }`}
-                            >
-                              <MapPin className="w-4 h-4 text-kanan-cyan shrink-0" />
-                              <span>{mun}</span>
-                            </button>
-                          );
-                        })}
+                    {/* Bloque de Código Postal con Autocompletado y Filtro de Cobertura */}
+                    <div className="bg-kanan-ice/70 rounded-3xl p-5 sm:p-6 border border-slate-200/90 space-y-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div>
+                          <label
+                            htmlFor="wizard-cp"
+                            className="block font-heading font-extrabold text-sm sm:text-base text-kanan-deep"
+                          >
+                            1. Ingresa tu Código Postal (5 dígitos)
+                          </label>
+                          <p className="text-xs text-slate-500 mt-0.5">
+                            Detecta automáticamente tu municipio y colonias oficiales en Jalisco.
+                          </p>
+                        </div>
+                        <span className="text-[11px] font-heading font-bold text-kanan-cerulean bg-white px-3 py-1 rounded-full border border-kanan-cyan/30 self-start sm:self-auto">
+                          📍 Cobertura exclusiva Jalisco
+                        </span>
                       </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-start">
+                        <div className="sm:col-span-4">
+                          <div className="relative">
+                            <input
+                              id="wizard-cp"
+                              type="text"
+                              maxLength={5}
+                              value={codigoPostal}
+                              onChange={(e) => handleCodigoPostalChange(e.target.value)}
+                              placeholder="Ej. 44600"
+                              className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-base font-heading font-bold text-kanan-deep tracking-wider focus:outline-none focus:ring-2 focus:ring-kanan-cyan"
+                            />
+                            {codigoPostal.length === 5 && !cpError && (
+                              <CheckCircle2 className="w-5 h-5 text-emerald-500 absolute right-3.5 top-3.5" />
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Municipio Detectado */}
+                        <div className="sm:col-span-4">
+                          <div className="px-4 py-3 rounded-2xl bg-white border border-slate-200 text-xs sm:text-sm flex items-center justify-between min-h-[46px]">
+                            <span className="text-slate-400 font-medium">Municipio:</span>
+                            <span className="font-heading font-bold text-kanan-deep">
+                              {selectedMunicipio}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Colonia (Select si hay catálogo, o input libre) */}
+                        <div className="sm:col-span-4">
+                          {coloniasDisponibles.length > 0 ? (
+                            <select
+                              value={colonia}
+                              onChange={(e) => setColonia(e.target.value)}
+                              className="w-full rounded-2xl border border-slate-300 bg-white px-3.5 py-3 text-xs sm:text-sm font-semibold text-kanan-deep focus:outline-none focus:ring-2 focus:ring-kanan-cyan"
+                            >
+                              {coloniasDisponibles.map((col) => (
+                                <option key={col} value={col}>
+                                  {col}
+                                </option>
+                              ))}
+                            </select>
+                          ) : (
+                            <input
+                              type="text"
+                              value={colonia}
+                              onChange={(e) => setColonia(e.target.value)}
+                              placeholder="Colonia o Fracc."
+                              className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-xs sm:text-sm text-kanan-deep focus:outline-none focus:ring-2 focus:ring-kanan-cyan"
+                            />
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Alerta si el CP está fuera de cobertura */}
+                      {cpError && (
+                        <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2.5 animate-fadeIn">
+                          <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                          <p className="leading-snug">{cpError}</p>
+                        </div>
+                      )}
                     </div>
 
+                    {/* Dirección Específica: Calle, Número y Coto */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <label
-                          htmlFor="wizard-direccion"
-                          className="block font-heading font-bold text-sm text-kanan-deep mb-1.5"
+                          htmlFor="wizard-calle"
+                          className="block font-heading font-bold text-sm text-kanan-deep mb-1.5 flex items-center justify-between"
                         >
-                          2. Colonia y Calle / Coto
+                          <span>2. Calle, Número Exterior e Interior / Coto</span>
+                          <span className="text-[11px] font-normal text-slate-400">Requerido</span>
                         </label>
                         <input
-                          id="wizard-direccion"
+                          id="wizard-calle"
                           type="text"
-                          value={direccion}
-                          onChange={(e) => setDireccion(e.target.value)}
-                          placeholder={`Ej. Col. Providencia / Av. Patria, ${selectedMunicipio}`}
+                          value={calleNumero}
+                          onChange={(e) => setCalleNumero(e.target.value)}
+                          placeholder="Ej. Av. Providencia 2340, Depto 4B / Coto Santa Anita"
                           className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-kanan-deep focus:outline-none focus:ring-2 focus:ring-kanan-cyan"
                         />
                       </div>
@@ -718,16 +810,17 @@ export function BookingWizard({
                       <div>
                         <label
                           htmlFor="wizard-notas"
-                          className="block font-heading font-bold text-sm text-kanan-deep mb-1.5"
+                          className="block font-heading font-bold text-sm text-kanan-deep mb-1.5 flex items-center justify-between"
                         >
-                          3. Detalles de manchas o tela (Opcional)
+                          <span>3. Detalles de manchas o tela (Opcional)</span>
+                          <span className="text-[11px] font-normal text-slate-400">Opcional</span>
                         </label>
                         <input
                           id="wizard-notas"
                           type="text"
                           value={notasServicio}
                           onChange={(e) => setNotasServicio(e.target.value)}
-                          placeholder="Ej. Sala color beige, manchas de mascota o café"
+                          placeholder="Ej. Manchas de café en asiento, tela tipo lino claro"
                           className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-kanan-deep focus:outline-none focus:ring-2 focus:ring-kanan-cyan"
                         />
                       </div>
@@ -804,8 +897,9 @@ export function BookingWizard({
 
                       <button
                         type="button"
+                        disabled={Boolean(cpError) || codigoPostal.length !== 5 || !calleNumero.trim()}
                         onClick={() => setStep(3)}
-                        className="inline-flex items-center gap-2 bg-kanan-cyan hover:bg-[#009ec0] text-white font-heading font-bold text-sm px-6 py-3.5 rounded-2xl shadow-cyan-glow"
+                        className="inline-flex items-center gap-2 bg-kanan-cyan hover:bg-[#009ec0] disabled:bg-slate-300 disabled:shadow-none text-white font-heading font-bold text-sm px-6 py-3.5 rounded-2xl shadow-cyan-glow"
                       >
                         <span>Elegir Fecha y Turno</span>
                         <ArrowRight className="w-4 h-4" />
