@@ -15,18 +15,8 @@ import {
   X,
   Shield,
   Sparkles,
-  ChevronLeft,
-  ChevronRight,
   Plus,
-  Truck,
   ExternalLink,
-  Search,
-  Bell,
-  SlidersHorizontal,
-  Flame,
-  CheckCircle2,
-  Clock,
-  Layers,
 } from "lucide-react";
 import {
   KananDatabase,
@@ -37,7 +27,6 @@ import {
   MunicipioZMG,
   MarketingMetrics,
 } from "@/types/crm";
-import { JaliscoServiceMap } from "@/components/admin/JaliscoServiceMap";
 import { WhatsAppFoxdrop } from "@/components/admin/WhatsAppFoxdrop";
 import { ClientesTable } from "@/components/admin/ClientesTable";
 import { CalendarCitasView } from "@/components/admin/CalendarCitasView";
@@ -57,7 +46,6 @@ export default function AdminPage() {
   // Navegación en el Menú Lateral
   const [activeSection, setActiveSection] = useState<AdminSection>("resumen");
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   // Filtro de calendario y trigger de nueva cita
   const [calendarHighlightStatus, setCalendarHighlightStatus] = useState<string | null>(null);
@@ -273,11 +261,7 @@ export default function AdminPage() {
     },
   };
 
-  // Métricas rápidas para top header y badges
-  const hoyStr = useMemo(() => new Date().toISOString().split("T")[0], []);
-  const citasHoy = useMemo(() => citas.filter((c) => c.fecha === hoyStr && c.estatus !== "Cancelada"), [citas, hoyStr]);
   const citasPendientes = useMemo(() => citas.filter((c) => c.estatus === "Por Confirmar"), [citas]);
-  const citasEnRuta = useMemo(() => citas.filter((c) => c.estatus === "En Ruta" || c.estatus === "En Proceso"), [citas]);
 
   const navItems = [
     {
@@ -297,8 +281,7 @@ export default function AdminPage() {
       id: "clientes" as AdminSection,
       label: "Clientes",
       icon: Users,
-      badge: clientes.length > 0 ? clientes.length : null,
-      badgeColor: "bg-slate-700/80 text-slate-200",
+      badge: null,
     },
     {
       id: "whatsapp" as AdminSection,
@@ -320,118 +303,57 @@ export default function AdminPage() {
     },
   ];
 
-  const sectionTitles: Record<AdminSection, { title: string; subtitle: string }> = {
-    resumen: {
-      title: "Panel de Control Ejecutivo",
-      subtitle: "Métricas operativas y monitoreo de ruta en tiempo real",
-    },
-    calendario: {
-      title: "Calendario & Servicios",
-      subtitle: "Gestión de turnos, semáforo de capacidad y firmas de conformidad",
-    },
-    clientes: {
-      title: "Directorio de Clientes",
-      subtitle: "Histórico de compras, domicilios en ZMG y frecuencia de servicio",
-    },
-    whatsapp: {
-      title: "Automatización WhatsApp",
-      subtitle: "Disparadores de confirmación, recordatorios y seguimiento Foxdrop",
-    },
-    marketing: {
-      title: "Métricas de Crecimiento & Ads",
-      subtitle: "Rendimiento publicitario en Meta, Google Ads y posicionamiento orgánico",
-    },
-    configuracion: {
-      title: "Configuración del Sistema",
-      subtitle: "PIN de campo del técnico, políticas de cancelación y modo temático",
-    },
+  const sectionTitles: Record<AdminSection, string> = {
+    resumen: "Resumen",
+    calendario: "Calendario de citas",
+    clientes: "Clientes",
+    whatsapp: "WhatsApp",
+    marketing: "Métricas & Marketing",
+    configuracion: "Configuración",
   };
 
   if (authChecking) {
     return (
       <div className="min-h-screen bg-[#0F172A] flex flex-col items-center justify-center gap-4">
-        <div className="w-12 h-12 border-4 border-[#36A6DE] border-t-transparent rounded-full animate-spin" />
-        <p className="text-slate-400 font-heading text-xs tracking-wider uppercase">Cargando Kanan Admin...</p>
+        <div className="w-10 h-10 border-4 border-[#36A6DE] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#F4F7F9] flex antialiased text-slate-800 selection:bg-[#36A6DE]/30">
+    <div className="min-h-screen bg-[#F4F7F9] flex antialiased text-slate-800">
       
-      {/* MENÚ LATERAL (SIDEBAR) LINEAR / APPLE STYLE */}
+      {/* MENÚ LATERAL (SIDEBAR) */}
       <aside
-        className={`fixed md:sticky top-0 left-0 h-screen z-50 bg-[#0F172A] text-white flex flex-col justify-between transition-all duration-300 ease-in-out border-r border-slate-800/80 shadow-[4px_0_24px_rgba(0,0,0,0.25)] ${
+        className={`fixed md:sticky top-0 left-0 h-screen z-50 bg-[#0F172A] text-white flex flex-col justify-between transition-transform duration-300 ease-in-out border-r border-slate-800/80 shadow-2xl w-64 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
-        } ${sidebarCollapsed ? "md:w-20" : "md:w-64"} w-72`}
+        }`}
       >
         <div className="flex flex-col h-full overflow-y-auto no-scrollbar">
           
-          {/* Header de Sidebar con Logo y Collapse Toggle */}
-          <div className="p-5 pb-4 border-b border-slate-800/80 flex items-center justify-between relative">
-            <div className={`flex items-center gap-3 transition-opacity duration-200 ${sidebarCollapsed ? "md:justify-center md:w-full" : ""}`}>
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#1D71B5] to-[#36A6DE] p-2 flex items-center justify-center shadow-lg shadow-[#1D71B5]/30 shrink-0">
-                <img
-                  src="/assets/brand/kanan-logo-white.png"
-                  alt="Kanan"
-                  className="w-full h-full object-contain"
-                />
-              </div>
-              {!sidebarCollapsed && (
-                <div className="flex flex-col">
-                  <span className="font-heading font-black text-sm tracking-tight text-white leading-none">
-                    KANAN
-                  </span>
-                  <span className="text-[10px] text-[#36A6DE] font-semibold tracking-wider uppercase mt-1">
-                    Control Operativo
-                  </span>
-                </div>
-              )}
+          {/* Header con el Logo Original Kanan en Blanco (Sin recuadros artificiales) */}
+          <div className="p-6 pb-5 border-b border-white/10 flex items-center justify-between relative">
+            <div className="w-full flex justify-center items-center py-1">
+              <img
+                src="/assets/brand/kanan-logo-white.png"
+                alt="Kanan"
+                className="h-10 w-auto object-contain"
+              />
             </div>
 
             {/* Botón cerrar en móvil */}
             <button
               type="button"
               onClick={() => setSidebarOpen(false)}
-              className="md:hidden text-slate-400 hover:text-white p-2 rounded-xl hover:bg-slate-800/60 transition-colors"
+              className="md:hidden absolute right-4 top-5 text-slate-400 hover:text-white p-2 rounded-xl hover:bg-slate-800 transition-colors"
               aria-label="Cerrar menú"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
-          {/* Quick Route Status Pill (Technician indicator) */}
-          {!sidebarCollapsed && (
-            <div className="px-4 pt-4 pb-2">
-              <div className="p-3 rounded-2xl bg-slate-800/60 border border-slate-700/50 flex items-center justify-between">
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <span className="relative flex h-2.5 w-2.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-                  </span>
-                  <div className="truncate">
-                    <p className="text-[11px] font-bold text-slate-200 truncate">Ruta Guadalajara</p>
-                    <p className="text-[10px] text-slate-400">{citasHoy.length} citas hoy</p>
-                  </div>
-                </div>
-                <Link
-                  href="/tecnico"
-                  target="_blank"
-                  className="p-1.5 rounded-lg bg-[#1D71B5]/30 hover:bg-[#1D71B5]/50 text-[#36A6DE] transition-colors"
-                  title="Abrir app técnico de campo"
-                >
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </Link>
-              </div>
-            </div>
-          )}
-
           {/* Navegación Principal */}
-          <nav className="p-3 space-y-1.5 flex-1">
-            <div className={`px-3 py-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider ${sidebarCollapsed ? "text-center" : ""}`}>
-              {sidebarCollapsed ? "•" : "Menú Principal"}
-            </div>
-
+          <nav className="p-4 space-y-1.5 flex-1">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeSection === item.id;
@@ -444,39 +366,27 @@ export default function AdminPage() {
                     setActiveSection(item.id);
                     setSidebarOpen(false);
                   }}
-                  title={sidebarCollapsed ? item.label : undefined}
-                  className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl font-heading font-medium text-xs transition-all duration-200 group relative ${
+                  className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl font-heading font-medium text-xs transition-all duration-200 group ${
                     isActive
                       ? "bg-gradient-to-r from-[#1D71B5] to-[#36A6DE] text-white shadow-[0_4px_16px_rgba(29,113,181,0.35)]"
                       : "text-slate-300 hover:bg-slate-800/70 hover:text-white"
-                  } ${sidebarCollapsed ? "justify-center px-0" : ""}`}
+                  }`}
                 >
                   <Icon
                     className={`w-4 h-4 shrink-0 transition-transform duration-200 ${
                       isActive ? "text-white" : "text-slate-400 group-hover:text-[#36A6DE]"
-                    } ${sidebarCollapsed ? "w-5 h-5" : ""}`}
+                    }`}
                   />
-                  
-                  {!sidebarCollapsed && (
-                    <span className="truncate flex-1 text-left">{item.label}</span>
-                  )}
+                  <span className="truncate flex-1 text-left font-bold">{item.label}</span>
 
-                  {!sidebarCollapsed && item.badge !== null && (
+                  {item.badge !== null && (
                     <span
-                      className={`px-2 py-0.5 rounded-full text-[10px] font-bold shrink-0 ${
+                      className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold shrink-0 ${
                         item.badgeColor || "bg-slate-700 text-slate-200"
                       }`}
                     >
                       {item.badge}
                     </span>
-                  )}
-
-                  {/* Tooltip para modo colapsado */}
-                  {sidebarCollapsed && (
-                    <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-slate-900 text-white text-[11px] font-medium rounded-xl whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity shadow-xl border border-slate-700/80 z-50">
-                      {item.label}
-                      {item.badge !== null && ` (${item.badge})`}
-                    </div>
                   )}
                 </button>
               );
@@ -484,46 +394,23 @@ export default function AdminPage() {
           </nav>
 
           {/* Footer de Sidebar */}
-          <div className="p-3 border-t border-slate-800/80 space-y-2">
-            {/* Collapse toggle (desktop only) */}
-            <button
-              type="button"
-              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              className="hidden md:flex items-center justify-center gap-2 w-full py-2 px-3 rounded-xl bg-slate-800/50 hover:bg-slate-800 text-slate-400 hover:text-white text-xs font-medium transition-colors"
-              title={sidebarCollapsed ? "Expandir barra lateral" : "Colapsar barra lateral"}
-            >
-              {sidebarCollapsed ? (
-                <ChevronRight className="w-4 h-4" />
-              ) : (
-                <>
-                  <ChevronLeft className="w-4 h-4" />
-                  <span className="text-[11px]">Colapsar menú</span>
-                </>
-              )}
-            </button>
-
+          <div className="p-4 border-t border-slate-800/80 space-y-2">
             <Link
               href="/"
               target="_blank"
-              className={`flex items-center gap-2 w-full py-2 px-3 rounded-xl bg-slate-800/30 hover:bg-slate-800/70 text-slate-300 hover:text-white text-xs font-medium transition-colors border border-slate-800 ${
-                sidebarCollapsed ? "justify-center" : "justify-center"
-              }`}
-              title="Ver Sitio Web Público"
+              className="flex items-center justify-center gap-2 w-full py-2.5 px-3 rounded-2xl bg-slate-800/50 hover:bg-slate-800 text-slate-300 hover:text-white text-xs font-bold transition-colors border border-slate-800"
             >
               <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
-              {!sidebarCollapsed && <span>Sitio Público</span>}
+              <span>Ver Sitio Web</span>
             </Link>
 
             <button
               type="button"
               onClick={handleLogout}
-              className={`flex items-center gap-2 w-full py-2 px-3 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 hover:text-rose-100 text-xs font-medium transition-colors border border-rose-500/20 ${
-                sidebarCollapsed ? "justify-center" : "justify-center"
-              }`}
-              title="Cerrar sesión segura"
+              className="flex items-center justify-center gap-2 w-full py-2.5 px-3 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 hover:text-rose-100 text-xs font-bold transition-colors border border-rose-500/20"
             >
               <LogOut className="w-3.5 h-3.5 text-rose-400" />
-              {!sidebarCollapsed && <span>Salir</span>}
+              <span>Cerrar sesión</span>
             </button>
           </div>
         </div>
@@ -532,10 +419,9 @@ export default function AdminPage() {
       {/* ÁREA DE CONTENIDO PRINCIPAL */}
       <div className="flex-1 flex flex-col min-w-0">
         
-        {/* HEADER EJECUTIVO FIJO (STICKY GLASS TOP BAR) */}
-        <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-8 py-3.5 flex items-center justify-between shadow-[0_1px_8px_rgba(0,0,0,0.03)] transition-all">
+        {/* BARRA SUPERIOR FIJA */}
+        <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-8 py-3.5 flex items-center justify-between shadow-[0_1px_6px_rgba(0,0,0,0.02)]">
           <div className="flex items-center gap-3 min-w-0">
-            {/* Toggle móvil */}
             <button
               type="button"
               onClick={() => setSidebarOpen(true)}
@@ -545,68 +431,29 @@ export default function AdminPage() {
               <Menu className="w-5 h-5" />
             </button>
 
-            {/* Breadcrumb / Título dinámico */}
-            <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider hidden sm:inline">
-                  Admin Kanan /
-                </span>
-                <h1 className="font-heading font-extrabold text-base sm:text-lg text-slate-900 truncate">
-                  {sectionTitles[activeSection].title}
-                </h1>
-              </div>
-              <p className="text-[11px] text-slate-500 hidden sm:block truncate">
-                {sectionTitles[activeSection].subtitle}
-              </p>
-            </div>
+            <h1 className="font-heading font-extrabold text-lg sm:text-xl text-[#355581] truncate">
+              {sectionTitles[activeSection]}
+            </h1>
           </div>
 
-          {/* Quick Actions & KPIs Rápidos */}
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            
-            {/* Status rápido del técnico */}
-            <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100/90 border border-slate-200 text-xs font-medium text-slate-700">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-[11px]">Unidad 1 ZMG:</span>
-              <strong className="text-slate-900 font-semibold">
-                {citasEnRuta.length > 0 ? "En Ruta Activa" : "Base Operativa"}
-              </strong>
-            </div>
-
-            {/* Badge de alertas de hoy */}
-            <button
-              type="button"
-              onClick={() => setActiveSection("calendario")}
-              className="relative p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
-              title="Notificaciones de agenda"
-            >
-              <Bell className="w-4 h-4" />
-              {citasPendientes.length > 0 && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-amber-500 text-white rounded-full text-[9px] font-bold flex items-center justify-center">
-                  {citasPendientes.length}
-                </span>
-              )}
-            </button>
-
-            {/* Botón Nueva Cita de Acción Rápida */}
-            <button
-              type="button"
-              onClick={() => {
-                setActiveSection("calendario");
-                setTriggerNewCitaModal(true);
-              }}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#1D71B5] to-[#36A6DE] hover:from-[#175c94] hover:to-[#2c8fc0] text-white font-heading font-bold text-xs shadow-sm hover:shadow-md transition-all active:scale-[0.98]"
-            >
-              <Plus className="w-4 h-4" />
-              <span className="hidden sm:inline">Nueva Cita</span>
-            </button>
-          </div>
+          {/* Botón Nueva Cita de Acción Rápida */}
+          <button
+            type="button"
+            onClick={() => {
+              setActiveSection("calendario");
+              setTriggerNewCitaModal(true);
+            }}
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-[#1D71B5] to-[#36A6DE] hover:from-[#175c94] hover:to-[#2c8fc0] text-white font-heading font-bold text-xs shadow-sm hover:shadow-md transition-all active:scale-[0.98]"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Nueva Cita</span>
+          </button>
         </header>
 
         {/* CONTENEDOR DE PÁGINA */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto space-y-6">
           
-          {/* SECCIÓN 1: RESUMEN (BENTO BOX DASHBOARD) */}
+          {/* SECCIÓN 1: RESUMEN */}
           {activeSection === "resumen" && (
             <ResumenDashboard
               clientes={clientes}
@@ -636,37 +483,31 @@ export default function AdminPage() {
 
           {/* SECCIÓN 3: CLIENTES */}
           {activeSection === "clientes" && (
-            <div className="space-y-6">
-              <ClientesTable
-                clientes={clientes}
-                citas={citas}
-                onUpdateCliente={handleUpdateCliente}
-                onDeleteCliente={handleDeleteCliente}
-                onCreateClienteManual={handleCreateClienteManual}
-              />
-            </div>
+            <ClientesTable
+              clientes={clientes}
+              citas={citas}
+              onUpdateCliente={handleUpdateCliente}
+              onDeleteCliente={handleDeleteCliente}
+              onCreateClienteManual={handleCreateClienteManual}
+            />
           )}
 
           {/* SECCIÓN 4: WHATSAPP */}
           {activeSection === "whatsapp" && (
-            <div className="space-y-4">
-              <WhatsAppFoxdrop
-                clientes={clientes}
-                citas={citas}
-                mensajes={mensajes}
-                onTriggerMessage={handleTriggerWhatsApp}
-              />
-            </div>
+            <WhatsAppFoxdrop
+              clientes={clientes}
+              citas={citas}
+              mensajes={mensajes}
+              onTriggerMessage={handleTriggerWhatsApp}
+            />
           )}
 
           {/* SECCIÓN 5: MÉTRICAS Y MARKETING DIGITAL */}
           {activeSection === "marketing" && (
-            <div className="space-y-6">
-              <MarketingAnalyticsView
-                metrics={marketing}
-                onRefresh={fetchCrmData}
-              />
-            </div>
+            <MarketingAnalyticsView
+              metrics={marketing}
+              onRefresh={fetchCrmData}
+            />
           )}
 
           {/* SECCIÓN 6: CONFIGURACIÓN */}
@@ -677,7 +518,7 @@ export default function AdminPage() {
                 {/* Ajustes de Campaña Temporal (Modo Halloween) */}
                 <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-5">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-orange-100 text-orange-600 flex items-center justify-center text-lg shadow-sm">
+                    <div className="w-10 h-10 rounded-2xl bg-orange-100 text-orange-600 flex items-center justify-center text-lg">
                       🎃
                     </div>
                     <div>
@@ -685,7 +526,7 @@ export default function AdminPage() {
                         Campaña de Temporada
                       </h3>
                       <p className="text-xs text-slate-400">
-                        Efectos visuales temáticos en el sitio web público
+                        Efectos temáticos en el sitio web público
                       </p>
                     </div>
                   </div>
@@ -716,7 +557,7 @@ export default function AdminPage() {
                 {/* Políticas Operativas y Cancelaciones */}
                 <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-5">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-blue-100 text-[#1D71B5] flex items-center justify-center shadow-sm">
+                    <div className="w-10 h-10 rounded-2xl bg-blue-100 text-[#1D71B5] flex items-center justify-center">
                       <Shield className="w-5 h-5" />
                     </div>
                     <div>
@@ -724,7 +565,7 @@ export default function AdminPage() {
                         Políticas de Cancelación
                       </h3>
                       <p className="text-xs text-slate-400">
-                        Reglas operativas para clientes
+                        Reglas automáticas para clientes
                       </p>
                     </div>
                   </div>
@@ -743,7 +584,7 @@ export default function AdminPage() {
                 <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-5 md:col-span-2">
                   <div className="flex items-center justify-between flex-wrap gap-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-2xl bg-blue-50 text-[#1D71B5] flex items-center justify-center text-lg shadow-sm">
+                      <div className="w-10 h-10 rounded-2xl bg-blue-50 text-[#1D71B5] flex items-center justify-center text-lg">
                         🚐
                       </div>
                       <div>
