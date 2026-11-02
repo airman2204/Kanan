@@ -343,6 +343,12 @@ export function createBookingFromWizard(payload: {
   whatsapp: string;
   direccion: string;
   municipio: MunicipioZMG;
+  codigo_postal?: string;
+  colonia?: string;
+  calle?: string;
+  numero_exterior?: string;
+  coto_interior?: string;
+  coordenadas?: { lat: number; lng: number };
   mascotas: boolean;
   fecha: string;
   turno: TurnoServicio;
@@ -362,6 +368,12 @@ export function createBookingFromWizard(payload: {
       whatsapp: cleanPhone,
       direccion: payload.direccion.trim(),
       municipio: payload.municipio,
+      codigo_postal: payload.codigo_postal,
+      colonia: payload.colonia,
+      calle: payload.calle,
+      numero_exterior: payload.numero_exterior,
+      coto_interior: payload.coto_interior,
+      coordenadas: payload.coordenadas,
       mascotas: payload.mascotas,
       notas_especiales: "",
       historico_gasto: 0,
@@ -371,6 +383,12 @@ export function createBookingFromWizard(payload: {
   } else {
     cliente.direccion = payload.direccion.trim();
     cliente.municipio = payload.municipio;
+    if (payload.codigo_postal) cliente.codigo_postal = payload.codigo_postal;
+    if (payload.colonia) cliente.colonia = payload.colonia;
+    if (payload.calle) cliente.calle = payload.calle;
+    if (payload.numero_exterior) cliente.numero_exterior = payload.numero_exterior;
+    if (payload.coto_interior) cliente.coto_interior = payload.coto_interior;
+    if (payload.coordenadas) cliente.coordenadas = payload.coordenadas;
     cliente.mascotas = payload.mascotas;
   }
 
@@ -387,6 +405,7 @@ export function createBookingFromWizard(payload: {
     tecnico_asignado: "Por asignar",
     ruta_geografica: `Ruta ${payload.municipio}`,
     notas_servicio: payload.notas_servicio,
+    coordenadas: payload.coordenadas,
     fotos_estado_actual: payload.fotos_estado_actual || [],
     fotos_antes_despues: [],
     calificacion: null,

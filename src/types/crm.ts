@@ -52,6 +52,11 @@ export interface FotoAntesDespues {
   descripcion: string;
 }
 
+export interface CoordenadasGPS {
+  lat: number;
+  lng: number;
+}
+
 export interface Cliente {
   id: string;
   nombre: string;
@@ -60,6 +65,10 @@ export interface Cliente {
   municipio: string;
   codigo_postal?: string;
   colonia?: string;
+  calle?: string;
+  numero_exterior?: string;
+  coto_interior?: string;
+  coordenadas?: CoordenadasGPS;
   mascotas: boolean;
   notas_especiales: string;
   historico_gasto: number;
@@ -85,6 +94,7 @@ export interface ServicioCita {
   tecnico_asignado: string;
   ruta_geografica: string;
   notas_servicio: string;
+  coordenadas?: CoordenadasGPS;
   // Especificaciones técnicas de la tela y acceso
   tipo_tela?: string;
   manchas_dificiles?: string[];

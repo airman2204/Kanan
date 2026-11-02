@@ -23,6 +23,8 @@ import {
   Building2,
   Check,
   Lock,
+  Navigation,
+  Loader2,
 } from "lucide-react";
 import {
   MunicipioZMG,
@@ -37,6 +39,11 @@ import {
   validarWhatsApp,
   sanitizeInput,
 } from "@/lib/utils/securityValidation";
+import {
+  geocodificarInverso,
+  buscarCallesZMG,
+  ResultadoDireccionOSM,
+} from "@/lib/utils/geocoding";
 
 interface CatalogPiece {
   id: string;
@@ -188,17 +195,25 @@ export function BookingWizard({
     "sala-l": 1,
   });
 
-  // Paso 2: Ubicación Inteligente por Código Postal y Fotos
+  // Paso 2: Ubicación Inteligente por Código Postal, GPS y Fotos
   const [codigoPostal, setCodigoPostal] = useState("");
   const [cpValido, setCpValido] = useState(false);
   const [municipioAutollenado, setMunicipioAutollenado] = useState<MunicipioZMG | null>(null);
   const [colonia, setColonia] = useState("");
   const [coloniasDisponibles, setColoniasDisponibles] = useState<string[]>([]);
+  const [calle, setCalle] = useState("");
+  const [numeroExterior, setNumeroExterior] = useState("");
+  const [cotoInterior, setCotoInterior] = useState("");
   const [calleNumero, setCalleNumero] = useState("");
   const [calleError, setCalleError] = useState<string | null>(null);
   const [cpError, setCpError] = useState<string | null>(null);
+  const [coordenadasGPS, setCoordenadasGPS] = useState<{ lat: number; lng: number } | null>(null);
+  const [obteniendoGPS, setObteniendoGPS] = useState(false);
+  const [gpsMensaje, setGpsMensaje] = useState<string | null>(null);
+  const [sugerenciasCalles, setSugerenciasCalles] = useState<ResultadoDireccionOSM[]>([]);
   const [direccion, setDireccion] = useState("");
   const [notasServicio, setNotasServicio] = useState("");
+  const [tipoManchaChips, setTipoManchaChips] = useState<string[]>([]);
   const [notasError, setNotasError] = useState<string | null>(null);
   const [fotosPreview, setFotosPreview] = useState<string[]>([]);
   const [fotosError, setFotosError] = useState<string | null>(null);
@@ -260,41 +275,118 @@ export function BookingWizard({
     }
   };
 
-  const handleCalleChange = (val: string) => {
-    // Sanitizar sin eliminar el espacio que el usuario acaba de teclear
+  const handleCalleChange = async (val: string) => {
     const sanitized = sanitizeInput(val, false);
-    setCalleNumero(sanitized);
+    setCalle(sanitized);
 
-    // Solo mostrar error si el usuario ya escribió suficiente o si borró todo
-    if (sanitized.trim().length === 0) {
-      setCalleError(null);
-    } else if (sanitized.trim().length >= 8) {
-      const v = validarDireccion(sanitized);
-      setCalleError(v.valida ? null : (v.error || null));
+    // Buscar sugerencias en vivo con OpenStreetMap (Photon)
+    if (sanitized.trim().length >= 4) {
+      buscarCallesZMG(sanitized).then((res) => {
+        setSugerenciasCalles(res);
+      });
     } else {
-      // Mientras esté escribiendo las primeras letras no mostrar error agresivo
-      setCalleError(null);
+      setSugerenciasCalles([]);
     }
   };
 
-  const handleCalleBlur = () => {
-    if (calleNumero.trim().length > 0) {
-      const v = validarDireccion(calleNumero);
-      setCalleError(v.valida ? null : (v.error || null));
+  const seleccionarSugerenciaCalle = (sug: ResultadoDireccionOSM) => {
+    setCalle(sug.calle || sug.nombreCompleto.split(",")[0]);
+    if (sug.numero) setNumeroExterior(sug.numero);
+    if (sug.colonia && (!colonia || coloniasDisponibles.length === 0)) {
+      setColonia(sug.colonia);
     }
+    if (sug.lat && sug.lng) {
+      setCoordenadasGPS({ lat: sug.lat, lng: sug.lng });
+      setGpsMensaje("📍 Ubicación validada con cartografía OpenStreetMap");
+    }
+    setSugerenciasCalles([]);
+  };
+
+  // Botón de Geolocalización Nativa del Navegador
+  const handleObtenerUbicacionGPS = () => {
+    if (!navigator.geolocation) {
+      setGpsMensaje("Tu navegador no soporta geolocalización.");
+      return;
+    }
+
+    setObteniendoGPS(true);
+    setGpsMensaje(null);
+
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const { latitude, longitude } = pos.coords;
+        setCoordenadasGPS({ lat: latitude, lng: longitude });
+
+        // Intentar geocodificación inversa para auto-rellenar calle y colonia
+        const rev = await geocodificarInverso(latitude, longitude);
+        if (rev) {
+          if (rev.calle && !calle) setCalle(rev.calle);
+          if (rev.numero && !numeroExterior) setNumeroExterior(rev.numero);
+          if (rev.colonia && !colonia) setColonia(rev.colonia);
+          if (rev.codigoPostal && !codigoPostal) {
+            handleCodigoPostalChange(rev.codigoPostal);
+          }
+          setGpsMensaje("✅ ¡Ubicación exacta detectada vía GPS satelital!");
+        } else {
+          setGpsMensaje("✅ Coordenadas GPS fijadas con precisión.");
+        }
+        setObteniendoGPS(false);
+      },
+      () => {
+        setGpsMensaje("No se pudo obtener tu ubicación. Por favor escribe tu calle manualmente.");
+        setObteniendoGPS(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  };
+
+  // Mantener sincronizado el campo calleNumero y direccion completa
+  useEffect(() => {
+    let direccionLinea = calle.trim();
+    if (numeroExterior.trim()) {
+      direccionLinea += ` ${numeroExterior.trim()}`;
+    }
+    if (cotoInterior.trim()) {
+      direccionLinea += ` (${cotoInterior.trim()})`;
+    }
+    setCalleNumero(direccionLinea);
+
+    if (direccionLinea.trim().length > 0) {
+      const v = validarDireccion(direccionLinea);
+      setCalleError(v.valida ? null : (v.error || null));
+    } else {
+      setCalleError(null);
+    }
+
+    const partes = [];
+    if (direccionLinea.trim()) partes.push(direccionLinea.trim());
+    if (colonia.trim()) partes.push(`Col. ${colonia.trim()}`);
+    if (codigoPostal.trim()) partes.push(`CP ${codigoPostal.trim()}`);
+    partes.push(selectedMunicipio);
+    setDireccion(partes.join(", "));
+  }, [calle, numeroExterior, cotoInterior, colonia, codigoPostal, selectedMunicipio]);
+
+  const toggleChipMancha = (chip: string) => {
+    setTipoManchaChips((prev) => {
+      const existe = prev.includes(chip);
+      const nuevo = existe ? prev.filter((c) => c !== chip) : [...prev, chip];
+      // Actualizar el texto libre de notas con los chips seleccionados
+      const textoChips = nuevo.join(", ");
+      setNotasServicio(textoChips);
+      if (nuevo.length > 0) {
+        setNotasError(null);
+      }
+      return nuevo;
+    });
   };
 
   const handleNotasChange = (val: string) => {
-    // Sanitizar sin eliminar espacios en blanco
     const sanitized = sanitizeInput(val, false);
     setNotasServicio(sanitized);
 
-    if (sanitized.trim().length === 0) {
+    if (sanitized.trim().length === 0 && tipoManchaChips.length === 0) {
       setNotasError(null);
-    } else if (sanitized.trim().length >= 6) {
-      const v = validarDetalleManchas(sanitized);
-      setNotasError(v.valida ? null : (v.error || null));
-    } else {
+    } else if (sanitized.trim().length >= 4 || tipoManchaChips.length > 0) {
       setNotasError(null);
     }
   };
@@ -305,16 +397,6 @@ export function BookingWizard({
       setNotasError(v.valida ? null : (v.error || null));
     }
   };
-
-  // Mantener sincronizado el campo direccion completo
-  useEffect(() => {
-    const partes = [];
-    if (calleNumero.trim()) partes.push(calleNumero.trim());
-    if (colonia.trim()) partes.push(`Col. ${colonia.trim()}`);
-    if (codigoPostal.trim()) partes.push(`CP ${codigoPostal.trim()}`);
-    partes.push(selectedMunicipio);
-    setDireccion(partes.join(", "));
-  }, [calleNumero, colonia, codigoPostal, selectedMunicipio]);
   const obtenerTurnosPorMunicipioYFecha = (): { turno: TurnoServicio; horario: string; secadoInfo: string }[] => {
     const muniLower = selectedMunicipio.toLowerCase();
     // Determinar día de la semana a partir de la fecha (0 = Domingo, 6 = Sábado)
@@ -499,6 +581,12 @@ export function BookingWizard({
           whatsapp: whatsapp.replace(/\D/g, ""),
           direccion: direccion.trim() || `Domicilio en ${selectedMunicipio}`,
           calleNumero: sanitizeInput(calleNumero),
+          calle: sanitizeInput(calle),
+          numero_exterior: sanitizeInput(numeroExterior),
+          coto_interior: sanitizeInput(cotoInterior),
+          codigo_postal: codigoPostal,
+          colonia,
+          coordenadas: coordenadasGPS,
           municipio: selectedMunicipio,
           mascotas,
           fecha,
@@ -921,58 +1009,171 @@ export function BookingWizard({
                       )}
                     </div>
 
-                    {/* Bloque 2: Dirección y Detalle de Manchas (Desbloqueados solo tras validar CP) */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {/* Calle y Número con Validación de Dirección Real */}
-                      <div>
-                        <label
-                          htmlFor="wizard-calle"
-                          className="block font-heading font-bold text-sm text-kanan-deep mb-1.5 flex items-center justify-between"
+                    {/* Bloque 2: Dirección Estructurada y Botón GPS Satelital */}
+                    <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/90 shadow-sm space-y-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+                        <div>
+                          <h4 className="font-heading font-extrabold text-sm sm:text-base text-kanan-deep">
+                            2. Dirección Exacta de tu Domicilio *
+                          </h4>
+                          <p className="text-xs text-slate-500 mt-0.5">
+                            Separamos calle, número y coto para que nuestro técnico llegue directo sin perderse.
+                          </p>
+                        </div>
+
+                        {/* Botón táctil de GPS satelital nativo */}
+                        <button
+                          type="button"
+                          disabled={!cpValido || obteniendoGPS}
+                          onClick={handleObtenerUbicacionGPS}
+                          className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 disabled:opacity-50 text-white font-heading font-bold text-xs px-4 py-2.5 rounded-xl shadow-sm transition active:scale-95 shrink-0"
                         >
-                          <span>2. Calle y Número Exterior / Interior *</span>
-                          <span className="text-[11px] font-semibold text-rose-600">Requerido</span>
-                        </label>
-                        <input
-                          id="wizard-calle"
-                          type="text"
-                          disabled={!cpValido}
-                          value={calleNumero}
-                          onChange={(e) => handleCalleChange(e.target.value)}
-                          onBlur={handleCalleBlur}
-                          placeholder={
-                            cpValido
-                              ? "Ej. Av. Providencia 2340, Depto 4B"
-                              : "Ingresa primero un Código Postal válido"
-                          }
-                          className={`w-full rounded-2xl border px-4 py-3 text-sm transition-all focus:outline-none ${
-                            !cpValido
-                              ? "bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed"
-                              : calleError
-                              ? "bg-white border-rose-300 focus:ring-2 focus:ring-rose-400 text-kanan-deep"
-                              : "bg-white border-slate-300 focus:ring-2 focus:ring-kanan-cyan text-kanan-deep"
-                          }`}
-                        />
-                        {calleError ? (
-                          <p className="text-[11px] text-rose-600 mt-1 flex items-center gap-1 font-medium">
-                            <AlertCircle className="w-3 h-3 shrink-0" />
-                            {calleError}
-                          </p>
-                        ) : (
-                          <p className="text-[11px] text-slate-400 mt-1">
-                            Debe incluir nombre de calle y número exterior (mínimo 8 caracteres).
-                          </p>
-                        )}
+                          {obteniendoGPS ? (
+                            <>
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                              <span>Detectando satélite...</span>
+                            </>
+                          ) : (
+                            <>
+                              <Navigation className="w-4 h-4 text-emerald-200" />
+                              <span>📍 Fijar con mi GPS Actual</span>
+                            </>
+                          )}
+                        </button>
                       </div>
 
-                      {/* Detalles de Manchas o Tela (Requerido) */}
-                      <div>
+                      {gpsMensaje && (
+                        <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2">
+                          <span>{gpsMensaje}</span>
+                        </div>
+                      )}
+
+                      {/* Cuadrícula de 3 campos: Calle (con autocompletado OSM), Número Exterior y Coto */}
+                      <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
+                        {/* Campo Calle */}
+                        <div className="sm:col-span-6 relative">
+                          <label className="block text-xs font-heading font-bold text-slate-700 mb-1">
+                            Calle o Avenida *
+                          </label>
+                          <input
+                            type="text"
+                            disabled={!cpValido}
+                            value={calle}
+                            onChange={(e) => handleCalleChange(e.target.value)}
+                            placeholder={cpValido ? "Ej. Av. Providencia / Hidalgo" : "Ingresa primero el C.P."}
+                            className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-kanan-deep focus:outline-none focus:ring-2 focus:ring-kanan-cyan disabled:bg-slate-100 disabled:cursor-not-allowed"
+                          />
+
+                          {/* Menú de sugerencias en vivo de OpenStreetMap */}
+                          {sugerenciasCalles.length > 0 && (
+                            <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-2xl shadow-xl z-30 max-h-48 overflow-y-auto">
+                              <p className="px-3 py-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider bg-slate-50 border-b border-slate-100">
+                                Calles verificadas en Jalisco (OpenStreetMap)
+                              </p>
+                              {sugerenciasCalles.map((sug, idx) => (
+                                <button
+                                  key={idx}
+                                  type="button"
+                                  onClick={() => seleccionarSugerenciaCalle(sug)}
+                                  className="w-full text-left px-3.5 py-2.5 text-xs text-slate-700 hover:bg-kanan-ice/80 hover:text-kanan-navy border-b border-slate-50 last:border-0 flex items-center gap-2 transition"
+                                >
+                                  <MapPin className="w-3.5 h-3.5 text-kanan-cerulean shrink-0" />
+                                  <span className="truncate">{sug.nombreCompleto}</span>
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Campo Número Exterior */}
+                        <div className="sm:col-span-3">
+                          <label className="block text-xs font-heading font-bold text-slate-700 mb-1 flex items-center justify-between">
+                            <span>Núm. Ext. *</span>
+                            <span className="text-[10px] text-rose-600 font-semibold">Requerido</span>
+                          </label>
+                          <input
+                            type="text"
+                            disabled={!cpValido}
+                            value={numeroExterior}
+                            onChange={(e) => setNumeroExterior(sanitizeInput(e.target.value, false))}
+                            placeholder="Ej. 2340 / Mz 4"
+                            className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-kanan-deep focus:outline-none focus:ring-2 focus:ring-kanan-cyan disabled:bg-slate-100 disabled:cursor-not-allowed font-medium"
+                          />
+                        </div>
+
+                        {/* Campo Coto / Fracc / Interior */}
+                        <div className="sm:col-span-3">
+                          <label className="block text-xs font-heading font-bold text-slate-700 mb-1 flex items-center justify-between">
+                            <span>Coto / Interior</span>
+                            <span className="text-[10px] text-slate-400 font-normal">Opcional</span>
+                          </label>
+                          <input
+                            type="text"
+                            disabled={!cpValido}
+                            value={cotoInterior}
+                            onChange={(e) => setCotoInterior(sanitizeInput(e.target.value, false))}
+                            placeholder="Ej. Coto 3 / Casa 12B"
+                            className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-kanan-deep focus:outline-none focus:ring-2 focus:ring-kanan-cyan disabled:bg-slate-100 disabled:cursor-not-allowed"
+                          />
+                        </div>
+                      </div>
+
+                      {calleError && (
+                        <p className="text-xs text-rose-600 font-medium flex items-center gap-1">
+                          <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                          {calleError}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Bloque 3: Detalle de Manchas con Chips Inteligentes */}
+                    <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/90 shadow-sm space-y-3">
+                      <div className="flex items-center justify-between">
                         <label
                           htmlFor="wizard-notas"
-                          className="block font-heading font-bold text-sm text-kanan-deep mb-1.5 flex items-center justify-between"
+                          className="block font-heading font-extrabold text-sm sm:text-base text-kanan-deep"
                         >
-                          <span>3. Detalle de manchas o tipo de tela *</span>
-                          <span className="text-[11px] font-semibold text-rose-600">Requerido</span>
+                          3. Tipo de Manchas o Estado de tu Tela *
                         </label>
+                        <span className="text-[11px] font-semibold text-rose-600 bg-rose-50 px-2.5 py-0.5 rounded-full border border-rose-200">
+                          Requerido
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-500">
+                        Selecciona las opciones que apliquen a tus piezas para preparar los desmanchadores específicos:
+                      </p>
+
+                      {/* Chips de selección rápida */}
+                      <div className="flex flex-wrap gap-2 pt-1">
+                        {[
+                          { id: "🐾 Mascotas / Orina", label: "🐾 Mascotas / Orina" },
+                          { id: "☕ Café / Bebidas / Comida", label: "☕ Café / Bebidas / Comida" },
+                          { id: "🍷 Grasa / Aceite / Maquillaje", label: "🍷 Grasa / Aceite" },
+                          { id: "💨 Polvo y Suciedad Profunda", label: "💨 Polvo y Suciedad Profunda" },
+                          { id: "✨ Mantenimiento Preventivo", label: "✨ Mantenimiento Preventivo" },
+                          { id: "⚠️ Olores / Humedad", label: "⚠️ Olores / Humedad" },
+                        ].map((chip) => {
+                          const activo = tipoManchaChips.includes(chip.id);
+                          return (
+                            <button
+                              key={chip.id}
+                              type="button"
+                              disabled={!cpValido}
+                              onClick={() => toggleChipMancha(chip.id)}
+                              className={`text-xs px-3.5 py-2 rounded-xl font-heading font-semibold transition-all border ${
+                                activo
+                                  ? "bg-kanan-navy text-white border-kanan-navy shadow-sm"
+                                  : "bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200"
+                              } disabled:opacity-50 disabled:cursor-not-allowed`}
+                            >
+                              {chip.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {/* Campo de notas complementarias */}
+                      <div className="pt-2">
                         <input
                           id="wizard-notas"
                           type="text"
@@ -982,25 +1183,15 @@ export function BookingWizard({
                           onBlur={handleNotasBlur}
                           placeholder={
                             cpValido
-                              ? "Ej. Manchas de café en cojines, tela lino gris claro"
+                              ? "O escribe detalles adicionales (ej. tela lino claro, manchas en descansabrazos)..."
                               : "Ingresa primero un Código Postal válido"
                           }
-                          className={`w-full rounded-2xl border px-4 py-3 text-sm transition-all focus:outline-none ${
-                            !cpValido
-                              ? "bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed"
-                              : notasError
-                              ? "bg-white border-rose-300 focus:ring-2 focus:ring-rose-400 text-kanan-deep"
-                              : "bg-white border-slate-300 focus:ring-2 focus:ring-kanan-cyan text-kanan-deep"
-                          }`}
+                          className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-kanan-deep focus:outline-none focus:ring-2 focus:ring-kanan-cyan disabled:bg-slate-100 disabled:cursor-not-allowed"
                         />
-                        {notasError ? (
+                        {notasError && (
                           <p className="text-[11px] text-rose-600 mt-1 flex items-center gap-1 font-medium">
                             <AlertCircle className="w-3 h-3 shrink-0" />
                             {notasError}
-                          </p>
-                        ) : (
-                          <p className="text-[11px] text-slate-400 mt-1">
-                            Nos permite preparar los químicos y solventes neutros adecuados.
                           </p>
                         )}
                       </div>

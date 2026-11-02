@@ -123,10 +123,31 @@ export default function TecnicoPage() {
   // Acciones de Navegación y Contacto
   const abrirGoogleMaps = () => {
     if (!citaActual || !citaActual.cliente) return;
-    const query = encodeURIComponent(
-      `${citaActual.cliente.direccion}, ${citaActual.cliente.municipio}, Jalisco`
-    );
-    window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, "_blank");
+    const coords = citaActual.coordenadas || citaActual.cliente.coordenadas;
+    if (coords && coords.lat && coords.lng) {
+      window.open(
+        `https://www.google.com/maps/dir/?api=1&destination=${coords.lat},${coords.lng}`,
+        "_blank"
+      );
+    } else {
+      const query = encodeURIComponent(
+        `${citaActual.cliente.direccion}, ${citaActual.cliente.municipio}, Jalisco`
+      );
+      window.open(`https://www.google.com/maps/dir/?api=1&destination=${query}`, "_blank");
+    }
+  };
+
+  const abrirWaze = () => {
+    if (!citaActual || !citaActual.cliente) return;
+    const coords = citaActual.coordenadas || citaActual.cliente.coordenadas;
+    if (coords && coords.lat && coords.lng) {
+      window.open(`https://waze.com/ul?ll=${coords.lat},${coords.lng}&navigate=yes`, "_blank");
+    } else {
+      const query = encodeURIComponent(
+        `${citaActual.cliente.direccion}, ${citaActual.cliente.municipio}, Jalisco`
+      );
+      window.open(`https://waze.com/ul?q=${query}&navigate=yes`, "_blank");
+    }
   };
 
   const contactarWhatsApp = () => {
@@ -467,23 +488,32 @@ export default function TecnicoPage() {
               </div>
 
               {/* Botones de acción directa para usar con el pulgar */}
-              <div className="grid grid-cols-2 gap-2.5 pt-0.5">
+              <div className="grid grid-cols-3 gap-2 pt-0.5">
+                <button
+                  type="button"
+                  onClick={abrirWaze}
+                  className="w-full py-3 px-2 bg-gradient-to-r from-cyan-600 to-sky-600 hover:from-cyan-700 hover:to-sky-700 text-white rounded-2xl font-heading font-bold text-xs flex flex-col items-center justify-center gap-1 shadow-sm active:scale-[0.98] transition"
+                >
+                  <span className="text-base">🚗</span>
+                  <span>Waze</span>
+                </button>
+
                 <button
                   type="button"
                   onClick={abrirGoogleMaps}
-                  className="w-full py-3 px-3 bg-gradient-to-r from-[#355581] to-[#1D71B5] hover:from-[#2a4468] hover:to-[#175c94] text-white rounded-2xl font-heading font-bold text-xs flex items-center justify-center gap-2 shadow-md shadow-[#1D71B5]/20 active:scale-[0.98] transition"
+                  className="w-full py-3 px-2 bg-gradient-to-r from-[#355581] to-[#1D71B5] hover:from-[#2a4468] hover:to-[#175c94] text-white rounded-2xl font-heading font-bold text-xs flex flex-col items-center justify-center gap-1 shadow-sm active:scale-[0.98] transition"
                 >
                   <span className="text-base">🗺️</span>
-                  <span>Abrir Maps / Waze</span>
+                  <span>Google Maps</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={contactarWhatsApp}
-                  className="w-full py-3 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-heading font-bold text-xs flex items-center justify-center gap-2 shadow-md shadow-emerald-600/20 active:scale-[0.98] transition"
+                  className="w-full py-3 px-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-heading font-bold text-xs flex flex-col items-center justify-center gap-1 shadow-sm active:scale-[0.98] transition"
                 >
                   <span className="text-base">📞</span>
-                  <span>Llamar / WhatsApp</span>
+                  <span>WhatsApp</span>
                 </button>
               </div>
             </div>
