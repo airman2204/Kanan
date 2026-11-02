@@ -42,33 +42,30 @@ export function StickyHeader({
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white/85 backdrop-blur-xl border-b border-kanan-cyan/15 shadow-[0_4px_24px_-6px_rgba(15,36,56,0.06)]">
-      {/* Top Pill Bar — Fresca y Luminosa */}
-      <div className="bg-gradient-to-r from-kanan-ice via-[#E6F7FB] to-kanan-ice border-b border-kanan-cyan/20 text-kanan-deep text-[11px] sm:text-xs py-1.5 px-3 sm:px-6">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2 min-w-0">
-            <span className="inline-flex items-center gap-1.5 bg-white text-kanan-cerulean font-heading font-bold px-2.5 py-0.5 rounded-full shadow-sm border border-kanan-cyan/30 shrink-0">
-              <span className="w-2 h-2 rounded-full bg-kanan-cyan animate-ping" />
-              Limpieza Profesional
-            </span>
-            {isHalloweenMode && (
-              <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-heading font-bold px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-600 border border-orange-300/40 shrink-0 animate-pulse">
-                🦇 Modo Halloween 🎃
+      {/* Top Banner de Anuncio Dinámico Tipo Marquee */}
+      <div className="bg-gradient-to-r from-kanan-deep via-kanan-cerulean to-kanan-deep text-white text-[11px] sm:text-xs py-1.5 overflow-hidden border-b border-kanan-cyan/30">
+        <div className="animate-marquee flex items-center gap-8 whitespace-nowrap cursor-pointer" onClick={onOpenWizard}>
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="flex items-center gap-6">
+              <span className="inline-flex items-center gap-1.5 font-heading font-extrabold uppercase tracking-wider text-cyan-200">
+                <Sparkles className="w-3.5 h-3.5 text-kanan-cyan animate-spin" style={{ animationDuration: "6s" }} />
+                ¡Agenda tu cita a domicilio hoy mismo!
               </span>
-            )}
-            <span className="truncate font-medium text-slate-600">
-              Unidades móviles hoy en <strong className="text-kanan-deep">{selectedMunicipio}</strong> • Secado en 3-4h
-            </span>
-          </div>
-
-          <div className="flex items-center gap-3 shrink-0">
-            <Link
-              href="/guia-cuidados"
-              className="inline-flex items-center gap-1 font-semibold text-kanan-cerulean hover:text-kanan-deep transition-colors text-xs"
-            >
-              <BookOpen className="w-3.5 h-3.5 text-kanan-cyan" />
-              <span>Guía Ante Derrames</span>
-            </Link>
-          </div>
+              <span className="text-white/40">•</span>
+              <span className="font-medium text-slate-100">
+                Unidades móviles activas en <strong className="text-cyan-300 font-bold">{selectedMunicipio}</strong> y municipios
+              </span>
+              <span className="text-white/40">•</span>
+              <span className="font-semibold text-white bg-white/15 px-2.5 py-0.5 rounded-full border border-white/20">
+                Secado rápido en 3 a 4 horas*
+              </span>
+              <span className="text-white/40">•</span>
+              <span className="text-emerald-300 font-bold flex items-center gap-1">
+                WhatsApp: 33 4335 9207
+              </span>
+              <span className="text-white/40">•</span>
+            </div>
+          ))}
         </div>
       </div>
 

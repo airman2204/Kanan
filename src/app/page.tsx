@@ -15,7 +15,7 @@ import { PapelPicado } from "@/components/landing/PapelPicado";
 export default function HomePage() {
   const [selectedMunicipio, setSelectedMunicipio] = useState<MunicipioZMG>("Guadalajara");
   const [preselectedCategory, setPreselectedCategory] = useState<string | null>(null);
-  const [modoHalloween, setModoHalloween] = useState<boolean>(true);
+  const [modoHalloween, setModoHalloween] = useState<boolean>(false);
 
   useEffect(() => {
     // Consultar el estado del modo Halloween público sin requerir autenticación
