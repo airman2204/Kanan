@@ -133,134 +133,175 @@ export function SocialProofAndFAQ() {
           </div>
         </div>
 
-        {/* BLOQUE 2: PASE DIGITAL DE RECOMENDACIONES Y PRÓXIMO SERVICIO */}
-        <div className="bg-gradient-to-br from-kanan-navy via-kanan-deep to-[#0D1E30] text-white rounded-3xl p-6 sm:p-10 shadow-kanan-lg grid grid-cols-1 lg:grid-cols-12 gap-8 items-center border border-white/10">
-          <div className="lg:col-span-6 space-y-4">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-xs font-heading font-bold text-kanan-cyan">
+        {/* BLOQUE 2: TARJETA OFICIAL DE GARANTÍA Y SERVICIOS (PASE DIGITAL DINÁMICO) */}
+        <div className="bg-gradient-to-br from-[#102235] via-kanan-deep to-[#0A1724] text-white rounded-3xl p-6 sm:p-10 shadow-kanan-lg grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center border border-white/10">
+          <div className="lg:col-span-6 space-y-5">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-kanan-cyan/15 border border-kanan-cyan/30 text-xs font-heading font-bold text-kanan-cyan">
               <Smartphone className="w-3.5 h-3.5" />
-              <span>Pase Digital de Cliente</span>
+              <span>Pase Digital Oficial en tu Teléfono</span>
             </div>
-            <h3 className="font-heading text-2xl sm:text-3xl font-extrabold leading-tight">
-              Tarjeta de Recomendaciones y Próximo Servicio
+            
+            <h3 className="font-heading text-2xl sm:text-4xl font-extrabold leading-tight tracking-tight">
+              Tarjeta de Garantía y Servicios Kanan
             </h3>
-            <p className="text-slate-200 text-xs sm:text-sm leading-relaxed">
-              Al finalizar cada servicio recibes tu tarjeta oficial y tu pase digital interactivo: incluye recomendaciones de cuidado textil para prolongar la limpieza, la fecha sugerida para tu próximo mantenimiento preventivo (6 meses) y acceso directo para calificar tu experiencia.
-            </p>
-            <div className="flex flex-wrap gap-2 pt-2">
-              <button
-                type="button"
-                onClick={() => {
-                  const now = new Date();
-                  const nextDate = new Date(now.setMonth(now.getMonth() + 6));
-                  const formatDate = (d: Date) => d.toISOString().replace(/-|:|\.\d+/g, "").slice(0, 15) + "Z";
-                  const start = formatDate(nextDate);
-                  const end = formatDate(new Date(nextDate.getTime() + 60 * 60 * 1000));
-                  const icsContent = [
-                    "BEGIN:VCALENDAR",
-                    "VERSION:2.0",
-                    "PRODID:-//Kanan Limpieza//Mantenimiento Textil//ES",
-                    "BEGIN:VEVENT",
-                    `UID:kanan-${Date.now()}@kananlimpieza.mx`,
-                    `DTSTAMP:${formatDate(new Date())}`,
-                    `DTSTART:${start}`,
-                    `DTEND:${end}`,
-                    "SUMMARY:Próximo Mantenimiento Textil - Kanan Limpieza",
-                    "DESCRIPTION:Recordatorio a 6 meses para renovación y desinfección profunda de salas y textiles con Kanan Limpieza. WhatsApp: 33 4335 9207",
-                    "URL:https://kananlimpieza.mx",
-                    "STATUS:CONFIRMED",
-                    "END:VEVENT",
-                    "END:VCALENDAR",
-                  ].join("\r\n");
 
-                  const blob = new Blob([icsContent], { type: "text/calendar;charset=utf-8" });
-                  const link = document.createElement("a");
-                  link.href = window.URL.createObjectURL(blob);
-                  link.setAttribute("download", "recordatorio-kanan-6-meses.ics");
-                  document.body.appendChild(link);
-                  link.click();
-                  document.body.removeChild(link);
-                }}
-                className="inline-flex items-center gap-2 bg-kanan-cyan hover:bg-[#009ec0] text-white text-xs font-heading font-bold px-4 py-2.5 rounded-full shadow-cyan-glow transition-all active:scale-95"
-              >
-                <Download className="w-3.5 h-3.5" />
-                <span>Guardar Recordatorio en Calendario (.ics)</span>
-              </button>
+            <p className="text-slate-300 text-xs sm:text-base leading-relaxed">
+              Al concluir tu primer servicio recibes tu tarjeta física oficial y tu pase digital para <strong className="text-white">Apple Wallet</strong> y <strong className="text-white">Google Wallet</strong>.
+            </p>
+
+            <div className="space-y-3 pt-1">
+              <div className="flex items-start gap-3 bg-white/5 p-3.5 rounded-2xl border border-white/10 text-xs sm:text-sm">
+                <div className="w-7 h-7 rounded-xl bg-kanan-cyan/20 text-kanan-cyan flex items-center justify-center shrink-0 mt-0.5">
+                  <Sparkles className="w-4 h-4" />
+                </div>
+                <div>
+                  <strong className="text-white block font-heading">1 Cliente = 1 Sola Tarjeta Permanente</strong>
+                  <span className="text-slate-300 text-xs leading-snug">
+                    No necesitas guardar una tarjeta nueva en cada servicio. Se vincula a tu número y se actualiza sola automáticamente en tu teléfono.
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3 bg-white/5 p-3.5 rounded-2xl border border-white/10 text-xs sm:text-sm">
+                <div className="w-7 h-7 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">
+                  <Calendar className="w-4 h-4" />
+                </div>
+                <div>
+                  <strong className="text-white block font-heading">Recordatorio de Mantenimiento Sugerido</strong>
+                  <span className="text-slate-300 text-xs leading-snug">
+                    Calcula automáticamente tu siguiente revisión preventiva a los 6 meses para proteger tu garantía y conservar tu tarifa preferencial.
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-2 flex flex-wrap items-center gap-3">
               <a
                 href={KANAN_GOOGLE_MAPS_REVIEW_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 bg-white/10 hover:bg-white/20 text-white text-xs font-heading font-bold px-4 py-2.5 rounded-full border border-white/20 transition-all"
+                className="inline-flex items-center gap-2 bg-kanan-cyan hover:bg-[#009ec0] text-white text-xs sm:text-sm font-heading font-bold px-5 py-3 rounded-full shadow-cyan-glow transition-all active:scale-95"
               >
-                <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                <span>Calificar en Google Maps</span>
+                <Star className="w-4 h-4 fill-amber-300 text-amber-300" />
+                <span>Calificar Servicio en Google Maps</span>
+              </a>
+              <a
+                href="tel:3340160684"
+                className="inline-flex items-center gap-1.5 bg-white/10 hover:bg-white/20 text-white text-xs sm:text-sm font-heading font-bold px-4 py-3 rounded-full border border-white/20 transition-all"
+              >
+                <span>Llamar a Soporte</span>
               </a>
             </div>
           </div>
 
-          {/* Visualización del Pase Digital tipo Wallet */}
+          {/* Visualización de la Tarjeta Oficial de Garantía y Servicios (Diseño Oficial de Kanan) */}
           <div className="lg:col-span-6 flex justify-center">
-            <div className="w-full max-w-sm rounded-3xl overflow-hidden shadow-2xl border border-white/20 bg-gradient-to-b from-[#1D324F] to-[#0E1B2B]">
-              {/* Header del Pase */}
-              <div className="p-4 bg-gradient-to-r from-kanan-navy via-kanan-deep to-kanan-cerulean flex items-center justify-between border-b border-white/10">
-                <KananLogo variant="white" className="scale-75 origin-left" />
-                <span className="text-[10px] font-heading font-bold uppercase tracking-wider bg-white/20 px-2 py-0.5 rounded-full text-cyan-200">
-                  Digital Pass
-                </span>
+            <div className="w-full max-w-[340px] sm:max-w-[370px] rounded-[28px] overflow-hidden shadow-2xl border border-white/25 bg-[#0F2338] text-white transition-all hover:scale-[1.01] duration-300">
+              
+              {/* Header: Logo Oficial Kanan Blanco + Kanan Dog con Uniforme */}
+              <div className="pt-6 pb-4 px-6 flex items-center justify-between gap-2">
+                <div className="space-y-1">
+                  <KananLogo variant="white" className="scale-90 origin-left" />
+                </div>
+                <div className="relative w-24 h-24 shrink-0">
+                  <img
+                    src="/assets/brand/kanan-dog-active.png"
+                    alt="Kanan Dog Oficial"
+                    className="w-full h-full object-contain filter drop-shadow-md"
+                  />
+                </div>
               </div>
 
-              {/* Contenido del Pase */}
-              <div className="p-5 space-y-4">
-                <div className="flex justify-between items-start">
+              {/* Barra Distintiva Cian */}
+              <div className="bg-[#00B4D8] py-2 px-4 text-center">
+                <h4 className="font-heading font-extrabold text-xs sm:text-[13px] tracking-wide text-white uppercase">
+                  TARJETA DE GARANTÍA Y SERVICIOS
+                </h4>
+              </div>
+
+              {/* Cuerpo de Datos del Cliente */}
+              <div className="p-5 sm:p-6 space-y-4 text-xs sm:text-[13px]">
+                <div className="space-y-1.5">
+                  <p>
+                    <span className="font-heading font-extrabold tracking-wide text-white">CLIENTE: </span>
+                    <span className="font-bold text-cyan-300">Juan Pérez</span>
+                  </p>
+                  <p>
+                    <span className="font-heading font-extrabold tracking-wide text-white">ÚLTIMO SERVICIO: </span>
+                    <span className="font-semibold text-cyan-200">12 Nov 2026</span>
+                  </p>
                   <div>
-                    <span className="text-[10px] uppercase tracking-wider text-slate-400 block font-semibold">
-                      Tipo de Cuidado
-                    </span>
-                    <p className="font-heading font-extrabold text-sm text-white mt-0.5">
-                      Desinfección & Extracción Profunda
+                    <p>
+                      <span className="font-heading font-extrabold tracking-wide text-white">PRÓXIMO SERVICIO </span>
+                      <span className="text-[11px] text-slate-300">(Sugerido): </span>
+                      <strong className="text-[#36A6DE] font-bold text-sm">Mayo 2027</strong>
                     </p>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-[10px] uppercase tracking-wider text-slate-400 block font-semibold">
-                      Garantía
-                    </span>
-                    <span className="inline-flex items-center gap-1 text-[11px] font-heading font-bold text-emerald-400">
-                      ✓ Certificada
+                    <span className="text-[10px] text-slate-400 block -mt-0.5">
+                      Sugerido para mantener garantía
                     </span>
                   </div>
+                  <p className="pt-0.5">
+                    <span className="font-heading font-extrabold tracking-wide text-white">TIPO DE SERVICIO: </span>
+                    <span className="text-cyan-200 font-medium">Lavado de Sala y Desinfección</span>
+                  </p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 p-3 rounded-2xl bg-white/5 border border-white/10 text-xs">
-                  <div>
-                    <span className="text-[10px] text-slate-400 block">Fecha Servicio</span>
-                    <span className="font-heading font-bold text-white">Registrado</span>
+                {/* Caja de Recomendaciones Post-Servicio */}
+                <div className="rounded-2xl border border-cyan-400/40 bg-white/5 p-3.5 space-y-1.5 text-[11px] sm:text-xs">
+                  <p className="font-heading font-extrabold tracking-wide text-white text-center sm:text-left">
+                    RECOMENDACIONES POST-SERVICIO
+                  </p>
+                  <ul className="space-y-1 text-slate-200 leading-snug">
+                    <li className="flex items-start gap-1.5">
+                      <span className="text-cyan-300">•</span>
+                      <span>Dejar ventilar <strong className="text-white">3-4 horas</strong> hasta secado completo</span>
+                    </li>
+                    <li className="flex items-start gap-1.5">
+                      <span className="text-cyan-300">•</span>
+                      <span>No aplicar químicos caseros sobre manchas</span>
+                    </li>
+                    <li className="flex items-start gap-1.5">
+                      <span className="text-cyan-300">•</span>
+                      <span>Agenda cada 6 meses para conservar tu descuento de cliente frecuente</span>
+                    </li>
+                  </ul>
+                </div>
+
+                {/* Código de Identificador Oficial */}
+                <div className="pt-1 flex flex-col items-center justify-center space-y-1">
+                  {/* Simulación visual de código de barras de alta densidad */}
+                  <div className="h-8 flex items-center justify-center gap-[2px] opacity-90 px-4 py-1 bg-white rounded-md">
+                    {[3, 1, 4, 1, 2, 4, 1, 3, 2, 1, 4, 2, 3, 1, 2, 4, 1, 3, 1, 2, 4, 2, 1, 3, 2, 4, 1].map((w, i) => (
+                      <span
+                        key={i}
+                        className="bg-slate-900 h-6 block"
+                        style={{ width: `${w * 1.5}px` }}
+                      />
+                    ))}
                   </div>
-                  <div>
-                    <span className="text-[10px] text-slate-400 block">Siguiente Cita</span>
-                    <span className="font-heading font-bold text-cyan-300">En 6 meses</span>
-                  </div>
-                </div>
-
-                <div className="space-y-1.5 text-[11px] text-slate-300 bg-white/5 p-3 rounded-2xl border border-white/10">
-                  <p className="font-heading font-bold text-white flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-kanan-cyan" />
-                    Recomendaciones de Cuidado:
-                  </p>
-                  <p className="leading-snug">
-                    • Mantener buena ventilación en el área las primeras 3-4 horas.
-                  </p>
-                  <p className="leading-snug">
-                    • Ante derrames accidentales, absorber de inmediato sin frotar bruscamente.
+                  <p className="text-[11px] font-mono tracking-widest text-slate-300 font-bold">
+                    ID: KAN-9821-XP
                   </p>
                 </div>
 
-                <div className="pt-2 flex items-center justify-between text-[11px] border-t border-white/10">
-                  <span className="text-slate-400">Soporte y Citas:</span>
-                  <a
-                    href="tel:3340160684"
-                    className="font-heading font-bold text-kanan-cyan hover:underline"
-                  >
-                    33 4016 0684
-                  </a>
+                {/* Footer de la Tarjeta con Enlace Directo */}
+                <div className="pt-2 border-t border-white/10 text-center text-[10px] sm:text-[11px] text-slate-300 leading-snug">
+                  <p className="font-semibold text-white">¡Conserva tu garantía!</p>
+                  <p>
+                    Llámanos al{" "}
+                    <a href="tel:3340160684" className="text-cyan-300 font-bold hover:underline">
+                      33 4016 0684
+                    </a>{" "}
+                    o por WhatsApp al{" "}
+                    <a
+                      href={`https://wa.me/523343359207?text=${encodeURIComponent("Hola Kanan Limpieza, deseo consultar mi Tarjeta de Garantía ID: KAN-9821-XP")}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-emerald-400 font-bold hover:underline"
+                    >
+                      33 4335 9207
+                    </a>
+                  </p>
                 </div>
               </div>
             </div>
