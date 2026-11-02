@@ -361,14 +361,15 @@ export default function TecnicoPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[#F4F7F9] flex justify-center p-2 sm:p-4 selection:bg-[#36A6DE]/20">
-      <div className="w-full max-w-md bg-[#F4F7F9] border border-slate-200/90 rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col relative my-auto">
+    <div className="min-h-screen bg-[#F4F7F9] flex flex-col selection:bg-[#36A6DE]/20">
+      {/* CONTENEDOR 100% RESPONSIVO PARA MÓVIL */}
+      <div className="w-full max-w-lg mx-auto bg-white min-h-screen shadow-md flex flex-col">
 
-        {/* BARRA SUPERIOR DE ESTADO OPERATIVO */}
-        <div className="bg-gradient-to-r from-[#355581] to-[#1D71B5] text-white p-5 pt-6 shadow-md relative overflow-hidden">
-          <div className="flex items-center justify-between relative z-10">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-white/15 backdrop-blur-md border border-white/20 flex items-center justify-center font-bold text-lg shadow-inner">
+        {/* BARRA SUPERIOR DE ESTADO OPERATIVO (ESTILO APP NATIVA) */}
+        <div className="bg-gradient-to-r from-[#355581] to-[#1D71B5] text-white p-4 pt-5 sm:p-5 shadow-sm sticky top-0 z-30">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl bg-white/15 backdrop-blur-md border border-white/20 flex items-center justify-center font-bold text-base shadow-inner">
                 🚐
               </div>
               <div>
@@ -378,7 +379,7 @@ export default function TecnicoPage() {
                     1 UNIDAD
                   </span>
                 </div>
-                <p className="text-xs text-blue-100 font-medium">Ruta de Hoy ({fechaTexto}) · ZMG</p>
+                <p className="text-[11px] text-blue-100 font-medium">Ruta de Hoy ({fechaTexto}) · ZMG</p>
               </div>
             </div>
 
@@ -390,11 +391,11 @@ export default function TecnicoPage() {
         </div>
 
         {/* SELECTOR DE PARADAS DEL DÍA */}
-        <div className="px-4 py-3 bg-white border-b border-slate-200/80">
-          <div className="bg-[#F4F7F9] p-1.5 rounded-2xl grid grid-cols-2 gap-1.5 border border-slate-200">
+        <div className="px-4 py-3 bg-white border-b border-slate-200 sticky top-[68px] z-20 shadow-xs">
+          <div className="bg-[#F4F7F9] p-1 rounded-2xl grid grid-cols-2 gap-1.5 border border-slate-200">
             <button
               onClick={() => setTurnoActivo("matutino")}
-              className={`py-2.5 px-3 rounded-xl font-heading font-bold text-xs transition-all flex flex-col items-center ${
+              className={`py-2 px-3 rounded-xl font-heading font-bold text-xs transition-all flex flex-col items-center ${
                 turnoActivo === "matutino"
                   ? "bg-[#1D71B5] text-white shadow-sm"
                   : "bg-white text-slate-500 hover:text-[#355581]"
@@ -404,14 +405,14 @@ export default function TecnicoPage() {
                 <span>☀️</span>
                 <span>Parada 1 (Mañana)</span>
               </span>
-              <span className={`text-[11px] font-normal font-sans mt-0.5 ${turnoActivo === "matutino" ? "opacity-90" : "text-slate-400"}`}>
+              <span className={`text-[10px] font-normal font-sans mt-0.5 ${turnoActivo === "matutino" ? "opacity-90" : "text-slate-400"}`}>
                 09:00 - 13:00
               </span>
             </button>
 
             <button
               onClick={() => setTurnoActivo("vespertino")}
-              className={`py-2.5 px-3 rounded-xl font-heading font-bold text-xs transition-all flex flex-col items-center ${
+              className={`py-2 px-3 rounded-xl font-heading font-bold text-xs transition-all flex flex-col items-center ${
                 turnoActivo === "vespertino"
                   ? "bg-[#1D71B5] text-white shadow-sm"
                   : "bg-white text-slate-500 hover:text-[#355581]"
@@ -421,7 +422,7 @@ export default function TecnicoPage() {
                 <span>🌤️</span>
                 <span>Parada 2 (Tarde)</span>
               </span>
-              <span className={`text-[11px] font-normal font-sans mt-0.5 ${turnoActivo === "vespertino" ? "opacity-90" : "text-slate-400"}`}>
+              <span className={`text-[10px] font-normal font-sans mt-0.5 ${turnoActivo === "vespertino" ? "opacity-90" : "text-slate-400"}`}>
                 14:00 - 18:00
               </span>
             </button>
@@ -429,8 +430,10 @@ export default function TecnicoPage() {
         </div>
 
         {/* CUERPO DEL SERVICIO SELECCIONADO */}
-        {citaActual ? (
-          <div className="p-4 space-y-4 overflow-y-auto max-h-[640px]">
+        <div className="flex-1 bg-[#F4F7F9] flex flex-col">
+          {citaActual ? (
+            <div className="p-4 space-y-4">
+              {/* TARJETA 1: CLIENTE Y UBICACIÓN */}
 
             {/* TARJETA 1: CLIENTE Y UBICACIÓN */}
             <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-3.5">
@@ -693,18 +696,19 @@ export default function TecnicoPage() {
               )}
             </div>
 
-          </div>
-        ) : (
-          <div className="p-8 text-center space-y-3 my-auto">
-            <span className="text-4xl block">☀️</span>
-            <h3 className="font-heading font-extrabold text-slate-800 text-sm">
-              Sin citas asignadas en este turno
-            </h3>
-            <p className="text-xs text-slate-400 max-w-xs mx-auto">
-              No hay citas programadas para el turno {turnoActivo === "matutino" ? "de la mañana" : "de la tarde"} de hoy.
-            </p>
-          </div>
-        )}
+            </div>
+          ) : (
+            <div className="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-3 min-h-[360px]">
+              <span className="text-4xl block">☀️</span>
+              <h3 className="font-heading font-extrabold text-slate-800 text-sm">
+                Sin citas asignadas en este turno
+              </h3>
+              <p className="text-xs text-slate-400 max-w-xs mx-auto">
+                No hay citas programadas para el turno {turnoActivo === "matutino" ? "de la mañana" : "de la tarde"} de hoy.
+              </p>
+            </div>
+          )}
+        </div>
 
         {/* PIE DISCRETO */}
         <div className="p-3 bg-white border-t border-slate-200 text-center">
