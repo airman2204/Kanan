@@ -125,13 +125,8 @@ export function BeforeAfterGallery({ onOpenWizard }: { onOpenWizard: () => void 
         {/* Encabezado Fresco */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div className="max-w-2xl">
-            <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white border border-kanan-cyan/30 text-kanan-cerulean font-heading font-bold text-xs uppercase tracking-wider shadow-sm">
-              <Sparkles className="w-3.5 h-3.5 text-kanan-cyan" />
-              Evidencia Real sin Filtros
-            </span>
-            <h2 className="font-heading text-3xl sm:text-4xl font-extrabold text-kanan-deep mt-3 tracking-tight">
-              Laboratorio Interactivo{" "}
-              <span className="text-kanan-cyan">&ldquo;Antes y Después&rdquo;</span>
+            <h2 className="font-heading text-3xl sm:text-4xl font-extrabold text-kanan-deep tracking-tight">
+              Antes y Después
             </h2>
             <p className="text-slate-600 text-sm sm:text-base mt-2">
               Desliza el comparador o selecciona un caso real en Guadalajara y Zapopan para ver la

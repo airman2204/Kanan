@@ -120,16 +120,16 @@ export function StickyHeader({
           {/* Navegación Moderna */}
           <nav className="hidden xl:flex items-center gap-6 text-sm font-heading font-bold text-slate-600">
             <a href="#servicios" className="hover:text-kanan-cyan transition-colors">
-              Tecnología &amp; Servicios
+              Servicios
             </a>
             <a href="#antes-despues" className="hover:text-kanan-cyan transition-colors">
-              Resultados Reales
+              Antes y Después
             </a>
             <a href="#agendar" className="hover:text-kanan-cyan transition-colors">
-              Cotizador 4 Pasos
+              Cotizar
             </a>
             <a href="#opiniones" className="hover:text-kanan-cyan transition-colors">
-              Garantía &amp; FAQ
+              Preguntas Frecuentes
             </a>
           </nav>
 

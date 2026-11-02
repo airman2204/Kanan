@@ -155,7 +155,6 @@ export function HeroSection({ selectedMunicipio, onOpenWizard }: HeroSectionProp
                   <h2 className="font-heading font-bold text-xs sm:text-sm text-kanan-deep">
                     Garantía de Satisfacción
                   </h2>
-                  <p className="text-[11px] text-slate-500">Sello oficial poservicio</p>
                 </div>
               </div>
             </div>
@@ -192,13 +191,10 @@ export function HeroSection({ selectedMunicipio, onOpenWizard }: HeroSectionProp
                   className="w-16 h-16 sm:w-20 sm:h-20 object-contain bg-kanan-ice rounded-2xl p-1.5 border border-kanan-cyan/30 shrink-0"
                 />
                 <div className="min-w-0">
-                  <span className="inline-block px-2.5 py-0.5 rounded-full bg-kanan-cyan/15 text-kanan-cerulean font-heading font-bold text-[10px] uppercase tracking-wider">
-                    Aprobado por Kanan Dog &ldquo;OK&rdquo;
-                  </span>
-                  <h3 className="font-heading font-extrabold text-sm text-kanan-deep mt-1">
+                  <h3 className="font-heading font-extrabold text-sm text-kanan-deep">
                     Cultura 100% Pet-Friendly
                   </h3>
-                  <p className="text-xs text-slate-600 mt-0.5 leading-snug">
+                  <p className="text-xs text-slate-600 mt-1 leading-snug">
                     Neutralizamos olores orgánicos y pelo de mascota con enzimas naturales sin
                     químicos agresivos.
                   </p>

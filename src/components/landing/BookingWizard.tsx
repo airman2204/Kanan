@@ -362,16 +362,12 @@ export function BookingWizard({
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Encabezado de Sección */}
         <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-10">
-          <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-kanan-navy text-kanan-cyan font-heading font-bold text-xs uppercase tracking-wider">
-            <PawPrint className="w-3.5 h-3.5" />
-            Asistente Guiado por Kanan Dog
-          </span>
-          <h2 className="font-heading text-2xl sm:text-4xl font-extrabold text-kanan-deep mt-3">
-            Agenda tu Servicio en 4 Pasos Simples
+          <h2 className="font-heading text-2xl sm:text-4xl font-extrabold text-kanan-deep">
+            Agenda tu Servicio en 4 Pasos
           </h2>
           <p className="text-slate-600 text-sm sm:text-base mt-2">
             Selecciona tus muebles, ubicación y horario. Sin cobros por adelantado: confirmamos tu
-            cita y cotización personalizada directamente por WhatsApp.
+            cita y cotización directamente por WhatsApp.
           </p>
         </div>
 

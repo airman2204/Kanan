@@ -100,18 +100,14 @@ export function ServicesSection({ onSelectCategoryForWizard }: ServicesSectionPr
         {/* Encabezado Editorial */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="max-w-2xl">
-            <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-kanan-cyan/15 text-kanan-cerulean font-heading font-bold text-xs uppercase tracking-wider">
-              <Sparkles className="w-3.5 h-3.5 text-kanan-cyan" />
-              Ingeniería de Limpieza Residencial
-            </span>
-            <h2 className="font-heading text-3xl sm:text-4xl font-extrabold text-kanan-deep mt-3 tracking-tight">
+            <h2 className="font-heading text-3xl sm:text-4xl font-extrabold text-kanan-deep tracking-tight">
               No solo lavamos por encima:{" "}
               <span className="text-kanan-cerulean">extraemos desde la raíz.</span>
             </h2>
           </div>
           <p className="text-slate-600 text-sm sm:text-base max-w-md">
-            Nuestro protocolo de 3 etapas renueva la textura y bioseguridad de tus textiles sin
-            dejar humedad ni residuos jabonosos.
+            Nuestro protocolo renueva la textura y bioseguridad de tus textiles sin
+            dejar humedad excesiva ni residuos jabonosos.
           </p>
         </div>
 
@@ -262,16 +258,10 @@ export function ServicesSection({ onSelectCategoryForWizard }: ServicesSectionPr
 
         {/* Bloque de Maquinaria Industrial Oficial */}
         <div className="bg-kanan-ice rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-sm space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-3">
-            <div>
-              <span className="text-[11px] font-heading font-extrabold uppercase tracking-wider text-kanan-cerulean">
-                Tecnología de Grado Profesional
-              </span>
-              <h3 className="font-heading text-lg sm:text-xl font-extrabold text-kanan-deep">
-                Maquinaria y Equipo Oficial que Ocupamos
-              </h3>
-            </div>
-            <span className="text-xs text-slate-500 font-medium">Potencia alemana y extracción de alto vacío</span>
+          <div className="border-b border-slate-200 pb-3">
+            <h3 className="font-heading text-lg sm:text-xl font-extrabold text-kanan-deep">
+              Maquinaria y Equipo Oficial que Ocupamos
+            </h3>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">

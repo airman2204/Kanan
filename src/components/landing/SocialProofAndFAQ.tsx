@@ -148,10 +148,6 @@ export function SocialProofAndFAQ() {
         <div className="bg-gradient-to-r from-kanan-deep to-kanan-navy rounded-3xl p-6 sm:p-10 text-white shadow-kanan-lg">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             <div className="lg:col-span-6 space-y-4">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-kanan-cyan/20 text-kanan-cyan text-xs font-heading font-bold uppercase tracking-wider">
-                <ShieldCheck className="w-4 h-4" />
-                Respaldo Oficial Kanan
-              </span>
               <h3 className="font-heading text-2xl sm:text-3xl font-extrabold leading-tight">
                 Tarjeta de Recomendaciones y Próximo Servicio
               </h3>

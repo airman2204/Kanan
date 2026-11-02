@@ -18,12 +18,12 @@ export default function HomePage() {
   const [modoHalloween, setModoHalloween] = useState<boolean>(true);
 
   useEffect(() => {
-    // Consultar el estado del modo Halloween configurado en el Admin
-    fetch("/api/crm")
+    // Consultar el estado del modo Halloween público sin requerir autenticación
+    fetch("/api/config")
       .then((res) => res.json())
       .then((data) => {
-        if (data?.config?.modo_halloween !== undefined) {
-          setModoHalloween(Boolean(data.config.modo_halloween));
+        if (data?.modo_halloween !== undefined) {
+          setModoHalloween(Boolean(data.modo_halloween));
         }
       })
       .catch(() => {});
