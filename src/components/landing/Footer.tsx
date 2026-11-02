@@ -132,6 +132,10 @@ export function Footer({ onOpenWizard }: FooterProps) {
           <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
             <p>© {new Date().getFullYear()} Kanan Servicios de Limpieza. Todos los derechos reservados.</p>
             <div className="flex items-center gap-4">
+              <Link href="/aviso-de-privacidad" className="hover:text-white transition-colors underline">
+                Aviso de Privacidad
+              </Link>
+              <span>•</span>
               <Link href="/guia-cuidados" className="hover:text-white transition-colors">
                 Guía Ante Derrames
               </Link>
@@ -140,31 +144,33 @@ export function Footer({ onOpenWizard }: FooterProps) {
         </div>
       </footer>
 
-      {/* Floating Sticky Mobile CTA Bar */}
-      <div className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 p-3 flex items-center gap-2 shadow-[0_-4px_16px_rgba(0,0,0,0.08)]">
+      {/* Floating Sticky Mobile CTA Bar con 3 botones equilibrados */}
+      <div className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 p-2.5 grid grid-cols-3 gap-2 shadow-[0_-4px_16px_rgba(0,0,0,0.08)]">
         <a
           href={`tel:${KANAN_PHONE_CALL}`}
-          className="p-3 rounded-2xl bg-slate-100 text-kanan-deep font-bold text-xs flex items-center justify-center shrink-0 border border-slate-200"
+          className="h-12 rounded-2xl bg-slate-100 hover:bg-slate-200 text-kanan-deep font-heading font-bold text-xs flex items-center justify-center gap-1.5 border border-slate-200 transition-all active:scale-95"
           title="Llamar"
         >
-          <Phone className="w-4 h-4 text-kanan-cerulean" />
+          <Phone className="w-4 h-4 text-kanan-cerulean shrink-0" />
+          <span>Llamar</span>
         </a>
         <a
           href={directWaUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="p-3 rounded-2xl bg-emerald-50 text-emerald-700 font-bold text-xs flex items-center justify-center shrink-0 border border-emerald-200"
+          className="h-12 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-heading font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all active:scale-95"
           title="WhatsApp"
         >
-          <MessageCircle className="w-4 h-4 text-emerald-600" />
+          <MessageCircle className="w-4 h-4 shrink-0" />
+          <span>WhatsApp</span>
         </a>
         <button
           type="button"
           onClick={onOpenWizard}
-          className="flex-1 py-3 px-4 rounded-2xl bg-kanan-cyan text-white font-heading font-bold text-xs flex items-center justify-center gap-1.5 shadow-cyan-glow"
+          className="h-12 rounded-2xl bg-kanan-cyan hover:bg-[#009ec0] text-white font-heading font-bold text-xs flex items-center justify-center gap-1.5 shadow-cyan-glow transition-all active:scale-95"
         >
-          <CalendarCheck className="w-4 h-4" />
-          <span>Cotizar Ahora</span>
+          <CalendarCheck className="w-4 h-4 shrink-0" />
+          <span>Agendar</span>
         </button>
       </div>
     </>

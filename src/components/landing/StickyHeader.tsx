@@ -81,15 +81,15 @@ export function StickyHeader({
             <KananLogo variant="color" layout="horizontal" size="md" />
           </a>
 
-          {/* Botones de Contacto Rápido y CTA Directos */}
+          {/* Botones de Contacto Rápido y CTA Directos (Mismo tamaño uniforme) */}
           <div className="flex items-center gap-2 sm:gap-2.5">
             {/* Botón de Llamada Telefónica Directa */}
             <a
               href={`tel:${KANAN_PHONE_CALL}`}
-              className="inline-flex items-center gap-1.5 bg-kanan-ice hover:bg-slate-200/80 text-kanan-deep font-heading font-bold text-xs px-3.5 py-2.5 rounded-full border border-slate-200 transition-all shadow-sm active:scale-95"
+              className="inline-flex items-center justify-center gap-1.5 bg-kanan-ice hover:bg-slate-200/80 text-kanan-deep font-heading font-bold text-xs sm:text-sm px-4 sm:px-5 py-2.5 sm:py-3 rounded-full border border-slate-200 transition-all shadow-sm active:scale-95 h-11"
               title="Llamar directamente al 33 4016 0684"
             >
-              <PhoneCall className="w-3.5 h-3.5 text-kanan-cerulean" />
+              <PhoneCall className="w-4 h-4 text-kanan-cerulean shrink-0" />
               <span>Llamar</span>
             </a>
 
@@ -98,17 +98,18 @@ export function StickyHeader({
               href={`https://wa.me/${KANAN_WHATSAPP_NUMBER}?text=${encodeURIComponent("Hola Kanan Limpieza, deseo cotizar un servicio a domicilio.")}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-white font-heading font-bold text-xs px-3.5 py-2.5 rounded-full shadow-sm transition-all active:scale-95"
+              className="inline-flex items-center justify-center gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-white font-heading font-bold text-xs sm:text-sm px-4 sm:px-5 py-2.5 sm:py-3 rounded-full shadow-sm transition-all active:scale-95 h-11"
               title="Chat en WhatsApp: 33 4335 9207"
             >
-              <MessageSquare className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">WhatsApp</span>
+              <MessageSquare className="w-4 h-4 shrink-0" />
+              <span>WhatsApp</span>
             </a>
 
+            {/* Botón de Agendar Cita */}
             <button
               type="button"
               onClick={onOpenWizard}
-              className="group inline-flex items-center gap-2 bg-gradient-to-r from-kanan-cyan to-kanan-cerulean hover:from-[#009ec0] hover:to-kanan-navy text-white font-heading font-bold text-xs sm:text-sm px-4 sm:px-6 py-2.5 sm:py-3 rounded-full shadow-cyan-glow transition-all active:scale-95"
+              className="group inline-flex items-center justify-center gap-1.5 bg-gradient-to-r from-kanan-cyan to-kanan-cerulean hover:from-[#009ec0] hover:to-kanan-navy text-white font-heading font-bold text-xs sm:text-sm px-4 sm:px-5 py-2.5 sm:py-3 rounded-full shadow-cyan-glow transition-all active:scale-95 h-11"
             >
               <CalendarCheck className="w-4 h-4 shrink-0" />
               <span>Agendar Cita</span>

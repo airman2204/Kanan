@@ -1098,6 +1098,19 @@ export function BookingWizard({
                       </div>
                     </div>
 
+                    <div className="pt-2 text-[11px] text-slate-500 text-center sm:text-left">
+                      Al confirmar tu cita, aceptas el tratamiento de tus datos personales conforme a nuestro{" "}
+                      <a
+                        href="/aviso-de-privacidad"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-kanan-cerulean underline font-semibold hover:text-kanan-deep"
+                      >
+                        Aviso de Privacidad
+                      </a>
+                      , utilizados exclusivamente para fines de cotización y servicio a domicilio.
+                    </div>
+
                     <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2">
                       <button
                         type="button"

@@ -57,12 +57,12 @@ const SERVICES = [
     id: "colchones",
     tag: "Descanso & Salud Respiratoria",
     title: "Sanitización Profunda de Colchones",
-    badge: "99.9% Anti-Ácaros",
+    badge: "Extracción y Sanitización",
     badgeIcon: ShieldCheck,
     image: "/assets/services/mattress-fresh.jpg",
     icon: BedDouble,
     metrics: [
-      { label: "Eliminación de Ácaros", value: "99.9%" },
+      { label: "Extracción Profunda", value: "Polvo y Ácaros" },
       { label: "Cuidado Textil", value: "Hipoalergénico" },
       { label: "Listo para Dormir", value: "Mismo día" },
     ],
@@ -84,7 +84,7 @@ const SERVICES = [
       { label: "Tiempo de Secado*", value: "3 a 4 hrs" },
     ],
     description:
-      "Llevamos nuestro equipo móvil hasta tu cochera para devolverle la frescura y la limpieza de agencia a los asientos, cabeceras, alfombra, tapetes y cajuela de tu vehículo.",
+      "Llevamos nuestro equipo móvil hasta tu cochera para devolverle la frescura y la limpieza profunda a los asientos, cabeceras, alfombra, tapetes y cajuela de tu vehículo.",
     chips: ["Auto Sedán / Hatchback", "Camioneta SUV 5 Pasajeros", "SUV 3 Filas (7 Pasajeros)", "Pick-up"],
   },
 ];

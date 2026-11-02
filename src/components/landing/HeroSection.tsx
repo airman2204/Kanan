@@ -64,7 +64,7 @@ export function HeroSection({ selectedMunicipio, onOpenWizard }: HeroSectionProp
               <p className="text-slate-600 text-base sm:text-lg leading-relaxed">
                 Transformamos la higiene de tus muebles con tecnología industrial de{" "}
                 <strong className="text-kanan-deep">inyección-succión profunda</strong> y desinfección profesional de telas.
-                Eliminamos el 99.9% de ácaros, polvo profundo, manchas difíciles y olores desde la primera sesión.
+                Remoción profunda de polvo, suciedad acumulada, manchas comunes y olores desde la primera sesión.
               </p>
             </div>
 
@@ -117,7 +117,7 @@ export function HeroSection({ selectedMunicipio, onOpenWizard }: HeroSectionProp
                   <h2 className="font-heading font-bold text-xs sm:text-sm text-kanan-deep">
                     Desinfección Profunda
                   </h2>
-                  <p className="text-[11px] text-slate-500">Elimina el 99.9% de ácaros y bacterias</p>
+                  <p className="text-[11px] text-slate-500">Sanitización profunda de fibras y telas</p>
                 </div>
               </div>
 
@@ -153,7 +153,7 @@ export function HeroSection({ selectedMunicipio, onOpenWizard }: HeroSectionProp
 
                 <div className="absolute top-3.5 right-3.5 bg-white/95 backdrop-blur-md text-kanan-deep rounded-full px-3 py-1.5 shadow-md border border-kanan-cyan/30 flex items-center gap-1.5 text-xs font-heading font-bold">
                   <ShieldCheck className="w-4 h-4 text-kanan-cyan" />
-                  <span>99.9% Libre de Ácaros</span>
+                  <span>Sanitización Profunda</span>
                 </div>
               </div>
 
