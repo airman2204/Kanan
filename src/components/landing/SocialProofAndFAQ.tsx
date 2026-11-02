@@ -134,18 +134,22 @@ export function SocialProofAndFAQ() {
         </div>
 
         {/* BLOQUE 2: TARJETA DE GARANTÍA Y SERVICIOS */}
-        <div className="bg-gradient-to-br from-[#102235] via-kanan-deep to-[#0A1724] text-white rounded-3xl p-6 sm:p-10 shadow-kanan-lg grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center border border-white/10">
-          <div className="lg:col-span-6 space-y-5">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-kanan-cyan/15 border border-kanan-cyan/30 text-xs font-heading font-bold text-kanan-cyan">
-              <Sparkles className="w-3.5 h-3.5" />
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#F0F7FB] via-white to-[#E8F4FA] p-6 sm:p-12 border border-kanan-cyan/25 shadow-kanan-lg grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+          {/* Orbes sutiles luminosos de fondo */}
+          <div className="absolute -top-24 -left-24 w-80 h-80 rounded-full bg-kanan-cyan/15 blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-24 -right-24 w-80 h-80 rounded-full bg-kanan-cerulean/10 blur-3xl pointer-events-none" />
+
+          <div className="relative lg:col-span-6 space-y-5">
+            <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white border border-kanan-cyan/30 text-xs font-heading font-bold text-kanan-cerulean shadow-sm">
+              <Sparkles className="w-3.5 h-3.5 text-kanan-cyan" />
               <span>Garantía Oficial Kanan</span>
             </div>
             
-            <h3 className="font-heading text-2xl sm:text-4xl font-extrabold leading-tight tracking-tight">
+            <h3 className="font-heading text-2xl sm:text-4xl font-extrabold text-kanan-deep leading-tight tracking-tight">
               Tarjeta de Garantía y Servicios
             </h3>
 
-            <p className="text-slate-300 text-xs sm:text-base leading-relaxed">
+            <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
               Al concluir tu servicio recibes tu tarjeta oficial con las recomendaciones clave de cuidado pos-servicio y la fecha sugerida para tu próximo mantenimiento preventivo.
             </p>
 
@@ -154,7 +158,7 @@ export function SocialProofAndFAQ() {
                 href={KANAN_GOOGLE_MAPS_REVIEW_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-kanan-cyan hover:bg-[#009ec0] text-white text-xs sm:text-sm font-heading font-bold px-5 py-3 rounded-full shadow-cyan-glow transition-all active:scale-95"
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-kanan-cyan to-kanan-cerulean hover:from-[#009ec0] hover:to-kanan-navy text-white text-xs sm:text-sm font-heading font-bold px-6 py-3.5 rounded-full shadow-cyan-glow transition-all active:scale-95"
               >
                 <Star className="w-4 h-4 fill-amber-300 text-amber-300" />
                 <span>Calificar en Google</span>
@@ -162,13 +166,13 @@ export function SocialProofAndFAQ() {
             </div>
           </div>
 
-          {/* Visualización Exacta de la Tarjeta que pasó el usuario */}
-          <div className="lg:col-span-6 flex justify-center">
-            <div className="w-full max-w-[340px] sm:max-w-[380px] drop-shadow-2xl transition-all hover:scale-[1.02] duration-300">
+          {/* Visualización de la Tarjeta con relieve sobre fondo claro */}
+          <div className="relative lg:col-span-6 flex justify-center">
+            <div className="w-full max-w-[320px] sm:max-w-[360px] drop-shadow-[0_20px_35px_rgba(15,36,56,0.18)] transition-all hover:scale-[1.02] duration-300">
               <img
                 src="/assets/brand/tarjeta-garantia-digital.png"
                 alt="Tarjeta de Garantía y Servicios Kanan"
-                className="w-full h-auto rounded-[32px] shadow-2xl border border-white/20"
+                className="w-full h-auto rounded-[32px] border border-slate-200/80 shadow-2xl"
               />
             </div>
           </div>
