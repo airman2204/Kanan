@@ -41,13 +41,16 @@ export function HeroSection({ selectedMunicipio, onOpenWizard }: HeroSectionProp
             <div className="inline-flex flex-wrap items-center gap-2 bg-white border border-kanan-cyan/30 rounded-full pl-3 pr-4 py-1.5 shadow-sm">
               <span className="inline-flex items-center gap-1 text-xs font-heading font-bold text-kanan-cerulean">
                 <MapPin className="w-3.5 h-3.5 text-kanan-cyan" />
-                {selectedMunicipio}, ZMG
+                Cobertura en {selectedMunicipio} y municipios
               </span>
               <span className="text-slate-300">•</span>
-              <span className="inline-flex items-center gap-1 text-xs font-semibold text-amber-600">
+              <a
+                href="#opiniones"
+                className="inline-flex items-center gap-1 text-xs font-semibold text-amber-600 hover:text-amber-700 transition-colors"
+              >
                 <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
                 4.9 ★ en Google Maps
-              </span>
+              </a>
             </div>
 
             {/* Tagline Oficial */}
@@ -60,63 +63,34 @@ export function HeroSection({ selectedMunicipio, onOpenWizard }: HeroSectionProp
               </h1>
               <p className="text-slate-600 text-base sm:text-lg leading-relaxed">
                 Transformamos la higiene de tus muebles con tecnología industrial de{" "}
-                <strong className="text-kanan-deep">inyección-succión profunda</strong> y
-                bioseguridad textil de grado profesional.
+                <strong className="text-kanan-deep">inyección-succión profunda</strong> y desinfección profesional de telas.
                 Eliminamos el 99.9% de ácaros, polvo profundo, manchas difíciles y olores desde la primera sesión.
               </p>
             </div>
 
-            {/* Selector Interactivo: 1. Salas y Sillas, 2. Tapetes, 3. Colchones, 4. Vestiduras */}
-            <div className="bg-white/90 backdrop-blur-md rounded-3xl p-4 sm:p-5 border border-slate-200/90 shadow-kanan space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-heading font-extrabold uppercase tracking-wider text-kanan-navy flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-kanan-cyan" />
-                  ¿Qué deseas limpiar y desinfectar hoy?
-                </span>
-                <span className="text-[11px] font-semibold text-kanan-cyan">
-                  Paso 1 de 4 →
-                </span>
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                {[
-                  { id: "salas", label: "Salas y Sillas", icon: Sofa },
-                  { id: "tapetes", label: "Tapetes", icon: Sparkles },
-                  { id: "colchones", label: "Colchones", icon: BedDouble },
-                  { id: "vestiduras", label: "Vestiduras", icon: CarFront },
-                ].map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => onOpenWizard(item.id)}
-                      className="group p-3 rounded-2xl bg-kanan-ice hover:bg-kanan-cyan hover:text-white text-kanan-deep border border-slate-200/80 hover:border-kanan-cyan transition-all flex flex-col items-center justify-center gap-1.5 text-center shadow-sm active:scale-95"
-                    >
-                      <Icon className="w-5 h-5 text-kanan-cyan group-hover:text-white transition-colors" />
-                      <span className="font-heading font-bold text-xs">{item.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-2.5 pt-1">
+            {/* Acciones Principales y Claras */}
+            <div className="bg-white/95 backdrop-blur-md rounded-3xl p-5 sm:p-6 border border-slate-200/90 shadow-kanan space-y-3">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <button
                   type="button"
                   onClick={() => onOpenWizard()}
-                  className="flex-1 inline-flex items-center justify-center gap-2 bg-kanan-cyan hover:bg-[#009ec0] text-white font-heading font-bold text-sm sm:text-base px-6 py-3.5 rounded-2xl shadow-cyan-glow transition-all active:scale-95"
+                  className="flex-1 inline-flex items-center justify-center gap-2 bg-kanan-cyan hover:bg-[#009ec0] text-white font-heading font-bold text-sm sm:text-base px-6 py-4 rounded-2xl shadow-cyan-glow transition-all active:scale-95"
                 >
-                  <CalendarCheck className="w-5 h-5" />
-                  <span>Agendar Cita a Domicilio</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <CalendarCheck className="w-5 h-5 shrink-0" />
+                  <span>Cotizar Cita a Domicilio</span>
+                  <ArrowRight className="w-4 h-4 shrink-0" />
                 </button>
                 <a
-                  href="#antes-despues"
-                  className="inline-flex items-center justify-center gap-1.5 bg-kanan-ice hover:bg-slate-200/70 text-kanan-deep font-heading font-bold text-xs sm:text-sm px-5 py-3.5 rounded-2xl border border-slate-200 transition-all"
+                  href="#servicios"
+                  className="inline-flex items-center justify-center gap-1.5 bg-kanan-ice hover:bg-slate-200/70 text-kanan-deep font-heading font-bold text-sm px-6 py-4 rounded-2xl border border-slate-200 transition-all text-center"
                 >
-                  <span>Ver Antes y Después</span>
+                  <span>Ver Servicios y Precios</span>
                 </a>
               </div>
+              <p className="text-xs text-slate-500 text-center sm:text-left flex items-center justify-center sm:justify-start gap-1.5 pt-1">
+                <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                Cotización instantánea en menos de 2 minutos • Sin compromiso
+              </p>
             </div>
 
             {/* 3 Pilares de Valor (Sin Pet-Friendly, Garantía de Satisfacción y Secado con Clima) */}
@@ -169,7 +143,7 @@ export function HeroSection({ selectedMunicipio, onOpenWizard }: HeroSectionProp
               <div className="col-span-12 relative rounded-3xl overflow-hidden border border-slate-200/90 shadow-kanan-lg bg-white group">
                 <img
                   src="/assets/services/hero-fresh.jpg"
-                  alt="Sala impecable y luminosa con bioseguridad Kanan"
+                  alt="Sala limpia y renovada por Kanan Limpieza"
                   className="w-full h-[270px] sm:h-[360px] object-cover group-hover:scale-[1.02] transition-transform duration-700"
                 />
 
@@ -190,10 +164,10 @@ export function HeroSection({ selectedMunicipio, onOpenWizard }: HeroSectionProp
                 </div>
                 <div className="min-w-0">
                   <h3 className="font-heading font-extrabold text-sm text-kanan-deep">
-                    Bioseguridad Textil Activa
+                    Cuidado Especializado de Telas
                   </h3>
                   <p className="text-xs text-slate-600 mt-1 leading-snug">
-                    Fórmulas biodegradables que neutralizan olores y suciedad acumulada sin maltratar tejidos ni dejar residuos químicos.
+                    Fórmulas biodegradables que neutralizan suciedad y olores acumulados sin maltratar tejidos ni dejar residuos químicos.
                   </p>
                 </div>
               </div>

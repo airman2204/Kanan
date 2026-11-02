@@ -45,7 +45,7 @@ const SERVICES = [
     image: "/assets/services/rug-fresh.jpg",
     icon: Sparkles,
     metrics: [
-      { label: "Logística ZMG", value: "Recolección Gratis" },
+      { label: "Logística a Domicilio", value: "Recolección Gratis" },
       { label: "Secado en Taller", value: "Controlado" },
       { label: "Tiempo de Entrega", value: "3 días hábiles" },
     ],
@@ -63,7 +63,7 @@ const SERVICES = [
     icon: BedDouble,
     metrics: [
       { label: "Eliminación de Ácaros", value: "99.9%" },
-      { label: "Bioseguridad", value: "Hipoalergénico" },
+      { label: "Cuidado Textil", value: "Hipoalergénico" },
       { label: "Listo para Dormir", value: "Mismo día" },
     ],
     description:
@@ -104,7 +104,7 @@ export function ServicesSection({ onSelectCategoryForWizard }: ServicesSectionPr
             </h2>
           </div>
           <p className="text-slate-600 text-sm sm:text-base max-w-md">
-            Nuestro protocolo renueva la textura y bioseguridad de tus textiles sin
+            Nuestro protocolo renueva la textura y limpieza de tus textiles sin
             dejar humedad excesiva ni residuos jabonosos.
           </p>
         </div>
@@ -244,61 +244,6 @@ export function ServicesSection({ onSelectCategoryForWizard }: ServicesSectionPr
               </div>
             );
           })}
-        </div>
-
-        {/* Bloque de Maquinaria Industrial Oficial según Documento del Cliente */}
-        <div className="bg-kanan-ice rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-sm space-y-4">
-          <div className="border-b border-slate-200 pb-3">
-            <h3 className="font-heading text-lg sm:text-xl font-extrabold text-kanan-deep">
-              Maquinaria y Equipo Oficial que Ocupamos
-            </h3>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
-            <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-kanan-navy/10 text-kanan-navy font-bold flex items-center justify-center text-lg shrink-0">
-                🌪️
-              </div>
-              <div>
-                <p className="font-heading font-bold text-slate-900 text-sm">Aspiradora Kärcher WD1 Classic</p>
-                <p className="text-[11px] text-slate-500">Aspirado turbinado seco-húmedo</p>
-              </div>
-            </div>
-
-            <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-kanan-cerulean/10 text-kanan-cerulean font-bold flex items-center justify-center text-lg shrink-0">
-                💧
-              </div>
-              <div>
-                <p className="font-heading font-bold text-slate-900 text-sm">Kärcher Puzzi 8/1 C</p>
-                <p className="text-[11px] text-slate-500">Inyección-succión compacta</p>
-              </div>
-            </div>
-
-            <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-kanan-cyan/15 text-kanan-cyan font-bold flex items-center justify-center text-lg shrink-0">
-                ⚡
-              </div>
-              <div>
-                <p className="font-heading font-bold text-slate-900 text-sm">Kärcher Puzzi 10/1</p>
-                <p className="text-[11px] text-slate-500">Inyección-succión industrial</p>
-              </div>
-            </div>
-
-            <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-600 font-bold flex items-center justify-center text-lg shrink-0">
-                💨
-              </div>
-              <div>
-                <p className="font-heading font-bold text-slate-900 text-sm">Turbina de Aire XPOWER P-230AT</p>
-                <p className="text-[11px] text-slate-500">Turbina centrífuga de secado</p>
-              </div>
-            </div>
-          </div>
-
-          <p className="text-[11px] text-slate-500 text-center pt-1">
-            *El tiempo de secado dependerá de la ventilación natural y las condiciones climáticas del domicilio.
-          </p>
         </div>
       </div>
     </section>

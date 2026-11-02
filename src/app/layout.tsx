@@ -16,15 +16,15 @@ export const metadata: Metadata = {
     template: "%s | Kanan Servicios de Limpieza",
   },
   description:
-    "Protegemos lo que más tocas. Limpieza y desinfección profunda de salas, colchones, vestiduras y tapetes a domicilio en Tlajomulco, Zapopan, Guadalajara y Tlaquepaque. Bioseguridad textil y secado rápido.",
+    "Protegemos lo que más tocas. Limpieza y desinfección profunda de salas, colchones, vestiduras y tapetes a domicilio en Tlajomulco, Zapopan, Guadalajara y Tlaquepaque. Secado rápido.",
   keywords: [
     "limpieza de salas guadalajara",
     "lavado de salas zapopan",
     "lavado de colchones zapopan",
     "limpieza de vestiduras a domicilio guadalajara",
     "lavado de tapetes guadalajara",
-    "desinfeccion profunda pet friendly",
-    "limpieza de tapiceria zmg",
+    "desinfeccion profunda muebles",
+    "limpieza de tapiceria guadalajara",
     "kanan servicios de limpieza",
   ],
   authors: [{ name: "Kanan Limpieza Especializada" }],

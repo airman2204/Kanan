@@ -48,7 +48,7 @@ export function StickyHeader({
           <div className="flex items-center gap-2 min-w-0">
             <span className="inline-flex items-center gap-1.5 bg-white text-kanan-cerulean font-heading font-bold px-2.5 py-0.5 rounded-full shadow-sm border border-kanan-cyan/30 shrink-0">
               <span className="w-2 h-2 rounded-full bg-kanan-cyan animate-ping" />
-              Bioseguridad Textil
+              Limpieza Profesional
             </span>
             {isHalloweenMode && (
               <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-heading font-bold px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-600 border border-orange-300/40 shrink-0 animate-pulse">
@@ -63,17 +63,10 @@ export function StickyHeader({
           <div className="flex items-center gap-3 shrink-0">
             <Link
               href="/guia-cuidados"
-              className="hidden md:inline-flex items-center gap-1 font-semibold text-kanan-cerulean hover:text-kanan-deep transition-colors"
+              className="inline-flex items-center gap-1 font-semibold text-kanan-cerulean hover:text-kanan-deep transition-colors text-xs"
             >
               <BookOpen className="w-3.5 h-3.5 text-kanan-cyan" />
               <span>Guía Ante Derrames</span>
-            </Link>
-            <Link
-              href="/admin"
-              className="inline-flex items-center gap-1.5 bg-white hover:bg-kanan-deep hover:text-white text-kanan-deep px-3 py-0.5 rounded-full font-heading font-bold transition-all border border-slate-200 shadow-sm"
-            >
-              <LayoutDashboard className="w-3 h-3 text-kanan-cyan" />
-              <span>CRM</span>
             </Link>
           </div>
         </div>
@@ -95,7 +88,7 @@ export function StickyHeader({
           <div className="hidden lg:flex items-center bg-kanan-ice/90 p-1 rounded-full border border-slate-200/80 shadow-inner">
             <div className="flex items-center gap-1 px-2.5 text-xs font-heading font-bold text-kanan-cerulean">
               <MapPin className="w-3.5 h-3.5 text-kanan-cyan" />
-              <span>ZMG:</span>
+              <span>Cobertura:</span>
             </div>
             {MUNICIPIOS.map((mun) => {
               const active = selectedMunicipio === mun;
@@ -138,11 +131,11 @@ export function StickyHeader({
             {/* Botón de Llamada Telefónica Directa */}
             <a
               href={`tel:${KANAN_PHONE_CALL}`}
-              className="hidden md:inline-flex items-center gap-1.5 bg-kanan-ice hover:bg-slate-200/80 text-kanan-deep font-heading font-bold text-xs px-3.5 py-2.5 rounded-full border border-slate-200 transition-all shadow-sm active:scale-95"
-              title="Llamar al 33 4016 0684"
+              className="inline-flex items-center gap-1.5 bg-kanan-ice hover:bg-slate-200/80 text-kanan-deep font-heading font-bold text-xs px-3.5 py-2.5 rounded-full border border-slate-200 transition-all shadow-sm active:scale-95"
+              title="Llamar directamente al 33 4016 0684"
             >
               <PhoneCall className="w-3.5 h-3.5 text-kanan-cerulean" />
-              <span>33 4016 0684</span>
+              <span>Llamar</span>
             </a>
 
             {/* Botón de WhatsApp Directo */}
@@ -244,16 +237,6 @@ export function StickyHeader({
             >
               <span>📘 Guía Digital Ante Derrames</span>
             </Link>
-            <Link
-              href="/admin"
-              onClick={() => setMobileMenuOpen(false)}
-              className="p-3 rounded-2xl bg-kanan-deep text-white flex items-center justify-between"
-            >
-              <span>📊 Panel Operativo CRM (2 Ejemplos)</span>
-              <span className="text-[10px] bg-kanan-cyan text-white px-2 py-0.5 rounded-full">
-                Abrir
-              </span>
-            </Link>
           </nav>
 
           <div className="grid grid-cols-2 gap-2 pt-2">
@@ -271,7 +254,7 @@ export function StickyHeader({
               className="py-3 px-3 rounded-2xl bg-kanan-ice text-kanan-deep font-heading font-bold text-xs flex items-center justify-center gap-1.5 border border-slate-200"
             >
               <PhoneCall className="w-4 h-4 text-kanan-cerulean" />
-              <span>33 4016 0684</span>
+              <span>Llamar</span>
             </a>
           </div>
         </div>

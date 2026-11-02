@@ -33,7 +33,7 @@ export function Footer({ onOpenWizard }: FooterProps) {
               <KananLogo variant="white" />
               <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
                 &ldquo;Protegemos lo que más tocas. Limpieza y desinfección profunda a
-                domicilio.&rdquo; Especialistas en bioseguridad textil e inyección-succión
+                domicilio.&rdquo; Especialistas en cuidado textil e inyección-succión
                 en Tlajomulco, Zapopan, Guadalajara y Tlaquepaque.
               </p>
             </div>
@@ -134,10 +134,6 @@ export function Footer({ onOpenWizard }: FooterProps) {
             <div className="flex items-center gap-4">
               <Link href="/guia-cuidados" className="hover:text-white transition-colors">
                 Guía Ante Derrames
-              </Link>
-              <span>•</span>
-              <Link href="/admin" className="hover:text-white transition-colors">
-                Acceso Admin
               </Link>
             </div>
           </div>

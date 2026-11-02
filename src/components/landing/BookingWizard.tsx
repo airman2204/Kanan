@@ -147,7 +147,7 @@ const KANAN_DOG_TIPS: Record<number, { title: string; tip: string }> = {
   },
   2: {
     title: "Paso 2 de 4: Tu ubicación y fotos opcionales 📷",
-    tip: "Indícanos tu municipio en ZMG y, si gustas, sube una foto del estado actual de tus muebles para preparar el equipo ideal.",
+    tip: "Indícanos tu municipio y, si gustas, sube una foto del estado actual de tus muebles para preparar el equipo ideal.",
   },
   3: {
     title: "Paso 3 de 4: Elige tu fecha y turno ideal ⏰",
@@ -650,14 +650,14 @@ export function BookingWizard({
                   <div className="space-y-6">
                     <div>
                       <label className="block font-heading font-bold text-sm text-kanan-deep mb-2">
-                        1. Selecciona tu Municipio en la ZMG
+                        1. Selecciona tu Municipio de Cobertura
                       </label>
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                         {(
                           [
-                            "Guadalajara",
-                            "Zapopan",
                             "Tlajomulco",
+                            "Zapopan",
+                            "Guadalajara",
                             "Tlaquepaque",
                           ] as MunicipioZMG[]
                         ).map((mun) => {
