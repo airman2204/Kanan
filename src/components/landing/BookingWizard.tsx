@@ -21,6 +21,8 @@ import {
   ShieldCheck,
   AlertCircle,
   Building2,
+  Check,
+  Lock,
 } from "lucide-react";
 import {
   MunicipioZMG,
@@ -28,6 +30,13 @@ import {
   ItemContratado,
 } from "@/types/crm";
 import { consultarCodigoPostal } from "@/lib/utils/postalCodes";
+import {
+  validarDireccion,
+  validarDetalleManchas,
+  validarNombre,
+  validarWhatsApp,
+  sanitizeInput,
+} from "@/lib/utils/securityValidation";
 
 interface CatalogPiece {
   id: string;
@@ -149,8 +158,8 @@ const KANAN_DOG_TIPS: Record<number, { title: string; tip: string }> = {
     tip: "Elige las salas, tapetes, colchones o vestiduras que deseas limpiar y desinfectar. Al final te daremos atención y cotización personalizada.",
   },
   2: {
-    title: "Paso 2 de 4: Tu ubicación y fotos opcionales 📷",
-    tip: "Indícanos tu municipio y, si gustas, sube una foto del estado actual de tus muebles para preparar el equipo ideal.",
+    title: "Paso 2 de 4: Ubicación verificada y fotos de tus piezas 📷",
+    tip: "Ingresa tu código postal para validar la cobertura en Jalisco. Adjunta fotos y describe las manchas para asignarte el técnico y químico adecuado.",
   },
   3: {
     title: "Paso 3 de 4: Elige tu fecha y turno ideal ⏰",
@@ -181,13 +190,18 @@ export function BookingWizard({
 
   // Paso 2: Ubicación Inteligente por Código Postal y Fotos
   const [codigoPostal, setCodigoPostal] = useState("");
+  const [cpValido, setCpValido] = useState(false);
+  const [municipioAutollenado, setMunicipioAutollenado] = useState<MunicipioZMG | null>(null);
   const [colonia, setColonia] = useState("");
   const [coloniasDisponibles, setColoniasDisponibles] = useState<string[]>([]);
   const [calleNumero, setCalleNumero] = useState("");
+  const [calleError, setCalleError] = useState<string | null>(null);
   const [cpError, setCpError] = useState<string | null>(null);
   const [direccion, setDireccion] = useState("");
   const [notasServicio, setNotasServicio] = useState("");
+  const [notasError, setNotasError] = useState<string | null>(null);
   const [fotosPreview, setFotosPreview] = useState<string[]>([]);
+  const [fotosError, setFotosError] = useState<string | null>(null);
 
   // Paso 3: Fecha y Turno
   const tomorrowStr = new Date(Date.now() + 86400000).toISOString().split("T")[0];
@@ -213,13 +227,26 @@ export function BookingWizard({
     setCodigoPostal(clean);
     setCpError(null);
 
+    if (clean.length < 5) {
+      setCpValido(false);
+      setMunicipioAutollenado(null);
+      setColoniasDisponibles([]);
+      setColonia("");
+      return;
+    }
+
     if (clean.length === 5) {
       const info = consultarCodigoPostal(clean);
       if (!info.valido) {
+        setCpValido(false);
+        setMunicipioAutollenado(null);
         setCpError(info.mensajeError || "Código postal fuera de nuestra zona de cobertura en Jalisco.");
         setColoniasDisponibles([]);
+        setColonia("");
       } else {
+        setCpValido(true);
         if (info.municipio) {
+          setMunicipioAutollenado(info.municipio);
           onSelectMunicipio(info.municipio);
         }
         if (info.colonias && info.colonias.length > 0) {
@@ -227,8 +254,31 @@ export function BookingWizard({
           setColonia(info.colonias[0]);
         } else {
           setColoniasDisponibles([]);
+          setColonia("");
         }
       }
+    }
+  };
+
+  const handleCalleChange = (val: string) => {
+    const sanitized = sanitizeInput(val);
+    setCalleNumero(sanitized);
+    if (sanitized.length >= 8) {
+      const v = validarDireccion(sanitized);
+      setCalleError(v.valida ? null : (v.error || null));
+    } else {
+      setCalleError(null);
+    }
+  };
+
+  const handleNotasChange = (val: string) => {
+    const sanitized = sanitizeInput(val);
+    setNotasServicio(sanitized);
+    if (sanitized.length >= 6) {
+      const v = validarDetalleManchas(sanitized);
+      setNotasError(v.valida ? null : (v.error || null));
+    } else {
+      setNotasError(null);
     }
   };
 
@@ -348,9 +398,15 @@ export function BookingWizard({
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
+    setFotosError(null);
     Array.from(files)
       .slice(0, 3)
       .forEach((file) => {
+        // Validar tamaño máximo 5MB por foto
+        if (file.size > 5 * 1024 * 1024) {
+          setFotosError("Cada foto debe pesar menos de 5MB.");
+          return;
+        }
         const reader = new FileReader();
         reader.onload = () => {
           if (typeof reader.result === "string") {
@@ -359,6 +415,34 @@ export function BookingWizard({
         };
         reader.readAsDataURL(file);
       });
+  };
+
+  const validarPaso2 = (): boolean => {
+    if (!cpValido || !municipioAutollenado) {
+      setCpError("Ingresa un Código Postal válido de 5 dígitos con cobertura en Jalisco.");
+      return false;
+    }
+    const resDir = validarDireccion(calleNumero);
+    if (!resDir.valida) {
+      setCalleError(resDir.error || "Dirección incompleta o inválida.");
+      return false;
+    }
+    const resNotas = validarDetalleManchas(notasServicio);
+    if (!resNotas.valida) {
+      setNotasError(resNotas.error || "Por favor describe las manchas o tipo de tela.");
+      return false;
+    }
+    if (fotosPreview.length === 0) {
+      setFotosError("Es obligatorio adjuntar al menos 1 foto del estado actual de tus piezas.");
+      return false;
+    }
+    return true;
+  };
+
+  const handleContinuarAPaso3 = () => {
+    if (validarPaso2()) {
+      setStep(3);
+    }
   };
 
   const handleConfirmBooking = async (e: React.FormEvent) => {
@@ -370,8 +454,14 @@ export function BookingWizard({
       setStep(1);
       return;
     }
-    if (!nombre.trim() || whatsapp.replace(/\D/g, "").length < 8) {
-      setErrorMsg("Por favor ingresa tu nombre y un número de WhatsApp válido (10 dígitos).");
+    const validNombre = validarNombre(nombre);
+    if (!validNombre.valida) {
+      setErrorMsg(validNombre.error || "Nombre inválido");
+      return;
+    }
+    const validTel = validarWhatsApp(whatsapp);
+    if (!validTel.valida) {
+      setErrorMsg(validTel.error || "WhatsApp inválido (deben ser 10 dígitos)");
       return;
     }
 
@@ -381,15 +471,16 @@ export function BookingWizard({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          nombre,
-          whatsapp,
+          nombre: sanitizeInput(nombre),
+          whatsapp: whatsapp.replace(/\D/g, ""),
           direccion: direccion.trim() || `Domicilio en ${selectedMunicipio}`,
+          calleNumero: sanitizeInput(calleNumero),
           municipio: selectedMunicipio,
           mascotas,
           fecha,
           turno,
           items_contratados: selectedItems,
-          notas_servicio: notasServicio,
+          notas_servicio: sanitizeInput(notasServicio),
           fotos_estado_actual: fotosPreview,
         }),
       });
@@ -702,10 +793,10 @@ export function BookingWizard({
                   </div>
                 )}
 
-                {/* PASO 2: UBICACIÓN INTELIGENTE POR CÓDIGO POSTAL Y FOTOS */}
+                {/* PASO 2: UBICACIÓN INTELIGENTE POR CÓDIGO POSTAL Y FOTOS (SEGURO Y VALIDADO) */}
                 {step === 2 && (
                   <div className="space-y-6">
-                    {/* Bloque de Código Postal con Autocompletado y Filtro de Cobertura */}
+                    {/* Bloque 1: Código Postal que desbloquea Municipio y Colonia */}
                     <div className="bg-kanan-ice/70 rounded-3xl p-5 sm:p-6 border border-slate-200/90 space-y-4">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                         <div>
@@ -713,10 +804,10 @@ export function BookingWizard({
                             htmlFor="wizard-cp"
                             className="block font-heading font-extrabold text-sm sm:text-base text-kanan-deep"
                           >
-                            1. Ingresa tu Código Postal (5 dígitos)
+                            1. Ingresa tu Código Postal (5 dígitos) *
                           </label>
                           <p className="text-xs text-slate-500 mt-0.5">
-                            Detecta automáticamente tu municipio y colonias oficiales en Jalisco.
+                            Al ingresarlo se verificará tu municipio y colonias oficiales en Jalisco.
                           </p>
                         </div>
                         <span className="text-[11px] font-heading font-bold text-kanan-cerulean bg-white px-3 py-1 rounded-full border border-kanan-cyan/30 self-start sm:self-auto">
@@ -725,6 +816,7 @@ export function BookingWizard({
                       </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-start">
+                        {/* Input Código Postal */}
                         <div className="sm:col-span-4">
                           <div className="relative">
                             <input
@@ -736,25 +828,43 @@ export function BookingWizard({
                               placeholder="Ej. 44600"
                               className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-base font-heading font-bold text-kanan-deep tracking-wider focus:outline-none focus:ring-2 focus:ring-kanan-cyan"
                             />
-                            {codigoPostal.length === 5 && !cpError && (
+                            {cpValido && (
                               <CheckCircle2 className="w-5 h-5 text-emerald-500 absolute right-3.5 top-3.5" />
                             )}
                           </div>
                         </div>
 
-                        {/* Municipio Detectado */}
+                        {/* Municipio Detectado (Solo se llena si el CP es válido) */}
                         <div className="sm:col-span-4">
-                          <div className="px-4 py-3 rounded-2xl bg-white border border-slate-200 text-xs sm:text-sm flex items-center justify-between min-h-[46px]">
-                            <span className="text-slate-400 font-medium">Municipio:</span>
-                            <span className="font-heading font-bold text-kanan-deep">
-                              {selectedMunicipio}
-                            </span>
+                          <div
+                            className={`px-4 py-3 rounded-2xl border text-xs sm:text-sm flex items-center min-h-[46px] transition-all ${
+                              cpValido && municipioAutollenado
+                                ? "bg-white border-emerald-300 shadow-sm"
+                                : "bg-slate-100/80 border-slate-200 text-slate-400"
+                            }`}
+                          >
+                            <span className="text-slate-400 font-medium shrink-0">Municipio:&nbsp;</span>
+                            {cpValido && municipioAutollenado ? (
+                              <span className="font-heading font-extrabold text-kanan-deep inline-flex items-center gap-1">
+                                {municipioAutollenado}
+                                <Check className="w-3.5 h-3.5 text-emerald-600" />
+                              </span>
+                            ) : (
+                              <span className="italic text-slate-400 text-xs flex items-center gap-1">
+                                <Lock className="w-3 h-3 text-slate-400" /> Esperando C.P...
+                              </span>
+                            )}
                           </div>
                         </div>
 
-                        {/* Colonia (Select si hay catálogo, o input libre) */}
+                        {/* Colonia (Select si hay catálogo, o input libre - Desbloqueado solo con CP válido) */}
                         <div className="sm:col-span-4">
-                          {coloniasDisponibles.length > 0 ? (
+                          {!cpValido ? (
+                            <div className="px-4 py-3 rounded-2xl bg-slate-100/80 border border-slate-200 text-xs text-slate-400 min-h-[46px] flex items-center gap-1.5">
+                              <Lock className="w-3 h-3 text-slate-400" />
+                              <span>Colonia (requiere C.P.)</span>
+                            </div>
+                          ) : coloniasDisponibles.length > 0 ? (
                             <select
                               value={colonia}
                               onChange={(e) => setColonia(e.target.value)}
@@ -770,8 +880,8 @@ export function BookingWizard({
                             <input
                               type="text"
                               value={colonia}
-                              onChange={(e) => setColonia(e.target.value)}
-                              placeholder="Colonia o Fracc."
+                              onChange={(e) => setColonia(sanitizeInput(e.target.value))}
+                              placeholder="Colonia o Fraccionamiento *"
                               className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-xs sm:text-sm text-kanan-deep focus:outline-none focus:ring-2 focus:ring-kanan-cyan"
                             />
                           )}
@@ -787,82 +897,158 @@ export function BookingWizard({
                       )}
                     </div>
 
-                    {/* Dirección Específica: Calle, Número y Coto */}
+                    {/* Bloque 2: Dirección y Detalle de Manchas (Desbloqueados solo tras validar CP) */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {/* Calle y Número con Validación de Dirección Real */}
                       <div>
                         <label
                           htmlFor="wizard-calle"
                           className="block font-heading font-bold text-sm text-kanan-deep mb-1.5 flex items-center justify-between"
                         >
-                          <span>2. Calle, Número Exterior e Interior / Coto</span>
-                          <span className="text-[11px] font-normal text-slate-400">Requerido</span>
+                          <span>2. Calle y Número Exterior / Interior *</span>
+                          <span className="text-[11px] font-semibold text-rose-600">Requerido</span>
                         </label>
                         <input
                           id="wizard-calle"
                           type="text"
+                          disabled={!cpValido}
                           value={calleNumero}
-                          onChange={(e) => setCalleNumero(e.target.value)}
-                          placeholder="Ej. Av. Providencia 2340, Depto 4B / Coto Santa Anita"
-                          className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-kanan-deep focus:outline-none focus:ring-2 focus:ring-kanan-cyan"
+                          onChange={(e) => handleCalleChange(e.target.value)}
+                          placeholder={
+                            cpValido
+                              ? "Ej. Av. Providencia 2340, Depto 4B"
+                              : "Ingresa primero un Código Postal válido"
+                          }
+                          className={`w-full rounded-2xl border px-4 py-3 text-sm transition-all focus:outline-none ${
+                            !cpValido
+                              ? "bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed"
+                              : calleError
+                              ? "bg-white border-rose-300 focus:ring-2 focus:ring-rose-400 text-kanan-deep"
+                              : "bg-white border-slate-300 focus:ring-2 focus:ring-kanan-cyan text-kanan-deep"
+                          }`}
                         />
+                        {calleError ? (
+                          <p className="text-[11px] text-rose-600 mt-1 flex items-center gap-1 font-medium">
+                            <AlertCircle className="w-3 h-3 shrink-0" />
+                            {calleError}
+                          </p>
+                        ) : (
+                          <p className="text-[11px] text-slate-400 mt-1">
+                            Debe incluir nombre de calle y número exterior (mínimo 8 caracteres).
+                          </p>
+                        )}
                       </div>
 
+                      {/* Detalles de Manchas o Tela (Requerido) */}
                       <div>
                         <label
                           htmlFor="wizard-notas"
                           className="block font-heading font-bold text-sm text-kanan-deep mb-1.5 flex items-center justify-between"
                         >
-                          <span>3. Detalles de manchas o tela (Opcional)</span>
-                          <span className="text-[11px] font-normal text-slate-400">Opcional</span>
+                          <span>3. Detalle de manchas o tipo de tela *</span>
+                          <span className="text-[11px] font-semibold text-rose-600">Requerido</span>
                         </label>
                         <input
                           id="wizard-notas"
                           type="text"
+                          disabled={!cpValido}
                           value={notasServicio}
-                          onChange={(e) => setNotasServicio(e.target.value)}
-                          placeholder="Ej. Manchas de café en asiento, tela tipo lino claro"
-                          className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-kanan-deep focus:outline-none focus:ring-2 focus:ring-kanan-cyan"
+                          onChange={(e) => handleNotasChange(e.target.value)}
+                          placeholder={
+                            cpValido
+                              ? "Ej. Manchas de café en cojines, tela lino gris claro"
+                              : "Ingresa primero un Código Postal válido"
+                          }
+                          className={`w-full rounded-2xl border px-4 py-3 text-sm transition-all focus:outline-none ${
+                            !cpValido
+                              ? "bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed"
+                              : notasError
+                              ? "bg-white border-rose-300 focus:ring-2 focus:ring-rose-400 text-kanan-deep"
+                              : "bg-white border-slate-300 focus:ring-2 focus:ring-kanan-cyan text-kanan-deep"
+                          }`}
                         />
+                        {notasError ? (
+                          <p className="text-[11px] text-rose-600 mt-1 flex items-center gap-1 font-medium">
+                            <AlertCircle className="w-3 h-3 shrink-0" />
+                            {notasError}
+                          </p>
+                        ) : (
+                          <p className="text-[11px] text-slate-400 mt-1">
+                            Nos permite preparar los químicos y solventes neutros adecuados.
+                          </p>
+                        )}
                       </div>
                     </div>
 
-                    {/* Carga Opcional de Fotos del Estado Actual */}
-                    <div className="bg-kanan-ice rounded-2xl p-4 sm:p-5 border border-dashed border-kanan-cerulean/50">
+                    {/* Bloque 3: Carga Requerida de Fotos del Estado Actual (Desbloqueado tras validar CP) */}
+                    <div
+                      className={`rounded-2xl p-4 sm:p-5 border border-dashed transition-all ${
+                        !cpValido
+                          ? "bg-slate-50 border-slate-200 opacity-60"
+                          : fotosPreview.length > 0
+                          ? "bg-emerald-50/50 border-emerald-300"
+                          : "bg-kanan-ice border-kanan-cerulean/50"
+                      }`}
+                    >
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div className="flex items-start gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-kanan-cyan/15 text-kanan-cerulean flex items-center justify-center shrink-0">
+                          <div
+                            className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                              fotosPreview.length > 0
+                                ? "bg-emerald-600 text-white"
+                                : "bg-kanan-cyan/15 text-kanan-cerulean"
+                            }`}
+                          >
                             <Camera className="w-5 h-5" />
                           </div>
                           <div>
-                            <h4 className="font-heading font-bold text-sm text-kanan-deep">
-                              Carga Opcional de Fotos del Estado Actual
-                            </h4>
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-heading font-bold text-sm text-kanan-deep">
+                                Fotos del Estado Actual de tus Piezas *
+                              </h4>
+                              <span className="text-[10px] bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full font-bold">
+                                Requerido
+                              </span>
+                            </div>
                             <p className="text-xs text-slate-600 mt-0.5">
-                              Sube hasta 3 fotos desde tu celular para que el técnico prepare los
-                              desmanchadores específicos para tu tela.
+                              Adjunta de 1 a 3 fotos claras para que el técnico verifique el tipo de tejido y severidad de manchas antes de acudir.
                             </p>
                           </div>
                         </div>
 
-                        <label className="cursor-pointer inline-flex items-center justify-center gap-2 bg-white hover:bg-slate-50 text-kanan-navy border border-slate-300 font-heading font-bold text-xs px-4 py-2.5 rounded-xl shadow-sm shrink-0">
-                          <Camera className="w-4 h-4 text-kanan-cyan" />
-                          <span>Tomar / Subir Fotos</span>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            multiple
-                            onChange={handlePhotoUpload}
-                            className="hidden"
-                          />
-                        </label>
+                        {cpValido ? (
+                          <label className="cursor-pointer inline-flex items-center justify-center gap-2 bg-kanan-navy hover:bg-[#062445] text-white border border-transparent font-heading font-bold text-xs px-4 py-2.5 rounded-xl shadow-sm shrink-0">
+                            <Camera className="w-4 h-4 text-kanan-cyan" />
+                            <span>{fotosPreview.length > 0 ? "Agregar más fotos" : "Tomar / Subir Fotos *"}</span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              multiple
+                              onChange={handlePhotoUpload}
+                              className="hidden"
+                            />
+                          </label>
+                        ) : (
+                          <div className="inline-flex items-center gap-1.5 text-xs text-slate-400 bg-slate-200/60 px-3 py-2 rounded-xl">
+                            <Lock className="w-3.5 h-3.5" />
+                            <span>Requiere CP</span>
+                          </div>
+                        )}
                       </div>
+
+                      {fotosError && (
+                        <p className="text-xs text-rose-600 mt-2 flex items-center gap-1 font-semibold">
+                          <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                          {fotosError}
+                        </p>
+                      )}
 
                       {fotosPreview.length > 0 && (
                         <div className="flex flex-wrap gap-3 mt-4 pt-3 border-t border-slate-200">
                           {fotosPreview.map((src, idx) => (
                             <div
                               key={idx}
-                              className="relative w-20 h-20 rounded-xl overflow-hidden border border-slate-300 bg-white"
+                              className="relative w-20 h-20 rounded-xl overflow-hidden border border-slate-300 bg-white shadow-sm"
                             >
                               <img
                                 src={src}
@@ -874,7 +1060,7 @@ export function BookingWizard({
                                 onClick={() =>
                                   setFotosPreview((prev) => prev.filter((_, i) => i !== idx))
                                 }
-                                className="absolute top-1 right-1 bg-red-600 text-white p-1 rounded-full shadow"
+                                className="absolute top-1 right-1 bg-red-600 text-white p-1 rounded-full shadow hover:bg-red-700"
                                 aria-label="Eliminar foto"
                               >
                                 <Trash2 className="w-3 h-3" />
@@ -885,6 +1071,7 @@ export function BookingWizard({
                       )}
                     </div>
 
+                    {/* Botones de navegación del Paso 2 */}
                     <div className="flex items-center justify-between gap-3 pt-2">
                       <button
                         type="button"
@@ -897,9 +1084,19 @@ export function BookingWizard({
 
                       <button
                         type="button"
-                        disabled={Boolean(cpError) || codigoPostal.length !== 5 || !calleNumero.trim()}
-                        onClick={() => setStep(3)}
-                        className="inline-flex items-center gap-2 bg-kanan-cyan hover:bg-[#009ec0] disabled:bg-slate-300 disabled:shadow-none text-white font-heading font-bold text-sm px-6 py-3.5 rounded-2xl shadow-cyan-glow"
+                        disabled={
+                          !cpValido ||
+                          !municipioAutollenado ||
+                          !calleNumero.trim() ||
+                          calleNumero.trim().length < 8 ||
+                          Boolean(calleError) ||
+                          !notasServicio.trim() ||
+                          notasServicio.trim().length < 6 ||
+                          Boolean(notasError) ||
+                          fotosPreview.length === 0
+                        }
+                        onClick={handleContinuarAPaso3}
+                        className="inline-flex items-center gap-2 bg-kanan-cyan hover:bg-[#009ec0] disabled:bg-slate-300 disabled:shadow-none text-white font-heading font-bold text-sm px-6 py-3.5 rounded-2xl shadow-cyan-glow transition-all"
                       >
                         <span>Elegir Fecha y Turno</span>
                         <ArrowRight className="w-4 h-4" />

@@ -16,6 +16,14 @@ import {
 } from "@/lib/db/store";
 import { generarMensajeWhatsAppReservaCliente, KANAN_WHATSAPP_NUMBER } from "@/lib/whatsapp/templates";
 import { verifySessionToken } from "@/lib/auth/security";
+import {
+  validarDireccion,
+  validarDetalleManchas,
+  validarNombre,
+  validarWhatsApp,
+  sanitizeInput,
+} from "@/lib/utils/securityValidation";
+import { consultarCodigoPostal } from "@/lib/utils/postalCodes";
 
 function isAuthenticatedAdmin(req: NextRequest): boolean {
   const cookie = req.cookies.get("kanan_admin_session")?.value;
@@ -120,17 +128,57 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // 3. Crear nueva cita desde el Wizard público
+    // 3. Crear nueva cita desde el Wizard público (Validación estricta y desinfección)
+    const validNombre = validarNombre(body.nombre || "");
+    if (!validNombre.valida) {
+      return NextResponse.json({ ok: false, error: validNombre.error }, { status: 400 });
+    }
+
+    const validTel = validarWhatsApp(body.whatsapp || "");
+    if (!validTel.valida) {
+      return NextResponse.json({ ok: false, error: validTel.error }, { status: 400 });
+    }
+
+    const validDir = validarDireccion(body.calleNumero || body.direccion || "");
+    if (!validDir.valida) {
+      return NextResponse.json({ ok: false, error: validDir.error }, { status: 400 });
+    }
+
+    const validManchas = validarDetalleManchas(body.notas_servicio || "");
+    if (!validManchas.valida) {
+      return NextResponse.json({ ok: false, error: validManchas.error }, { status: 400 });
+    }
+
+    if (!Array.isArray(body.fotos_estado_actual) || body.fotos_estado_actual.length === 0) {
+      return NextResponse.json(
+        { ok: false, error: "Es requerido adjuntar al menos 1 foto del estado de tus muebles para preparar el desmanchado." },
+        { status: 400 }
+      );
+    }
+
+    // Validación de municipio permitido
+    const municipiosPermitidos = ["Guadalajara", "Zapopan", "Tlajomulco", "Tlaquepaque"];
+    if (!municipiosPermitidos.includes(body.municipio)) {
+      return NextResponse.json(
+        { ok: false, error: "Municipio no válido o fuera de zona autorizada de Jalisco." },
+        { status: 400 }
+      );
+    }
+
+    const sanitizedNombre = sanitizeInput(body.nombre);
+    const sanitizedDireccion = sanitizeInput(body.direccion);
+    const sanitizedNotas = sanitizeInput(body.notas_servicio);
+
     const { cita, cliente } = createBookingFromWizard({
-      nombre: body.nombre,
+      nombre: sanitizedNombre,
       whatsapp: body.whatsapp,
-      direccion: body.direccion,
+      direccion: sanitizedDireccion,
       municipio: body.municipio,
       mascotas: Boolean(body.mascotas),
       fecha: body.fecha,
       turno: body.turno,
       items_contratados: body.items_contratados || [],
-      notas_servicio: body.notas_servicio || "",
+      notas_servicio: sanitizedNotas,
       fotos_estado_actual: body.fotos_estado_actual || [],
     });
 
