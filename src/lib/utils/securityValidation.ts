@@ -2,14 +2,15 @@ import { MunicipioZMG } from "@/types/crm";
 
 /**
  * Sanitizador estricto contra inyecciones XSS / HTML / scripts y caracteres de escape maliciosos.
+ * IMPORTANTE: No hace .trim() para no eliminar los espacios finales mientras el usuario escribe en inputs en vivo.
  */
-export function sanitizeInput(input: string): string {
+export function sanitizeInput(input: string, trimEnd = false): string {
   if (!input) return "";
-  return input
+  const cleaned = input
     .replace(/[<>'"`;${}\\]/g, "") // Bloquear etiquetas HTML, backticks, llaves y caracteres de inyección
     .replace(/javascript:/gi, "")
-    .replace(/data:/gi, "")
-    .trim();
+    .replace(/data:/gi, "");
+  return trimEnd ? cleaned.trim() : cleaned;
 }
 
 /**

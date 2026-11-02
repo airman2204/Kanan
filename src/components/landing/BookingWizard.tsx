@@ -261,24 +261,48 @@ export function BookingWizard({
   };
 
   const handleCalleChange = (val: string) => {
-    const sanitized = sanitizeInput(val);
+    // Sanitizar sin eliminar el espacio que el usuario acaba de teclear
+    const sanitized = sanitizeInput(val, false);
     setCalleNumero(sanitized);
-    if (sanitized.trim().length > 0) {
+
+    // Solo mostrar error si el usuario ya escribió suficiente o si borró todo
+    if (sanitized.trim().length === 0) {
+      setCalleError(null);
+    } else if (sanitized.trim().length >= 8) {
       const v = validarDireccion(sanitized);
       setCalleError(v.valida ? null : (v.error || null));
     } else {
+      // Mientras esté escribiendo las primeras letras no mostrar error agresivo
       setCalleError(null);
     }
   };
 
+  const handleCalleBlur = () => {
+    if (calleNumero.trim().length > 0) {
+      const v = validarDireccion(calleNumero);
+      setCalleError(v.valida ? null : (v.error || null));
+    }
+  };
+
   const handleNotasChange = (val: string) => {
-    const sanitized = sanitizeInput(val);
+    // Sanitizar sin eliminar espacios en blanco
+    const sanitized = sanitizeInput(val, false);
     setNotasServicio(sanitized);
-    if (sanitized.trim().length > 0) {
+
+    if (sanitized.trim().length === 0) {
+      setNotasError(null);
+    } else if (sanitized.trim().length >= 6) {
       const v = validarDetalleManchas(sanitized);
       setNotasError(v.valida ? null : (v.error || null));
     } else {
       setNotasError(null);
+    }
+  };
+
+  const handleNotasBlur = () => {
+    if (notasServicio.trim().length > 0) {
+      const v = validarDetalleManchas(notasServicio);
+      setNotasError(v.valida ? null : (v.error || null));
     }
   };
 
@@ -914,6 +938,7 @@ export function BookingWizard({
                           disabled={!cpValido}
                           value={calleNumero}
                           onChange={(e) => handleCalleChange(e.target.value)}
+                          onBlur={handleCalleBlur}
                           placeholder={
                             cpValido
                               ? "Ej. Av. Providencia 2340, Depto 4B"
@@ -954,6 +979,7 @@ export function BookingWizard({
                           disabled={!cpValido}
                           value={notasServicio}
                           onChange={(e) => handleNotasChange(e.target.value)}
+                          onBlur={handleNotasBlur}
                           placeholder={
                             cpValido
                               ? "Ej. Manchas de café en cojines, tela lino gris claro"
