@@ -214,7 +214,62 @@ export function CalendarCitasView({
   const citasMatutino = citasDelDia.filter((c) => c.turno.startsWith("Matutino") && c.estatus !== "Cancelada");
   const citasVespertino = citasDelDia.filter((c) => c.turno.startsWith("Vespertino") && c.estatus !== "Cancelada");
 
-  // Validación de semáforo de capacidad para la fecha que se está seleccionando en el formulario
+  // Helper para obtener los turnos disponibles según el municipio y la fecha seleccionada
+  const obtenerTurnosPorMunicipioYFecha = (mun: string, fechaStr: string): { turno: TurnoServicio; horario: string }[] => {
+    const muniLower = (mun || "").toLowerCase();
+    let esFinDeSemana = false;
+    if (fechaStr) {
+      const parts = fechaStr.split("-");
+      if (parts.length === 3) {
+        const d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+        const dayOfWeek = d.getDay();
+        esFinDeSemana = dayOfWeek === 0 || dayOfWeek === 6;
+      }
+    }
+
+    if (muniLower.includes("tlajomulco")) {
+      return [
+        {
+          turno: "Lunes a Domingo (09:00 - 16:00)",
+          horario: "09:00 am a 4:00 pm",
+        },
+      ];
+    }
+
+    // Guadalajara, Zapopan y Tlaquepaque
+    if (esFinDeSemana) {
+      return [
+        {
+          turno: "Sábado y Domingo (08:00 - 13:00)",
+          horario: "08:00 am a 1:00 pm (Fin de Semana)",
+        },
+      ];
+    }
+
+    return [
+      {
+        turno: "Lunes a Viernes (09:00 - 14:00)",
+        horario: "09:00 am a 2:00 pm (Entre Semana)",
+      },
+    ];
+  };
+
+  const turnosAdminDisponibles = obtenerTurnosPorMunicipioYFecha(
+    isExistingClient && selectedClientId
+      ? clientes.find((c) => c.id === selectedClientId)?.municipio || newMunicipio
+      : newMunicipio,
+    newFecha
+  );
+
+  // Sincronizar newTurno si el turno actual no pertenece a la zona/fecha seleccionada
+  React.useEffect(() => {
+    if (turnosAdminDisponibles.length > 0) {
+      const valido = turnosAdminDisponibles.some((t) => t.turno === newTurno);
+      if (!valido) {
+        setNewTurno(turnosAdminDisponibles[0].turno);
+      }
+    }
+  }, [newMunicipio, newFecha, selectedClientId, isExistingClient]);
   const citasFechaForm = citas.filter((c) => c.fecha === newFecha && c.estatus !== "Cancelada");
   const matutinoOcupado = citasFechaForm.some((c) => c.turno.startsWith("Matutino"));
   const vespertinoOcupado = citasFechaForm.some((c) => c.turno.startsWith("Vespertino"));
@@ -1178,17 +1233,26 @@ export function CalendarCitasView({
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-xs font-heading font-bold text-slate-700">Turno de Atención</label>
+                    <label className="text-xs font-heading font-bold text-slate-700">Turno Oficial según Zona y Día</label>
                     <select
                       value={newTurno}
                       onChange={(e) => setNewTurno(e.target.value as TurnoServicio)}
                       className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-800"
                     >
+                      {turnosAdminDisponibles.map((t) => {
+                        const ocupado = citasFechaForm.some((c) => c.turno === t.turno);
+                        return (
+                          <option key={t.turno} value={t.turno}>
+                            {t.horario} {ocupado ? "⚠️ Ocupado" : "🟢 Libre"}
+                          </option>
+                        );
+                      })}
+                      {/* Opciones estándar como alternativa */}
                       <option value="Matutino (09:00 - 13:00)">
-                        Matutino (09:00 - 13:00) {matutinoOcupado ? "⚠️ Ocupado" : "🟢 Libre"}
+                        Extra / Matutino (09:00 - 13:00) {matutinoOcupado ? "⚠️ Ocupado" : "🟢 Libre"}
                       </option>
                       <option value="Vespertino (14:00 - 18:00)">
-                        Vespertino (14:00 - 18:00) {vespertinoOcupado ? "⚠️ Ocupado" : "🟢 Libre"}
+                        Extra / Vespertino (14:00 - 18:00) {vespertinoOcupado ? "⚠️ Ocupado" : "🟢 Libre"}
                       </option>
                     </select>
                   </div>
