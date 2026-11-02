@@ -195,6 +195,51 @@ export function BeforeAfterGallery({ onOpenWizard }: { onOpenWizard: () => void 
               />
             </div>
 
+            {/* Tira Horizontal de Miniaturas Rápidas para Móvil y Desktop */}
+            <div className="pt-1">
+              <span className="text-[11px] font-heading font-bold text-slate-400 block mb-2 px-1">
+                Toca cualquier foto para comparar:
+              </span>
+              <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
+                {COMPARISONS.map((item, idx) => {
+                  const active = selectedCase.id === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedCase(item);
+                        setSliderPos(50);
+                      }}
+                      className={`shrink-0 flex items-center gap-2 p-1.5 pr-3 rounded-2xl border transition-all ${
+                        active
+                          ? "bg-kanan-navy text-white border-kanan-navy shadow-md ring-2 ring-kanan-cyan/50"
+                          : "bg-kanan-ice hover:bg-white text-kanan-deep border-slate-200 hover:border-kanan-cyan/40"
+                      }`}
+                    >
+                      <img
+                        src={item.afterImg}
+                        alt={item.title}
+                        className="w-10 h-10 rounded-xl object-cover shrink-0"
+                      />
+                      <div className="text-left">
+                        <span
+                          className={`text-[9px] font-bold uppercase block ${
+                            active ? "text-kanan-cyan" : "text-kanan-cerulean"
+                          }`}
+                        >
+                          Caso 0{idx + 1}
+                        </span>
+                        <p className="font-heading font-bold text-xs whitespace-nowrap">
+                          {item.title}
+                        </p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
             {/* Ficha Técnica Inferior del Caso Seleccionado */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3 bg-kanan-ice rounded-2xl p-3 sm:p-4 border border-slate-200/80">
               <div className="flex items-center gap-2">

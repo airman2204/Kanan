@@ -245,7 +245,23 @@ export function BookingWizard({
 
   const turnosDisponibles = obtenerTurnosPorMunicipioYFecha();
 
-  // Mantener el turno sincronizado si cambia la fecha o municipio
+  // Mantener la categoría sincronizada con la que el usuario eligió en las tarjetas de servicios
+  useEffect(() => {
+    if (preselectedCategory) {
+      setActiveCategory(preselectedCategory);
+      // Asignar 1 pieza por defecto de esa categoría si no tiene seleccionadas
+      const cat = CATALOGO_KANAN.find((c) => c.id === preselectedCategory);
+      if (cat && cat.piezas.length > 0) {
+        const firstPiezaId = cat.piezas[0].id;
+        setQuantities((prev) => {
+          // Si ya tiene ítems de esta categoría, conservarlos
+          const hasCurrent = cat.piezas.some((p) => (prev[p.id] || 0) > 0);
+          if (hasCurrent) return prev;
+          return { [firstPiezaId]: 1 };
+        });
+      }
+    }
+  }, [preselectedCategory]);
   useEffect(() => {
     if (turnosDisponibles.length > 0) {
       const existe = turnosDisponibles.some((t) => t.turno === turno);
