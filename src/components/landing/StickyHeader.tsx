@@ -81,24 +81,8 @@ export function StickyHeader({
             <KananLogo variant="color" layout="horizontal" size="md" />
           </a>
 
-          {/* Navegación Moderna */}
-          <nav className="hidden xl:flex items-center gap-6 text-sm font-heading font-bold text-slate-600">
-            <a href="#servicios" className="hover:text-kanan-cyan transition-colors">
-              Servicios
-            </a>
-            <a href="#antes-despues" className="hover:text-kanan-cyan transition-colors">
-              Antes y Después
-            </a>
-            <a href="#agendar" className="hover:text-kanan-cyan transition-colors">
-              Cotizar
-            </a>
-            <a href="#opiniones" className="hover:text-kanan-cyan transition-colors">
-              Preguntas Frecuentes
-            </a>
-          </nav>
-
-          {/* Botones de Contacto Rápido y CTA */}
-          <div className="flex items-center gap-2">
+          {/* Botones de Contacto Rápido y CTA Directos */}
+          <div className="flex items-center gap-2 sm:gap-2.5">
             {/* Botón de Llamada Telefónica Directa */}
             <a
               href={`tel:${KANAN_PHONE_CALL}`}
@@ -129,81 +113,9 @@ export function StickyHeader({
               <CalendarCheck className="w-4 h-4 shrink-0" />
               <span>Agendar Cita</span>
             </button>
-
-            <button
-              type="button"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="xl:hidden inline-flex items-center justify-center p-2.5 rounded-2xl text-kanan-deep bg-kanan-ice hover:bg-slate-200/70 border border-slate-200/80"
-              aria-label="Abrir menú"
-            >
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
           </div>
         </div>
       </div>
-
-      {/* Menú Móvil Desplegable */}
-      {mobileMenuOpen && (
-        <div className="xl:hidden bg-white/95 backdrop-blur-xl border-t border-slate-100 px-4 pt-4 pb-6 space-y-4 shadow-2xl">
-          <nav className="grid grid-cols-1 gap-1.5 text-sm font-heading font-bold text-kanan-deep">
-            <a
-              href="#servicios"
-              onClick={() => setMobileMenuOpen(false)}
-              className="p-3 rounded-2xl bg-kanan-ice/70 hover:bg-kanan-ice flex items-center justify-between"
-            >
-              <span>✨ Tecnología y Servicios</span>
-              <Sparkles className="w-4 h-4 text-kanan-cyan" />
-            </a>
-            <a
-              href="#antes-despues"
-              onClick={() => setMobileMenuOpen(false)}
-              className="p-3 rounded-2xl bg-kanan-ice/70 hover:bg-kanan-ice flex items-center justify-between"
-            >
-              <span>🔍 Comparador Antes y Después</span>
-            </a>
-            <a
-              href="#agendar"
-              onClick={() => setMobileMenuOpen(false)}
-              className="p-3 rounded-2xl bg-kanan-ice/70 hover:bg-kanan-ice flex items-center justify-between"
-            >
-              <span>🐾 Agendar en 4 Pasos con Kanan Dog</span>
-            </a>
-            <a
-              href="#opiniones"
-              onClick={() => setMobileMenuOpen(false)}
-              className="p-3 rounded-2xl bg-kanan-ice/70 hover:bg-kanan-ice flex items-center justify-between"
-            >
-              <span>⭐ Reseñas Google Maps y FAQ</span>
-            </a>
-            <Link
-              href="/guia-cuidados"
-              onClick={() => setMobileMenuOpen(false)}
-              className="p-3 rounded-2xl bg-kanan-cyan/10 text-kanan-cerulean flex items-center justify-between"
-            >
-              <span>📘 Guía Digital Ante Derrames</span>
-            </Link>
-          </nav>
-
-          <div className="grid grid-cols-2 gap-2 pt-2">
-            <a
-              href={`https://wa.me/${KANAN_WHATSAPP_NUMBER}?text=${encodeURIComponent("Hola Kanan Limpieza, deseo cotizar un servicio a domicilio.")}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="py-3 px-3 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-heading font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm"
-            >
-              <MessageSquare className="w-4 h-4" />
-              <span>WhatsApp</span>
-            </a>
-            <a
-              href={`tel:${KANAN_PHONE_CALL}`}
-              className="py-3 px-3 rounded-2xl bg-kanan-ice text-kanan-deep font-heading font-bold text-xs flex items-center justify-center gap-1.5 border border-slate-200"
-            >
-              <PhoneCall className="w-4 h-4 text-kanan-cerulean" />
-              <span>Llamar</span>
-            </a>
-          </div>
-        </div>
-      )}
     </header>
   );
 }
