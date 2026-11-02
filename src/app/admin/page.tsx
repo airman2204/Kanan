@@ -17,6 +17,8 @@ import {
   Sparkles,
   Plus,
   ExternalLink,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import {
   KananDatabase,
@@ -46,6 +48,7 @@ export default function AdminPage() {
   // Navegación en el Menú Lateral
   const [activeSection, setActiveSection] = useState<AdminSection>("resumen");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   // Filtro de calendario y trigger de nueva cita
   const [calendarHighlightStatus, setCalendarHighlightStatus] = useState<string | null>(null);
@@ -325,19 +328,36 @@ export default function AdminPage() {
       
       {/* MENÚ LATERAL (SIDEBAR) */}
       <aside
-        className={`fixed md:sticky top-0 left-0 h-screen z-50 bg-[#0F172A] text-white flex flex-col justify-between transition-transform duration-300 ease-in-out border-r border-slate-800/80 shadow-2xl w-64 ${
+        className={`fixed md:sticky top-0 left-0 h-screen z-50 bg-[#0F172A] text-white flex flex-col justify-between transition-all duration-300 ease-in-out border-r border-slate-800/80 shadow-2xl relative ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
-        }`}
+        } ${sidebarCollapsed ? "md:w-20" : "md:w-64"} w-64`}
       >
+        {/* Pestaña flotante para colapsar / desplegar sidebar (estilo tab en el borde derecho) */}
+        <button
+          type="button"
+          onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+          className="hidden md:flex absolute -right-3.5 top-28 z-50 w-7 h-7 bg-[#1D71B5] hover:bg-[#36A6DE] text-white rounded-full items-center justify-center shadow-lg border-2 border-[#0F172A] transition-all hover:scale-110 active:scale-95"
+          title={sidebarCollapsed ? "Desplegar menú" : "Colapsar menú"}
+          aria-label={sidebarCollapsed ? "Desplegar menú" : "Colapsar menú"}
+        >
+          {sidebarCollapsed ? (
+            <ChevronRight className="w-4 h-4 stroke-[2.5]" />
+          ) : (
+            <ChevronLeft className="w-4 h-4 stroke-[2.5]" />
+          )}
+        </button>
+
         <div className="flex flex-col h-full overflow-y-auto no-scrollbar">
           
-          {/* Header con el Logo Original Kanan en Blanco (Sin recuadros artificiales) */}
+          {/* Header con el Logo Original Kanan en Blanco */}
           <div className="p-6 pb-5 border-b border-white/10 flex items-center justify-between relative">
-            <div className="w-full flex justify-center items-center py-1">
+            <div className={`w-full flex justify-center items-center py-2 ${sidebarCollapsed ? "px-0" : "px-3"}`}>
               <img
                 src="/assets/brand/kanan-logo-white.png"
                 alt="Kanan"
-                className="h-10 w-auto object-contain"
+                className={`w-auto object-contain transition-all duration-200 ${
+                  sidebarCollapsed ? "h-10 max-w-[48px]" : "h-16 sm:h-20 max-w-[200px]"
+                }`}
               />
             </div>
 
@@ -353,7 +373,7 @@ export default function AdminPage() {
           </div>
 
           {/* Navegación Principal */}
-          <nav className="p-4 space-y-1.5 flex-1">
+          <nav className="p-3 space-y-1.5 flex-1">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeSection === item.id;
@@ -366,20 +386,23 @@ export default function AdminPage() {
                     setActiveSection(item.id);
                     setSidebarOpen(false);
                   }}
-                  className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl font-heading font-medium text-xs transition-all duration-200 group ${
+                  title={sidebarCollapsed ? item.label : undefined}
+                  className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl font-heading font-medium text-xs transition-all duration-200 group relative ${
                     isActive
                       ? "bg-gradient-to-r from-[#1D71B5] to-[#36A6DE] text-white shadow-[0_4px_16px_rgba(29,113,181,0.35)]"
                       : "text-slate-300 hover:bg-slate-800/70 hover:text-white"
-                  }`}
+                  } ${sidebarCollapsed ? "justify-center px-0" : ""}`}
                 >
                   <Icon
-                    className={`w-4 h-4 shrink-0 transition-transform duration-200 ${
+                    className={`w-5 h-5 shrink-0 transition-transform duration-200 ${
                       isActive ? "text-white" : "text-slate-400 group-hover:text-[#36A6DE]"
                     }`}
                   />
-                  <span className="truncate flex-1 text-left font-bold">{item.label}</span>
+                  {!sidebarCollapsed && (
+                    <span className="truncate flex-1 text-left font-bold">{item.label}</span>
+                  )}
 
-                  {item.badge !== null && (
+                  {!sidebarCollapsed && item.badge !== null && (
                     <span
                       className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold shrink-0 ${
                         item.badgeColor || "bg-slate-700 text-slate-200"
@@ -388,29 +411,43 @@ export default function AdminPage() {
                       {item.badge}
                     </span>
                   )}
+
+                  {/* Tooltip en modo colapsado */}
+                  {sidebarCollapsed && (
+                    <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-slate-900 text-white text-[11px] font-bold rounded-xl whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity shadow-xl border border-slate-700/80 z-50">
+                      {item.label}
+                      {item.badge !== null && ` (${item.badge})`}
+                    </div>
+                  )}
                 </button>
               );
             })}
           </nav>
 
           {/* Footer de Sidebar */}
-          <div className="p-4 border-t border-slate-800/80 space-y-2">
+          <div className="p-3 border-t border-slate-800/80 space-y-2">
             <Link
               href="/"
               target="_blank"
-              className="flex items-center justify-center gap-2 w-full py-2.5 px-3 rounded-2xl bg-slate-800/50 hover:bg-slate-800 text-slate-300 hover:text-white text-xs font-bold transition-colors border border-slate-800"
+              title="Ver Sitio Web"
+              className={`flex items-center gap-2 w-full py-2.5 px-3 rounded-2xl bg-slate-800/50 hover:bg-slate-800 text-slate-300 hover:text-white text-xs font-bold transition-colors border border-slate-800 ${
+                sidebarCollapsed ? "justify-center" : "justify-center"
+              }`}
             >
-              <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
-              <span>Ver Sitio Web</span>
+              <ExternalLink className="w-4 h-4 text-slate-400 shrink-0" />
+              {!sidebarCollapsed && <span>Ver Sitio Web</span>}
             </Link>
 
             <button
               type="button"
               onClick={handleLogout}
-              className="flex items-center justify-center gap-2 w-full py-2.5 px-3 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 hover:text-rose-100 text-xs font-bold transition-colors border border-rose-500/20"
+              title="Cerrar sesión"
+              className={`flex items-center gap-2 w-full py-2.5 px-3 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 hover:text-rose-100 text-xs font-bold transition-colors border border-rose-500/20 ${
+                sidebarCollapsed ? "justify-center" : "justify-center"
+              }`}
             >
-              <LogOut className="w-3.5 h-3.5 text-rose-400" />
-              <span>Cerrar sesión</span>
+              <LogOut className="w-4 h-4 text-rose-400 shrink-0" />
+              {!sidebarCollapsed && <span>Cerrar sesión</span>}
             </button>
           </div>
         </div>

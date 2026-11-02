@@ -145,7 +145,7 @@ export function getDatabase(): KananDatabase {
 
 export function saveDatabase(db: KananDatabase): void {
   if (!db.config?.marketing) {
-    db.config = { ...db.config, marketing: DEFAULT_MARKETING, modo_halloween: db.config?.modo_halloween ?? true };
+    db.config = { ...db.config, marketing: DEFAULT_MARKETING, modo_halloween: db.config?.modo_halloween ?? false };
   }
   memoryFallbackDb = db;
   const payload = JSON.stringify(db, null, 2);
@@ -199,7 +199,7 @@ export function setModoHalloween(enabled: boolean): KananDatabase {
 export function updateMarketingConfig(updates: Partial<MarketingMetrics>): KananDatabase {
   const db = getDatabase();
   db.config = {
-    ...(db.config || { modo_halloween: true }),
+    ...(db.config || { modo_halloween: false }),
     marketing: {
       ...(db.config?.marketing || DEFAULT_MARKETING),
       ...updates,
