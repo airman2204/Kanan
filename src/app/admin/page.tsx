@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -11,15 +11,22 @@ import {
   BarChart3,
   Settings,
   LogOut,
-  MapPin,
-  Clock,
-  DollarSign,
-  TrendingUp,
-  Activity,
   Menu,
   X,
   Shield,
   Sparkles,
+  ChevronLeft,
+  ChevronRight,
+  Plus,
+  Truck,
+  ExternalLink,
+  Search,
+  Bell,
+  SlidersHorizontal,
+  Flame,
+  CheckCircle2,
+  Clock,
+  Layers,
 } from "lucide-react";
 import {
   KananDatabase,
@@ -37,6 +44,8 @@ import { CalendarCitasView } from "@/components/admin/CalendarCitasView";
 import { MarketingAnalyticsView } from "@/components/admin/MarketingAnalyticsView";
 import { ResumenDashboard } from "@/components/admin/ResumenDashboard";
 
+type AdminSection = "resumen" | "calendario" | "clientes" | "whatsapp" | "marketing" | "configuracion";
+
 export default function AdminPage() {
   const router = useRouter();
 
@@ -46,24 +55,20 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
 
   // Navegación en el Menú Lateral
-  const [activeSection, setActiveSection] = useState<
-    "resumen" | "calendario" | "clientes" | "whatsapp" | "marketing" | "configuracion"
-  >("resumen");
+  const [activeSection, setActiveSection] = useState<AdminSection>("resumen");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-  // Filtro de calendario
+  // Filtro de calendario y trigger de nueva cita
   const [calendarHighlightStatus, setCalendarHighlightStatus] = useState<string | null>(null);
+  const [triggerNewCitaModal, setTriggerNewCitaModal] = useState(false);
 
   // Comprobar autenticación segura
   const checkAuth = useCallback(async () => {
     try {
       const res = await fetch("/api/auth/session");
       const data = await res.json();
-      if (!data.authenticated) {
-        router.push("/admin/login");
-        return;
-      }
-      if (data.mustChangePassword) {
+      if (!data.authenticated || data.mustChangePassword) {
         router.push("/admin/login");
         return;
       }
@@ -248,17 +253,9 @@ export default function AdminPage() {
     }
   };
 
-  if (authChecking) {
-    return (
-      <div className="min-h-screen bg-[#F0F4F8] flex items-center justify-center">
-        <div className="w-10 h-10 border-4 border-[#355581] border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
-  const clientes = db?.clientes || [];
-  const citas = db?.servicios_citas || [];
-  const mensajes = db?.mensajes_automatizacion || [];
+  const clientes = useMemo(() => db?.clientes || [], [db]);
+  const citas = useMemo(() => db?.servicios_citas || [], [db]);
+  const mensajes = useMemo(() => db?.mensajes_automatizacion || [], [db]);
   const marketing: MarketingMetrics = db?.config?.marketing || {
     meta: {
       conectado: false,
@@ -276,186 +273,340 @@ export default function AdminPage() {
     },
   };
 
-  // Cálculos Financieros
-  const totalGanancias = clientes.reduce((acc, c) => acc + (c.historico_gasto || 0), 0);
-  const totalServicios = citas.length;
+  // Métricas rápidas para top header y badges
+  const hoyStr = useMemo(() => new Date().toISOString().split("T")[0], []);
+  const citasHoy = useMemo(() => citas.filter((c) => c.fecha === hoyStr && c.estatus !== "Cancelada"), [citas, hoyStr]);
+  const citasPendientes = useMemo(() => citas.filter((c) => c.estatus === "Por Confirmar"), [citas]);
+  const citasEnRuta = useMemo(() => citas.filter((c) => c.estatus === "En Ruta" || c.estatus === "En Proceso"), [citas]);
+
+  const navItems = [
+    {
+      id: "resumen" as AdminSection,
+      label: "Resumen",
+      icon: LayoutDashboard,
+      badge: null,
+    },
+    {
+      id: "calendario" as AdminSection,
+      label: "Calendario de citas",
+      icon: Calendar,
+      badge: citasPendientes.length > 0 ? citasPendientes.length : null,
+      badgeColor: "bg-[#36A6DE] text-white",
+    },
+    {
+      id: "clientes" as AdminSection,
+      label: "Clientes",
+      icon: Users,
+      badge: clientes.length > 0 ? clientes.length : null,
+      badgeColor: "bg-slate-700/80 text-slate-200",
+    },
+    {
+      id: "whatsapp" as AdminSection,
+      label: "WhatsApp",
+      icon: MessageSquare,
+      badge: null,
+    },
+    {
+      id: "marketing" as AdminSection,
+      label: "Métricas & Marketing",
+      icon: BarChart3,
+      badge: null,
+    },
+    {
+      id: "configuracion" as AdminSection,
+      label: "Configuración",
+      icon: Settings,
+      badge: null,
+    },
+  ];
+
+  const sectionTitles: Record<AdminSection, { title: string; subtitle: string }> = {
+    resumen: {
+      title: "Panel de Control Ejecutivo",
+      subtitle: "Métricas operativas y monitoreo de ruta en tiempo real",
+    },
+    calendario: {
+      title: "Calendario & Servicios",
+      subtitle: "Gestión de turnos, semáforo de capacidad y firmas de conformidad",
+    },
+    clientes: {
+      title: "Directorio de Clientes",
+      subtitle: "Histórico de compras, domicilios en ZMG y frecuencia de servicio",
+    },
+    whatsapp: {
+      title: "Automatización WhatsApp",
+      subtitle: "Disparadores de confirmación, recordatorios y seguimiento Foxdrop",
+    },
+    marketing: {
+      title: "Métricas de Crecimiento & Ads",
+      subtitle: "Rendimiento publicitario en Meta, Google Ads y posicionamiento orgánico",
+    },
+    configuracion: {
+      title: "Configuración del Sistema",
+      subtitle: "PIN de campo del técnico, políticas de cancelación y modo temático",
+    },
+  };
+
+  if (authChecking) {
+    return (
+      <div className="min-h-screen bg-[#0F172A] flex flex-col items-center justify-center gap-4">
+        <div className="w-12 h-12 border-4 border-[#36A6DE] border-t-transparent rounded-full animate-spin" />
+        <p className="text-slate-400 font-heading text-xs tracking-wider uppercase">Cargando Kanan Admin...</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-[#F0F4F8] flex flex-col md:flex-row antialiased text-slate-800">
+    <div className="min-h-screen bg-[#F4F7F9] flex antialiased text-slate-800 selection:bg-[#36A6DE]/30">
       
-      {/* MENÚ LATERAL (SIDEBAR) */}
+      {/* MENÚ LATERAL (SIDEBAR) LINEAR / APPLE STYLE */}
       <aside
-        className={`fixed md:sticky top-0 left-0 h-screen z-50 w-72 bg-gradient-to-b from-[#101F33] via-[#162D4A] to-[#0D1A2B] text-white flex flex-col justify-between p-6 shadow-2xl border-r border-white/5 transition-transform duration-300 ${
+        className={`fixed md:sticky top-0 left-0 h-screen z-50 bg-[#0F172A] text-white flex flex-col justify-between transition-all duration-300 ease-in-out border-r border-slate-800/80 shadow-[4px_0_24px_rgba(0,0,0,0.25)] ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
-        }`}
+        } ${sidebarCollapsed ? "md:w-20" : "md:w-64"} w-72`}
       >
-        <div className="space-y-8">
-          {/* Logo en tamaño grande y perfectamente centrado */}
-          <div className="flex flex-col items-center justify-center pb-5 border-b border-white/10 relative">
+        <div className="flex flex-col h-full overflow-y-auto no-scrollbar">
+          
+          {/* Header de Sidebar con Logo y Collapse Toggle */}
+          <div className="p-5 pb-4 border-b border-slate-800/80 flex items-center justify-between relative">
+            <div className={`flex items-center gap-3 transition-opacity duration-200 ${sidebarCollapsed ? "md:justify-center md:w-full" : ""}`}>
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#1D71B5] to-[#36A6DE] p-2 flex items-center justify-center shadow-lg shadow-[#1D71B5]/30 shrink-0">
+                <img
+                  src="/assets/brand/kanan-logo-white.png"
+                  alt="Kanan"
+                  className="w-full h-full object-contain"
+                />
+              </div>
+              {!sidebarCollapsed && (
+                <div className="flex flex-col">
+                  <span className="font-heading font-black text-sm tracking-tight text-white leading-none">
+                    KANAN
+                  </span>
+                  <span className="text-[10px] text-[#36A6DE] font-semibold tracking-wider uppercase mt-1">
+                    Control Operativo
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Botón cerrar en móvil */}
             <button
               type="button"
               onClick={() => setSidebarOpen(false)}
-              className="md:hidden absolute top-0 right-0 text-white/70 hover:text-white p-2 rounded-xl hover:bg-white/10 transition-colors"
+              className="md:hidden text-slate-400 hover:text-white p-2 rounded-xl hover:bg-slate-800/60 transition-colors"
+              aria-label="Cerrar menú"
             >
               <X className="w-5 h-5" />
             </button>
-            <img
-              src="/assets/brand/kanan-logo-white.png"
-              alt="Kanan"
-              className="h-16 sm:h-20 w-auto object-contain mx-auto"
-            />
           </div>
 
+          {/* Quick Route Status Pill (Technician indicator) */}
+          {!sidebarCollapsed && (
+            <div className="px-4 pt-4 pb-2">
+              <div className="p-3 rounded-2xl bg-slate-800/60 border border-slate-700/50 flex items-center justify-between">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <span className="relative flex h-2.5 w-2.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                  </span>
+                  <div className="truncate">
+                    <p className="text-[11px] font-bold text-slate-200 truncate">Ruta Guadalajara</p>
+                    <p className="text-[10px] text-slate-400">{citasHoy.length} citas hoy</p>
+                  </div>
+                </div>
+                <Link
+                  href="/tecnico"
+                  target="_blank"
+                  className="p-1.5 rounded-lg bg-[#1D71B5]/30 hover:bg-[#1D71B5]/50 text-[#36A6DE] transition-colors"
+                  title="Abrir app técnico de campo"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </Link>
+              </div>
+            </div>
+          )}
+
           {/* Navegación Principal */}
-          <nav className="space-y-1.5">
+          <nav className="p-3 space-y-1.5 flex-1">
+            <div className={`px-3 py-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider ${sidebarCollapsed ? "text-center" : ""}`}>
+              {sidebarCollapsed ? "•" : "Menú Principal"}
+            </div>
+
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeSection === item.id;
+
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => {
+                    setActiveSection(item.id);
+                    setSidebarOpen(false);
+                  }}
+                  title={sidebarCollapsed ? item.label : undefined}
+                  className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl font-heading font-medium text-xs transition-all duration-200 group relative ${
+                    isActive
+                      ? "bg-gradient-to-r from-[#1D71B5] to-[#36A6DE] text-white shadow-[0_4px_16px_rgba(29,113,181,0.35)]"
+                      : "text-slate-300 hover:bg-slate-800/70 hover:text-white"
+                  } ${sidebarCollapsed ? "justify-center px-0" : ""}`}
+                >
+                  <Icon
+                    className={`w-4 h-4 shrink-0 transition-transform duration-200 ${
+                      isActive ? "text-white" : "text-slate-400 group-hover:text-[#36A6DE]"
+                    } ${sidebarCollapsed ? "w-5 h-5" : ""}`}
+                  />
+                  
+                  {!sidebarCollapsed && (
+                    <span className="truncate flex-1 text-left">{item.label}</span>
+                  )}
+
+                  {!sidebarCollapsed && item.badge !== null && (
+                    <span
+                      className={`px-2 py-0.5 rounded-full text-[10px] font-bold shrink-0 ${
+                        item.badgeColor || "bg-slate-700 text-slate-200"
+                      }`}
+                    >
+                      {item.badge}
+                    </span>
+                  )}
+
+                  {/* Tooltip para modo colapsado */}
+                  {sidebarCollapsed && (
+                    <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-slate-900 text-white text-[11px] font-medium rounded-xl whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity shadow-xl border border-slate-700/80 z-50">
+                      {item.label}
+                      {item.badge !== null && ` (${item.badge})`}
+                    </div>
+                  )}
+                </button>
+              );
+            })}
+          </nav>
+
+          {/* Footer de Sidebar */}
+          <div className="p-3 border-t border-slate-800/80 space-y-2">
+            {/* Collapse toggle (desktop only) */}
             <button
               type="button"
-              onClick={() => {
-                setActiveSection("resumen");
-                setSidebarOpen(false);
-              }}
-              className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl font-heading font-bold text-xs transition-all duration-200 ${
-                activeSection === "resumen"
-                  ? "bg-gradient-to-r from-[#1D71B5] to-[#36A6DE] text-white shadow-[0_8px_20px_rgba(29,113,181,0.4)]"
-                  : "text-slate-300 hover:bg-white/10 hover:text-white"
-              }`}
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              className="hidden md:flex items-center justify-center gap-2 w-full py-2 px-3 rounded-xl bg-slate-800/50 hover:bg-slate-800 text-slate-400 hover:text-white text-xs font-medium transition-colors"
+              title={sidebarCollapsed ? "Expandir barra lateral" : "Colapsar barra lateral"}
             >
-              <LayoutDashboard className={`w-4 h-4 ${activeSection === "resumen" ? "text-white" : "text-[#36A6DE]"}`} />
-              <span>Resumen</span>
+              {sidebarCollapsed ? (
+                <ChevronRight className="w-4 h-4" />
+              ) : (
+                <>
+                  <ChevronLeft className="w-4 h-4" />
+                  <span className="text-[11px]">Colapsar menú</span>
+                </>
+              )}
             </button>
+
+            <Link
+              href="/"
+              target="_blank"
+              className={`flex items-center gap-2 w-full py-2 px-3 rounded-xl bg-slate-800/30 hover:bg-slate-800/70 text-slate-300 hover:text-white text-xs font-medium transition-colors border border-slate-800 ${
+                sidebarCollapsed ? "justify-center" : "justify-center"
+              }`}
+              title="Ver Sitio Web Público"
+            >
+              <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
+              {!sidebarCollapsed && <span>Sitio Público</span>}
+            </Link>
 
             <button
               type="button"
-              onClick={() => {
-                setActiveSection("calendario");
-                setSidebarOpen(false);
-              }}
-              className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl font-heading font-bold text-xs transition-all duration-200 ${
-                activeSection === "calendario"
-                  ? "bg-gradient-to-r from-[#1D71B5] to-[#36A6DE] text-white shadow-[0_8px_20px_rgba(29,113,181,0.4)]"
-                  : "text-slate-300 hover:bg-white/10 hover:text-white"
+              onClick={handleLogout}
+              className={`flex items-center gap-2 w-full py-2 px-3 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 hover:text-rose-100 text-xs font-medium transition-colors border border-rose-500/20 ${
+                sidebarCollapsed ? "justify-center" : "justify-center"
               }`}
+              title="Cerrar sesión segura"
             >
-              <Calendar className={`w-4 h-4 ${activeSection === "calendario" ? "text-white" : "text-[#36A6DE]"}`} />
-              <span>Calendario de citas</span>
-              {citas.filter((c) => c.estatus === "Por Confirmar").length > 0 && (
-                <span className="ml-auto px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#36A6DE] text-white">
-                  {citas.filter((c) => c.estatus === "Por Confirmar").length}
+              <LogOut className="w-3.5 h-3.5 text-rose-400" />
+              {!sidebarCollapsed && <span>Salir</span>}
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      {/* ÁREA DE CONTENIDO PRINCIPAL */}
+      <div className="flex-1 flex flex-col min-w-0">
+        
+        {/* HEADER EJECUTIVO FIJO (STICKY GLASS TOP BAR) */}
+        <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-8 py-3.5 flex items-center justify-between shadow-[0_1px_8px_rgba(0,0,0,0.03)] transition-all">
+          <div className="flex items-center gap-3 min-w-0">
+            {/* Toggle móvil */}
+            <button
+              type="button"
+              onClick={() => setSidebarOpen(true)}
+              className="md:hidden p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
+              aria-label="Abrir menú"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+
+            {/* Breadcrumb / Título dinámico */}
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider hidden sm:inline">
+                  Admin Kanan /
+                </span>
+                <h1 className="font-heading font-extrabold text-base sm:text-lg text-slate-900 truncate">
+                  {sectionTitles[activeSection].title}
+                </h1>
+              </div>
+              <p className="text-[11px] text-slate-500 hidden sm:block truncate">
+                {sectionTitles[activeSection].subtitle}
+              </p>
+            </div>
+          </div>
+
+          {/* Quick Actions & KPIs Rápidos */}
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            
+            {/* Status rápido del técnico */}
+            <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100/90 border border-slate-200 text-xs font-medium text-slate-700">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-[11px]">Unidad 1 ZMG:</span>
+              <strong className="text-slate-900 font-semibold">
+                {citasEnRuta.length > 0 ? "En Ruta Activa" : "Base Operativa"}
+              </strong>
+            </div>
+
+            {/* Badge de alertas de hoy */}
+            <button
+              type="button"
+              onClick={() => setActiveSection("calendario")}
+              className="relative p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
+              title="Notificaciones de agenda"
+            >
+              <Bell className="w-4 h-4" />
+              {citasPendientes.length > 0 && (
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-amber-500 text-white rounded-full text-[9px] font-bold flex items-center justify-center">
+                  {citasPendientes.length}
                 </span>
               )}
             </button>
 
+            {/* Botón Nueva Cita de Acción Rápida */}
             <button
               type="button"
               onClick={() => {
-                setActiveSection("clientes");
-                setSidebarOpen(false);
+                setActiveSection("calendario");
+                setTriggerNewCitaModal(true);
               }}
-              className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl font-heading font-bold text-xs transition-all duration-200 ${
-                activeSection === "clientes"
-                  ? "bg-gradient-to-r from-[#1D71B5] to-[#36A6DE] text-white shadow-[0_8px_20px_rgba(29,113,181,0.4)]"
-                  : "text-slate-300 hover:bg-white/10 hover:text-white"
-              }`}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#1D71B5] to-[#36A6DE] hover:from-[#175c94] hover:to-[#2c8fc0] text-white font-heading font-bold text-xs shadow-sm hover:shadow-md transition-all active:scale-[0.98]"
             >
-              <Users className={`w-4 h-4 ${activeSection === "clientes" ? "text-white" : "text-[#36A6DE]"}`} />
-              <span>Clientes</span>
+              <Plus className="w-4 h-4" />
+              <span className="hidden sm:inline">Nueva Cita</span>
             </button>
+          </div>
+        </header>
 
-            <button
-              type="button"
-              onClick={() => {
-                setActiveSection("whatsapp");
-                setSidebarOpen(false);
-              }}
-              className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl font-heading font-bold text-xs transition-all duration-200 ${
-                activeSection === "whatsapp"
-                  ? "bg-gradient-to-r from-[#1D71B5] to-[#36A6DE] text-white shadow-[0_8px_20px_rgba(29,113,181,0.4)]"
-                  : "text-slate-300 hover:bg-white/10 hover:text-white"
-              }`}
-            >
-              <MessageSquare className={`w-4 h-4 ${activeSection === "whatsapp" ? "text-white" : "text-[#36A6DE]"}`} />
-              <span>WhatsApp</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setActiveSection("marketing");
-                setSidebarOpen(false);
-              }}
-              className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl font-heading font-bold text-xs transition-all duration-200 ${
-                activeSection === "marketing"
-                  ? "bg-gradient-to-r from-[#1D71B5] to-[#36A6DE] text-white shadow-[0_8px_20px_rgba(29,113,181,0.4)]"
-                  : "text-slate-300 hover:bg-white/10 hover:text-white"
-              }`}
-            >
-              <BarChart3 className={`w-4 h-4 ${activeSection === "marketing" ? "text-white" : "text-[#36A6DE]"}`} />
-              <span>Métricas & Marketing</span>
-            </button>
-
-            {/* SECCIÓN CONFIGURACIÓN EN LA PARTE INFERIOR DEL MENÚ */}
-            <button
-              type="button"
-              onClick={() => {
-                setActiveSection("configuracion");
-                setSidebarOpen(false);
-              }}
-              className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl font-heading font-bold text-xs transition-all duration-200 ${
-                activeSection === "configuracion"
-                  ? "bg-gradient-to-r from-[#1D71B5] to-[#36A6DE] text-white shadow-[0_8px_20px_rgba(29,113,181,0.4)]"
-                  : "text-slate-300 hover:bg-white/10 hover:text-white"
-              }`}
-            >
-              <Settings className={`w-4 h-4 ${activeSection === "configuracion" ? "text-white" : "text-[#36A6DE]"}`} />
-              <span>Configuración</span>
-            </button>
-          </nav>
-        </div>
-
-        {/* Pie de Menú Lateral */}
-        <div className="space-y-3 pt-6 border-t border-white/10">
-          <Link
-            href="/"
-            target="_blank"
-            className="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-2xl bg-white/10 hover:bg-white/15 text-xs font-heading font-bold text-white transition-all border border-white/10"
-          >
-            <span>Ver Sitio Web</span>
-          </Link>
-
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-2xl bg-rose-500/20 hover:bg-rose-500/30 text-xs font-heading font-bold text-rose-200 hover:text-white transition-all border border-rose-500/30"
-          >
-            <LogOut className="w-4 h-4" />
-            <span>Cerrar sesión</span>
-          </button>
-        </div>
-      </aside>
-
-      {/* ÁREA DE CONTENIDO */}
-      <div className="flex-1 flex flex-col min-w-0">
-        
-        {/* Barra Superior Móvil */}
-        <div className="md:hidden bg-[#101F33] text-white p-4 flex items-center justify-between sticky top-0 z-40 border-b border-white/10">
-          <button
-            type="button"
-            onClick={() => setSidebarOpen(true)}
-            className="p-2 rounded-xl bg-white/10"
-          >
-            <Menu className="w-5 h-5" />
-          </button>
-          <img
-            src="/assets/brand/kanan-logo-white.png"
-            alt="Kanan"
-            className="h-12 w-auto object-contain"
-          />
-          <div className="w-6" />
-        </div>
-
-        <main className="flex-1 p-4 sm:p-8 max-w-7xl w-full mx-auto space-y-8">
+        {/* CONTENEDOR DE PÁGINA */}
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto space-y-6">
           
-          {/* SECCIÓN 1: RESUMEN */}
+          {/* SECCIÓN 1: RESUMEN (BENTO BOX DASHBOARD) */}
           {activeSection === "resumen" && (
             <ResumenDashboard
               clientes={clientes}
@@ -470,28 +621,22 @@ export default function AdminPage() {
 
           {/* SECCIÓN 2: CALENDARIO DE CITAS */}
           {activeSection === "calendario" && (
-            <div className="space-y-6">
-              <h1 className="font-heading font-extrabold text-2xl text-[#355581]">
-                Calendario de citas
-              </h1>
-              <CalendarCitasView
-                citas={citas}
-                clientes={clientes}
-                highlightStatus={calendarHighlightStatus}
-                onClearHighlight={() => setCalendarHighlightStatus(null)}
-                onUpdateCita={handleUpdateCita}
-                onCancelCita={handleCancelCita}
-                onCreateCitaManual={handleCreateCitaManual}
-              />
-            </div>
+            <CalendarCitasView
+              citas={citas}
+              clientes={clientes}
+              highlightStatus={calendarHighlightStatus}
+              onClearHighlight={() => setCalendarHighlightStatus(null)}
+              onUpdateCita={handleUpdateCita}
+              onCancelCita={handleCancelCita}
+              onCreateCitaManual={handleCreateCitaManual}
+              autoOpenNewModal={triggerNewCitaModal}
+              onResetAutoOpenNewModal={() => setTriggerNewCitaModal(false)}
+            />
           )}
 
-          {/* SECCIÓN 3: CLIENTES EN TABLA ESTRUCTURADA */}
+          {/* SECCIÓN 3: CLIENTES */}
           {activeSection === "clientes" && (
             <div className="space-y-6">
-              <h1 className="font-heading font-extrabold text-2xl text-[#355581]">
-                Clientes ({clientes.length})
-              </h1>
               <ClientesTable
                 clientes={clientes}
                 citas={citas}
@@ -505,9 +650,6 @@ export default function AdminPage() {
           {/* SECCIÓN 4: WHATSAPP */}
           {activeSection === "whatsapp" && (
             <div className="space-y-4">
-              <h1 className="font-heading font-extrabold text-2xl text-[#355581]">
-                WhatsApp
-              </h1>
               <WhatsAppFoxdrop
                 clientes={clientes}
                 citas={citas}
@@ -520,9 +662,6 @@ export default function AdminPage() {
           {/* SECCIÓN 5: MÉTRICAS Y MARKETING DIGITAL */}
           {activeSection === "marketing" && (
             <div className="space-y-6">
-              <h1 className="font-heading font-extrabold text-2xl text-[#355581]">
-                Métricas & Marketing
-              </h1>
               <MarketingAnalyticsView
                 metrics={marketing}
                 onRefresh={fetchCrmData}
@@ -530,18 +669,15 @@ export default function AdminPage() {
             </div>
           )}
 
-          {/* SECCIÓN 6: CONFIGURACIÓN (UBICADA AL FINAL) */}
+          {/* SECCIÓN 6: CONFIGURACIÓN */}
           {activeSection === "configuracion" && (
             <div className="space-y-6">
-              <h1 className="font-heading font-extrabold text-2xl text-[#355581]">
-                Configuración
-              </h1>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
                 {/* Ajustes de Campaña Temporal (Modo Halloween) */}
-                <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-5">
+                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-5">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-orange-100 text-orange-600 flex items-center justify-center text-lg">
+                    <div className="w-10 h-10 rounded-2xl bg-orange-100 text-orange-600 flex items-center justify-center text-lg shadow-sm">
                       🎃
                     </div>
                     <div>
@@ -549,12 +685,12 @@ export default function AdminPage() {
                         Campaña de Temporada
                       </h3>
                       <p className="text-xs text-slate-400">
-                        Efectos visuales en el sitio web público
+                        Efectos visuales temáticos en el sitio web público
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                  <div className="flex items-center justify-between p-4 bg-slate-50/80 rounded-2xl border border-slate-100">
                     <div>
                       <p className="text-xs font-bold text-slate-800">Modo Halloween & Papel Picado</p>
                       <p className="text-[11px] text-slate-500">Muestra los murciélagos y decoración temática</p>
@@ -578,9 +714,9 @@ export default function AdminPage() {
                 </div>
 
                 {/* Políticas Operativas y Cancelaciones */}
-                <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-5">
+                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-5">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-blue-100 text-[#1D71B5] flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-2xl bg-blue-100 text-[#1D71B5] flex items-center justify-center shadow-sm">
                       <Shield className="w-5 h-5" />
                     </div>
                     <div>
@@ -588,12 +724,12 @@ export default function AdminPage() {
                         Políticas de Cancelación
                       </h3>
                       <p className="text-xs text-slate-400">
-                        Reglas automáticas para clientes
+                        Reglas operativas para clientes
                       </p>
                     </div>
                   </div>
 
-                  <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-2 text-xs">
+                  <div className="p-4 bg-slate-50/80 rounded-2xl border border-slate-100 space-y-2 text-xs">
                     <p className="font-semibold text-slate-800">
                       Regla de cancelación de 2 Horas:
                     </p>
@@ -604,10 +740,10 @@ export default function AdminPage() {
                 </div>
 
                 {/* Administración del PIN y App Móvil del Técnico */}
-                <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-5 md:col-span-2">
-                  <div className="flex items-center justify-between">
+                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-5 md:col-span-2">
+                  <div className="flex items-center justify-between flex-wrap gap-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-2xl bg-blue-50 text-[#1D71B5] flex items-center justify-center text-lg">
+                      <div className="w-10 h-10 rounded-2xl bg-blue-50 text-[#1D71B5] flex items-center justify-center text-lg shadow-sm">
                         🚐
                       </div>
                       <div>
@@ -624,14 +760,14 @@ export default function AdminPage() {
                       href="/tecnico"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-[#1D71B5] font-bold text-xs rounded-xl border border-blue-200 transition flex items-center gap-1.5"
+                      className="px-3.5 py-2 bg-blue-50 hover:bg-blue-100 text-[#1D71B5] font-bold text-xs rounded-xl border border-blue-200 transition flex items-center gap-1.5 shadow-sm"
                     >
                       <span>Abrir App Técnico</span>
                       <Sparkles className="w-3.5 h-3.5" />
                     </a>
                   </div>
 
-                  <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100 space-y-4">
+                  <div className="p-5 bg-slate-50/80 rounded-2xl border border-slate-100 space-y-4">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                       <div>
                         <p className="text-xs font-bold text-slate-800">PIN Numérico de Acceso en Campo</p>
@@ -662,7 +798,7 @@ export default function AdminPage() {
                     </div>
 
                     <div className="pt-3 border-t border-slate-200/80 text-[11px] text-slate-500 flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
                       <span>URL para el celular del técnico: <strong className="text-slate-700">admin.kananlimpieza.mx/tecnico</strong> (o kananlimpieza.mx/tecnico)</span>
                     </div>
                   </div>

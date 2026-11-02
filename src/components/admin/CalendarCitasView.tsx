@@ -35,6 +35,8 @@ interface CalendarViewProps {
   clientes: Cliente[];
   highlightStatus?: string | null;
   onClearHighlight?: () => void;
+  autoOpenNewModal?: boolean;
+  onResetAutoOpenNewModal?: () => void;
   onUpdateCita: (
     citaId: string,
     updates: {
@@ -130,11 +132,14 @@ export function CalendarCitasView({
   clientes,
   highlightStatus,
   onClearHighlight,
+  autoOpenNewModal,
+  onResetAutoOpenNewModal,
   onUpdateCita,
   onCancelCita,
   onCreateCitaManual,
 }: CalendarViewProps) {
   const [viewMode, setViewMode] = useState<"dia" | "kanban">("dia");
+  const [selectedStatusTab, setSelectedStatusTab] = useState<string>("TODOS");
   const [selectedDate, setSelectedDate] = useState<string>(
     new Date().toISOString().split("T")[0]
   );
@@ -182,8 +187,30 @@ export function CalendarCitasView({
   const [cancellingCita, setCancellingCita] = useState<ServicioCita | null>(null);
   const [cancelMotivo, setCancelMotivo] = useState("");
 
-  // Citas del día seleccionado
-  const citasDelDia = citas.filter((c) => c.fecha === selectedDate);
+  // Manejar apertura automática de modal si viene desde el header
+  React.useEffect(() => {
+    if (autoOpenNewModal) {
+      if (clientes.length > 0 && !selectedClientId) {
+        setSelectedClientId(clientes[0].id);
+      }
+      setShowNewModal(true);
+      if (onResetAutoOpenNewModal) onResetAutoOpenNewModal();
+    }
+  }, [autoOpenNewModal, clientes, selectedClientId, onResetAutoOpenNewModal]);
+
+  // Manejar filtro sincronizado si viene de ResumenDashboard
+  React.useEffect(() => {
+    if (highlightStatus) {
+      setSelectedStatusTab(highlightStatus);
+    }
+  }, [highlightStatus]);
+
+  // Citas del día seleccionado con filtro de status opcional
+  const citasDelDia = citas.filter((c) => {
+    if (c.fecha !== selectedDate) return false;
+    if (selectedStatusTab !== "TODOS" && c.estatus !== selectedStatusTab) return false;
+    return true;
+  });
   const citasMatutino = citasDelDia.filter((c) => c.turno.startsWith("Matutino") && c.estatus !== "Cancelada");
   const citasVespertino = citasDelDia.filter((c) => c.turno.startsWith("Vespertino") && c.estatus !== "Cancelada");
 
@@ -485,6 +512,50 @@ export function CalendarCitasView({
           <Plus className="w-4 h-4" />
           <span>+ Agendar cita manual</span>
         </button>
+      </div>
+
+      {/* PESTAÑAS DE FILTRO RÁPIDO POR ESTATUS (Linear Style Segmented Tabs) */}
+      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
+        {[
+          { id: "TODOS", label: "Todas", count: citas.filter((c) => c.fecha === selectedDate).length },
+          { id: "Por Confirmar", label: "Por Confirmar", count: citas.filter((c) => c.fecha === selectedDate && c.estatus === "Por Confirmar").length, color: "text-amber-700 bg-amber-50 border-amber-200" },
+          { id: "Confirmada", label: "Confirmadas", count: citas.filter((c) => c.fecha === selectedDate && c.estatus === "Confirmada").length, color: "text-blue-700 bg-blue-50 border-blue-200" },
+          { id: "En Ruta", label: "En Ruta", count: citas.filter((c) => c.fecha === selectedDate && (c.estatus === "En Ruta" || c.estatus === "En Proceso")).length, color: "text-indigo-700 bg-indigo-50 border-indigo-200" },
+          { id: "Completada", label: "Completadas", count: citas.filter((c) => c.fecha === selectedDate && c.estatus === "Completada").length, color: "text-emerald-700 bg-emerald-50 border-emerald-200" },
+          { id: "Cancelada", label: "Canceladas", count: citas.filter((c) => c.fecha === selectedDate && c.estatus === "Cancelada").length, color: "text-rose-700 bg-rose-50 border-rose-200" },
+        ].map((tab) => {
+          const isActive = selectedStatusTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => {
+                setSelectedStatusTab(tab.id);
+                if (onClearHighlight && tab.id === "TODOS") {
+                  onClearHighlight();
+                }
+              }}
+              className={`px-3 py-2 rounded-2xl text-xs font-heading font-bold transition-all flex items-center gap-2 whitespace-nowrap border shrink-0 ${
+                isActive
+                  ? "bg-[#0F172A] text-white border-slate-800 shadow-sm"
+                  : "bg-white text-slate-600 hover:text-slate-900 border-slate-200/90 hover:border-slate-300"
+              }`}
+            >
+              <span>{tab.label}</span>
+              <span
+                className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+                  isActive
+                    ? "bg-[#36A6DE] text-white"
+                    : tab.count > 0
+                    ? "bg-slate-100 text-slate-700"
+                    : "bg-slate-50 text-slate-400"
+                }`}
+              >
+                {tab.count}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       {/* SEMÁFORO DE CAPACIDAD DEL DÍA EN PANTALLA (Para 1 solo técnico) */}
