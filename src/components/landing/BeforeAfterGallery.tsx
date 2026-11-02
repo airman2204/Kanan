@@ -3,10 +3,8 @@
 import React, { useState } from "react";
 import {
   MoveHorizontal,
-  Sparkles,
   CalendarCheck,
   Clock,
-  PawPrint,
   ShieldCheck,
   CheckCircle2,
 } from "lucide-react";
@@ -15,7 +13,6 @@ interface ComparisonItem {
   id: string;
   category: "salas" | "colchones" | "vestiduras" | "tapetes";
   categoryLabel: string;
-  zone: string;
   title: string;
   subtitle: string;
   stainType: string;
@@ -30,80 +27,87 @@ const COMPARISONS: ComparisonItem[] = [
     id: "comp-1",
     category: "salas",
     categoryLabel: "Salas y Sillas",
-    zone: "Zapopan • Jardines del Valle",
-    title: "Recuperación de Sala Seccional Familiar",
+    title: "Sofá Cama Terracota",
     subtitle:
-      "Extracción profunda de manchas acumuladas por uso diario y neutralización de olores orgánicos.",
-    stainType: "Tráfico alto + Mascotas",
+      "Extracción profunda de suciedad, polvo incrustado y aureolas oscuras en tapicería de microfibra.",
+    stainType: "Uso diario y polvo profundo",
     dryingTime: "3 a 4 hrs*",
-    formula: "Enzimática 100% Pet-Friendly",
-    beforeImg: "/assets/portfolio/antes-1.jpg",
-    afterImg: "/assets/portfolio/despues-1.jpg",
+    formula: "Inyección-Succión Industrial",
+    beforeImg: "/assets/portfolio/sofacama-antes.jpg",
+    afterImg: "/assets/portfolio/sofacama-despues.jpg",
   },
   {
     id: "comp-2",
     category: "salas",
     categoryLabel: "Salas y Sillas",
-    zone: "Guadalajara • Col. Providencia",
-    title: "Desmanchado Textil sin Decoloración",
+    title: "Sillón Loveseat Café",
     subtitle:
-      "Devolvemos el tono uniforme original de la tapicería mediante inyección-succión controlada.",
-    stainType: "Derrames de bebidas y polvo",
+      "Desmanchado textil en cojines de asiento y respaldo capitonado devolviendo el color uniforme.",
+    stainType: "Aureolas y roce continuo",
     dryingTime: "3 a 4 hrs*",
-    formula: "Oxi-Bioseguridad Textil",
-    beforeImg: "/assets/portfolio/antes-2.jpg",
-    afterImg: "/assets/portfolio/despues-2.jpg",
+    formula: "Bioseguridad Textil",
+    beforeImg: "/assets/portfolio/sillon-cafe-antes.jpg",
+    afterImg: "/assets/portfolio/sillon-cafe-despues.jpg",
   },
   {
     id: "comp-3",
     category: "salas",
     categoryLabel: "Salas y Sillas",
-    zone: "Tlajomulco • Lomas de San Agustín",
-    title: "Desmanchado de Sillón Ocre Individual",
+    title: "Silla de Comedor con Brazos de Madera",
     subtitle:
-      "Extracción profunda de aureolas y suciedad incrustada en tapicería ocre con inyección-succión.",
-    stainType: "Aureolas y polvo acumulado",
+      "Restauración completa de tapicería clara en asiento y respaldo sin dejar cercos de humedad.",
+    stainType: "Manchas por alimentos y polvo",
     dryingTime: "3 a 4 hrs*",
-    formula: "Enzimática Kanan",
-    beforeImg: "/assets/portfolio/antes-3.jpg",
-    afterImg: "/assets/portfolio/despues-3.jpg",
+    formula: "Espuma Activa Kärcher",
+    beforeImg: "/assets/portfolio/silla-madera-antes.jpg",
+    afterImg: "/assets/portfolio/silla-madera-despues.jpg",
   },
   {
     id: "comp-4",
-    category: "vestiduras",
-    categoryLabel: "Vestiduras Auto",
-    zone: "Zapopan • Puerta de Hierro",
-    title: "Limpieza Integral de Asientos Automotrices",
+    category: "salas",
+    categoryLabel: "Salas y Sillas",
+    title: "Silla de Comedor Respaldo Alto",
     subtitle:
-      "Extracción profunda de sudor, polvo y derrames en vestiduras de tela dejándolas como de agencia.",
-    stainType: "Uso diario y polvo incrustado",
+      "Extracción profunda en tejido fino eliminando manchas oscuras por fricción y polvo.",
+    stainType: "Suciedad concentrada y grasa",
     dryingTime: "3 a 4 hrs*",
-    formula: "Espuma Activa Baja Humedad",
-    beforeImg: "/assets/portfolio/antes-4.jpg",
-    afterImg: "/assets/portfolio/despues-4.jpg",
+    formula: "Inyección-Succión Kanan",
+    beforeImg: "/assets/portfolio/silla-alta-antes.jpg",
+    afterImg: "/assets/portfolio/silla-alta-despues.jpg",
   },
   {
     id: "comp-5",
     category: "salas",
     categoryLabel: "Salas y Sillas",
-    zone: "Guadalajara • Chapalita",
-    title: "Renovación de Sillón Capitón en Tela Clara",
+    title: "Banca Capitonada Gris",
     subtitle:
-      "Restauración luminosa de tapicería clara sin dejar cercos de humedad gracias al alto vacío.",
-    stainType: "Oscurecimiento por roce",
+      "Limpieza profunda en tapicería gris con botones capitonados eliminando aureolas y suciedad.",
+    stainType: "Oscurecimiento por uso",
     dryingTime: "3 a 4 hrs*",
     formula: "Bioseguridad Textil",
-    beforeImg: "/assets/portfolio/antes-5.jpg",
-    afterImg: "/assets/portfolio/despues-5.jpg",
+    beforeImg: "/assets/portfolio/banca-antes.jpg",
+    afterImg: "/assets/portfolio/banca-despues.jpg",
   },
   {
     id: "comp-6",
+    category: "vestiduras",
+    categoryLabel: "Vestiduras Auto",
+    title: "Asientos Automotrices de Tela",
+    subtitle:
+      "Extracción profunda de sudor, polvo y derrames en vestiduras automotrices dejándolas limpias y frescas.",
+    stainType: "Tráfico vehicular y polvo",
+    dryingTime: "3 a 4 hrs*",
+    formula: "Baja Humedad Cabina",
+    beforeImg: "/assets/portfolio/antes-4.jpg",
+    afterImg: "/assets/portfolio/despues-4.jpg",
+  },
+  {
+    id: "comp-7",
     category: "tapetes",
     categoryLabel: "Tapetes",
-    zone: "Tlaquepaque • Residencial",
-    title: "Lavado y Desinfección de Tapete Decorativo",
+    title: "Tapete Decorativo Geométrico",
     subtitle:
-      "Despolvado profundo y extracción de suciedad en fibras geométricas devolviendo sus colores vivos.",
+      "Lavado profundo por inmersión y centrifugado en taller devolviendo brillo y textura a las fibras.",
     stainType: "Tráfico de calzado y polvo",
     dryingTime: "Secado en Taller (3 días)",
     formula: "Sanitizante Especializado",
@@ -122,61 +126,23 @@ export function BeforeAfterGallery({ onOpenWizard }: { onOpenWizard: () => void 
       className="py-16 sm:py-24 bg-gradient-to-b from-kanan-ice via-white to-kanan-ice border-t border-slate-200/70"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
-        {/* Encabezado Fresco */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div className="max-w-2xl">
-            <h2 className="font-heading text-3xl sm:text-4xl font-extrabold text-kanan-deep tracking-tight">
-              Antes y Después
-            </h2>
-            <p className="text-slate-600 text-sm sm:text-base mt-2">
-              Desliza el comparador o selecciona un caso real en Guadalajara y Zapopan para ver la
-              diferencia de nuestra extracción profunda.
-            </p>
-          </div>
-
-          {/* Botones de posición rápida del deslizador */}
-          <div className="flex items-center gap-1.5 bg-white p-1.5 rounded-2xl border border-slate-200 shadow-sm self-start md:self-auto">
-            <button
-              type="button"
-              onClick={() => setSliderPos(85)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-heading font-bold transition-all ${
-                sliderPos > 65
-                  ? "bg-kanan-deep text-white"
-                  : "text-slate-500 hover:text-kanan-deep"
-              }`}
-            >
-              Ver Antes
-            </button>
-            <button
-              type="button"
-              onClick={() => setSliderPos(50)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-heading font-bold transition-all ${
-                sliderPos >= 35 && sliderPos <= 65
-                  ? "bg-kanan-cyan text-white"
-                  : "text-slate-500 hover:text-kanan-deep"
-              }`}
-            >
-              50 / 50
-            </button>
-            <button
-              type="button"
-              onClick={() => setSliderPos(15)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-heading font-bold transition-all ${
-                sliderPos < 35
-                  ? "bg-kanan-cerulean text-white"
-                  : "text-slate-500 hover:text-kanan-deep"
-              }`}
-            >
-              Ver Después
-            </button>
-          </div>
+        {/* Encabezado Limpio */}
+        <div className="max-w-2xl">
+          <h2 className="font-heading text-3xl sm:text-4xl font-extrabold text-kanan-deep tracking-tight">
+            Antes y Después
+          </h2>
+          <p className="text-slate-600 text-sm sm:text-base mt-2">
+            Desliza las flechas sobre la foto para ver los resultados reales de nuestra extracción profunda.
+          </p>
         </div>
 
         {/* Layout Showcase: Visor Principal Izquierdo (7 cols) + Selector y Ficha Técnica Derecha (5 cols) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
-          {/* VISOR INTERACTIVO PRINCIPAL */}
+          
+          {/* VISOR INTERACTIVO PRINCIPAL (SIN BOTONES 50/50, SOLO SLIDER TÁCTIL) */}
           <div className="lg:col-span-7 bg-white rounded-3xl p-3 sm:p-4 border border-slate-200/90 shadow-kanan-lg space-y-4">
-            <div className="relative h-[300px] sm:h-[430px] w-full rounded-2xl overflow-hidden select-none bg-slate-900">
+            <div className="relative h-[320px] sm:h-[450px] w-full rounded-2xl overflow-hidden select-none bg-slate-900">
+              
               {/* Imagen DESPUÉS (Fondo) */}
               <img
                 src={selectedCase.afterImg}
@@ -185,7 +151,7 @@ export function BeforeAfterGallery({ onOpenWizard }: { onOpenWizard: () => void 
                 draggable={false}
               />
 
-              {/* Imagen ANTES (Clip dinámico) */}
+              {/* Imagen ANTES (Clip dinámico con el slider) */}
               <div
                 className="absolute inset-0 overflow-hidden"
                 style={{ clipPath: `inset(0 ${100 - sliderPos}% 0 0)` }}
@@ -198,16 +164,16 @@ export function BeforeAfterGallery({ onOpenWizard }: { onOpenWizard: () => void 
                 />
               </div>
 
-              {/* Placas flotantes al 95% de opacidad */}
+              {/* Placas indicadoras sutiles */}
               <span className="absolute top-3.5 left-3.5 z-10 bg-kanan-deep/90 backdrop-blur-md text-white text-xs font-heading font-bold uppercase tracking-wider px-3.5 py-1.5 rounded-full shadow">
-                Antes del Servicio
+                Antes
               </span>
               <span className="absolute top-3.5 right-3.5 z-10 bg-white/95 backdrop-blur-md text-kanan-deep text-xs font-heading font-bold uppercase tracking-wider px-3.5 py-1.5 rounded-full shadow border border-kanan-cyan/40 flex items-center gap-1">
                 <CheckCircle2 className="w-3.5 h-3.5 text-kanan-cyan" />
-                Resultado Kanan
+                Después
               </span>
 
-              {/* Línea divisoria + Handle Cian Fresco */}
+              {/* Línea divisoria interactiva con flechas */}
               <div
                 className="absolute top-0 bottom-0 z-20 w-0.5 bg-white shadow-[0_0_12px_rgba(0,0,0,0.7)] pointer-events-none"
                 style={{ left: `${sliderPos}%` }}
@@ -217,7 +183,7 @@ export function BeforeAfterGallery({ onOpenWizard }: { onOpenWizard: () => void 
                 </div>
               </div>
 
-              {/* Input range táctil para celular y mouse */}
+              {/* Input range táctil invisible para deslizar suavemente en móvil y mouse */}
               <input
                 type="range"
                 min={2}
@@ -230,7 +196,7 @@ export function BeforeAfterGallery({ onOpenWizard }: { onOpenWizard: () => void 
             </div>
 
             {/* Ficha Técnica Inferior del Caso Seleccionado */}
-            <div className="grid grid-cols-3 gap-2 sm:gap-3 bg-kanan-ice rounded-2xl p-3 sm:p-4 border border-slate-200/80">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3 bg-kanan-ice rounded-2xl p-3 sm:p-4 border border-slate-200/80">
               <div className="flex items-center gap-2">
                 <ShieldCheck className="w-4 h-4 text-kanan-cyan shrink-0 hidden sm:block" />
                 <div>
@@ -244,7 +210,7 @@ export function BeforeAfterGallery({ onOpenWizard }: { onOpenWizard: () => void 
               </div>
 
               <div className="flex items-center gap-2">
-                <PawPrint className="w-4 h-4 text-kanan-cyan shrink-0 hidden sm:block" />
+                <div className="w-2 h-2 rounded-full bg-kanan-cyan shrink-0 hidden sm:block" />
                 <div>
                   <span className="text-[10px] font-bold uppercase text-slate-400 block">
                     Fórmula Aplicada
@@ -272,12 +238,12 @@ export function BeforeAfterGallery({ onOpenWizard }: { onOpenWizard: () => void 
             </div>
           </div>
 
-          {/* COLUMNA DERECHA: SELECTOR DE CASOS REALES (6 Miniaturas Interactivas) */}
+          {/* COLUMNA DERECHA: SELECTOR DE CASOS REALES */}
           <div className="lg:col-span-5 space-y-4">
             <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/90 shadow-kanan space-y-4">
               <div>
                 <span className="text-xs font-heading font-bold uppercase tracking-wider text-kanan-cerulean">
-                  {selectedCase.zone}
+                  {selectedCase.categoryLabel}
                 </span>
                 <h3 className="font-heading text-xl font-extrabold text-kanan-deep mt-1">
                   {selectedCase.title}
@@ -289,7 +255,7 @@ export function BeforeAfterGallery({ onOpenWizard }: { onOpenWizard: () => void 
 
               <div className="space-y-2 pt-2 border-t border-slate-100">
                 <span className="text-[11px] font-heading font-bold uppercase tracking-wider text-slate-400 block">
-                  Explora otros casos reales ({COMPARISONS.length}):
+                  Resultados Reales ({COMPARISONS.length}):
                 </span>
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 gap-2.5">
@@ -323,7 +289,7 @@ export function BeforeAfterGallery({ onOpenWizard }: { onOpenWizard: () => void 
                             Caso 0{idx + 1}
                           </span>
                           <p className="font-heading font-bold text-xs truncate">
-                            {item.categoryLabel}
+                            {item.title}
                           </p>
                         </div>
                       </button>

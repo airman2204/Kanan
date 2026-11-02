@@ -3,7 +3,6 @@
 import React from "react";
 import {
   Timer,
-  PawPrint,
   FileCheck2,
   CalendarCheck,
   Sparkles,
@@ -14,6 +13,7 @@ import {
   CarFront,
   ShieldCheck,
   Star,
+  CheckCircle2,
 } from "lucide-react";
 import { MunicipioZMG } from "@/types/crm";
 import { KananLogo } from "@/components/brand/KananLogo";
@@ -29,13 +29,13 @@ export function HeroSection({ selectedMunicipio, onOpenWizard }: HeroSectionProp
       id="inicio"
       className="relative overflow-hidden bg-gradient-to-b from-[#F4F7F9] via-white to-[#F4F7F9] pt-6 pb-14 sm:py-14 lg:py-20"
     >
-      {/* Orbes luminosos de frescura (Cian Fresco y Cerúleo suaves) */}
+      {/* Orbes luminosos de frescura */}
       <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-kanan-cyan/15 blur-3xl pointer-events-none" />
       <div className="absolute top-1/2 -left-24 w-80 h-80 rounded-full bg-kanan-cerulean/10 blur-3xl pointer-events-none" />
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-          {/* Columna Izquierda: Tipografía Aireada, Selector Rápido y 3 Pilares */}
+          {/* Columna Izquierda: Tipografía, Selector Rápido y Pilares */}
           <div className="lg:col-span-6 space-y-6">
             {/* Píldora de Ubicación & Calificación */}
             <div className="inline-flex flex-wrap items-center gap-2 bg-white border border-kanan-cyan/30 rounded-full pl-3 pr-4 py-1.5 shadow-sm">
@@ -50,7 +50,7 @@ export function HeroSection({ selectedMunicipio, onOpenWizard }: HeroSectionProp
               </span>
             </div>
 
-            {/* Tagline Oficial con Diseño Fresco y Luminoso */}
+            {/* Tagline Oficial */}
             <div className="space-y-3">
               <h1 className="font-heading text-3xl sm:text-5xl lg:text-[52px] font-extrabold text-kanan-deep tracking-tight leading-[1.08]">
                 Protegemos lo que más tocas.{" "}
@@ -59,14 +59,14 @@ export function HeroSection({ selectedMunicipio, onOpenWizard }: HeroSectionProp
                 </span>
               </h1>
               <p className="text-slate-600 text-base sm:text-lg leading-relaxed">
-                Transformamos la higiene de tu hogar con tecnología industrial de{" "}
+                Transformamos la higiene de tus muebles con tecnología industrial de{" "}
                 <strong className="text-kanan-deep">inyección-succión profunda</strong> y
-                bioseguridad textil <strong className="text-kanan-cerulean">100% Pet-Friendly</strong>.
-                Eliminamos el 99.9% de ácaros, manchas difíciles y olores desde la primera sesión.
+                bioseguridad textil de grado profesional.
+                Eliminamos el 99.9% de ácaros, polvo profundo, manchas difíciles y olores desde la primera sesión.
               </p>
             </div>
 
-            {/* Selector Interactivo Instantáneo "¿Qué deseas renovar hoy?" */}
+            {/* Selector Interactivo: 1. Salas y Sillas, 2. Tapetes, 3. Colchones, 4. Vestiduras */}
             <div className="bg-white/90 backdrop-blur-md rounded-3xl p-4 sm:p-5 border border-slate-200/90 shadow-kanan space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-heading font-extrabold uppercase tracking-wider text-kanan-navy flex items-center gap-1.5">
@@ -119,7 +119,7 @@ export function HeroSection({ selectedMunicipio, onOpenWizard }: HeroSectionProp
               </div>
             </div>
 
-            {/* 3 Pilares de Valor (Tarjetas Frescas y Luminosas) */}
+            {/* 3 Pilares de Valor (Sin Pet-Friendly, Garantía de Satisfacción y Secado con Clima) */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div className="bg-white rounded-2xl p-3.5 border border-slate-200/80 shadow-sm flex items-start gap-3">
                 <div className="w-10 h-10 rounded-xl bg-kanan-cyan/15 text-kanan-cyan flex items-center justify-center shrink-0 mt-0.5">
@@ -137,13 +137,13 @@ export function HeroSection({ selectedMunicipio, onOpenWizard }: HeroSectionProp
 
               <div className="bg-white rounded-2xl p-3.5 border border-slate-200/80 shadow-sm flex items-start gap-3">
                 <div className="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5">
-                  <PawPrint className="w-5 h-5" />
+                  <ShieldCheck className="w-5 h-5" />
                 </div>
                 <div>
                   <h2 className="font-heading font-bold text-xs sm:text-sm text-kanan-deep">
-                    100% Pet-Friendly
+                    Desinfección Profunda
                   </h2>
-                  <p className="text-[11px] text-slate-500">Seguro para mascotas y bebés</p>
+                  <p className="text-[11px] text-slate-500">Elimina el 99.9% de ácaros y bacterias</p>
                 </div>
               </div>
 
@@ -155,53 +155,50 @@ export function HeroSection({ selectedMunicipio, onOpenWizard }: HeroSectionProp
                   <h2 className="font-heading font-bold text-xs sm:text-sm text-kanan-deep">
                     Garantía de Satisfacción
                   </h2>
+                  <p className="text-[11px] text-slate-500">Revisión junto contigo al terminar</p>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Columna Derecha: Bento Grid Editorial & Fresco */}
+          {/* Columna Derecha: Bento Grid con Fotografía Editorial y Extracción */}
           <div className="lg:col-span-6">
             <div className="grid grid-cols-12 gap-3 sm:gap-4 items-stretch">
-              {/* Tarjeta Principal Bento (12 cols): Fotografía Editorial Luminosa */}
+              
+              {/* Tarjeta Principal Bento */}
               <div className="col-span-12 relative rounded-3xl overflow-hidden border border-slate-200/90 shadow-kanan-lg bg-white group">
                 <img
                   src="/assets/services/hero-fresh.jpg"
-                  alt="Sala impecable y luminosa con mascota Golden Retriever y bioseguridad Kanan"
+                  alt="Sala impecable y luminosa con bioseguridad Kanan"
                   className="w-full h-[270px] sm:h-[360px] object-cover group-hover:scale-[1.02] transition-transform duration-700"
                 />
 
-                {/* Placa Blanca al 95% de Opacidad (Regla Estricta Manual Pág. 2) */}
                 <div className="absolute top-3.5 left-3.5 bg-white/95 backdrop-blur-md rounded-2xl px-3.5 py-2 shadow-md border border-slate-200/80">
                   <KananLogo variant="color" className="scale-90 origin-left" />
                 </div>
 
-                {/* Píldora flotante derecha: Bioseguridad Activa */}
                 <div className="absolute top-3.5 right-3.5 bg-white/95 backdrop-blur-md text-kanan-deep rounded-full px-3 py-1.5 shadow-md border border-kanan-cyan/30 flex items-center gap-1.5 text-xs font-heading font-bold">
                   <ShieldCheck className="w-4 h-4 text-kanan-cyan" />
                   <span>99.9% Libre de Ácaros</span>
                 </div>
               </div>
 
-              {/* Sub-tarjeta Bento Izquierda (7 cols): Kanan Dog Compromiso Pet-Friendly */}
+              {/* Sub-tarjeta Bento Izquierda: Protocolo Textil de Alto Vacío */}
               <div className="col-span-12 sm:col-span-7 bg-white rounded-3xl p-4 border border-slate-200/90 shadow-kanan flex items-center gap-3.5">
-                <img
-                  src="/assets/brand/kanan-dog.png"
-                  alt="Kanan Dog — Mascota Oficial"
-                  className="w-16 h-16 sm:w-20 sm:h-20 object-contain bg-kanan-ice rounded-2xl p-1.5 border border-kanan-cyan/30 shrink-0"
-                />
+                <div className="w-12 h-12 rounded-2xl bg-kanan-ice flex items-center justify-center text-kanan-cerulean shrink-0 border border-kanan-cyan/30">
+                  <ShieldCheck className="w-6 h-6 text-kanan-cyan" />
+                </div>
                 <div className="min-w-0">
                   <h3 className="font-heading font-extrabold text-sm text-kanan-deep">
-                    Cultura 100% Pet-Friendly
+                    Bioseguridad Textil Activa
                   </h3>
                   <p className="text-xs text-slate-600 mt-1 leading-snug">
-                    Neutralizamos olores orgánicos y pelo de mascota con enzimas naturales sin
-                    químicos agresivos.
+                    Fórmulas biodegradables que neutralizan olores y suciedad acumulada sin maltratar tejidos ni dejar residuos químicos.
                   </p>
                 </div>
               </div>
 
-              {/* Sub-tarjeta Bento Derecha (5 cols): Indicador de Secado Ultrarrápido */}
+              {/* Sub-tarjeta Bento Derecha: Indicador de Secado */}
               <div className="col-span-12 sm:col-span-5 bg-gradient-to-br from-kanan-navy to-kanan-deep text-white rounded-3xl p-4 shadow-kanan flex flex-col justify-between">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-heading font-bold uppercase tracking-wider text-kanan-cyan">

@@ -142,19 +142,19 @@ const CATALOGO_KANAN: CatalogCategory[] = [
 
 const KANAN_DOG_TIPS: Record<number, { title: string; tip: string }> = {
   1: {
-    title: "Paso 1 de 4: ¡Hola! Soy Kanan Dog 🐾",
-    tip: "Selecciona los muebles, colchones o vestiduras que deseas limpiar y desinfectar. ¡No te preocupes por el precio ahora! Al final te daremos atención y cotización exacta.",
+    title: "Paso 1 de 4: Selecciona tus muebles 🛋️",
+    tip: "Elige las salas, tapetes, colchones o vestiduras que deseas limpiar y desinfectar. Al final te daremos atención y cotización personalizada.",
   },
   2: {
     title: "Paso 2 de 4: Tu ubicación y fotos opcionales 📷",
-    tip: "Indícanos en qué municipio de la ZMG estás y, si gustas, sube una foto del estado actual de tus muebles para preparar el equipo ideal.",
+    tip: "Indícanos tu municipio en ZMG y, si gustas, sube una foto del estado actual de tus muebles para preparar el equipo ideal.",
   },
   3: {
     title: "Paso 3 de 4: Elige tu fecha y turno ideal ⏰",
-    tip: "Recuerda que nuestro proceso de inyección-succión permite un secado rápido en solo 3 a 4 horas.",
+    tip: "Recuerda que nuestro proceso de inyección-succión permite un secado rápido en solo 3 a 4 horas (sujeto a ventilación y clima).",
   },
   4: {
-    title: "Paso 4 de 4: Confirmación y Sello Pet-Friendly ✅",
+    title: "Paso 4 de 4: Confirmación del servicio ✅",
     tip: "Revisa tu resumen. Al confirmar, registraremos tu cita en nuestro sistema y te conectaremos directo por WhatsApp con tu folio.",
   },
 };
@@ -377,7 +377,7 @@ export function BookingWizard({
           <div className="bg-kanan-deep text-white p-4 sm:p-6 flex flex-col sm:flex-row items-center gap-4 border-b border-white/10">
             <div className="relative shrink-0">
               <img
-                src="/assets/brand/kanan-dog.png"
+                src="/assets/brand/kanan-dog-active.png"
                 alt="Técnico Especialista Kanan Dog"
                 className="w-20 h-20 sm:w-24 sm:h-24 object-contain bg-white rounded-2xl p-1.5 border-2 border-kanan-cyan shadow-md"
               />
@@ -937,28 +937,6 @@ export function BookingWizard({
                             className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-kanan-deep focus:outline-none focus:ring-2 focus:ring-kanan-cyan"
                           />
                         </div>
-
-                        {/* Selector Hogar Pet-Friendly (Alimenta CRM + Automatización Mes 3) */}
-                        <div className="bg-kanan-ice p-4 rounded-2xl border border-slate-200">
-                          <label className="flex items-start gap-3 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={mascotas}
-                              onChange={(e) => setMascotas(e.target.checked)}
-                              className="mt-1 h-4 w-4 rounded border-slate-300 text-kanan-cyan focus:ring-kanan-cyan"
-                            />
-                            <div>
-                              <span className="font-heading font-bold text-xs sm:text-sm text-kanan-deep flex items-center gap-1.5">
-                                <PawPrint className="w-4 h-4 text-kanan-cyan" />
-                                Tengo mascotas en casa (Protocolo Pet-Friendly)
-                              </span>
-                              <p className="text-xs text-slate-600 mt-0.5">
-                                Aplicaremos neutralizador enzimático 100% seguro para mascotas y
-                                activaremos tus tips de cuidado trimestral.
-                              </p>
-                            </div>
-                          </label>
-                        </div>
                       </div>
 
                       {/* Resumen del Servicio (Sin precios en el wizard) */}
@@ -991,10 +969,6 @@ export function BookingWizard({
                             </p>
                             <p>
                               📅 <strong>Fecha y Turno:</strong> {fecha} ({turno})
-                            </p>
-                            <p>
-                              🐾 <strong>Protocolo Pet-Friendly:</strong>{" "}
-                              {mascotas ? "Activado" : "Estándar"}
                             </p>
                             {fotosPreview.length > 0 && (
                               <p>
