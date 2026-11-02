@@ -263,7 +263,7 @@ export function BookingWizard({
   const handleCalleChange = (val: string) => {
     const sanitized = sanitizeInput(val);
     setCalleNumero(sanitized);
-    if (sanitized.length >= 8) {
+    if (sanitized.trim().length > 0) {
       const v = validarDireccion(sanitized);
       setCalleError(v.valida ? null : (v.error || null));
     } else {
@@ -274,7 +274,7 @@ export function BookingWizard({
   const handleNotasChange = (val: string) => {
     const sanitized = sanitizeInput(val);
     setNotasServicio(sanitized);
-    if (sanitized.length >= 6) {
+    if (sanitized.trim().length > 0) {
       const v = validarDetalleManchas(sanitized);
       setNotasError(v.valida ? null : (v.error || null));
     } else {
