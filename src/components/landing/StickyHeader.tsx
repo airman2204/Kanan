@@ -81,32 +81,6 @@ export function StickyHeader({
             <KananLogo variant="color" layout="horizontal" size="md" />
           </a>
 
-          {/* Selector de Cobertura Tipo Cápsula Flotante (Desktop) */}
-          <div className="hidden lg:flex items-center bg-kanan-ice/90 p-1 rounded-full border border-slate-200/80 shadow-inner">
-            <div className="flex items-center gap-1 px-2.5 text-xs font-heading font-bold text-kanan-cerulean">
-              <MapPin className="w-3.5 h-3.5 text-kanan-cyan" />
-              <span>Cobertura:</span>
-            </div>
-            {MUNICIPIOS.map((mun) => {
-              const active = selectedMunicipio === mun;
-              return (
-                <button
-                  key={mun}
-                  type="button"
-                  onClick={() => onSelectMunicipio(mun)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-heading font-bold transition-all ${
-                    active
-                      ? "bg-white text-kanan-deep shadow-sm border border-kanan-cyan/30"
-                      : "text-slate-500 hover:text-kanan-deep"
-                  }`}
-                >
-                  {active && <span className="inline-block w-1.5 h-1.5 rounded-full bg-kanan-cyan mr-1.5 align-middle" />}
-                  {mun}
-                </button>
-              );
-            })}
-          </div>
-
           {/* Navegación Moderna */}
           <nav className="hidden xl:flex items-center gap-6 text-sm font-heading font-bold text-slate-600">
             <a href="#servicios" className="hover:text-kanan-cyan transition-colors">
@@ -165,32 +139,6 @@ export function StickyHeader({
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
           </div>
-        </div>
-
-        {/* Selector horizontal de chips para Móvil (Ultra rápido y fresco) */}
-        <div className="lg:hidden flex items-center gap-1.5 overflow-x-auto py-2 border-t border-slate-100 no-scrollbar">
-          <span className="text-[11px] font-heading font-bold text-slate-400 flex items-center gap-1 shrink-0 pr-1">
-            <MapPin className="w-3 h-3 text-kanan-cyan" />
-            Tu zona:
-          </span>
-          {MUNICIPIOS.map((mun) => {
-            const active = selectedMunicipio === mun;
-            return (
-              <button
-                key={mun}
-                type="button"
-                onClick={() => onSelectMunicipio(mun)}
-                className={`px-3 py-1 rounded-full text-xs font-heading font-bold whitespace-nowrap transition-all flex items-center gap-1 ${
-                  active
-                    ? "bg-kanan-cyan/15 text-kanan-cerulean border border-kanan-cyan/40"
-                    : "bg-kanan-ice text-slate-500 border border-transparent"
-                }`}
-              >
-                {active && <Check className="w-3 h-3 text-kanan-cyan" />}
-                <span>{mun}</span>
-              </button>
-            );
-          })}
         </div>
       </div>
 
