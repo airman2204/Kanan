@@ -393,9 +393,9 @@ export function BookingWizard({
           <div className="bg-kanan-deep text-white p-4 sm:p-6 flex flex-col sm:flex-row items-center gap-4 border-b border-white/10">
             <div className="relative shrink-0">
               <img
-                src="/assets/brand/kanan-dog-active.png"
-                alt="Técnico Especialista Kanan Dog"
-                className="w-20 h-20 sm:w-24 sm:h-24 object-contain bg-white rounded-2xl p-1.5 border-2 border-kanan-cyan shadow-md"
+                src="/assets/brand/kanan-dog-agenda.png"
+                alt="Kanan Dog Agendando Citas"
+                className="w-20 h-20 sm:w-24 sm:h-24 object-contain bg-white rounded-2xl p-1 border-2 border-kanan-cyan shadow-md"
               />
               <span className="absolute -bottom-1 -right-1 bg-kanan-cyan text-white text-[10px] font-heading font-bold px-2 py-0.5 rounded-full shadow">
                 OK ✓
