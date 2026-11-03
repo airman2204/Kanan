@@ -19,18 +19,17 @@ export function KananLogo({
 }: KananLogoProps) {
   const isWhite = variant === "white";
 
-  // Tamaños ampliados y visibles
+  // Tamaños ampliados y visibles (ajustados para móvil y desktop)
   const heightClasses = {
-    sm: "h-12 sm:h-14",
-    md: "h-16 sm:h-20",
-    lg: "h-20 sm:h-28",
+    sm: "h-10 sm:h-14",
+    md: "h-12 sm:h-16 md:h-20",
+    lg: "h-16 sm:h-24 md:h-28",
   }[size];
 
   if (layout === "stacked") {
     return (
       <div
         className={`inline-flex flex-col items-center select-none ${className}`}
-        style={{ minWidth: "180px" }}
       >
         <img
           src={
@@ -47,8 +46,7 @@ export function KananLogo({
 
   return (
     <div
-      className={`inline-flex items-center gap-2.5 select-none py-1 ${className}`}
-      style={{ minWidth: "180px" }}
+      className={`inline-flex items-center gap-2 select-none py-1 ${className}`}
       aria-label="Kanan Servicios de Limpieza"
     >
       <img

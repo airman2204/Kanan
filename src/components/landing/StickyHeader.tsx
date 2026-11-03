@@ -70,19 +70,19 @@ export function StickyHeader({
       </div>
 
       {/* Main Navbar con Logo Grande */}
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20 sm:h-24 gap-3">
-          {/* Imagotipo Oficial en Tamaño Grande */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16 sm:h-24">
+          {/* Imagotipo Oficial: Centrado o a la izquierda en móvil, visible y nítido */}
           <a
             href="#inicio"
-            className="shrink-0 focus:outline-none"
+            className="shrink-0 focus:outline-none flex items-center"
             aria-label="Kanan Servicios de Limpieza"
           >
             <KananLogo variant="color" layout="horizontal" size="md" />
           </a>
 
-          {/* Botones de Contacto Rápido y CTA Directos (Mismo tamaño uniforme) */}
-          <div className="flex items-center gap-2 sm:gap-2.5">
+          {/* Botones de Contacto Rápido y CTA Directos (Visibles ÚNICAMENTE en Desktop/Tablet; en móvil se usa la barra fija inferior) */}
+          <div className="hidden sm:flex items-center gap-2 sm:gap-2.5">
             {/* Botón de Llamada Telefónica Directa */}
             <a
               href={`tel:${KANAN_PHONE_CALL}`}
