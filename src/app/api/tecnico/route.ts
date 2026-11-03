@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDatabase, updateCitaInDb } from "@/lib/db/store";
 import { ServicioCita, Cliente } from "@/types/crm";
+import {
+  despacharEventoEnCamino,
+  despacharEventoInicioServicio,
+  despacharEventoFinServicio,
+} from "@/lib/chat/dispatcher";
 
 function getPinConfigurado(): string {
   const db = getDatabase();
@@ -97,18 +102,62 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ ok: false, error: "No autorizado." }, { status: 401 });
     }
 
-    const { citaId, estatus, metodo_pago, firma_conformidad, fotos_antes_despues, monto_total } = body;
-    if (!citaId) {
-      return NextResponse.json({ ok: false, error: "Falta citaId." }, { status: 400 });
-    }
-
-    const updated = updateCitaInDb(citaId, {
+    const {
+      citaId,
+      accion,
       estatus,
       metodo_pago,
       firma_conformidad,
       fotos_antes_despues,
       monto_total,
-    });
+      duracion_minutos,
+      rango_tiempo,
+    } = body;
+    if (!citaId) {
+      return NextResponse.json({ ok: false, error: "Falta citaId." }, { status: 400 });
+    }
+
+    const db = getDatabase();
+    const citaActual = db.servicios_citas.find((c) => c.id === citaId);
+    const cliente = citaActual ? db.clientes.find((cl) => cl.id === citaActual.cliente_id) : null;
+
+    let nuevoEstatus = estatus || citaActual?.estatus;
+    const nowIso = new Date().toISOString();
+    const updatePayload: any = {
+      estatus: nuevoEstatus,
+      metodo_pago,
+      firma_conformidad,
+      fotos_antes_despues,
+      monto_total,
+      duracion_minutos,
+    };
+
+    if (accion === "INICIAR_RUTA" || estatus === "En Ruta") {
+      nuevoEstatus = "En Ruta";
+      updatePayload.estatus = "En Ruta";
+      updatePayload.hora_en_camino = nowIso;
+      if (citaActual && cliente) {
+        despacharEventoEnCamino(citaActual, cliente, rango_tiempo).catch(console.warn);
+      }
+    } else if (accion === "INICIAR_SERVICIO" || estatus === "En Proceso") {
+      nuevoEstatus = "En Proceso";
+      updatePayload.estatus = "En Proceso";
+      updatePayload.hora_inicio = nowIso;
+      if (citaActual && cliente) {
+        despacharEventoInicioServicio(citaActual, cliente).catch(console.warn);
+      }
+    } else if (accion === "CONCLUIR_SERVICIO" || estatus === "Completada") {
+      nuevoEstatus = "Completada";
+      updatePayload.estatus = "Completada";
+      updatePayload.hora_fin = nowIso;
+      if (citaActual && cliente) {
+        const citasPrevias = db.servicios_citas.filter((c) => c.cliente_id === cliente.id && c.estatus === "Completada");
+        const esClienteNuevo = citasPrevias.length <= 1;
+        despacharEventoFinServicio(citaActual, cliente, duracion_minutos || 90, esClienteNuevo).catch(console.warn);
+      }
+    }
+
+    const updated = updateCitaInDb(citaId, updatePayload);
 
     return NextResponse.json({
       ok: Boolean(updated),

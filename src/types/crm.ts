@@ -104,11 +104,40 @@ export interface ServicioCita {
   fotos_antes_despues: FotoAntesDespues[];
   firma_conformidad?: string;
   calificacion: number | null;
+  // Campos del ciclo de cronómetro y satisfacción
+  hora_en_camino?: string;
+  hora_inicio?: string;
+  hora_fin?: string;
+  duracion_minutos?: number;
+  calificacion_estrellas?: number | null;
+  comentarios_encuesta?: string;
+  tarjeta_enviada?: boolean;
   ticket_soporte: boolean;
-  origen?: "web" | "manual" | "whatsapp";
+  origen?: "web" | "manual" | "whatsapp" | "chat";
   created_at: string;
   cancelled_at?: string;
   cancel_reason?: string;
+}
+
+export interface ChatMessage {
+  id: string;
+  cliente_id: string;
+  from_client: boolean;
+  text: string;
+  media_url?: string;
+  media_type?: "image" | "sticker" | "document";
+  timestamp: string;
+  is_read: boolean;
+}
+
+export interface ChatSession {
+  cliente_id: string;
+  cliente_nombre: string;
+  whatsapp: string;
+  last_message: string;
+  last_timestamp: string;
+  unread_count: number;
+  modo_ia_activo: boolean;
 }
 
 export interface RegistroRecurrencia {

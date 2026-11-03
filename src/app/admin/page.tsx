@@ -19,6 +19,7 @@ import {
   ExternalLink,
   ChevronLeft,
   ChevronRight,
+  Columns3,
 } from "lucide-react";
 import {
   KananDatabase,
@@ -29,13 +30,14 @@ import {
   MunicipioZMG,
   MarketingMetrics,
 } from "@/types/crm";
-import { WhatsAppFoxdrop } from "@/components/admin/WhatsAppFoxdrop";
+import { ChatInbox } from "@/components/admin/ChatInbox";
+import { KanbanBoard } from "@/components/admin/KanbanBoard";
 import { ClientesTable } from "@/components/admin/ClientesTable";
 import { CalendarCitasView } from "@/components/admin/CalendarCitasView";
 import { MarketingAnalyticsView } from "@/components/admin/MarketingAnalyticsView";
 import { ResumenDashboard } from "@/components/admin/ResumenDashboard";
 
-type AdminSection = "resumen" | "calendario" | "clientes" | "whatsapp" | "marketing" | "configuracion";
+type AdminSection = "resumen" | "kanban" | "calendario" | "clientes" | "chat" | "marketing" | "configuracion";
 
 export default function AdminPage() {
   const router = useRouter();
@@ -274,6 +276,12 @@ export default function AdminPage() {
       badge: null,
     },
     {
+      id: "kanban" as AdminSection,
+      label: "Tablero Kanban",
+      icon: Columns3,
+      badge: null,
+    },
+    {
       id: "calendario" as AdminSection,
       label: "Calendario de citas",
       icon: Calendar,
@@ -287,8 +295,8 @@ export default function AdminPage() {
       badge: null,
     },
     {
-      id: "whatsapp" as AdminSection,
-      label: "WhatsApp",
+      id: "chat" as AdminSection,
+      label: "Chat",
       icon: MessageSquare,
       badge: null,
     },
@@ -308,9 +316,10 @@ export default function AdminPage() {
 
   const sectionTitles: Record<AdminSection, string> = {
     resumen: "Resumen",
+    kanban: "Tablero Kanban en Vivo",
     calendario: "Calendario de citas",
     clientes: "Clientes",
-    whatsapp: "WhatsApp",
+    chat: "Bandeja de Chat",
     marketing: "Métricas & Marketing",
     configuracion: "Configuración",
   };
@@ -499,11 +508,23 @@ export default function AdminPage() {
                 setCalendarHighlightStatus(status || null);
                 setActiveSection("calendario");
               }}
-              onNavigateToWhatsApp={() => setActiveSection("whatsapp")}
+              onNavigateToWhatsApp={() => setActiveSection("chat")}
             />
           )}
 
-          {/* SECCIÓN 2: CALENDARIO DE CITAS */}
+          {/* SECCIÓN 2: TABLERO KANBAN EN VIVO */}
+          {activeSection === "kanban" && (
+            <KanbanBoard
+              citas={citas}
+              clientes={clientes}
+              onUpdateStatus={async (citaId, nuevoEstatus) => {
+                await handleUpdateCita(citaId, { estatus: nuevoEstatus });
+              }}
+              onRefresh={fetchCrmData}
+            />
+          )}
+
+          {/* SECCIÓN 3: CALENDARIO DE CITAS */}
           {activeSection === "calendario" && (
             <CalendarCitasView
               citas={citas}
@@ -518,7 +539,7 @@ export default function AdminPage() {
             />
           )}
 
-          {/* SECCIÓN 3: CLIENTES */}
+          {/* SECCIÓN 4: CLIENTES */}
           {activeSection === "clientes" && (
             <ClientesTable
               clientes={clientes}
@@ -529,9 +550,9 @@ export default function AdminPage() {
             />
           )}
 
-          {/* SECCIÓN 4: WHATSAPP */}
-          {activeSection === "whatsapp" && (
-            <WhatsAppFoxdrop
+          {/* SECCIÓN 5: CHAT OFICIAL KANAN */}
+          {activeSection === "chat" && (
+            <ChatInbox
               clientes={clientes}
               citas={citas}
               mensajes={mensajes}

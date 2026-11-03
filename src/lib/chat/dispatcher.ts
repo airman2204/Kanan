@@ -1,0 +1,177 @@
+import { ServicioCita, Cliente } from "@/types/crm";
+import { enviarMensajeChat, enviarStickerChat, enviarMediaChat } from "./bridgeClient";
+
+/**
+ * Cálculo gratuito de ruta en tiempo real con OSRM (OpenStreetMap).
+ * Añade un margen prudente de tráfico para la Zona Metropolitana de Guadalajara.
+ */
+export async function calcularTiempoRutaMinutos(
+  origenLat: number,
+  origenLng: number,
+  destinoLat: number,
+  destinoLng: number
+): Promise<{ minutosAprox: number; rangoTexto: string }> {
+  try {
+    const url = `https://router.project-osrm.org/route/v1/driving/${origenLng},${origenLat};${destinoLng},${destinoLat}?overview=false`;
+    const res = await fetch(url, {
+      headers: { "User-Agent": "KananLimpieza/1.0 (contacto@kananlimpieza.mx)" },
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.routes && data.routes[0]) {
+        const duracionMin = Math.round(data.routes[0].duration / 60);
+        // Margen de tráfico prudente para la ZMG (+5 a 8 min)
+        const minInferior = Math.max(10, duracionMin);
+        const minSuperior = minInferior + 7;
+        return {
+          minutosAprox: minInferior,
+          rangoTexto: `${minInferior} a ${minSuperior} minutos`,
+        };
+      }
+    }
+  } catch {
+    // Fallback silencioso si no hay conexión
+  }
+  return { minutosAprox: 25, rangoTexto: "20 a 30 minutos" };
+}
+
+/**
+ * HITO 1: Notificación de técnico en camino + Sticker de Kanan Móvil
+ */
+export async function despacharEventoEnCamino(
+  cita: ServicioCita,
+  cliente: Cliente,
+  rangoTiempoCustom?: string
+) {
+  const cleanPhone = cliente.whatsapp.replace(/\D/g, "");
+  const primerNombre = cliente.nombre.split(" ")[0];
+  const tiempoEstimado = rangoTiempoCustom || "20 a 30 minutos";
+
+  const mensaje = [
+    `¡Hola ${primerNombre}! 🚗✨`,
+    `Tu técnico especializado de *Kanan* ya va en camino a tu domicilio en *${cliente.direccion}*.`,
+    ``,
+    `⏱️ *Tiempo estimado de llegada (según ruta):* ${tiempoEstimado}.`,
+    `Por favor asegúrate de tener despejada el área de tus muebles para comenzar con agilidad.`,
+    ``,
+    `¡Nos vemos en un momento! 🐾`,
+  ].join("\n");
+
+  await enviarMensajeChat(cleanPhone, mensaje);
+  // Intentar enviar el sticker oficial
+  await enviarStickerChat(cleanPhone, "assets/kanan-movil.webp");
+}
+
+/**
+ * HITO 2: Notificación de inicio de servicio y tratamiento de desinfección
+ */
+export async function despacharEventoInicioServicio(cita: ServicioCita, cliente: Cliente) {
+  const cleanPhone = cliente.whatsapp.replace(/\D/g, "");
+  const primerNombre = cliente.nombre.split(" ")[0];
+
+  const mensaje = [
+    `🧼 *¡Iniciando tu servicio de limpieza profunda!*`,
+    `Hola ${primerNombre}, nuestro técnico ha comenzado con la desinfección e inyección-succión de tus piezas.`,
+    ``,
+    `Aplicaremos fórmulas neutras que cuidan tus tejidos, remueven suciedad profunda y neutralizan olores.`,
+    `Cualquier detalle especial que desees indicarle al técnico, está totalmente a tu servicio.`,
+  ].join("\n");
+
+  await enviarMensajeChat(cleanPhone, mensaje);
+}
+
+/**
+ * HITO 3: Notificación de fin de servicio + Secado + Tarjeta Digital + Encuesta
+ */
+export async function despacharEventoFinServicio(
+  cita: ServicioCita,
+  cliente: Cliente,
+  duracionMinutos: number,
+  esClienteNuevo: boolean
+) {
+  const cleanPhone = cliente.whatsapp.replace(/\D/g, "");
+  const primerNombre = cliente.nombre.split(" ")[0];
+
+  // 1. Mensaje de entrega y secado
+  const mensajeEntrega = [
+    `✅ *¡Servicio Concluido con Éxito!*`,
+    `Muchas gracias por confiar en Kanan Limpieza, ${primerNombre}.`,
+    ``,
+    `🌬️ *Recomendación clave de secado:*`,
+    `Tus piezas secarán completamente en un lapso de *3 a 4 horas*. Mantén la habitación con buena ventilación o ventanas abiertas para acelerar el secado.`,
+    cita.firma_conformidad ? `📄 Tu firma de conformidad ha quedado debidamente registrada.` : ``,
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  await enviarMensajeChat(cleanPhone, mensajeEntrega);
+
+  // 2. Tarjeta Digital de Lealtad (Si es cliente nuevo)
+  if (esClienteNuevo) {
+    const captionTarjeta = [
+      `🎁 *¡Bienvenido(a) a la Familia Kanan!*`,
+      `Te obsequiamos tu *Tarjeta Digital Kanan* con Folio *#${cliente.id}*.`,
+      `Consérvala para obtener un *15% de descuento* en tu próximo servicio semestral o en la limpieza de colchones y autos.`,
+    ].join("\n");
+
+    await enviarMediaChat(cleanPhone, "/assets/brand/tarjeta-garantia-digital.png", captionTarjeta);
+  }
+
+  // 3. Encuesta de Satisfacción Interactiva
+  const encuesta = [
+    `⭐ *¿Cómo calificarías el servicio y la atención hoy?*`,
+    `Tu opinión nos ayuda a mantener la máxima calidad en Guadalajara.`,
+    ``,
+    `Responde a este chat únicamente con un número del 1 al 5:`,
+    `5️⃣ — ¡Excelente, me encantó!`,
+    `4️⃣ — Bueno`,
+    `3️⃣ — Regular`,
+    `2️⃣ — Malo`,
+    `1️⃣ — Pésimo`,
+  ].join("\n");
+
+  await enviarMensajeChat(cleanPhone, encuesta);
+}
+
+/**
+ * Procesar respuesta numérica de la encuesta (Filtro inteligente de Google Reviews)
+ */
+export async function procesarRespuestaEncuesta(
+  cliente: Cliente,
+  cita: ServicioCita,
+  estrellas: number
+) {
+  const cleanPhone = cliente.whatsapp.replace(/\D/g, "");
+  const primerNombre = cliente.nombre.split(" ")[0];
+
+  if (estrellas === 5) {
+    const googleDirectLink =
+      "https://search.google.com/local/writereview?placeid=ChIJrwbO27bXKYQRn078yH7zCio";
+    const mensaje5Estrellas = [
+      `¡Muchísimas gracias, ${primerNombre}! 🌟🎉`,
+      `Tu calificación de 5 estrellas significa el mundo para todo el equipo de Kanan.`,
+      ``,
+      `¿Nos apoyarías con 15 segundos para compartir tu experiencia en Google Maps? Abre directo la ventana con las 5 estrellas listas:`,
+      `👉 ${googleDirectLink}`,
+      ``,
+      `¡Que disfrutes tus muebles limpios y desinfectados! 🐾🛋️`,
+    ].join("\n");
+
+    await enviarMensajeChat(cleanPhone, mensaje5Estrellas);
+  } else if (estrellas <= 3) {
+    const mensajeSoporte = [
+      `Lamentamos mucho que tu experiencia no haya sido perfecta, ${primerNombre}.`,
+      `En Kanan tu satisfacción es lo más importante. Tu reporte ha sido canalizado a nuestra coordinación para hacer válida nuestra Garantía de Satisfacción. Nos comunicaremos contigo en breve.`,
+    ].join("\n");
+
+    await enviarMensajeChat(cleanPhone, mensajeSoporte);
+  } else {
+    // 4 estrellas
+    const mensajeAgradecimiento = [
+      `¡Muchas gracias por tus comentarios, ${primerNombre}!`,
+      `Seguiremos trabajando día a día para que tu próxima experiencia sea de 5 estrellas. ¡Que tengas un excelente día! ✨`,
+    ].join("\n");
+
+    await enviarMensajeChat(cleanPhone, mensajeAgradecimiento);
+  }
+}

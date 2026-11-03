@@ -25,6 +25,10 @@ export default function TecnicoPage() {
   const [fotoAntes, setFotoAntes] = useState<string | null>(null);
   const [fotoDespues, setFotoDespues] = useState<string | null>(null);
 
+  // Estados de cronómetro y estimación de ruta
+  const [tiempoEstimadoLlegada, setTiempoEstimadoLlegada] = useState("20 a 25 minutos");
+  const [segundosCronometro, setSegundosCronometro] = useState(0);
+
   // Canvas de firma táctil
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);
@@ -230,7 +234,87 @@ export default function TecnicoPage() {
     setHasSignatureDrawn(false);
   };
 
-  // Finalizar y Enviar Servicio
+  // Cronómetro en tiempo real para servicio en proceso
+  useEffect(() => {
+    if (!citaActual || citaActual.estatus !== "En Proceso" || !citaActual.hora_inicio) {
+      setSegundosCronometro(0);
+      return;
+    }
+
+    const startMs = new Date(citaActual.hora_inicio).getTime();
+    const updateTimer = () => {
+      const nowMs = Date.now();
+      const diffSec = Math.max(0, Math.floor((nowMs - startMs) / 1000));
+      setSegundosCronometro(diffSec);
+    };
+
+    updateTimer();
+    const timerInterval = setInterval(updateTimer, 1000);
+    return () => clearInterval(timerInterval);
+  }, [citaActual?.estatus, citaActual?.hora_inicio]);
+
+  const formatoTiempoCronometro = () => {
+    const hrs = Math.floor(segundosCronometro / 3600);
+    const mins = Math.floor((segundosCronometro % 3600) / 60);
+    const secs = segundosCronometro % 60;
+    const pad = (n: number) => n.toString().padStart(2, "0");
+    return `${hrs > 0 ? `${pad(hrs)}:` : ""}${pad(mins)}:${pad(secs)}`;
+  };
+
+  // 1. Iniciar Ruta ("Voy en camino")
+  const handleIniciarRuta = async () => {
+    if (!citaActual) return;
+    setSaving(true);
+    try {
+      const res = await fetch("/api/tecnico", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          citaId: citaActual.id,
+          accion: "INICIAR_RUTA",
+          rango_tiempo: tiempoEstimadoLlegada,
+        }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        cargarRuta();
+      } else {
+        alert("Error al iniciar ruta: " + (data.error || "Intenta nuevamente"));
+      }
+    } catch {
+      alert("Error de conexión al iniciar ruta.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // 2. Iniciar Servicio ("Comenzar Servicio" + Arrancar Cronómetro)
+  const handleIniciarServicio = async () => {
+    if (!citaActual) return;
+    setSaving(true);
+    try {
+      const res = await fetch("/api/tecnico", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          citaId: citaActual.id,
+          accion: "INICIAR_SERVICIO",
+        }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        cargarRuta();
+      } else {
+        alert("Error al iniciar servicio: " + (data.error || "Intenta nuevamente"));
+      }
+    } catch {
+      alert("Error de conexión al iniciar servicio.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // 3. Finalizar y Enviar Servicio ("Concluir Servicio" + Detener Cronómetro)
   const handleFinalizarServicio = async () => {
     if (!citaActual) return;
     setSaving(true);
@@ -249,21 +333,25 @@ export default function TecnicoPage() {
         });
       }
 
+      const duracionFinalMin = Math.max(1, Math.round(segundosCronometro / 60)) || 60;
+
       const res = await fetch("/api/tecnico", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           citaId: citaActual.id,
+          accion: "CONCLUIR_SERVICIO",
           estatus: "Completada",
           metodo_pago: metodoPagoSeleccionado,
           firma_conformidad: firmaDataUrl,
           fotos_antes_despues: fotosActualizadas.length > 0 ? fotosActualizadas : undefined,
+          duracion_minutos: duracionFinalMin,
         }),
       });
 
       const data = await res.json();
       if (data.ok) {
-        alert("✅ ¡Servicio finalizado con éxito! Datos registrados en el sistema.");
+        alert("✅ ¡Servicio finalizado con éxito! Tiempo, firma y entrega registrados.");
         cargarRuta();
       } else {
         alert("Error al finalizar servicio: " + (data.error || "Intenta nuevamente"));
@@ -454,6 +542,147 @@ export default function TecnicoPage() {
         <div className="flex-1 bg-[#F4F7F9] flex flex-col">
           {citaActual ? (
             <div className="p-4 space-y-4">
+
+              {/* PANEL MAESTRO 1-CLIC: FLUJO DE ESTADO Y CRONÓMETRO */}
+              <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-md space-y-3.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-heading font-extrabold text-[#355581] uppercase tracking-wider flex items-center gap-1.5">
+                    <span>⚡</span> Control Operativo 1-Clic
+                  </span>
+                  <span className={`text-[10px] font-heading font-extrabold px-2.5 py-0.5 rounded-full ${
+                    citaActual.estatus === "Completada"
+                      ? "bg-emerald-100 text-emerald-800"
+                      : citaActual.estatus === "En Proceso"
+                      ? "bg-cyan-100 text-cyan-800 animate-pulse"
+                      : citaActual.estatus === "En Ruta"
+                      ? "bg-amber-100 text-amber-800"
+                      : "bg-slate-100 text-slate-700"
+                  }`}>
+                    {citaActual.estatus}
+                  </span>
+                </div>
+
+                {/* Barra de progreso visual de 3 etapas */}
+                <div className="grid grid-cols-3 gap-1.5 text-center text-[10px] font-heading font-bold">
+                  <div className={`py-1.5 rounded-xl border ${
+                    citaActual.estatus === "En Ruta" || citaActual.estatus === "En Proceso" || citaActual.estatus === "Completada"
+                      ? "bg-blue-50 border-blue-200 text-[#1D71B5]"
+                      : "bg-slate-50 border-slate-200 text-slate-400"
+                  }`}>
+                    1. En Ruta 🚗
+                  </div>
+                  <div className={`py-1.5 rounded-xl border ${
+                    citaActual.estatus === "En Proceso" || citaActual.estatus === "Completada"
+                      ? "bg-blue-50 border-blue-200 text-[#1D71B5]"
+                      : "bg-slate-50 border-slate-200 text-slate-400"
+                  }`}>
+                    2. En Proceso 🧼
+                  </div>
+                  <div className={`py-1.5 rounded-xl border ${
+                    citaActual.estatus === "Completada"
+                      ? "bg-emerald-50 border-emerald-200 text-emerald-700"
+                      : "bg-slate-50 border-slate-200 text-slate-400"
+                  }`}>
+                    3. Concluido ✅
+                  </div>
+                </div>
+
+                {/* ESTADO 1: PENDIENTE / CONFIRMADA -> INICIAR RUTA */}
+                {citaActual.estatus !== "En Ruta" && citaActual.estatus !== "En Proceso" && citaActual.estatus !== "Completada" && (
+                  <div className="bg-[#F8FAFC] rounded-2xl p-4 border border-slate-200/90 space-y-3">
+                    <div>
+                      <p className="text-xs font-heading font-extrabold text-slate-800">
+                        ⏱️ Tiempo estimado de llegada al cliente:
+                      </p>
+                      <p className="text-[11px] text-slate-500">
+                        Calculado con ruta y tráfico de Guadalajara. Puedes ajustar con un toque:
+                      </p>
+                    </div>
+
+                    {/* Selector de tráfico de 1 toque */}
+                    <div className="grid grid-cols-4 gap-1.5">
+                      {[
+                        "15 minutos",
+                        "20 a 25 minutos",
+                        "35 minutos",
+                        "45+ minutos",
+                      ].map((tiempo) => (
+                        <button
+                          key={tiempo}
+                          type="button"
+                          onClick={() => setTiempoEstimadoLlegada(tiempo)}
+                          className={`py-2 px-1 text-[11px] font-heading font-bold rounded-xl border text-center transition ${
+                            tiempoEstimadoLlegada === tiempo
+                              ? "bg-[#1D71B5] text-white border-[#1D71B5] shadow-xs"
+                              : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
+                          }`}
+                        >
+                          {tiempo.replace(" minutos", "m")}
+                        </button>
+                      ))}
+                    </div>
+
+                    <button
+                      type="button"
+                      disabled={saving}
+                      onClick={handleIniciarRuta}
+                      className="w-full py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 active:scale-[0.98] text-white rounded-2xl font-heading font-extrabold text-xs sm:text-sm shadow-md transition flex items-center justify-center gap-2"
+                    >
+                      <span>🚗</span>
+                      <span>{saving ? "Notificando..." : `Voy en camino (Llegada en ${tiempoEstimadoLlegada})`}</span>
+                    </button>
+                  </div>
+                )}
+
+                {/* ESTADO 2: EN RUTA -> COMENZAR SERVICIO */}
+                {citaActual.estatus === "En Ruta" && (
+                  <div className="bg-amber-50/80 rounded-2xl p-4 border border-amber-200 space-y-3">
+                    <div className="flex items-center gap-2 text-xs text-amber-900 font-medium">
+                      <span>🚗</span>
+                      <span>Cliente notificado en traslado. Presiona al llegar al domicilio:</span>
+                    </div>
+
+                    <button
+                      type="button"
+                      disabled={saving}
+                      onClick={handleIniciarServicio}
+                      className="w-full py-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 active:scale-[0.98] text-white rounded-2xl font-heading font-extrabold text-xs sm:text-sm shadow-md transition flex items-center justify-center gap-2"
+                    >
+                      <span>▶️</span>
+                      <span>{saving ? "Iniciando..." : "Llegué al Domicilio: Comenzar Servicio"}</span>
+                    </button>
+                  </div>
+                )}
+
+                {/* ESTADO 3: EN PROCESO -> CRONÓMETRO DIGITAL ACTIVO */}
+                {citaActual.estatus === "En Proceso" && (
+                  <div className="bg-gradient-to-br from-[#0E2841] to-[#1D71B5] text-white rounded-2xl p-4.5 text-center shadow-lg border border-cyan-400/30 space-y-1">
+                    <div className="flex items-center justify-center gap-2 text-cyan-300 text-xs font-heading font-extrabold uppercase tracking-wider">
+                      <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping"></span>
+                      <span>Cronómetro de Servicio Activo</span>
+                    </div>
+                    <p className="font-heading font-black text-4xl tracking-widest text-white py-1">
+                      {formatoTiempoCronometro()}
+                    </p>
+                    <p className="text-[11px] text-blue-100 font-medium">
+                      Inyección-succión profunda y desinfección en curso
+                    </p>
+                  </div>
+                )}
+
+                {/* ESTADO 4: COMPLETADA */}
+                {citaActual.estatus === "Completada" && (
+                  <div className="bg-emerald-50 rounded-2xl p-3.5 border border-emerald-200 text-center space-y-0.5">
+                    <p className="font-heading font-extrabold text-xs text-emerald-800">
+                      ✓ Servicio Finalizado Exitosamente
+                    </p>
+                    <p className="text-[11px] text-emerald-700">
+                      Duración registrada: <strong>{citaActual.duracion_minutos || 60} minutos</strong>
+                    </p>
+                  </div>
+                )}
+              </div>
+
               {/* TARJETA 1: CLIENTE Y UBICACIÓN */}
 
             {/* TARJETA 1: CLIENTE Y UBICACIÓN */}
@@ -717,7 +946,13 @@ export default function TecnicoPage() {
                   className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white rounded-2xl font-heading font-extrabold text-sm shadow-lg shadow-emerald-600/30 transition flex items-center justify-center gap-2 disabled:opacity-60"
                 >
                   <span>{saving ? "⏳" : "✅"}</span>
-                  <span>{saving ? "Guardando en el sistema..." : "Finalizar Servicio y Enviar"}</span>
+                  <span>
+                    {saving
+                      ? "Guardando en el sistema..."
+                      : citaActual.estatus === "En Proceso"
+                      ? `Concluir Servicio y Cobrar (Tiempo: ${formatoTiempoCronometro()})`
+                      : "Concluir Servicio y Cobrar"}
+                  </span>
                 </button>
               ) : (
                 <div className="w-full py-3 bg-emerald-50 text-emerald-800 rounded-2xl font-heading font-extrabold text-xs text-center border border-emerald-200">

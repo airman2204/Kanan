@@ -468,6 +468,13 @@ export function updateCitaInDb(
     fecha?: string;
     turno?: TurnoServicio;
     hora_especifica?: string;
+    hora_en_camino?: string;
+    hora_inicio?: string;
+    hora_fin?: string;
+    duracion_minutos?: number;
+    calificacion_estrellas?: number | null;
+    comentarios_encuesta?: string;
+    tarjeta_enviada?: boolean;
   }
 ): ServicioCita | null {
   const db = getDatabase();
@@ -492,6 +499,13 @@ export function updateCitaInDb(
   if (updates.fecha !== undefined) cita.fecha = updates.fecha;
   if (updates.turno !== undefined) cita.turno = updates.turno;
   if (updates.hora_especifica !== undefined) cita.hora_especifica = updates.hora_especifica;
+  if (updates.hora_en_camino !== undefined) cita.hora_en_camino = updates.hora_en_camino;
+  if (updates.hora_inicio !== undefined) cita.hora_inicio = updates.hora_inicio;
+  if (updates.hora_fin !== undefined) cita.hora_fin = updates.hora_fin;
+  if (updates.duracion_minutos !== undefined) cita.duracion_minutos = updates.duracion_minutos;
+  if (updates.calificacion_estrellas !== undefined) cita.calificacion_estrellas = updates.calificacion_estrellas;
+  if (updates.comentarios_encuesta !== undefined) cita.comentarios_encuesta = updates.comentarios_encuesta;
+  if (updates.tarjeta_enviada !== undefined) cita.tarjeta_enviada = updates.tarjeta_enviada;
 
   if (updates.monto_total !== undefined) {
     cita.monto_total = updates.monto_total;
