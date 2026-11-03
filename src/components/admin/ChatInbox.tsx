@@ -220,13 +220,30 @@ export function ChatInbox({
               </p>
             </div>
 
-            <div className="bg-[#F8FAFC] border-2 border-dashed border-slate-200 rounded-2xl p-4 flex items-center justify-center min-h-[220px]">
+            <div className="bg-[#F8FAFC] border-2 border-dashed border-slate-200 rounded-2xl p-4 flex flex-col items-center justify-center min-h-[220px] text-center space-y-2">
               {bridgeQr ? (
-                <img src={bridgeQr} alt="QR Code" className="w-48 h-48 rounded-xl" />
+                <>
+                  <img src={bridgeQr} alt="QR Code" className="w-48 h-48 rounded-xl shadow-xs" />
+                  <p className="text-[11px] font-bold text-[#1D71B5] mt-1">
+                    ⚡ Escanea este código desde Dispositivos Vinculados
+                  </p>
+                </>
               ) : bridgeStatus === "connected" ? (
-                <p className="text-xs font-bold text-emerald-700">✓ ¡Dispositivo ya vinculado exitosamente!</p>
+                <div className="space-y-1">
+                  <span className="text-3xl block">✅</span>
+                  <p className="text-xs font-bold text-emerald-700">¡Dispositivo vinculado y conectado!</p>
+                  <p className="text-[11px] text-slate-400">Listo para enviar y recibir mensajes.</p>
+                </div>
+              ) : bridgeStatus === "disconnected" ? (
+                <div className="space-y-2 max-w-xs">
+                  <span className="text-2xl block">🔌</span>
+                  <p className="text-xs font-heading font-extrabold text-slate-700">Microservicio de Chat no detectado</p>
+                  <p className="text-[11px] text-slate-500 leading-relaxed">
+                    Igual que en FoxDrop, el puente <strong>chat-bridge</strong> debe correr en un servidor persistente (ej. Render.com gratuito o en tu PC con <code className="bg-slate-200 px-1 py-0.5 rounded text-[10px]">npm start</code>).
+                  </p>
+                </div>
               ) : (
-                <p className="text-xs text-slate-400 animate-pulse">Generando nuevo código QR...</p>
+                <p className="text-xs text-slate-400 animate-pulse">Conectando con el servicio de Chat...</p>
               )}
             </div>
 
