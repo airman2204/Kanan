@@ -279,9 +279,9 @@ export function BookingWizard({
     const sanitized = sanitizeInput(val, false);
     setCalle(sanitized);
 
-    // Buscar sugerencias en vivo con OpenStreetMap (Photon)
-    if (sanitized.trim().length >= 4) {
-      buscarCallesZMG(sanitized).then((res) => {
+    // Buscar sugerencias en vivo con OpenStreetMap (Nominatim y Photon)
+    if (sanitized.trim().length >= 3) {
+      buscarCallesZMG(sanitized, selectedMunicipio).then((res) => {
         setSugerenciasCalles(res);
       });
     } else {
@@ -292,17 +292,20 @@ export function BookingWizard({
   const seleccionarSugerenciaCalle = (sug: ResultadoDireccionOSM) => {
     setCalle(sug.calle || sug.nombreCompleto.split(",")[0]);
     if (sug.numero) setNumeroExterior(sug.numero);
-    if (sug.colonia && (!colonia || coloniasDisponibles.length === 0)) {
+    if (sug.colonia) {
       setColonia(sug.colonia);
+    }
+    if (sug.codigoPostal && !codigoPostal) {
+      handleCodigoPostalChange(sug.codigoPostal);
     }
     if (sug.lat && sug.lng) {
       setCoordenadasGPS({ lat: sug.lat, lng: sug.lng });
-      setGpsMensaje("📍 Ubicación validada con cartografía OpenStreetMap");
+      setGpsMensaje(`📍 Calle verificada: ${sug.calle} (${sug.colonia || selectedMunicipio})`);
     }
     setSugerenciasCalles([]);
   };
 
-  // Botón de Geolocalización Nativa del Navegador
+  // Botón de Geolocalización Nativa del Navegador (Rellena TODO de un golpe)
   const handleObtenerUbicacionGPS = () => {
     if (!navigator.geolocation) {
       setGpsMensaje("Tu navegador no soporta geolocalización.");
@@ -310,30 +313,35 @@ export function BookingWizard({
     }
 
     setObteniendoGPS(true);
-    setGpsMensaje(null);
+    setGpsMensaje("Conectando con satélite GPS...");
 
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         const { latitude, longitude } = pos.coords;
         setCoordenadasGPS({ lat: latitude, lng: longitude });
 
-        // Intentar geocodificación inversa para auto-rellenar calle y colonia
+        // Geocodificación inversa para auto-rellenar Código Postal, Municipio, Colonia y Calle
         const rev = await geocodificarInverso(latitude, longitude);
         if (rev) {
-          if (rev.calle && !calle) setCalle(rev.calle);
-          if (rev.numero && !numeroExterior) setNumeroExterior(rev.numero);
-          if (rev.colonia && !colonia) setColonia(rev.colonia);
-          if (rev.codigoPostal && !codigoPostal) {
+          if (rev.codigoPostal) {
             handleCodigoPostalChange(rev.codigoPostal);
+          } else if (rev.municipio) {
+            setCpValido(true);
+            setMunicipioAutollenado(rev.municipio);
+            onSelectMunicipio(rev.municipio);
           }
-          setGpsMensaje("✅ ¡Ubicación exacta detectada vía GPS satelital!");
+          if (rev.calle) setCalle(rev.calle);
+          if (rev.numero) setNumeroExterior(rev.numero);
+          if (rev.colonia) setColonia(rev.colonia);
+
+          setGpsMensaje(`✅ ¡Dirección detectada por GPS!: ${rev.calle || "Calle detectada"} ${rev.numero || ""} (Col. ${rev.colonia || ""})`);
         } else {
-          setGpsMensaje("✅ Coordenadas GPS fijadas con precisión.");
+          setGpsMensaje("✅ Coordenadas GPS fijadas con precisión. Por favor escribe tu calle.");
         }
         setObteniendoGPS(false);
       },
       () => {
-        setGpsMensaje("No se pudo obtener tu ubicación. Por favor escribe tu calle manualmente.");
+        setGpsMensaje("No se pudo obtener el permiso de ubicación. Por favor escribe tu calle manualmente.");
         setObteniendoGPS(false);
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
@@ -908,24 +916,48 @@ export function BookingWizard({
                 {/* PASO 2: UBICACIÓN INTELIGENTE POR CÓDIGO POSTAL Y FOTOS (SEGURO Y VALIDADO) */}
                 {step === 2 && (
                   <div className="space-y-6">
-                    {/* Bloque 1: Código Postal que desbloquea Municipio y Colonia */}
+                    {/* Bloque 1: Código Postal y Detección Automática por GPS */}
                     <div className="bg-kanan-ice/70 rounded-3xl p-5 sm:p-6 border border-slate-200/90 space-y-4">
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div>
                           <label
                             htmlFor="wizard-cp"
                             className="block font-heading font-extrabold text-sm sm:text-base text-kanan-deep"
                           >
-                            1. Ingresa tu Código Postal (5 dígitos) *
+                            1. Ingresa tu Código Postal o Detecta tu Ubicación
                           </label>
                           <p className="text-xs text-slate-500 mt-0.5">
-                            Al ingresarlo se verificará tu municipio y colonias oficiales en Jalisco.
+                            Detecta automáticamente tu municipio y colonias oficiales en Jalisco.
                           </p>
                         </div>
-                        <span className="text-[11px] font-heading font-bold text-kanan-cerulean bg-white px-3 py-1 rounded-full border border-kanan-cyan/30 self-start sm:self-auto">
-                          📍 Cobertura exclusiva Jalisco
-                        </span>
+
+                        {/* Botón táctil de GPS satelital nativo que auto-completa TODO */}
+                        <button
+                          type="button"
+                          disabled={obteniendoGPS}
+                          onClick={handleObtenerUbicacionGPS}
+                          className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 disabled:opacity-50 text-white font-heading font-bold text-xs px-4 py-2.5 rounded-xl shadow-sm transition active:scale-95 shrink-0 self-start sm:self-auto"
+                          title="Obtener dirección satelital exacta"
+                        >
+                          {obteniendoGPS ? (
+                            <>
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                              <span>Detectando satélite...</span>
+                            </>
+                          ) : (
+                            <>
+                              <Navigation className="w-4 h-4 text-emerald-200" />
+                              <span>📍 Autocompletar con mi GPS</span>
+                            </>
+                          )}
+                        </button>
                       </div>
+
+                      {gpsMensaje && (
+                        <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2 animate-fadeIn">
+                          <span>{gpsMensaje}</span>
+                        </div>
+                      )}
 
                       <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-start">
                         {/* Input Código Postal */}
@@ -1009,76 +1041,59 @@ export function BookingWizard({
                       )}
                     </div>
 
-                    {/* Bloque 2: Dirección Estructurada y Botón GPS Satelital */}
+                    {/* Bloque 2: Dirección Estructurada y Verificada */}
                     <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/90 shadow-sm space-y-4">
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
-                        <div>
-                          <h4 className="font-heading font-extrabold text-sm sm:text-base text-kanan-deep">
-                            2. Dirección Exacta de tu Domicilio *
-                          </h4>
-                          <p className="text-xs text-slate-500 mt-0.5">
-                            Separamos calle, número y coto para que nuestro técnico llegue directo sin perderse.
-                          </p>
-                        </div>
-
-                        {/* Botón táctil de GPS satelital nativo */}
-                        <button
-                          type="button"
-                          disabled={!cpValido || obteniendoGPS}
-                          onClick={handleObtenerUbicacionGPS}
-                          className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 disabled:opacity-50 text-white font-heading font-bold text-xs px-4 py-2.5 rounded-xl shadow-sm transition active:scale-95 shrink-0"
-                        >
-                          {obteniendoGPS ? (
-                            <>
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                              <span>Detectando satélite...</span>
-                            </>
-                          ) : (
-                            <>
-                              <Navigation className="w-4 h-4 text-emerald-200" />
-                              <span>📍 Fijar con mi GPS Actual</span>
-                            </>
-                          )}
-                        </button>
+                      <div>
+                        <h4 className="font-heading font-extrabold text-sm sm:text-base text-kanan-deep">
+                          2. Calle y Número de tu Domicilio *
+                        </h4>
+                        <p className="text-xs text-slate-500 mt-0.5">
+                          Escribe el nombre de tu calle y selecciona una opción verificada en Jalisco.
+                        </p>
                       </div>
-
-                      {gpsMensaje && (
-                        <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2">
-                          <span>{gpsMensaje}</span>
-                        </div>
-                      )}
 
                       {/* Cuadrícula de 3 campos: Calle (con autocompletado OSM), Número Exterior y Coto */}
                       <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
                         {/* Campo Calle */}
                         <div className="sm:col-span-6 relative">
-                          <label className="block text-xs font-heading font-bold text-slate-700 mb-1">
-                            Calle o Avenida *
+                          <label className="block text-xs font-heading font-bold text-slate-700 mb-1 flex items-center justify-between">
+                            <span>Calle o Avenida *</span>
+                            {coordenadasGPS && (
+                              <span className="text-[10px] text-emerald-600 font-bold flex items-center gap-1">
+                                ✓ Verificada en mapa
+                              </span>
+                            )}
                           </label>
                           <input
                             type="text"
                             disabled={!cpValido}
                             value={calle}
                             onChange={(e) => handleCalleChange(e.target.value)}
-                            placeholder={cpValido ? "Ej. Av. Providencia / Hidalgo" : "Ingresa primero el C.P."}
-                            className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-kanan-deep focus:outline-none focus:ring-2 focus:ring-kanan-cyan disabled:bg-slate-100 disabled:cursor-not-allowed"
+                            placeholder={cpValido ? "Escribe tu calle (ej. Av. Providencia)" : "Ingresa primero el C.P."}
+                            className={`w-full rounded-2xl border bg-white px-4 py-3 text-sm text-kanan-deep focus:outline-none focus:ring-2 focus:ring-kanan-cyan disabled:bg-slate-100 disabled:cursor-not-allowed ${
+                              coordenadasGPS ? "border-emerald-400" : "border-slate-300"
+                            }`}
                           />
 
-                          {/* Menú de sugerencias en vivo de OpenStreetMap */}
+                          {/* Menú desplegable de sugerencias en vivo de OpenStreetMap */}
                           {sugerenciasCalles.length > 0 && (
-                            <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-2xl shadow-xl z-30 max-h-48 overflow-y-auto">
-                              <p className="px-3 py-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider bg-slate-50 border-b border-slate-100">
-                                Calles verificadas en Jalisco (OpenStreetMap)
+                            <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-300 rounded-2xl shadow-2xl z-30 max-h-56 overflow-y-auto">
+                              <p className="px-3.5 py-2 text-[10px] font-bold text-kanan-deep uppercase tracking-wider bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+                                <span>📍 Calles encontradas en Jalisco</span>
+                                <span className="text-slate-400 font-normal">Toca para seleccionar</span>
                               </p>
                               {sugerenciasCalles.map((sug, idx) => (
                                 <button
                                   key={idx}
                                   type="button"
                                   onClick={() => seleccionarSugerenciaCalle(sug)}
-                                  className="w-full text-left px-3.5 py-2.5 text-xs text-slate-700 hover:bg-kanan-ice/80 hover:text-kanan-navy border-b border-slate-50 last:border-0 flex items-center gap-2 transition"
+                                  className="w-full text-left px-4 py-3 text-xs text-slate-800 hover:bg-kanan-ice hover:text-kanan-navy border-b border-slate-100 last:border-0 flex items-center gap-2.5 transition active:bg-slate-200"
                                 >
-                                  <MapPin className="w-3.5 h-3.5 text-kanan-cerulean shrink-0" />
-                                  <span className="truncate">{sug.nombreCompleto}</span>
+                                  <MapPin className="w-4 h-4 text-kanan-cyan shrink-0" />
+                                  <div className="min-w-0 flex-1">
+                                    <p className="font-heading font-bold truncate">{sug.calle}</p>
+                                    <p className="text-[11px] text-slate-500 truncate">{sug.colonia || sug.municipio}</p>
+                                  </div>
                                 </button>
                               ))}
                             </div>
