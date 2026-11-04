@@ -179,6 +179,7 @@ export function CalendarCitasView({
   const [fotoDespuesUrl, setFotoDespuesUrl] = useState("");
   const [montoCotizadoInput, setMontoCotizadoInput] = useState<number | "">("");
   const [guardandoCotizacion, setGuardandoCotizacion] = useState(false);
+  const [fotoZoomModal, setFotoZoomModal] = useState<string | null>(null);
 
   // Firma Digital en Pantalla
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -958,20 +959,19 @@ export function CalendarCitasView({
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {selectedCitaDetalle.fotos_estado_actual.map((fotoSrc, idx) => (
-                    <div key={idx} className="relative group rounded-xl overflow-hidden border border-amber-200 bg-white shadow-sm">
+                    <div
+                      key={idx}
+                      onClick={() => setFotoZoomModal(fotoSrc)}
+                      className="relative group rounded-xl overflow-hidden border border-amber-200 bg-white shadow-sm cursor-pointer"
+                    >
                       <img
                         src={fotoSrc}
                         alt={`Foto cliente ${idx + 1}`}
                         className="w-full h-28 sm:h-32 object-cover transition-transform group-hover:scale-105"
                       />
-                      <a
-                        href={fotoSrc}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[11px] font-bold transition-opacity"
-                      >
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[11px] font-bold transition-opacity">
                         Ver completa 🔍
-                      </a>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -1622,6 +1622,30 @@ export function CalendarCitasView({
                 Confirmar Cancelación
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL LIGHTBOX: VER FOTO COMPLETA EN ALTA RESOLUCIÓN */}
+      {fotoZoomModal && (
+        <div
+          className="fixed inset-0 z-[60] bg-black/90 backdrop-blur-md flex items-center justify-center p-4"
+          onClick={() => setFotoZoomModal(null)}
+        >
+          <div className="relative max-w-4xl max-h-[90vh] flex flex-col items-center">
+            <button
+              type="button"
+              onClick={() => setFotoZoomModal(null)}
+              className="absolute -top-12 right-0 px-3 py-1 bg-white/20 hover:bg-white/30 text-white rounded-full text-xs font-bold transition flex items-center gap-1"
+            >
+              <X className="w-4 h-4" /> Cerrar
+            </button>
+            <img
+              src={fotoZoomModal}
+              alt="Foto ampliada"
+              className="max-w-full max-h-[85vh] object-contain rounded-2xl shadow-2xl border border-white/10"
+              onClick={(e) => e.stopPropagation()}
+            />
           </div>
         </div>
       )}
