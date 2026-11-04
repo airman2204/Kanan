@@ -225,6 +225,7 @@ export function BookingWizard({
   const [bookingResult, setBookingResult] = useState<{
     folio: string;
     whatsappUrl: string;
+    autoEnviado?: boolean;
   } | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -543,6 +544,7 @@ export function BookingWizard({
       setBookingResult({
         folio: data.cita.id,
         whatsappUrl: data.whatsappUrl,
+        autoEnviado: Boolean(data.autoEnviado),
       });
     } catch (err: unknown) {
       setErrorMsg(err instanceof Error ? err.message : "Error inesperado");
@@ -666,6 +668,20 @@ export function BookingWizard({
                   </ul>
                 </div>
 
+                <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-emerald-900 text-xs sm:text-sm flex items-start sm:items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 font-bold">
+                    ✓
+                  </div>
+                  <div className="text-left">
+                    <p className="font-heading font-bold text-emerald-950">
+                      ¡Confirmación enviada automáticamente a tu WhatsApp!
+                    </p>
+                    <p className="text-[12px] text-emerald-800 mt-0.5">
+                      Ya mandamos los datos de tu folio al número registrado. Nuestro equipo revisará tus piezas para enviarte la cotización.
+                    </p>
+                  </div>
+                </div>
+
                 <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
                   <a
                     href={bookingResult.whatsappUrl}
@@ -674,7 +690,7 @@ export function BookingWizard({
                     className="inline-flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#1fb855] text-white font-heading font-bold text-sm sm:text-base px-6 py-4 rounded-2xl shadow-lg transition-all"
                   >
                     <MessageCircle className="w-5 h-5" />
-                    <span>Enviar Resumen por WhatsApp y Recibir Cotización</span>
+                    <span>Abrir Chat con Kanan (Opcional)</span>
                   </a>
 
                   <button

@@ -36,6 +36,40 @@ export async function calcularTiempoRutaMinutos(
 }
 
 /**
+ * HITO 0: Notificación automática inmediata tras agendar en la Web
+ */
+export async function despacharConfirmacionReservaAutomatica(
+  cita: ServicioCita,
+  cliente: Cliente
+) {
+  const cleanPhone = cliente.whatsapp.replace(/\D/g, "");
+  const primerNombre = cliente.nombre.split(" ")[0];
+  const itemsTexto = (cita.items_contratados || [])
+    .map((item) => `• ${item.cantidad}x ${item.piezaNombre}`)
+    .join("\n");
+
+  const mensaje = [
+    `¡Hola ${primerNombre}! 👋🐾`,
+    `¡Recibimos con éxito tu solicitud de servicio en *Kanan Limpieza Especializada*!`,
+    ``,
+    `📋 *Folio de Servicio:* ${cita.id}`,
+    `📅 *Fecha solicitada:* ${cita.fecha} (${cita.turno})`,
+    `📍 *Ubicación:* ${cliente.direccion}, ${cliente.municipio}`,
+    ``,
+    `🛋️ *Piezas registradas:*`,
+    itemsTexto || "• Servicios varios",
+    ``,
+    `✨ *¿Qué sigue?*`,
+    `1. Nuestro equipo revisará las fotos que adjuntaste para preparar la fórmula desmanchadora ideal.`,
+    `2. Te enviaremos por aquí la confirmación y cotización final sin costo por adelantado.`,
+    ``,
+    `Si necesitas agregar alguna otra pieza o cambiar algún dato, solo responde a este mensaje. ¡Gracias por confiar en Kanan! 💙`,
+  ].join("\n");
+
+  return await enviarMensajeChat(cleanPhone, mensaje);
+}
+
+/**
  * HITO 1: Notificación de técnico en camino + Sticker de Kanan Móvil
  */
 export async function despacharEventoEnCamino(

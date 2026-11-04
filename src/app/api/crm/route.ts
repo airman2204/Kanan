@@ -15,6 +15,7 @@ import {
   saveDatabase,
 } from "@/lib/db/store";
 import { generarMensajeWhatsAppReservaCliente, KANAN_WHATSAPP_NUMBER } from "@/lib/whatsapp/templates";
+import { despacharConfirmacionReservaAutomatica } from "@/lib/chat/dispatcher";
 import { verifySessionToken } from "@/lib/auth/security";
 import {
   validarDireccion,
@@ -191,11 +192,20 @@ export async function POST(req: NextRequest) {
     const textoWhatsApp = generarMensajeWhatsAppReservaCliente(cita, cliente);
     const whatsappUrl = `https://wa.me/${KANAN_WHATSAPP_NUMBER}?text=${encodeURIComponent(textoWhatsApp)}`;
 
+    // Envío automático al WhatsApp del cliente vía servicio de Chat
+    let autoEnviado = false;
+    try {
+      autoEnviado = await despacharConfirmacionReservaAutomatica(cita, cliente);
+    } catch (chatErr) {
+      console.error("No se pudo autodespachar el mensaje de reserva:", chatErr);
+    }
+
     return NextResponse.json({
       ok: true,
       cita,
       cliente,
       whatsappUrl,
+      autoEnviado,
       db: getDatabase(),
     });
   } catch (error: unknown) {
