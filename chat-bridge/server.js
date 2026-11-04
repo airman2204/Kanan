@@ -5,6 +5,12 @@ const { default: makeWASocket, useMultiFileAuthState, DisconnectReason } = requi
 const pino = require('pino');
 const path = require('path');
 const fs = require('fs');
+const { createClient } = require('@supabase/supabase-js');
+const { useSupabaseAuthState } = require('./supabaseAuth');
+
+const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://gkiqxexacyhnhjfbmvqw.supabase.co';
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdraXF4ZXhhY3lobmhqZmJtdnF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMwMzM5MzEsImV4cCI6MjEwODYwOTkzMX0.2VQs1EMRZNZ2SCPuxzcLJ5G1IvQrdJrqJ2SAKodD-lM';
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const app = express();
 app.use(cors());
@@ -32,7 +38,15 @@ if (!fs.existsSync(assetsDir)) {
 }
 
 async function startWhatsApp() {
-  const { state, saveCreds } = await useMultiFileAuthState(authDir);
+  let authStateResult;
+  try {
+    authStateResult = await useSupabaseAuthState(supabase, 'kanan_primary_session');
+    console.log('✅ [Kanan Chat] Persistencia remota en Supabase conectada con éxito.');
+  } catch (supabaseErr) {
+    console.warn('⚠️ [Kanan Chat] Falló Supabase auth state, usando respaldo local:', supabaseErr.message);
+    authStateResult = await useMultiFileAuthState(authDir);
+  }
+  const { state, saveCreds } = authStateResult;
 
   sock = makeWASocket({
     auth: state,
