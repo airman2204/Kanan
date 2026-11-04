@@ -45,7 +45,12 @@ export async function obtenerQrBridge(): Promise<BridgeResponse> {
 
 export async function enviarMensajeChat(toPhone: string, message: string): Promise<boolean> {
   try {
-    const cleanPhone = toPhone.replace(/\D/g, "");
+    let cleanPhone = toPhone.replace(/\D/g, "");
+    if (!cleanPhone.startsWith("52") && cleanPhone.length === 10) {
+      cleanPhone = `521${cleanPhone}`;
+    } else if (cleanPhone.startsWith("52") && !cleanPhone.startsWith("521") && cleanPhone.length === 12) {
+      cleanPhone = `521${cleanPhone.slice(2)}`;
+    }
     const res = await fetch(`${CHAT_BRIDGE_URL}/api/send-message`, {
       method: "POST",
       headers: {
@@ -64,7 +69,12 @@ export async function enviarMensajeChat(toPhone: string, message: string): Promi
 
 export async function enviarStickerChat(toPhone: string, stickerPath: string): Promise<boolean> {
   try {
-    const cleanPhone = toPhone.replace(/\D/g, "");
+    let cleanPhone = toPhone.replace(/\D/g, "");
+    if (!cleanPhone.startsWith("52") && cleanPhone.length === 10) {
+      cleanPhone = `521${cleanPhone}`;
+    } else if (cleanPhone.startsWith("52") && !cleanPhone.startsWith("521") && cleanPhone.length === 12) {
+      cleanPhone = `521${cleanPhone.slice(2)}`;
+    }
     const res = await fetch(`${CHAT_BRIDGE_URL}/api/send-sticker`, {
       method: "POST",
       headers: {
