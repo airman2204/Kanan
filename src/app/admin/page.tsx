@@ -586,6 +586,9 @@ export default function AdminPage() {
               onUpdateCita={handleUpdateCita}
               onCancelCita={handleCancelCita}
               onDeleteCita={handleDeleteCita}
+              onNavigateToChat={(clienteId) => {
+                setActiveSection("chat");
+              }}
               onCreateCitaManual={handleCreateCitaManual}
               autoOpenNewModal={triggerNewCitaModal}
               onResetAutoOpenNewModal={() => setTriggerNewCitaModal(false)}

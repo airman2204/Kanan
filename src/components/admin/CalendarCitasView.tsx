@@ -62,6 +62,7 @@ interface CalendarViewProps {
   ) => Promise<void>;
   onCancelCita: (citaId: string, motivo?: string) => Promise<void>;
   onDeleteCita?: (citaId: string) => Promise<void>;
+  onNavigateToChat?: (clienteId: string) => void;
   onCreateCitaManual: (cita: {
     cliente_id?: string;
     cliente_data?: {
@@ -138,6 +139,7 @@ export function CalendarCitasView({
   onUpdateCita,
   onCancelCita,
   onDeleteCita,
+  onNavigateToChat,
   onCreateCitaManual,
 }: CalendarViewProps) {
   const [viewMode, setViewMode] = useState<"dia" | "kanban">("dia");
@@ -181,6 +183,7 @@ export function CalendarCitasView({
   const [fotoDespuesUrl, setFotoDespuesUrl] = useState("");
   const [montoCotizadoInput, setMontoCotizadoInput] = useState<number | "">("");
   const [guardandoCotizacion, setGuardandoCotizacion] = useState(false);
+  const [enviandoCotizacionChat, setEnviandoCotizacionChat] = useState(false);
   const [fotoZoomModal, setFotoZoomModal] = useState<string | null>(null);
 
   // Firma Digital en Pantalla
@@ -1046,19 +1049,46 @@ export function CalendarCitasView({
                   const piezasStr = (selectedCitaDetalle.items_contratados || []).map((it) => `${it.cantidad}x ${it.piezaNombre}`).join(", ");
                   const precioFinal = montoCotizadoInput !== "" ? montoCotizadoInput : (selectedCitaDetalle.monto_total || 0);
                   const msgWhats = `¡Hola ${cli?.nombre || "Cliente"}! 👋 En Kanan revisamos las fotos de tu servicio (${piezasStr}). Con gusto te confirmamos tu cotización por $${precioFinal} MXN para el día ${selectedCitaDetalle.fecha} (${selectedCitaDetalle.turno}). ¿Deseas confirmar la cita? 🐾✨`;
-                  const whatsUrl = `https://wa.me/${cli?.whatsapp}?text=${encodeURIComponent(msgWhats)}`;
 
                   return (
                     <div className="pt-2 border-t border-slate-200 space-y-2">
-                      <a
-                        href={whatsUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center gap-2 w-full py-2.5 px-3 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold text-xs shadow-sm transition"
+                      <button
+                        type="button"
+                        disabled={enviandoCotizacionChat || !cli}
+                        onClick={async () => {
+                          if (!cli) return;
+                          setEnviandoCotizacionChat(true);
+                          try {
+                            // 1. Guardar precio en la cita
+                            if (montoCotizadoInput !== "") {
+                              await onUpdateCita(selectedCitaDetalle.id, { monto_total: Number(montoCotizadoInput) });
+                            }
+                            // 2. Enviar mensaje por el bridge interno
+                            await fetch("/api/chat/send", {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({
+                                to: cli.whatsapp,
+                                message: msgWhats,
+                                cliente_id: cli.id,
+                              }),
+                            });
+                            // 3. Cerrar ficha y navegar directamente al chat integrado
+                            setSelectedCitaDetalle(null);
+                            if (onNavigateToChat) {
+                              onNavigateToChat(cli.id);
+                            }
+                          } finally {
+                            setEnviandoCotizacionChat(false);
+                          }
+                        }}
+                        className="inline-flex items-center justify-center gap-2 w-full py-2.5 px-3 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold text-xs shadow-sm transition active:scale-[0.98]"
                       >
                         <Phone className="w-4 h-4" />
-                        <span>Enviar Cotización por WhatsApp</span>
-                      </a>
+                        <span>
+                          {enviandoCotizacionChat ? "Enviando al Chat..." : "Enviar Cotización y Abrir Chat"}
+                        </span>
+                      </button>
 
                       {selectedCitaDetalle.estatus === "Por Confirmar" && (
                         <button
