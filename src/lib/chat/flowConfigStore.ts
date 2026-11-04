@@ -26,7 +26,7 @@ export const DEFAULT_AGENT_FLOW_CONFIG: AgentFlowConfig = {
       enabled: true,
       x: 360,
       y: 200,
-      stickerPath: '/assets/stickers/kanan-mascota-agendado.jpg',
+      stickerPath: '/assets/stickers/kanan-mascota-agendado.png',
       delaySegundos: 2,
       mensajePlantilla: `👋 ¡Hola *{nombre}*! Recibimos con éxito tu solicitud de servicio en *Kanan Limpieza*.
 
@@ -60,7 +60,7 @@ export const DEFAULT_AGENT_FLOW_CONFIG: AgentFlowConfig = {
       enabled: true,
       x: 1020,
       y: 200,
-      stickerPath: '/assets/stickers/kanan-sticker-cotizacion.jpg',
+      stickerPath: '/assets/stickers/kanan-sticker-cotizacion.png',
       delaySegundos: 3,
       mensajePlantilla: `💰 ¡Hola *{nombre}*! Tu cotización para el folio *{folio}* está lista:
 
@@ -93,7 +93,7 @@ export const DEFAULT_AGENT_FLOW_CONFIG: AgentFlowConfig = {
       enabled: true,
       x: 1680,
       y: 60,
-      stickerPath: '/assets/stickers/kanan-sticker-listo.jpg',
+      stickerPath: '/assets/stickers/kanan-sticker-listo.png',
       delaySegundos: 2,
       mensajePlantilla: `🎉 ¡Excelente, *{nombre}*! Tu cita ha quedado *CONFIRMADA*.
 
@@ -129,7 +129,7 @@ Nuestros técnicos acudirán en el horario programado. ¡Gracias por confiar en 
       enabled: true,
       x: 2020,
       y: 60,
-      stickerPath: '/assets/stickers/kanan-mascota-agendado.jpg',
+      stickerPath: '/assets/stickers/kanan-mascota-agendado.png',
       delaySegundos: 2,
       mensajePlantilla: `🐾 ¡Hola *{nombre}*! Te recordamos que *mañana* es tu servicio de limpieza con Kanan Limpieza.
 
@@ -151,7 +151,7 @@ Nuestros técnicos acudirán en el horario programado. ¡Gracias por confiar en 
       enabled: true,
       x: 2360,
       y: 60,
-      stickerPath: '/assets/stickers/kanan-sticker-garantia.jpg',
+      stickerPath: '/assets/stickers/kanan-sticker-garantia.png',
       delaySegundos: 2,
       mensajePlantilla: `💡 *Tips rápidos antes de que llegue el Kanan Móvil:*
 
@@ -172,7 +172,7 @@ Nuestros técnicos acudirán en el horario programado. ¡Gracias por confiar en 
       enabled: true,
       x: 2700,
       y: 60,
-      stickerPath: '/assets/stickers/kanan-sticker-en-camino.jpg',
+      stickerPath: '/assets/stickers/kanan-sticker-en-camino.png',
       delaySegundos: 2,
       mensajePlantilla: `🚗💨 ¡Hola *{nombre}*! Nuestro técnico *{tecnico}* va en camino a tu domicilio a bordo del *Kanan Móvil*.
 
@@ -193,7 +193,7 @@ Por favor asegúrate de estar disponible para recibir al equipo. ¡Ya casi llega
       x: 3040,
       y: 60,
       stickerCategoriaEspecifica: true,
-      stickerPath: '/assets/stickers/kanan-sticker-en-proceso.jpg',
+      stickerPath: '/assets/stickers/kanan-sticker-en-proceso.png',
       delaySegundos: 2,
       mensajePlantilla: `🧼✨ ¡Hola *{nombre}*! Hemos comenzado con la limpieza profunda de tus muebles:
 
@@ -214,7 +214,7 @@ Estamos aplicando nuestro proceso de inyección-succión y desinfección profund
       x: 3380,
       y: 60,
       stickerCategoriaEspecifica: true,
-      stickerPath: '/assets/stickers/kanan-sticker-concluido.jpg',
+      stickerPath: '/assets/stickers/kanan-sticker-concluido.png',
       delaySegundos: 3,
       mensajePlantilla: `🌟 ¡Listo *{nombre}*! Tu servicio ha quedado impecable y concluido con éxito.
 
@@ -255,7 +255,7 @@ Por favor califícanos respondiendo con un número del *1 al 5*:
       enabled: true,
       x: 4060,
       y: -30,
-      stickerPath: '/assets/stickers/kanan-sticker-listo.jpg',
+      stickerPath: '/assets/stickers/kanan-sticker-listo.png',
       delaySegundos: 2,
       mensajePlantilla: `🎉 ¡Muchísimas gracias, *{nombre}*! Nos alegra enorme que hayas quedado encantado con el trabajo.
 
@@ -309,7 +309,7 @@ He generado un ticket prioritario con folio *{folio}* para nuestro supervisor de
       enabled: true,
       x: 4740,
       y: -30,
-      stickerPath: '/assets/stickers/kanan-sticker-cotizacion.jpg',
+      stickerPath: '/assets/stickers/kanan-sticker-cotizacion.png',
       delaySegundos: 3,
       mensajePlantilla: `🐾 ¡Hola *{nombre}*! Ha pasado un tiempo desde que consentimos tus muebles con Kanan Limpieza.
 
@@ -323,7 +323,7 @@ Los expertos recomiendan realizar limpieza profunda cada 6 meses para eliminar �
   }
 };
 
-const STORAGE_KEY = 'kanan_agent_flow_config_v2';
+const STORAGE_KEY = 'kanan_agent_flow_config_v3';
 
 export function getAgentFlowConfig(): AgentFlowConfig {
   if (typeof window === 'undefined') {
