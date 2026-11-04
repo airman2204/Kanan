@@ -4,6 +4,7 @@
   "description": "Microservicio autónomo de enlace de Chat para Kanan Limpieza ZMG",
   "main": "server.js",
   "scripts": {
+    "build": "echo 'Build OK'",
     "start": "node server.js",
     "dev": "node --watch server.js"
   },
