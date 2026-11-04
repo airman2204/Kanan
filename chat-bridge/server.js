@@ -162,8 +162,11 @@ app.post('/api/send-message', authMiddleware, async (req, res) => {
     }
 
     let cleanPhone = to.replace(/\D/g, '');
+    // En México, WhatsApp requiere el prefijo internacional 521 para celulares de 10 dígitos
     if (!cleanPhone.startsWith('52') && cleanPhone.length === 10) {
-      cleanPhone = `52${cleanPhone}`;
+      cleanPhone = `521${cleanPhone}`;
+    } else if (cleanPhone.startsWith('52') && !cleanPhone.startsWith('521') && cleanPhone.length === 12) {
+      cleanPhone = `521${cleanPhone.slice(2)}`;
     }
     const jid = `${cleanPhone}@s.whatsapp.net`;
 
@@ -187,8 +190,11 @@ app.post('/api/send-sticker', authMiddleware, async (req, res) => {
     }
 
     let cleanPhone = to.replace(/\D/g, '');
+    // En México, WhatsApp requiere el prefijo internacional 521 para celulares de 10 dígitos
     if (!cleanPhone.startsWith('52') && cleanPhone.length === 10) {
-      cleanPhone = `52${cleanPhone}`;
+      cleanPhone = `521${cleanPhone}`;
+    } else if (cleanPhone.startsWith('52') && !cleanPhone.startsWith('521') && cleanPhone.length === 12) {
+      cleanPhone = `521${cleanPhone.slice(2)}`;
     }
     const jid = `${cleanPhone}@s.whatsapp.net`;
 
@@ -228,8 +234,11 @@ app.post('/api/send-media', authMiddleware, async (req, res) => {
     }
 
     let cleanPhone = to.replace(/\D/g, '');
+    // En México, WhatsApp requiere el prefijo internacional 521 para celulares de 10 dígitos
     if (!cleanPhone.startsWith('52') && cleanPhone.length === 10) {
-      cleanPhone = `52${cleanPhone}`;
+      cleanPhone = `521${cleanPhone}`;
+    } else if (cleanPhone.startsWith('52') && !cleanPhone.startsWith('521') && cleanPhone.length === 12) {
+      cleanPhone = `521${cleanPhone.slice(2)}`;
     }
     const jid = `${cleanPhone}@s.whatsapp.net`;
 
