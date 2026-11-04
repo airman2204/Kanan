@@ -614,6 +614,9 @@ export default function AdminPage() {
               mensajes={mensajes}
               onTriggerMessage={handleTriggerWhatsApp}
               onRefresh={fetchCrmData}
+              onConfirmCita={async (citaId) => {
+                await handleUpdateCita(citaId, { estatus: "Confirmada" });
+              }}
             />
           )}
 

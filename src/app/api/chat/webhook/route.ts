@@ -28,7 +28,23 @@ export async function POST(req: NextRequest) {
         .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
       const ultimaCita = citasCliente[0];
 
-      // 2. Verificar si es una respuesta a la encuesta (un número del 1 al 5)
+      // 2. Si el cliente responde que "sí", "confirmo", "adelante" o "ok", pasar cita a Confirmada automáticamente
+      const cleanLower = text.trim().toLowerCase();
+      const esAprobacion = /^(s[ií]+|si|sii|siii|confirmar|confirmo|de acuerdo|adelante|ok|sale|va|perfecto|enterado)\b/i.test(cleanLower);
+
+      if (esAprobacion && ultimaCita && ultimaCita.estatus === "Por Confirmar") {
+        updateCitaInDb(ultimaCita.id, {
+          estatus: "Confirmada",
+        });
+        // Responder automáticamente de recibido
+        const { enviarMensajeChat } = await import("@/lib/chat/bridgeClient");
+        await enviarMensajeChat(
+          cleanPhone,
+          `¡Excelente, ${cliente.nombre.split(" ")[0]}! 🎉 Tu cita ha quedado *Confirmada*. Nuestro técnico asignado te notificará el día de tu servicio cuando vaya en camino a tu domicilio. ¡Muchas gracias por tu confianza! 🐾✨`
+        );
+      }
+
+      // 3. Verificar si es una respuesta a la encuesta (un número del 1 al 5)
       const cleanText = text.trim();
       const ratingMatch = cleanText.match(/^[1-5]$/);
 

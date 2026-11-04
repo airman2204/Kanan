@@ -25,6 +25,7 @@ interface ChatInboxProps {
   mensajes: MensajeAutomatizacion[];
   onTriggerMessage: (mensajeId: string) => void;
   onRefresh?: () => void;
+  onConfirmCita?: (citaId: string) => Promise<void>;
 }
 
 export function ChatInbox({
@@ -33,6 +34,7 @@ export function ChatInbox({
   mensajes,
   onTriggerMessage,
   onRefresh,
+  onConfirmCita,
 }: ChatInboxProps) {
   const [contactosLocales, setContactosLocales] = useState<Cliente[]>(clientes);
   const [selectedClienteId, setSelectedClienteId] = useState<string>(clientes[0]?.id || "");
@@ -373,6 +375,27 @@ export function ChatInbox({
                 </div>
 
                 <div className="flex items-center gap-2">
+                  {/* Botón rápido para Confirmar Cita desde el Chat */}
+                  {(() => {
+                    const citaPorConfirmar = activeCitas.find((c) => c.estatus === "Por Confirmar");
+                    if (citaPorConfirmar && onConfirmCita) {
+                      return (
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            await onConfirmCita(citaPorConfirmar.id);
+                            if (onRefresh) onRefresh();
+                          }}
+                          className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-heading font-bold text-xs flex items-center gap-1.5 shadow-sm transition active:scale-95"
+                        >
+                          <Check className="w-3.5 h-3.5" />
+                          <span>Confirmar Cita ({citaPorConfirmar.id})</span>
+                        </button>
+                      );
+                    }
+                    return null;
+                  })()}
+
                   <span className={`text-[11px] font-heading font-bold px-2.5 py-1 rounded-xl border ${
                     modoIaActivo
                       ? "bg-blue-50 text-[#1D71B5] border-blue-200"
