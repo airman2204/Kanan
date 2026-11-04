@@ -99,6 +99,37 @@ export async function despacharEventoEnCamino(
 }
 
 /**
+ * Determina el sticker específico según los ítems contratados de la cita
+ */
+function resolverStickerPorCategoria(cita: ServicioCita, tipo: "proceso" | "concluido"): string {
+  const items = cita.items_contratados || [];
+  const categorias = items.map((it) => (it.categoriaId || it.categoriaNombre || "").toLowerCase());
+
+  if (categorias.some((cat) => cat.includes("colchon"))) {
+    return tipo === "proceso"
+      ? "assets/stickers/kanan-proceso-colchones.jpg"
+      : "assets/stickers/kanan-concluido-colchones.jpg";
+  }
+
+  if (categorias.some((cat) => cat.includes("auto") || cat.includes("vestidura"))) {
+    return tipo === "proceso"
+      ? "assets/stickers/kanan-proceso-vestiduras.jpg"
+      : "assets/stickers/kanan-concluido-vestiduras.jpg";
+  }
+
+  if (categorias.some((cat) => cat.includes("tapete") || cat.includes("alfombra"))) {
+    return tipo === "proceso"
+      ? "assets/stickers/kanan-proceso-tapetes.jpg"
+      : "assets/stickers/kanan-concluido-tapetes.jpg";
+  }
+
+  // Por defecto: Salas y Sillas
+  return tipo === "proceso"
+    ? "assets/stickers/kanan-sticker-en-proceso.jpg"
+    : "assets/stickers/kanan-sticker-concluido.jpg";
+}
+
+/**
  * HITO 2: Notificación de inicio de servicio y tratamiento de desinfección
  */
 export async function despacharEventoInicioServicio(cita: ServicioCita, cliente: Cliente) {
@@ -114,8 +145,9 @@ export async function despacharEventoInicioServicio(cita: ServicioCita, cliente:
   ].join("\n");
 
   await enviarMensajeChat(cleanPhone, mensaje);
-  // Enviar sticker de servicio en proceso
-  await enviarStickerChat(cleanPhone, "assets/stickers/kanan-sticker-en-proceso.jpg");
+  // Enviar sticker específico según la categoría contratada
+  const stickerPath = resolverStickerPorCategoria(cita, "proceso");
+  await enviarStickerChat(cleanPhone, stickerPath);
 }
 
 /**
@@ -143,8 +175,9 @@ export async function despacharEventoFinServicio(
     .join("\n");
 
   await enviarMensajeChat(cleanPhone, mensajeEntrega);
-  // Enviar sticker de servicio concluido
-  await enviarStickerChat(cleanPhone, "assets/stickers/kanan-sticker-concluido.jpg");
+  // Enviar sticker específico de servicio concluido según la categoría
+  const stickerPath = resolverStickerPorCategoria(cita, "concluido");
+  await enviarStickerChat(cleanPhone, stickerPath);
 
   // 2. Tarjeta Digital de Lealtad (Si es cliente nuevo)
   if (esClienteNuevo) {
