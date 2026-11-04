@@ -610,6 +610,7 @@ export default function AdminPage() {
               citas={citas}
               mensajes={mensajes}
               onTriggerMessage={handleTriggerWhatsApp}
+              onRefresh={fetchCrmData}
             />
           )}
 

@@ -24,6 +24,7 @@ interface ChatInboxProps {
   citas: ServicioCita[];
   mensajes: MensajeAutomatizacion[];
   onTriggerMessage: (mensajeId: string) => void;
+  onRefresh?: () => void;
 }
 
 export function ChatInbox({
@@ -31,6 +32,7 @@ export function ChatInbox({
   citas,
   mensajes,
   onTriggerMessage,
+  onRefresh,
 }: ChatInboxProps) {
   const [contactosLocales, setContactosLocales] = useState<Cliente[]>(clientes);
   const [selectedClienteId, setSelectedClienteId] = useState<string>(clientes[0]?.id || "");
@@ -74,9 +76,12 @@ export function ChatInbox({
 
   useEffect(() => {
     consultarStatus();
-    const interval = setInterval(consultarStatus, 10000);
+    const interval = setInterval(() => {
+      consultarStatus();
+      if (onRefresh) onRefresh();
+    }, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [onRefresh]);
 
   const clientesFiltrados = contactosLocales.filter((c) => {
     if (!busqueda.trim()) return true;
@@ -114,6 +119,7 @@ export function ChatInbox({
         setInputMessage("");
         // Al enviar un mensaje manual, se conmuta a control humano para no interferir con la IA
         setModoIaActivo(false);
+        if (onRefresh) onRefresh();
       } else {
         // Fallback: abrir enlace web directo si el bridge local está desconectado
         const cleanPhone = activeCliente.whatsapp.replace(/\D/g, "");

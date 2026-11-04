@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { enviarMensajeChat } from "@/lib/chat/bridgeClient";
 import { getDatabase, saveDatabase } from "@/lib/db/store";
+import { supabase } from "@/lib/supabase";
 
 export async function POST(req: NextRequest) {
   try {
@@ -16,7 +17,7 @@ export async function POST(req: NextRequest) {
     // Guardar en el log de mensajes si hay cliente_id
     if (cliente_id) {
       const db = getDatabase();
-      db.mensajes_automatizacion.unshift({
+      const nuevoMsg = {
         id: `chat-${Date.now()}`,
         cita_id: "manual",
         cliente_id,
@@ -26,8 +27,13 @@ export async function POST(req: NextRequest) {
         contenido_mensaje: message,
         estatus_envio: sent ? "Enviado" : "Programado",
         fecha_programada: new Date().toISOString(),
-      });
+      };
+
+      db.mensajes_automatizacion.unshift(nuevoMsg as any);
       saveDatabase(db);
+
+      // Guardar también en Supabase para persistencia
+      await supabase.from("mensajes_automatizacion").insert(nuevoMsg);
     }
 
     return NextResponse.json({ ok: sent });
