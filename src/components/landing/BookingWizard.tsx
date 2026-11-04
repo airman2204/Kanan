@@ -195,6 +195,8 @@ export function BookingWizard({
   const [municipioAutollenado, setMunicipioAutollenado] = useState<MunicipioZMG | null>(null);
   const [colonia, setColonia] = useState("");
   const [coloniasDisponibles, setColoniasDisponibles] = useState<string[]>([]);
+  const [esOtraColonia, setEsOtraColonia] = useState(false);
+  const [otraColoniaTexto, setOtraColoniaTexto] = useState("");
   const [calle, setCalle] = useState("");
   const [numeroExterior, setNumeroExterior] = useState("");
   const [cotoInterior, setCotoInterior] = useState("");
@@ -237,6 +239,8 @@ export function BookingWizard({
       setMunicipioAutollenado(null);
       setColoniasDisponibles([]);
       setColonia("");
+      setEsOtraColonia(false);
+      setOtraColoniaTexto("");
       return;
     }
 
@@ -248,6 +252,8 @@ export function BookingWizard({
         setCpError(info.mensajeError || "Código postal fuera de nuestra zona de cobertura en Jalisco.");
         setColoniasDisponibles([]);
         setColonia("");
+        setEsOtraColonia(false);
+        setOtraColoniaTexto("");
       } else {
         setCpValido(true);
         if (info.municipio) {
@@ -257,9 +263,13 @@ export function BookingWizard({
         if (info.colonias && info.colonias.length > 0) {
           setColoniasDisponibles(info.colonias);
           setColonia(info.colonias[0]);
+          setEsOtraColonia(false);
+          setOtraColoniaTexto("");
         } else {
           setColoniasDisponibles([]);
           setColonia("");
+          setEsOtraColonia(false);
+          setOtraColoniaTexto("");
         }
       }
     }
@@ -899,24 +909,49 @@ export function BookingWizard({
                         </div>
 
                         {/* Colonia (Select si hay catálogo, o input libre - Desbloqueado solo con CP válido) */}
-                        <div className="sm:col-span-4">
+                        <div className="sm:col-span-4 space-y-2">
                           {!cpValido ? (
                             <div className="px-4 py-3 rounded-2xl bg-slate-100/80 border border-slate-200 text-xs text-slate-400 min-h-[46px] flex items-center gap-1.5">
                               <Lock className="w-3 h-3 text-slate-400" />
                               <span>Colonia (requiere C.P.)</span>
                             </div>
                           ) : coloniasDisponibles.length > 0 ? (
-                            <select
-                              value={colonia}
-                              onChange={(e) => setColonia(e.target.value)}
-                              className="w-full rounded-2xl border border-slate-300 bg-white px-3.5 py-3 text-xs sm:text-sm font-semibold text-kanan-deep focus:outline-none focus:ring-2 focus:ring-kanan-cyan"
-                            >
-                              {coloniasDisponibles.map((col) => (
-                                <option key={col} value={col}>
-                                  {col}
-                                </option>
-                              ))}
-                            </select>
+                            <>
+                              <select
+                                value={esOtraColonia ? "__OTRA__" : colonia}
+                                onChange={(e) => {
+                                  if (e.target.value === "__OTRA__") {
+                                    setEsOtraColonia(true);
+                                    setColonia(otraColoniaTexto.trim());
+                                  } else {
+                                    setEsOtraColonia(false);
+                                    setColonia(e.target.value);
+                                  }
+                                }}
+                                className="w-full rounded-2xl border border-slate-300 bg-white px-3.5 py-3 text-xs sm:text-sm font-semibold text-kanan-deep focus:outline-none focus:ring-2 focus:ring-kanan-cyan"
+                              >
+                                {coloniasDisponibles.map((col) => (
+                                  <option key={col} value={col}>
+                                    {col}
+                                  </option>
+                                ))}
+                                <option value="__OTRA__">➕ Otra colonia / Fraccionamiento...</option>
+                              </select>
+                              {esOtraColonia && (
+                                <input
+                                  type="text"
+                                  autoFocus
+                                  value={otraColoniaTexto}
+                                  onChange={(e) => {
+                                    const sanitized = sanitizeInput(e.target.value);
+                                    setOtraColoniaTexto(sanitized);
+                                    setColonia(sanitized);
+                                  }}
+                                  placeholder="Escribe el nombre de tu colonia o coto *"
+                                  className="w-full rounded-2xl border border-kanan-cyan bg-white px-3.5 py-2.5 text-xs sm:text-sm text-kanan-deep focus:outline-none focus:ring-2 focus:ring-kanan-cyan animate-fadeIn"
+                                />
+                              )}
+                            </>
                           ) : (
                             <input
                               type="text"
