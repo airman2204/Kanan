@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Zap, 
   MessageSquareText, 
@@ -14,12 +14,15 @@ import {
   Award,
   RotateCcw,
   Save,
-  Info,
   ZoomIn,
   ZoomOut,
-  Maximize2
+  Maximize2,
+  Plus,
+  Move,
+  Clock,
+  Layers
 } from 'lucide-react';
-import { FlowNode, AgentFlowConfig } from '@/types/agentFlow';
+import { FlowNode, FlowNodeType, AgentFlowConfig } from '@/types/agentFlow';
 import { getAgentFlowConfig, saveAgentFlowConfig, resetAgentFlowConfig } from '@/lib/chat/flowConfigStore';
 import { NodeEditorDrawer } from './NodeEditorDrawer';
 
@@ -37,7 +40,8 @@ const ICON_MAP: Record<string, React.ElementType> = {
   XCircle,
   Truck,
   Sparkles,
-  Award
+  Award,
+  Clock
 };
 
 export const AgentFlowCanvas: React.FC<AgentFlowCanvasProps> = ({ onNotify }) => {
@@ -45,6 +49,22 @@ export const AgentFlowCanvas: React.FC<AgentFlowCanvasProps> = ({ onNotify }) =>
   const [selectedNode, setSelectedNode] = useState<FlowNode | null>(null);
   const [zoomLevel, setZoomLevel] = useState(1);
   const [saveBanner, setSaveBanner] = useState(false);
+  const [mostrarModalNuevoNodo, setMostrarModalNuevoNodo] = useState(false);
+
+  // Estado del Panning (Arrastrar el lienzo infinito sin scrollbars)
+  const [panOffset, setPanOffset] = useState<{ x: number; y: number }>({ x: 30, y: 40 });
+  const [isPanning, setIsPanning] = useState(false);
+  const panStartRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const hasMovedRef = useRef(false);
+
+  // Arrastre individual de un nodo para reposicionarlo libremente
+  const [draggingNodeId, setDraggingNodeId] = useState<string | null>(null);
+  const dragNodeStartRef = useRef<{ mouseX: number; mouseY: number; nodeX: number; nodeY: number }>({
+    mouseX: 0,
+    mouseY: 0,
+    nodeX: 0,
+    nodeY: 0
+  });
 
   useEffect(() => {
     setConfig(getAgentFlowConfig());
@@ -54,8 +74,74 @@ export const AgentFlowCanvas: React.FC<AgentFlowCanvasProps> = ({ onNotify }) =>
 
   const nodes = Object.values(config.nodos);
 
+  // Manejadores de Panning del Lienzo (Arrastrar fondo con mouse o touch)
+  const handleMouseDownCanvas = (e: React.MouseEvent) => {
+    // Si se hace clic directo en el fondo del lienzo o svg
+    if ((e.target as HTMLElement).closest('.flow-node-card')) return;
+    setIsPanning(true);
+    hasMovedRef.current = false;
+    panStartRef.current = {
+      x: e.clientX - panOffset.x,
+      y: e.clientY - panOffset.y
+    };
+  };
+
+  const handleMouseMoveCanvas = (e: React.MouseEvent) => {
+    if (draggingNodeId && config) {
+      // Moviendo nodo individual
+      const dx = (e.clientX - dragNodeStartRef.current.mouseX) / zoomLevel;
+      const dy = (e.clientY - dragNodeStartRef.current.mouseY) / zoomLevel;
+      const node = config.nodos[draggingNodeId];
+      if (node) {
+        const newX = Math.round(dragNodeStartRef.current.nodeX + dx);
+        const newY = Math.round(dragNodeStartRef.current.nodeY + dy);
+        setConfig({
+          ...config,
+          nodos: {
+            ...config.nodos,
+            [draggingNodeId]: {
+              ...node,
+              x: Math.max(10, newX),
+              y: Math.max(10, newY)
+            }
+          }
+        });
+      }
+      return;
+    }
+
+    if (!isPanning) return;
+    hasMovedRef.current = true;
+    setPanOffset({
+      x: e.clientX - panStartRef.current.x,
+      y: e.clientY - panStartRef.current.y
+    });
+  };
+
+  const handleMouseUpCanvas = () => {
+    if (draggingNodeId && config) {
+      saveAgentFlowConfig(config);
+      setDraggingNodeId(null);
+    }
+    setIsPanning(false);
+  };
+
+  // Iniciar arrastre de nodo individual
+  const handleNodeMouseDown = (e: React.MouseEvent, node: FlowNode) => {
+    e.stopPropagation();
+    setDraggingNodeId(node.id);
+    dragNodeStartRef.current = {
+      mouseX: e.clientX,
+      mouseY: e.clientY,
+      nodeX: node.x,
+      nodeY: node.y
+    };
+  };
+
   const handleSelectNode = (node: FlowNode) => {
-    setSelectedNode(node);
+    if (!hasMovedRef.current) {
+      setSelectedNode(node);
+    }
   };
 
   const handleUpdateNode = (updatedNode: FlowNode) => {
@@ -73,8 +159,79 @@ export const AgentFlowCanvas: React.FC<AgentFlowCanvasProps> = ({ onNotify }) =>
     setSaveBanner(true);
     setTimeout(() => setSaveBanner(false), 3000);
     if (onNotify) {
-      onNotify(`Nodo "${updatedNode.titulo}" actualizado correctamente`, 'success');
+      onNotify(`Nodo "${updatedNode.titulo}" guardado`, 'success');
     }
+  };
+
+  const handleDeleteNode = (nodeId: string) => {
+    const updated = { ...config.nodos };
+    delete updated[nodeId];
+    // Desvincular de otros nodos
+    Object.keys(updated).forEach((key) => {
+      const n = updated[key];
+      if (n.siguienteNodoId) {
+        n.siguienteNodoId = n.siguienteNodoId.filter((id) => id !== nodeId);
+      }
+    });
+
+    const newConfig = { ...config, nodos: updated };
+    setConfig(newConfig);
+    saveAgentFlowConfig(newConfig);
+    setSelectedNode(null);
+    if (onNotify) onNotify('Nodo eliminado del flujo', 'info');
+  };
+
+  const handleAddNewNode = (tipo: FlowNodeType, titulo: string, conectarDesdeId?: string) => {
+    const id = `nodo_${Date.now()}`;
+    let nuevoX = 300;
+    let nuevoY = 200;
+
+    // Colocar a la derecha del último nodo o del seleccionado
+    if (conectarDesdeId && config.nodos[conectarDesdeId]) {
+      const origen = config.nodos[conectarDesdeId];
+      nuevoX = origen.x + 340;
+      nuevoY = origen.y;
+    } else if (nodes.length > 0) {
+      const last = nodes[nodes.length - 1];
+      nuevoX = last.x + 340;
+      nuevoY = last.y;
+    }
+
+    const nuevoNodo: FlowNode = {
+      id,
+      tipo,
+      titulo,
+      subtitulo: 'Nuevo paso configurable del flujo',
+      icono: tipo === 'whatsapp_message' ? 'MessageSquareText' : tipo === 'decision' ? 'GitFork' : 'UserCheck',
+      enabled: true,
+      x: nuevoX,
+      y: nuevoY,
+      delaySegundos: 2,
+      siguienteNodoId: [],
+      mensajePlantilla: tipo === 'whatsapp_message' ? 'Hola *{nombre}*, te informamos lo siguiente...' : undefined
+    };
+
+    const updatedNodos = {
+      ...config.nodos,
+      [id]: nuevoNodo
+    };
+
+    // Conectar si se seleccionó origen
+    if (conectarDesdeId && updatedNodos[conectarDesdeId]) {
+      const origen = updatedNodos[conectarDesdeId];
+      origen.siguienteNodoId = [...(origen.siguienteNodoId || []), id];
+    }
+
+    const newConfig: AgentFlowConfig = {
+      ...config,
+      nodos: updatedNodos
+    };
+
+    setConfig(newConfig);
+    saveAgentFlowConfig(newConfig);
+    setSelectedNode(nuevoNodo);
+    setMostrarModalNuevoNodo(false);
+    if (onNotify) onNotify(`Nuevo nodo "${titulo}" creado con éxito`, 'success');
   };
 
   const handleResetFlow = () => {
@@ -82,6 +239,7 @@ export const AgentFlowCanvas: React.FC<AgentFlowCanvasProps> = ({ onNotify }) =>
       const reset = resetAgentFlowConfig();
       setConfig(reset);
       setSelectedNode(null);
+      setPanOffset({ x: 30, y: 40 });
       if (onNotify) {
         onNotify('Flujo restablecido a los valores por defecto', 'info');
       }
@@ -121,13 +279,12 @@ export const AgentFlowCanvas: React.FC<AgentFlowCanvasProps> = ({ onNotify }) =>
         const targetNode = config.nodos[targetId];
         if (!targetNode) return null;
 
-        // Coordenadas relativas
-        const startX = sourceNode.x + 280; // extremo derecho de tarjeta (ancho ~280px)
-        const startY = sourceNode.y + 70;  // punto medio vertical
-        const endX = targetNode.x;         // extremo izquierdo de tarjeta destino
+        const startX = sourceNode.x + 280;
+        const startY = sourceNode.y + 70;
+        const endX = targetNode.x;
         const endY = targetNode.y + 70;
 
-        const deltaX = Math.max(endX - startX, 80);
+        const deltaX = Math.max(endX - startX, 60);
         const cp1X = startX + deltaX * 0.45;
         const cp1Y = startY;
         const cp2X = endX - deltaX * 0.45;
@@ -138,7 +295,6 @@ export const AgentFlowCanvas: React.FC<AgentFlowCanvasProps> = ({ onNotify }) =>
 
         return (
           <g key={`${sourceNode.id}->${targetId}`}>
-            {/* Cable de fondo grueso para sombra */}
             <path
               d={pathData}
               fill="none"
@@ -146,7 +302,6 @@ export const AgentFlowCanvas: React.FC<AgentFlowCanvasProps> = ({ onNotify }) =>
               strokeWidth="6"
               strokeLinecap="round"
             />
-            {/* Cable principal de datos */}
             <path
               d={pathData}
               fill="none"
@@ -155,7 +310,6 @@ export const AgentFlowCanvas: React.FC<AgentFlowCanvasProps> = ({ onNotify }) =>
               strokeDasharray={isActive ? 'none' : '4 4'}
               className={isActive ? 'transition-all duration-300' : 'opacity-50'}
             />
-            {/* Punto indicador de dirección */}
             <circle
               cx={(startX + endX) / 2}
               cy={(startY + endY) / 2}
@@ -179,22 +333,34 @@ export const AgentFlowCanvas: React.FC<AgentFlowCanvasProps> = ({ onNotify }) =>
               Flujo Autónomo Kanan Bot v{config.version}
             </span>
           </div>
-          <span className="hidden sm:inline-block text-[11px] text-slate-400 border-l border-slate-800 pl-3">
-            Haz clic en cualquier nodo para personalizar sus mensajes y stickers
-          </span>
+
+          {/* Botón para Añadir Nodo */}
+          <button
+            type="button"
+            onClick={() => setMostrarModalNuevoNodo(true)}
+            className="px-3 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-cyan-950/40 active:scale-95"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Agregar Nodo</span>
+          </button>
         </div>
 
-        {/* Controles de Vista y Acciones */}
+        {/* Controles de Vista y Panning */}
         <div className="flex items-center gap-2">
           {saveBanner && (
             <span className="text-xs text-emerald-400 font-semibold px-2 py-1 bg-emerald-500/10 rounded-md border border-emerald-500/30 flex items-center gap-1.5 animate-in fade-in">
-              <Save className="w-3.5 h-3.5" /> Cambios guardados
+              <Save className="w-3.5 h-3.5" /> Guardado
             </span>
           )}
 
+          <div className="hidden md:flex items-center gap-1 text-[11px] text-slate-400 bg-slate-800/60 px-2.5 py-1 rounded-lg border border-slate-700/60">
+            <Move className="w-3.5 h-3.5 text-cyan-400" />
+            <span>Arrastra para mover el lienzo o cada nodo libremente</span>
+          </div>
+
           <div className="flex items-center bg-slate-800/80 rounded-lg p-0.5 border border-slate-700">
             <button
-              onClick={() => setZoomLevel((z) => Math.max(0.6, z - 0.1))}
+              onClick={() => setZoomLevel((z) => Math.max(0.4, z - 0.1))}
               className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700 rounded transition-colors"
               title="Reducir zoom"
             >
@@ -204,16 +370,19 @@ export const AgentFlowCanvas: React.FC<AgentFlowCanvasProps> = ({ onNotify }) =>
               {Math.round(zoomLevel * 100)}%
             </span>
             <button
-              onClick={() => setZoomLevel((z) => Math.min(1.4, z + 0.1))}
+              onClick={() => setZoomLevel((z) => Math.min(1.5, z + 0.1))}
               className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700 rounded transition-colors"
               title="Aumentar zoom"
             >
               <ZoomIn className="w-4 h-4" />
             </button>
             <button
-              onClick={() => setZoomLevel(1)}
+              onClick={() => {
+                setZoomLevel(1);
+                setPanOffset({ x: 30, y: 40 });
+              }}
               className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700 rounded transition-colors ml-0.5"
-              title="Zoom normal 100%"
+              title="Centrar y zoom normal"
             >
               <Maximize2 className="w-3.5 h-3.5" />
             </button>
@@ -222,28 +391,33 @@ export const AgentFlowCanvas: React.FC<AgentFlowCanvasProps> = ({ onNotify }) =>
           <button
             onClick={handleResetFlow}
             className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white text-xs font-medium transition-all flex items-center gap-1.5"
-            title="Restablecer textos a valores originales"
+            title="Restablecer flujo a valores de fábrica"
           >
             <RotateCcw className="w-3.5 h-3.5 text-amber-400" />
-            <span className="hidden md:inline">Restablecer</span>
+            <span className="hidden lg:inline">Restablecer</span>
           </button>
         </div>
       </div>
 
-      {/* Área del Lienzo Interactivo con Patrón de Cuadrícula Dot-Grid */}
+      {/* Área del Lienzo Interactivo con Panning Arrastrable (Sin Barras de Scroll) */}
       <div 
-        className="relative flex-1 overflow-auto bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:24px_24px] p-6"
-        style={{ minHeight: '600px' }}
+        onMouseDown={handleMouseDownCanvas}
+        onMouseMove={handleMouseMoveCanvas}
+        onMouseUp={handleMouseUpCanvas}
+        onMouseLeave={handleMouseUpCanvas}
+        className={`relative flex-1 overflow-hidden select-none bg-[radial-gradient(#1e293b_1.5px,transparent_1.5px)] [background-size:28px_28px] ${
+          isPanning ? 'cursor-grabbing' : 'cursor-grab'
+        }`}
       >
         <div 
-          className="relative transition-transform duration-100 origin-top-left"
+          className="absolute origin-top-left transition-transform duration-75 ease-out will-change-transform"
           style={{ 
-            width: '3100px', 
-            height: '650px',
-            transform: `scale(${zoomLevel})`
+            width: '4500px', 
+            height: '2500px',
+            transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoomLevel})`
           }}
         >
-          {/* Capa de Cables SVG */}
+          {/* Capa de Cables SVG Bézier */}
           <svg className="absolute inset-0 w-full h-full pointer-events-none z-0">
             {renderConnections()}
           </svg>
@@ -253,18 +427,22 @@ export const AgentFlowCanvas: React.FC<AgentFlowCanvasProps> = ({ onNotify }) =>
             const IconComponent = ICON_MAP[n.icono] || MessageSquareText;
             const isSelected = selectedNode?.id === n.id;
             const isMessage = n.tipo === 'whatsapp_message';
+            const isDragging = draggingNodeId === n.id;
 
             return (
               <div
                 key={n.id}
+                onMouseDown={(e) => handleNodeMouseDown(e, n)}
                 onClick={() => handleSelectNode(n)}
                 style={{
                   transform: `translate(${n.x}px, ${n.y}px)`,
                   width: '280px'
                 }}
-                className={`absolute z-10 cursor-pointer rounded-2xl border transition-all duration-200 group ${
-                  isSelected
-                    ? 'border-cyan-400 ring-2 ring-cyan-500/40 bg-slate-900 shadow-2xl shadow-cyan-950/60 scale-[1.02]'
+                className={`flow-node-card absolute z-10 cursor-move rounded-2xl border transition-all duration-150 group ${
+                  isDragging
+                    ? 'shadow-2xl shadow-cyan-500/50 scale-[1.04] ring-2 ring-cyan-400 bg-slate-900 border-cyan-400 z-30'
+                    : isSelected
+                    ? 'border-cyan-400 ring-2 ring-cyan-500/40 bg-slate-900 shadow-2xl shadow-cyan-950/60 scale-[1.02] z-20'
                     : n.enabled
                     ? 'border-slate-800 hover:border-slate-600 bg-slate-900/95 hover:bg-slate-900 shadow-xl'
                     : 'border-slate-800/60 bg-slate-950/80 opacity-60 hover:opacity-80'
@@ -321,18 +499,16 @@ export const AgentFlowCanvas: React.FC<AgentFlowCanvasProps> = ({ onNotify }) =>
                   {/* Delay Antispam */}
                   {isMessage && (
                     <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1">
-                      <span>Retardo antispam:</span>
+                      <span>Retardo:</span>
                       <span className="font-mono text-amber-400 font-semibold">{n.delaySegundos || 2}s</span>
                     </div>
                   )}
                 </div>
 
                 {/* Puertos de Conexión estilo n8n */}
-                {/* Puerto de Entrada (Izquierda) */}
                 {n.tipo !== 'trigger' && (
                   <div className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-slate-900 border-2 border-cyan-400 shadow group-hover:scale-125 transition-transform" />
                 )}
-                {/* Puerto de Salida (Derecha) */}
                 {n.siguienteNodoId && n.siguienteNodoId.length > 0 && (
                   <div className="absolute -right-1.5 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-slate-900 border-2 border-cyan-400 shadow group-hover:scale-125 transition-transform" />
                 )}
@@ -342,11 +518,86 @@ export const AgentFlowCanvas: React.FC<AgentFlowCanvasProps> = ({ onNotify }) =>
         </div>
       </div>
 
+      {/* Modal para Crear Nuevo Nodo */}
+      {mostrarModalNuevoNodo && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-700 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4 animate-in zoom-in-95">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div className="flex items-center gap-2">
+                <Plus className="w-5 h-5 text-cyan-400" />
+                <h3 className="text-base font-bold text-white">Añadir Nuevo Nodo al Flujo</h3>
+              </div>
+              <button 
+                onClick={() => setMostrarModalNuevoNodo(false)}
+                className="text-slate-400 hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Selecciona el tipo de nodo que deseas incorporar a la secuencia del agente:
+            </p>
+
+            <div className="grid grid-cols-1 gap-2.5">
+              <button
+                type="button"
+                onClick={() => handleAddNewNode('whatsapp_message', 'Nuevo Mensaje WhatsApp', selectedNode?.id)}
+                className="p-3 rounded-xl bg-slate-800/80 hover:bg-cyan-950/60 border border-slate-700 hover:border-cyan-500 text-left transition flex items-center gap-3 group"
+              >
+                <div className="p-2 rounded-lg bg-emerald-500/20 text-emerald-400 group-hover:scale-110 transition">
+                  <MessageSquareText className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-white">Mensaje de WhatsApp con Sticker</h4>
+                  <p className="text-[11px] text-slate-400">Envía un texto personalizado con variables y sticker a tu cliente.</p>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleAddNewNode('decision', 'Nueva Decisión / Filtro', selectedNode?.id)}
+                className="p-3 rounded-xl bg-slate-800/80 hover:bg-cyan-950/60 border border-slate-700 hover:border-cyan-500 text-left transition flex items-center gap-3 group"
+              >
+                <div className="p-2 rounded-lg bg-indigo-500/20 text-indigo-400 group-hover:scale-110 transition">
+                  <GitFork className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-white">Bifurcación / Decisión Lógica</h4>
+                  <p className="text-[11px] text-slate-400">Divide el flujo según la respuesta del cliente (Sí / No / Opción).</p>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleAddNewNode('admin_action', 'Paso Operativo Admin', selectedNode?.id)}
+                className="p-3 rounded-xl bg-slate-800/80 hover:bg-cyan-950/60 border border-slate-700 hover:border-cyan-500 text-left transition flex items-center gap-3 group"
+              >
+                <div className="p-2 rounded-lg bg-blue-500/20 text-blue-400 group-hover:scale-110 transition">
+                  <UserCheck className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-white">Acción de Administrador o Técnico</h4>
+                  <p className="text-[11px] text-slate-400">Espera validación manual antes de continuar el flujo.</p>
+                </div>
+              </button>
+            </div>
+
+            {selectedNode && (
+              <p className="text-[11px] text-cyan-400/90 bg-cyan-950/40 p-2.5 rounded-xl border border-cyan-800/40">
+                🔗 Se conectará automáticamente después del nodo: <strong>{selectedNode.titulo}</strong>
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Drawer Lateral de Edición de Nodo */}
       <NodeEditorDrawer
         node={selectedNode}
         onClose={() => setSelectedNode(null)}
         onSave={handleUpdateNode}
+        onDelete={handleDeleteNode}
         onSendTestMessage={handleTestMessage}
         testPhoneDefault={config.telefonoPruebas}
       />

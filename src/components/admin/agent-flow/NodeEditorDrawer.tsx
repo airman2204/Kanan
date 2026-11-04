@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   X, 
   Send, 
@@ -12,7 +12,8 @@ import {
   Smartphone, 
   Check, 
   Sparkles,
-  Info
+  Info,
+  Trash2
 } from 'lucide-react';
 import { FlowNode, VARIABLES_SISTEMA, STICKERS_DISPONIBLES } from '@/types/agentFlow';
 
@@ -20,6 +21,7 @@ interface NodeEditorDrawerProps {
   node: FlowNode | null;
   onClose: () => void;
   onSave: (updatedNode: FlowNode) => void;
+  onDelete?: (nodeId: string) => void;
   onSendTestMessage?: (node: FlowNode, phone: string) => void;
   testPhoneDefault?: string;
 }
@@ -28,6 +30,7 @@ export const NodeEditorDrawer: React.FC<NodeEditorDrawerProps> = ({
   node,
   onClose,
   onSave,
+  onDelete,
   onSendTestMessage,
   testPhoneDefault = '4421234567'
 }) => {
@@ -37,6 +40,12 @@ export const NodeEditorDrawer: React.FC<NodeEditorDrawerProps> = ({
   const [testPhone, setTestPhone] = useState(testPhoneDefault);
   const [testSent, setTestSent] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+
+  useEffect(() => {
+    if (node) {
+      setFormData({ ...node });
+    }
+  }, [node]);
 
   // Reemplazo de variables de prueba para la previsualización del celular
   const renderPreviewMessage = (text?: string) => {
@@ -360,13 +369,30 @@ export const NodeEditorDrawer: React.FC<NodeEditorDrawerProps> = ({
 
       {/* Footer Acciones */}
       <div className="p-4 sm:p-5 border-t border-slate-800 bg-slate-900/95 backdrop-blur flex items-center justify-between">
-        <button
-          type="button"
-          onClick={onClose}
-          className="px-4 py-2.5 rounded-xl border border-slate-700 text-slate-300 hover:text-white hover:bg-slate-800 text-xs font-semibold transition-all"
-        >
-          Cancelar
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-3.5 py-2.5 rounded-xl border border-slate-700 text-slate-300 hover:text-white hover:bg-slate-800 text-xs font-semibold transition-all"
+          >
+            Cerrar
+          </button>
+          {onDelete && formData.tipo !== 'trigger' && (
+            <button
+              type="button"
+              onClick={() => {
+                if (confirm(`¿Eliminar el nodo "${formData.titulo}"?`)) {
+                  onDelete(formData.id);
+                }
+              }}
+              className="px-3 py-2.5 rounded-xl border border-rose-900/40 text-rose-400 hover:bg-rose-950/40 text-xs font-semibold transition-all flex items-center gap-1.5"
+              title="Eliminar este nodo"
+            >
+              <Trash2 className="w-4 h-4" />
+              <span className="hidden sm:inline">Eliminar</span>
+            </button>
+          )}
+        </div>
 
         <button
           type="button"
