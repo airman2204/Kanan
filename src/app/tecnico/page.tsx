@@ -556,6 +556,30 @@ export default function TecnicoPage() {
 
         {/* CUERPO DEL SERVICIO SELECCIONADO */}
         <div className="flex-1 bg-[#F4F7F9] flex flex-col">
+          {/* BANNER DE ALERTA SI LA CITA FUE CANCELADA POR EL CLIENTE */}
+          {citaActual?.estatus === "Cancelada" && (
+            <div className="m-4 mb-0 p-4 rounded-3xl bg-rose-50 border-2 border-rose-300 shadow-md space-y-2 animate-fadeIn">
+              <div className="flex items-center gap-2.5">
+                <span className="w-8 h-8 rounded-2xl bg-rose-500 text-white flex items-center justify-center font-bold text-base shadow-sm">
+                  ⚠️
+                </span>
+                <div>
+                  <h4 className="font-heading font-extrabold text-sm text-rose-950">
+                    SERVICIO CANCELADO POR EL CLIENTE
+                  </h4>
+                  <p className="text-[11px] text-rose-800 font-medium">
+                    El cliente canceló con anticipación vía WhatsApp. Esta parada queda liberada.
+                  </p>
+                </div>
+              </div>
+              {citaActual.cancel_reason && (
+                <div className="p-2.5 rounded-xl bg-white/80 border border-rose-200 text-[11px] text-rose-900 font-mono">
+                  {citaActual.cancel_reason}
+                </div>
+              )}
+            </div>
+          )}
+
           {citaActual ? (
             <div className="p-4 space-y-4">
 

@@ -1048,7 +1048,7 @@ export function CalendarCitasView({
                   const cli = clientes.find((c) => c.id === selectedCitaDetalle.cliente_id);
                   const piezasStr = (selectedCitaDetalle.items_contratados || []).map((it) => `${it.cantidad}x ${it.piezaNombre}`).join(", ");
                   const precioFinal = montoCotizadoInput !== "" ? montoCotizadoInput : (selectedCitaDetalle.monto_total || 0);
-                  const msgWhats = `¡Hola ${cli?.nombre || "Cliente"}! 👋 En Kanan revisamos las fotos de tu servicio (${piezasStr}). Con gusto te confirmamos tu cotización por $${precioFinal} MXN para el día ${selectedCitaDetalle.fecha} (${selectedCitaDetalle.turno}). ¿Deseas confirmar la cita? 🐾✨`;
+                  const msgWhats = `¡Hola ${cli?.nombre || "Cliente"}! 👋 En Kanan revisamos los detalles de tu servicio (${piezasStr}). Con gusto te confirmamos tu cotización por *$${precioFinal} MXN* para el día *${selectedCitaDetalle.fecha}* (${selectedCitaDetalle.turno}).\n\n¿Deseas confirmar tu cita? Responde a este chat con un *"Sí"* para apartar tu lugar o *"No"* si prefieres cancelarla. 🐾✨`;
 
                   return (
                     <div className="pt-2 border-t border-slate-200 space-y-2">

@@ -668,38 +668,31 @@ export function BookingWizard({
                   </ul>
                 </div>
 
-                <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-emerald-900 text-xs sm:text-sm flex items-start sm:items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 font-bold">
+                <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-5 text-emerald-900 text-xs sm:text-sm flex items-start sm:items-center gap-3">
+                  <div className="w-9 h-9 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 font-bold shadow-xs">
                     ✓
                   </div>
-                  <div className="text-left">
-                    <p className="font-heading font-bold text-emerald-950">
-                      ¡Confirmación enviada automáticamente a tu WhatsApp!
+                  <div className="text-left space-y-1">
+                    <p className="font-heading font-bold text-emerald-950 text-sm">
+                      ¡Hemos recibido tu cotización con éxito! 📱
                     </p>
-                    <p className="text-[12px] text-emerald-800 mt-0.5">
-                      Ya mandamos los datos de tu folio al número registrado. Nuestro equipo revisará tus piezas para enviarte la cotización.
+                    <p className="text-[12px] text-emerald-800 leading-relaxed">
+                      Enviamos los detalles de tu servicio a tu WhatsApp. Nuestro equipo revisará tus fotos para enviarte el precio formal.
+                    </p>
+                    <p className="text-[11px] text-emerald-700 font-medium">
+                      ℹ️ Cuentas con hasta 2 horas antes de tu horario programado para realizar cambios o cancelar sin penalización.
                     </p>
                   </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
-                  <a
-                    href={bookingResult.whatsappUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#1fb855] text-white font-heading font-bold text-sm sm:text-base px-6 py-4 rounded-2xl shadow-lg transition-all"
-                  >
-                    <MessageCircle className="w-5 h-5" />
-                    <span>Abrir Chat con Kanan (Opcional)</span>
-                  </a>
-
+                <div className="flex justify-center pt-2">
                   <button
                     type="button"
                     onClick={() => {
                       setBookingResult(null);
                       setStep(1);
                     }}
-                    className="inline-flex items-center justify-center px-5 py-4 rounded-2xl bg-kanan-ice hover:bg-slate-200 text-kanan-deep font-semibold text-sm transition-colors"
+                    className="inline-flex items-center justify-center px-6 py-3.5 rounded-2xl bg-kanan-ice hover:bg-slate-200 text-kanan-deep font-semibold text-sm transition-colors"
                   >
                     Agendar otro servicio
                   </button>

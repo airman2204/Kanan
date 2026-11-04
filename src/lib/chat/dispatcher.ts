@@ -50,7 +50,7 @@ export async function despacharConfirmacionReservaAutomatica(
 
   const mensaje = [
     `¡Hola ${primerNombre}! 👋🐾`,
-    `¡Recibimos con éxito tu solicitud de servicio en *Kanan Limpieza Especializada*!`,
+    `Hemos recibido tu solicitud de cotización en *Kanan Servicios de Limpieza*.`,
     ``,
     `📋 *Folio de Servicio:* ${cita.id}`,
     `📅 *Fecha solicitada:* ${cita.fecha} (${cita.turno})`,
@@ -60,10 +60,12 @@ export async function despacharConfirmacionReservaAutomatica(
     itemsTexto || "• Servicios varios",
     ``,
     `✨ *¿Qué sigue?*`,
-    `1. Nuestro equipo revisará las fotos que adjuntaste para preparar la fórmula desmanchadora ideal.`,
-    `2. Te enviaremos por aquí la confirmación y cotización final sin costo por adelantado.`,
+    `Nuestro equipo administrativo está revisando las fotos y detalles de tus muebles para enviarte la cotización formal por este chat.`,
     ``,
-    `Si necesitas agregar alguna otra pieza o cambiar algún dato, solo responde a este mensaje. ¡Gracias por confiar en Kanan! 💙`,
+    `ℹ️ *Política de cambios y cancelación:*`,
+    `Cuentas con hasta *2 horas antes* del horario de tu cita para cancelar o reprogramar sin penalización respondiendo a este chat.`,
+    ``,
+    `¡Muchas gracias por tu preferencia! 💙✨`,
   ].join("\n");
 
   return await enviarMensajeChat(cleanPhone, mensaje);

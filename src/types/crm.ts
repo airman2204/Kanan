@@ -117,6 +117,7 @@ export interface ServicioCita {
   created_at: string;
   cancelled_at?: string;
   cancel_reason?: string;
+  cancelada_por_cliente?: boolean;
 }
 
 export interface ChatMessage {

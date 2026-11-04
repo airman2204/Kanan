@@ -612,6 +612,9 @@ export function updateCitaInDb(
     calificacion_estrellas?: number | null;
     comentarios_encuesta?: string;
     tarjeta_enviada?: boolean;
+    cancelled_at?: string;
+    cancel_reason?: string;
+    cancelada_por_cliente?: boolean;
   }
 ): ServicioCita | null {
   const db = getDatabase();
@@ -643,6 +646,9 @@ export function updateCitaInDb(
   if (updates.calificacion_estrellas !== undefined) cita.calificacion_estrellas = updates.calificacion_estrellas;
   if (updates.comentarios_encuesta !== undefined) cita.comentarios_encuesta = updates.comentarios_encuesta;
   if (updates.tarjeta_enviada !== undefined) cita.tarjeta_enviada = updates.tarjeta_enviada;
+  if (updates.cancelled_at !== undefined) cita.cancelled_at = updates.cancelled_at;
+  if (updates.cancel_reason !== undefined) cita.cancel_reason = updates.cancel_reason;
+  if (updates.cancelada_por_cliente !== undefined) cita.cancelada_por_cliente = updates.cancelada_por_cliente;
 
   if (updates.monto_total !== undefined) {
     cita.monto_total = updates.monto_total;

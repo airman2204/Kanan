@@ -28,23 +28,85 @@ export async function POST(req: NextRequest) {
         .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
       const ultimaCita = citasCliente[0];
 
-      // 2. Si el cliente responde que "sí", "confirmo", "adelante" o "ok", pasar cita a Confirmada automáticamente
+      // 2. DETECCIÓN INTELIGENTE DE RESPUESTAS (Aprobación, Rechazo y Cancelación con Política 2hrs)
       const cleanLower = text.trim().toLowerCase();
+      const primerNombre = cliente.nombre.split(" ")[0];
+
+      // A) Detección de Aprobación (Confirmar Cita)
       const esAprobacion = /^(s[ií]+|si|sii|siii|confirmar|confirmo|de acuerdo|adelante|ok|sale|va|perfecto|enterado)\b/i.test(cleanLower);
 
       if (esAprobacion && ultimaCita && ultimaCita.estatus === "Por Confirmar") {
         updateCitaInDb(ultimaCita.id, {
           estatus: "Confirmada",
         });
-        // Responder automáticamente de recibido
         const { enviarMensajeChat } = await import("@/lib/chat/bridgeClient");
         await enviarMensajeChat(
           cleanPhone,
-          `¡Excelente, ${cliente.nombre.split(" ")[0]}! 🎉 Tu cita ha quedado *Confirmada*. Nuestro técnico asignado te notificará el día de tu servicio cuando vaya en camino a tu domicilio. ¡Muchas gracias por tu confianza! 🐾✨`
+          `¡Excelente, ${primerNombre}! 🎉 Tu cita ha quedado *Confirmada* con éxito.\n\nNuestro técnico asignado te notificará el día de tu servicio en cuanto vaya en camino a tu domicilio.\n\nRecuerda que si necesitas reprogramar o cancelar, cuentas con hasta *2 horas antes* del horario de tu servicio para avisarnos por este medio. ¡Muchas gracias por tu confianza! 🐾✨`
         );
       }
 
-      // 3. Verificar si es una respuesta a la encuesta (un número del 1 al 5)
+      // B) Detección de Rechazo Inicial (Cliente dice "No" a la cotización)
+      const esRechazo = /^(no|nop|no gracias|cancelar cotizacion|ya no)\b/i.test(cleanLower);
+      if (esRechazo && ultimaCita && ultimaCita.estatus === "Por Confirmar") {
+        updateCitaInDb(ultimaCita.id, {
+          estatus: "Cancelada",
+          cancelled_at: new Date().toISOString(),
+          cancel_reason: "Rechazó cotización por WhatsApp",
+          cancelada_por_cliente: true,
+        });
+        const { enviarMensajeChat } = await import("@/lib/chat/bridgeClient");
+        await enviarMensajeChat(
+          cleanPhone,
+          `Entendido, ${primerNombre}. Hemos cancelado tu solicitud de servicio.\n\nSi en el futuro requieres de nuestros servicios de limpieza y desinfección, con gusto estaremos a tus órdenes por este mismo chat. ¡Que tengas un excelente día! 🐾✨`
+        );
+      }
+
+      // C) Detección de Cancelación (Cita ya Confirmada o En Ruta)
+      const esCancelacion = /(cancelar|cancelo|cancela mi cita|no voy a poder|reprogramar|posponer)/i.test(cleanLower);
+      if (esCancelacion && ultimaCita && (ultimaCita.estatus === "Confirmada" || ultimaCita.estatus === "En Ruta")) {
+        let horaCitaMs = 0;
+        try {
+          let horaStr = "09:00";
+          if (ultimaCita.hora_especifica) {
+            horaStr = ultimaCita.hora_especifica;
+          } else if (ultimaCita.turno.includes("Vespertino")) {
+            horaStr = "14:00";
+          }
+          const fechaCitaObj = new Date(`${ultimaCita.fecha}T${horaStr}:00`);
+          horaCitaMs = fechaCitaObj.getTime();
+        } catch {
+          horaCitaMs = 0;
+        }
+
+        const ahoraMs = Date.now();
+        const diffHoras = (horaCitaMs - ahoraMs) / (1000 * 60 * 60);
+
+        // Si el técnico ya va "En Ruta" o faltan menos de 2 horas: BLOQUEO DE CANCELACIÓN
+        if (ultimaCita.estatus === "En Ruta" || (horaCitaMs > 0 && diffHoras < 2)) {
+          const { enviarMensajeChat } = await import("@/lib/chat/bridgeClient");
+          await enviarMensajeChat(
+            cleanPhone,
+            `Hola ${primerNombre}. ⚠️ Te informamos que por políticas de logística operativa, *no es posible cancelar tu servicio*, debido a que nos encontramos a menos de 2 horas de tu horario programado o nuestra unidad móvil ya está en camino a tu domicilio.\n\nPara cualquier duda o aclaración especial, nuestro equipo de soporte se pondrá en contacto contigo a la brevedad.`
+          );
+        } else {
+          // Cancelación VÁLIDA (con más de 2 horas de anticipación)
+          updateCitaInDb(ultimaCita.id, {
+            estatus: "Cancelada",
+            cancelled_at: new Date().toISOString(),
+            cancel_reason: `Cancelado por el cliente vía WhatsApp: "${text}"`,
+            cancelada_por_cliente: true,
+          });
+
+          const { enviarMensajeChat } = await import("@/lib/chat/bridgeClient");
+          await enviarMensajeChat(
+            cleanPhone,
+            `Tu cita con folio *${ultimaCita.id}* ha sido *Cancelada con éxito*, ${primerNombre}. 🤝\n\nMuchas gracias por avisarnos con la anticipación debida (+2 hrs). Esperamos poder atenderte en una próxima ocasión. ¡Lindo día! 🐾`
+          );
+        }
+      }
+
+      // 5. Verificar si es una respuesta a la encuesta (un número del 1 al 5)
       const cleanText = text.trim();
       const ratingMatch = cleanText.match(/^[1-5]$/);
 
@@ -59,7 +121,7 @@ export async function POST(req: NextRequest) {
         await procesarRespuestaEncuesta(cliente, ultimaCita, rating);
       }
 
-      // 3. Registrar el mensaje recibido en el historial de automatizaciones para visualización
+      // 6. Registrar el mensaje recibido en el historial de automatizaciones para visualización
       const nuevoMsg = {
         id: `in-${Date.now()}`,
         cita_id: ultimaCita ? ultimaCita.id : "sin_cita",
