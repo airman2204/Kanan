@@ -1,5 +1,7 @@
 # dependencies
 /node_modules
+chat-bridge/node_modules/
+chat-bridge/auth_info_baileys/
 /.pnp
 .pnp.js
 
