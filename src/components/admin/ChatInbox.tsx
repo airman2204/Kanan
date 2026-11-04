@@ -32,11 +32,68 @@ export function ChatInbox({
   mensajes,
   onTriggerMessage,
 }: ChatInboxProps) {
+  const [contactosLocales, setContactosLocales] = useState<Cliente[]>(clientes);
   const [selectedClienteId, setSelectedClienteId] = useState<string>(clientes[0]?.id || "");
   const [inputMessage, setInputMessage] = useState("");
   const [busqueda, setBusqueda] = useState("");
   const [modoIaActivo, setModoIaActivo] = useState(true);
   const [enviando, setEnviando] = useState(false);
+
+  // Modal para iniciar un Chat de Prueba con tu propio celular
+  const [mostrarModalNuevoChat, setMostrarModalNuevoChat] = useState(false);
+  const [nuevoNombre, setNuevoNombre] = useState("Mi Teléfono de Prueba");
+  const [nuevoTelefono, setNuevoTelefono] = useState("");
+
+  // Sincronizar clientes cuando cambie la prop
+  useEffect(() => {
+    setContactosLocales(clientes);
+    if (!selectedClienteId && clientes.length > 0) {
+      setSelectedClienteId(clientes[0].id);
+    }
+  }, [clientes]);
+
+  const handleCrearChatPrueba = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!nuevoTelefono.trim()) return;
+    const cleanPhone = nuevoTelefono.replace(/\D/g, "");
+    const nombreFinal = nuevoNombre.trim() || "Mi WhatsApp de Prueba";
+
+    const nuevoCliente: Cliente = {
+      id: `cli-test-${Date.now()}`,
+      nombre: `🧪 ${nombreFinal}`,
+      whatsapp: cleanPhone,
+      direccion: "Domicilio de Prueba, Guadalajara",
+      municipio: "Guadalajara",
+      mascotas: true,
+      notas_especiales: "Cliente de prueba interno",
+      historico_gasto: 0,
+      fecha_registro: new Date().toISOString(),
+    };
+
+    try {
+      await fetch("/api/crm", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "CREATE_CLIENTE_MANUAL",
+          cliente: {
+            nombre: nuevoCliente.nombre,
+            whatsapp: cleanPhone,
+            direccion: nuevoCliente.direccion,
+            municipio: "Guadalajara",
+            mascotas: true,
+          },
+        }),
+      });
+    } catch {
+      // continuar
+    }
+
+    setContactosLocales((prev) => [nuevoCliente, ...prev.filter((c) => c.whatsapp !== cleanPhone)]);
+    setSelectedClienteId(nuevoCliente.id);
+    setMostrarModalNuevoChat(false);
+    setNuevoTelefono("");
+  };
 
   // Estado del bridge
   const [bridgeStatus, setBridgeStatus] = useState<"connected" | "qr_ready" | "connecting" | "disconnected">("connecting");
@@ -69,7 +126,7 @@ export function ChatInbox({
     return () => clearInterval(interval);
   }, []);
 
-  const clientesFiltrados = clientes.filter((c) => {
+  const clientesFiltrados = contactosLocales.filter((c) => {
     if (!busqueda.trim()) return true;
     const q = busqueda.toLowerCase();
     return (
@@ -79,7 +136,7 @@ export function ChatInbox({
     );
   });
 
-  const activeCliente = clientes.find((c) => c.id === selectedClienteId) || clientes[0];
+  const activeCliente = contactosLocales.find((c) => c.id === selectedClienteId) || contactosLocales[0];
   const activeCitas = citas.filter((c) => c.cliente_id === activeCliente?.id);
   const activeMensajes = mensajes.filter((m) => m.cliente_id === activeCliente?.id);
 
@@ -267,15 +324,88 @@ export function ChatInbox({
         </div>
       )}
 
+      {/* Modal para Iniciar Chat de Prueba con tu propio número */}
+      {mostrarModalNuevoChat && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fadeIn">
+          <form
+            onSubmit={handleCrearChatPrueba}
+            className="bg-white rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl border border-slate-200"
+          >
+            <div className="space-y-1">
+              <h3 className="font-heading font-extrabold text-base text-slate-800 flex items-center gap-2">
+                <span>🧪</span> Probar Chat con mi Número
+              </h3>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Ingresa tu número de WhatsApp para chatear contigo mismo desde el admin sin molestar a clientes reales.
+              </p>
+            </div>
+
+            <div className="space-y-2.5">
+              <div>
+                <label className="block text-[11px] font-bold text-slate-600 mb-1">Nombre o Etiqueta</label>
+                <input
+                  type="text"
+                  value={nuevoNombre}
+                  onChange={(e) => setNuevoNombre(e.target.value)}
+                  placeholder="Ej. Mi Celular de Prueba"
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#1D71B5]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-slate-600 mb-1">Tu WhatsApp (10 dígitos) *</label>
+                <input
+                  type="tel"
+                  required
+                  value={nuevoTelefono}
+                  onChange={(e) => setNuevoTelefono(e.target.value)}
+                  placeholder="Ej. 3312345678"
+                  className="w-full px-3 py-2 text-xs font-bold rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#1D71B5]"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => setMostrarModalNuevoChat(false)}
+                className="flex-1 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-heading font-bold text-slate-700"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                className="flex-1 py-2 rounded-xl bg-[#1D71B5] hover:bg-[#175c94] text-xs font-heading font-bold text-white shadow-xs"
+              >
+                Abrir Chat
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
       {/* Bandeja de Chat Principal */}
       <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-xs h-[640px] flex flex-col md:flex-row">
         {/* Columna Izquierda: Lista de Conversaciones */}
         <div className="w-full md:w-80 lg:w-96 border-r border-slate-200 flex flex-col bg-[#F8FAFC]">
-          <div className="p-3.5 border-b border-slate-200 bg-white space-y-2">
-            <h2 className="font-heading font-extrabold text-sm text-[#355581] flex items-center justify-between">
-              <span>Bandeja de Conversaciones</span>
-              <span className="text-[11px] font-bold text-slate-400">{clientes.length} contactos</span>
-            </h2>
+          <div className="p-3.5 border-b border-slate-200 bg-white space-y-2.5">
+            <div className="flex items-center justify-between">
+              <h2 className="font-heading font-extrabold text-sm text-[#355581]">
+                Bandeja de Conversaciones
+              </h2>
+              <span className="text-[11px] font-bold text-slate-400">{contactosLocales.length}</span>
+            </div>
+
+            {/* Botón Destacado para Probar con tu propio número sin tocar clientes */}
+            <button
+              type="button"
+              onClick={() => setMostrarModalNuevoChat(true)}
+              className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-purple-50 to-indigo-50 hover:from-purple-100 hover:to-indigo-100 border border-purple-200 text-purple-800 text-xs font-heading font-bold transition flex items-center justify-center gap-1.5 shadow-2xs active:scale-[0.98]"
+            >
+              <span>🧪</span>
+              <span>Probar con mi propio número</span>
+            </button>
+
             <div className="relative">
               <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
               <input
@@ -367,6 +497,14 @@ export function ChatInbox({
 
               {/* Hilo de Mensajes */}
               <div className="flex-1 p-4 overflow-y-auto space-y-3 bg-[#F8FAFC]">
+                {activeCliente.nombre.includes("🧪") && (
+                  <div className="p-3 bg-purple-50 border border-purple-200 rounded-2xl text-purple-900 text-xs flex items-center gap-2">
+                    <span className="text-base">🧪</span>
+                    <p className="font-medium">
+                      <strong>Canal de Prueba Seguro:</strong> Estás conectado a tu propio WhatsApp ({activeCliente.whatsapp}). Puedes enviar mensajes libremente para verificar el chat.
+                    </p>
+                  </div>
+                )}
                 {activeMensajes.length === 0 ? (
                   <div className="h-full flex flex-col items-center justify-center text-center p-6 text-slate-400 space-y-2">
                     <MessageCircle className="w-8 h-8 text-slate-300" />
