@@ -56,6 +56,7 @@ export const AgentFlowCanvas: React.FC<AgentFlowCanvasProps> = ({ onNotify }) =>
   const [isPanning, setIsPanning] = useState(false);
   const panStartRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const hasMovedRef = useRef(false);
+  const nodeDragMovedRef = useRef(false);
 
   // Arrastre individual de un nodo para reposicionarlo libremente
   const [draggingNodeId, setDraggingNodeId] = useState<string | null>(null);
@@ -91,8 +92,11 @@ export const AgentFlowCanvas: React.FC<AgentFlowCanvasProps> = ({ onNotify }) =>
       // Moviendo nodo individual
       const dx = (e.clientX - dragNodeStartRef.current.mouseX) / zoomLevel;
       const dy = (e.clientY - dragNodeStartRef.current.mouseY) / zoomLevel;
+      if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
+        nodeDragMovedRef.current = true;
+      }
       const node = config.nodos[draggingNodeId];
-      if (node) {
+      if (node && nodeDragMovedRef.current) {
         const newX = Math.round(dragNodeStartRef.current.nodeX + dx);
         const newY = Math.round(dragNodeStartRef.current.nodeY + dy);
         setConfig({
@@ -111,7 +115,11 @@ export const AgentFlowCanvas: React.FC<AgentFlowCanvasProps> = ({ onNotify }) =>
     }
 
     if (!isPanning) return;
-    hasMovedRef.current = true;
+    const dx = e.clientX - panStartRef.current.x - panOffset.x;
+    const dy = e.clientY - panStartRef.current.y - panOffset.y;
+    if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
+      hasMovedRef.current = true;
+    }
     setPanOffset({
       x: e.clientX - panStartRef.current.x,
       y: e.clientY - panStartRef.current.y
@@ -120,7 +128,9 @@ export const AgentFlowCanvas: React.FC<AgentFlowCanvasProps> = ({ onNotify }) =>
 
   const handleMouseUpCanvas = () => {
     if (draggingNodeId && config) {
-      saveAgentFlowConfig(config);
+      if (nodeDragMovedRef.current) {
+        saveAgentFlowConfig(config);
+      }
       setDraggingNodeId(null);
     }
     setIsPanning(false);
@@ -129,6 +139,7 @@ export const AgentFlowCanvas: React.FC<AgentFlowCanvasProps> = ({ onNotify }) =>
   // Iniciar arrastre de nodo individual
   const handleNodeMouseDown = (e: React.MouseEvent, node: FlowNode) => {
     e.stopPropagation();
+    nodeDragMovedRef.current = false;
     setDraggingNodeId(node.id);
     dragNodeStartRef.current = {
       mouseX: e.clientX,
@@ -139,7 +150,8 @@ export const AgentFlowCanvas: React.FC<AgentFlowCanvasProps> = ({ onNotify }) =>
   };
 
   const handleSelectNode = (node: FlowNode) => {
-    if (!hasMovedRef.current) {
+    // Si no hubo desplazamiento significativo del mouse, abrir drawer
+    if (!nodeDragMovedRef.current && !hasMovedRef.current) {
       setSelectedNode(node);
     }
   };
@@ -470,10 +482,23 @@ export const AgentFlowCanvas: React.FC<AgentFlowCanvasProps> = ({ onNotify }) =>
                     </div>
                   </div>
 
-                  {/* Estado Badge */}
-                  <span className={`w-2 h-2 rounded-full ${
-                    n.enabled ? 'bg-emerald-400 ring-4 ring-emerald-500/20' : 'bg-slate-600'
-                  }`} />
+                  {/* Estado Badge y Botón Editar */}
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedNode(n);
+                      }}
+                      className="px-2 py-0.5 rounded-md bg-cyan-950/80 hover:bg-cyan-800 text-cyan-300 border border-cyan-800/80 text-[10px] font-bold transition flex items-center gap-1 shadow-xs"
+                      title="Editar este nodo"
+                    >
+                      Editar ✎
+                    </button>
+                    <span className={`w-2 h-2 rounded-full ${
+                      n.enabled ? 'bg-emerald-400 ring-4 ring-emerald-500/20' : 'bg-slate-600'
+                    }`} />
+                  </div>
                 </div>
 
                 {/* Contenido / Vista previa del Nodo */}
