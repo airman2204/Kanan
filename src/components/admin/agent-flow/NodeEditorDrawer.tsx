@@ -316,11 +316,13 @@ export const NodeEditorDrawer: React.FC<NodeEditorDrawerProps> = ({
                 {/* Sticker Mockup si existe */}
                 {formData.stickerPath && (
                   <div className="flex justify-start mb-2 animate-in fade-in zoom-in-95">
-                    <img 
-                      src={formData.stickerPath} 
-                      alt="Sticker Preview" 
-                      className="w-28 h-auto max-h-32 object-contain drop-shadow-md"
-                    />
+                    <div className="p-2 rounded-2xl bg-white shadow-md inline-block max-w-[140px]">
+                      <img 
+                        src={formData.stickerPath} 
+                        alt="Sticker Preview" 
+                        className="w-full h-auto object-contain rounded-xl"
+                      />
+                    </div>
                   </div>
                 )}
 
