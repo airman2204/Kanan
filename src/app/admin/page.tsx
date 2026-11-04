@@ -20,7 +20,12 @@ import {
   ChevronLeft,
   ChevronRight,
   Columns3,
+  Bell,
+  BellOff,
+  Volume2,
 } from "lucide-react";
+import { soundEngine } from "@/lib/audio/soundEffects";
+import { AdminToastContainer, AdminToast } from "@/components/admin/AdminToastContainer";
 import {
   KananDatabase,
   ServicioCita,
@@ -95,6 +100,83 @@ export default function AdminPage() {
   const [calendarHighlightStatus, setCalendarHighlightStatus] = useState<string | null>(null);
   const [triggerNewCitaModal, setTriggerNewCitaModal] = useState(false);
 
+  // Estados del sistema de Notificaciones Nativas y Sonidos
+  const [toasts, setToasts] = useState<AdminToast[]>([]);
+  const [soundMuted, setSoundMuted] = useState(false);
+  const [permisoNotificaciones, setPermisoNotificaciones] = useState<NotificationPermission>("default");
+
+  // Referencias para detectar cambios en tiempo real
+  const lastCitasCountRef = React.useRef<number | null>(null);
+  const lastMensajesCountRef = React.useRef<number | null>(null);
+  const lastCitasHashRef = React.useRef<Record<string, EstatusCita>>({});
+
+  // Registrar Service Worker y cargar estado de sonido
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setSoundMuted(soundEngine.isMuted());
+      if ("Notification" in window) {
+        setPermisoNotificaciones(Notification.permission);
+      }
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("/sw.js").catch(() => {});
+      }
+    }
+  }, []);
+
+  const dismissToast = (id: string) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  };
+
+  const addToast = useCallback((toast: Omit<AdminToast, "id">) => {
+    const id = `toast-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+    setToasts((prev) => [
+      { ...toast, id },
+      ...prev.slice(0, 3), // Mantener máximo 4 en pantalla
+    ]);
+
+    // Enviar notificación al sistema operativo si la pestaña está en segundo plano / pantalla apagada
+    if (typeof document !== "undefined" && document.hidden && "serviceWorker" in navigator && navigator.serviceWorker.controller) {
+      navigator.serviceWorker.controller.postMessage({
+        type: "SHOW_NOTIFICATION",
+        title: toast.titulo,
+        options: {
+          body: `${toast.clienteNombre ? toast.clienteNombre + ": " : ""}${toast.descripcion}`,
+          tag: toast.tipo,
+          data: { url: "/admin" },
+        },
+      });
+    }
+
+    // Auto-cerrar después de 7 segundos
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 7000);
+  }, []);
+
+  const toggleSound = () => {
+    const nuevo = !soundMuted;
+    setSoundMuted(nuevo);
+    soundEngine.setMuted(nuevo);
+    if (!nuevo) {
+      soundEngine.playIncomingChatSound();
+    }
+  };
+
+  const solicitarPermisoNotificaciones = async () => {
+    if (typeof window !== "undefined" && "Notification" in window) {
+      const permiso = await Notification.requestPermission();
+      setPermisoNotificaciones(permiso);
+      if (permiso === "granted") {
+        soundEngine.playConfirmationSound();
+        addToast({
+          tipo: "cita_confirmada",
+          titulo: "¡Notificaciones activadas!",
+          descripcion: "Recibirás avisos sonoros y alertas incluso con la pantalla bloqueada en tu tableta.",
+        });
+      }
+    }
+  };
+
   // Comprobar autenticación segura
   const checkAuth = useCallback(async () => {
     try {
@@ -111,17 +193,96 @@ export default function AdminPage() {
   }, [router]);
 
   const fetchCrmData = useCallback(async () => {
-    setLoading(true);
     try {
       const res = await fetch("/api/crm");
       if (res.ok) {
         const data = (await res.json()) as KananDatabase;
+        
+        // DETECCIÓN DE EVENTOS PARA SONIDOS Y TOASTS EN VIVO
+        if (lastCitasCountRef.current !== null && data.servicios_citas) {
+          // 1. Detectar si hay una nueva cita agendada
+          if (data.servicios_citas.length > lastCitasCountRef.current) {
+            const nueva = data.servicios_citas[0];
+            const cli = data.clientes.find((c) => c.id === nueva.cliente_id);
+            soundEngine.playNewBookingSound();
+            addToast({
+              tipo: "cita_nueva",
+              titulo: "¡Nueva Solicitud de Cita!",
+              descripcion: `Servicio agendado para ${nueva.fecha} (${nueva.turno}). Piezas: ${nueva.items_contratados.length}`,
+              clienteNombre: cli?.nombre || "Nuevo Cliente",
+              folio: nueva.id,
+              actionLabel: "Revisar en Calendario",
+              onAction: () => setActiveSection("calendario"),
+            });
+          }
+
+          // 2. Detectar cambios de estatus en citas existentes (Confirmada o Cancelada)
+          data.servicios_citas.forEach((c) => {
+            const estatusPrevio = lastCitasHashRef.current[c.id];
+            if (estatusPrevio && estatusPrevio !== c.estatus) {
+              const cli = data.clientes.find((cl) => cl.id === c.cliente_id);
+              if (c.estatus === "Confirmada") {
+                soundEngine.playConfirmationSound();
+                addToast({
+                  tipo: "cita_confirmada",
+                  titulo: "Cita Confirmada",
+                  descripcion: `El cliente confirmó la cotización de su servicio.`,
+                  clienteNombre: cli?.nombre,
+                  folio: c.id,
+                  actionLabel: "Ver Ficha",
+                  onAction: () => setActiveSection("calendario"),
+                });
+              } else if (c.estatus === "Cancelada") {
+                soundEngine.playCancellationSound();
+                addToast({
+                  tipo: "cita_cancelada",
+                  titulo: "Cita Cancelada",
+                  descripcion: c.cancel_reason || `El servicio ha sido cancelado.`,
+                  clienteNombre: cli?.nombre,
+                  folio: c.id,
+                  actionLabel: "Ver Historial",
+                  onAction: () => setActiveSection("calendario"),
+                });
+              }
+            }
+          });
+        }
+
+        // 3. Detectar mensajes de chat entrantes
+        if (lastMensajesCountRef.current !== null && data.mensajes_automatizacion) {
+          if (data.mensajes_automatizacion.length > lastMensajesCountRef.current) {
+            const nuevoMsg = data.mensajes_automatizacion[0];
+            if (nuevoMsg.contenido_mensaje.startsWith("[Cliente]:")) {
+              const cli = data.clientes.find((c) => c.id === nuevoMsg.cliente_id);
+              const textoLimpio = nuevoMsg.contenido_mensaje.replace("[Cliente]:", "").trim();
+              soundEngine.playIncomingChatSound();
+              addToast({
+                tipo: "mensaje_chat",
+                titulo: "Nuevo Mensaje en Chat",
+                descripcion: textoLimpio,
+                clienteNombre: cli?.nombre || "Cliente WhatsApp",
+                actionLabel: "Responder en Chat",
+                onAction: () => setActiveSection("chat"),
+              });
+            }
+          }
+        }
+
+        // Actualizar referencias históricas
+        lastCitasCountRef.current = data.servicios_citas.length;
+        lastMensajesCountRef.current = data.mensajes_automatizacion.length;
+        const hash: Record<string, EstatusCita> = {};
+        data.servicios_citas.forEach((c) => {
+          hash[c.id] = c.estatus;
+        });
+        lastCitasHashRef.current = hash;
+
         setDb(data);
       }
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [addToast]);
 
   useEffect(() => {
     checkAuth();
@@ -534,19 +695,52 @@ export default function AdminPage() {
             </h1>
           </div>
 
-          {/* Botón Nueva Cita de Acción Rápida */}
-          <button
-            type="button"
-            onClick={() => {
-              setActiveSection("calendario");
-              setTriggerNewCitaModal(true);
-            }}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-[#1D71B5] to-[#36A6DE] hover:from-[#175c94] hover:to-[#2c8fc0] text-white font-heading font-bold text-xs shadow-sm hover:shadow-md transition-all active:scale-[0.98]"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Nueva Cita</span>
-          </button>
+          <div className="flex items-center gap-2">
+            {/* Control de Sonidos y Alertas de Tableta */}
+            <div className="flex items-center bg-slate-100 p-1 rounded-2xl border border-slate-200">
+              <button
+                type="button"
+                onClick={toggleSound}
+                className={`p-1.5 rounded-xl transition flex items-center gap-1.5 text-xs font-heading font-bold ${
+                  soundMuted
+                    ? "bg-slate-200 text-slate-500"
+                    : "bg-white text-[#1D71B5] shadow-xs"
+                }`}
+                title={soundMuted ? "Sonidos silenciados" : "Sonidos activos"}
+              >
+                {soundMuted ? <BellOff className="w-4 h-4 text-slate-400" /> : <Bell className="w-4 h-4 text-[#1D71B5]" />}
+                <span className="hidden sm:inline">{soundMuted ? "Silencio" : "Sonido"}</span>
+              </button>
+
+              {permisoNotificaciones !== "granted" && (
+                <button
+                  type="button"
+                  onClick={solicitarPermisoNotificaciones}
+                  className="px-2 py-1 rounded-xl text-[11px] font-heading font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 transition flex items-center gap-1"
+                  title="Activar alertas en segundo plano para tableta"
+                >
+                  <span>🔔 Activar Alertas 2do Plano</span>
+                </button>
+              )}
+            </div>
+
+            {/* Botón Nueva Cita de Acción Rápida */}
+            <button
+              type="button"
+              onClick={() => {
+                setActiveSection("calendario");
+                setTriggerNewCitaModal(true);
+              }}
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-[#1D71B5] to-[#36A6DE] hover:from-[#175c94] hover:to-[#2c8fc0] text-white font-heading font-bold text-xs shadow-sm hover:shadow-md transition-all active:scale-[0.98]"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Nueva Cita</span>
+            </button>
+          </div>
         </header>
+
+        {/* CONTENEDOR DE ALERTAS TOAST FLOTANTES INTEGRADO (SIN CUADROS NATIVOS) */}
+        <AdminToastContainer toasts={toasts} onDismiss={dismissToast} />
 
         {/* CONTENEDOR DE PÁGINA */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto space-y-6">

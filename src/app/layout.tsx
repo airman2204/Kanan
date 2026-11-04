@@ -11,6 +11,12 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://kananlimpieza.mx"),
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Kanan Admin",
+  },
   title: {
     default: "Kanan Servicios de Limpieza | Limpieza y Desinfección Profunda en Guadalajara",
     template: "%s | Kanan Servicios de Limpieza",

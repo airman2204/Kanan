@@ -1,0 +1,22 @@
+{
+  "name": "Kanan Admin",
+  "short_name": "Kanan",
+  "description": "Panel de Administración Operativo y Chat en Vivo Kanan Limpieza ZMG",
+  "start_url": "/admin",
+  "display": "standalone",
+  "background_color": "#355581",
+  "theme_color": "#355581",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/assets/brand/kanan-logo-fullcolor.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "/assets/brand/kanan-logo-fullcolor.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}
