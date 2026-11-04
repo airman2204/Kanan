@@ -177,6 +177,8 @@ export function CalendarCitasView({
   const [selectedCitaDetalle, setSelectedCitaDetalle] = useState<ServicioCita | null>(null);
   const [fotoAntesUrl, setFotoAntesUrl] = useState("");
   const [fotoDespuesUrl, setFotoDespuesUrl] = useState("");
+  const [montoCotizadoInput, setMontoCotizadoInput] = useState<number | "">("");
+  const [guardandoCotizacion, setGuardandoCotizacion] = useState(false);
 
   // Firma Digital en Pantalla
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -792,7 +794,10 @@ export function CalendarCitasView({
                       <div className="flex items-center gap-1.5">
                         <button
                           type="button"
-                          onClick={() => setSelectedCitaDetalle(cita)}
+                          onClick={() => {
+                            setSelectedCitaDetalle(cita);
+                            setMontoCotizadoInput(cita.monto_total || "");
+                          }}
                           className="px-2.5 py-1 text-[11px] font-bold text-[#1D71B5] hover:bg-blue-50 rounded-xl transition"
                         >
                           Ver ficha
@@ -911,6 +916,22 @@ export function CalendarCitasView({
                       <span className="text-slate-400">Dirección y Municipio:</span>
                       <strong className="text-slate-800 text-right">{cli?.direccion} ({cli?.municipio})</strong>
                     </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-400">Piezas solicitadas:</span>
+                      <div className="text-right">
+                        {(selectedCitaDetalle.items_contratados || []).map((it, idx) => (
+                          <div key={idx} className="font-bold text-slate-800">
+                            • {it.cantidad}x {it.piezaNombre}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    {selectedCitaDetalle.notas_servicio && (
+                      <div className="pt-2 border-t border-slate-200 text-slate-700 bg-blue-50/50 p-2.5 rounded-xl">
+                        <strong className="block text-[11px] text-[#1D71B5] mb-0.5">Notas del cliente / Manchas:</strong>
+                        <span>{selectedCitaDetalle.notas_servicio}</span>
+                      </div>
+                    )}
                     {selectedCitaDetalle.instrucciones_acceso && (
                       <div className="pt-2 border-t border-slate-200 text-amber-800 bg-amber-50/50 p-2 rounded-xl flex items-start gap-2">
                         <KeyRound className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
@@ -924,6 +945,38 @@ export function CalendarCitasView({
                 );
               })()}
             </div>
+
+            {/* Bloque FOTOS ADJUNTAS POR EL CLIENTE EN LA WEB */}
+            {selectedCitaDetalle.fotos_estado_actual && selectedCitaDetalle.fotos_estado_actual.length > 0 && (
+              <div className="bg-amber-50/40 p-4 rounded-2xl border border-amber-200/80 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="font-heading font-extrabold text-xs text-amber-900 flex items-center gap-1.5">
+                    <Camera className="w-4 h-4 text-amber-600" />
+                    Fotos Enviadas por el Cliente ({selectedCitaDetalle.fotos_estado_actual.length})
+                  </span>
+                  <span className="text-[10px] text-amber-700 font-medium">Revisa las manchas y estado antes de cotizar</span>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {selectedCitaDetalle.fotos_estado_actual.map((fotoSrc, idx) => (
+                    <div key={idx} className="relative group rounded-xl overflow-hidden border border-amber-200 bg-white shadow-sm">
+                      <img
+                        src={fotoSrc}
+                        alt={`Foto cliente ${idx + 1}`}
+                        className="w-full h-28 sm:h-32 object-cover transition-transform group-hover:scale-105"
+                      />
+                      <a
+                        href={fotoSrc}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[11px] font-bold transition-opacity"
+                      >
+                        Ver completa 🔍
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Bloque 2: Información Técnica del Mueble y Servicios */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
@@ -942,12 +995,81 @@ export function CalendarCitasView({
                 </p>
               </div>
 
-              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-1.5">
-                <span className="text-slate-400 block font-bold text-[10px] uppercase">Cobro y Método de Pago</span>
-                <p className="text-lg font-extrabold text-emerald-700">
-                  ${(selectedCitaDetalle.monto_total || 0).toLocaleString("es-MX")} MXN
-                </p>
+              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
+                <span className="text-slate-400 block font-bold text-[10px] uppercase">Definir Cotización y Cobro</span>
                 <div className="flex items-center gap-2">
+                  <div className="relative flex-1">
+                    <span className="absolute left-3 top-2.5 font-bold text-slate-400">$</span>
+                    <input
+                      type="number"
+                      placeholder="Monto a cotizar"
+                      value={montoCotizadoInput}
+                      onChange={(e) => setMontoCotizadoInput(e.target.value === "" ? "" : Number(e.target.value))}
+                      className="w-full bg-white border border-slate-300 rounded-xl pl-7 pr-3 py-2 font-bold text-base text-slate-800 focus:ring-2 focus:ring-[#1D71B5]"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    disabled={guardandoCotizacion || montoCotizadoInput === ""}
+                    onClick={async () => {
+                      if (montoCotizadoInput === "") return;
+                      setGuardandoCotizacion(true);
+                      try {
+                        await onUpdateCita(selectedCitaDetalle.id, { monto_total: Number(montoCotizadoInput) });
+                        setSelectedCitaDetalle({ ...selectedCitaDetalle, monto_total: Number(montoCotizadoInput) });
+                      } finally {
+                        setGuardandoCotizacion(false);
+                      }
+                    }}
+                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold rounded-xl text-xs transition"
+                  >
+                    {guardandoCotizacion ? "Guardando..." : "Fijar Precio"}
+                  </button>
+                </div>
+
+                {(() => {
+                  const cli = clientes.find((c) => c.id === selectedCitaDetalle.cliente_id);
+                  const piezasStr = (selectedCitaDetalle.items_contratados || []).map((it) => `${it.cantidad}x ${it.piezaNombre}`).join(", ");
+                  const precioFinal = montoCotizadoInput !== "" ? montoCotizadoInput : (selectedCitaDetalle.monto_total || 0);
+                  const msgWhats = `¡Hola ${cli?.nombre || "Cliente"}! 👋 En Kanan revisamos las fotos de tu servicio (${piezasStr}). Con gusto te confirmamos tu cotización por $${precioFinal} MXN para el día ${selectedCitaDetalle.fecha} (${selectedCitaDetalle.turno}). ¿Deseas confirmar la cita? 🐾✨`;
+                  const whatsUrl = `https://wa.me/${cli?.whatsapp}?text=${encodeURIComponent(msgWhats)}`;
+
+                  return (
+                    <div className="pt-2 border-t border-slate-200 space-y-2">
+                      <a
+                        href={whatsUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center gap-2 w-full py-2.5 px-3 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold text-xs shadow-sm transition"
+                      >
+                        <Phone className="w-4 h-4" />
+                        <span>Enviar Cotización por WhatsApp</span>
+                      </a>
+
+                      {selectedCitaDetalle.estatus === "Por Confirmar" && (
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            await onUpdateCita(selectedCitaDetalle.id, {
+                              estatus: "Confirmada",
+                              monto_total: montoCotizadoInput !== "" ? Number(montoCotizadoInput) : selectedCitaDetalle.monto_total
+                            });
+                            setSelectedCitaDetalle({
+                              ...selectedCitaDetalle,
+                              estatus: "Confirmada",
+                              monto_total: montoCotizadoInput !== "" ? Number(montoCotizadoInput) : selectedCitaDetalle.monto_total
+                            });
+                          }}
+                          className="w-full py-2 px-3 rounded-xl bg-[#1D71B5] hover:bg-blue-600 text-white font-bold text-xs transition"
+                        >
+                          ✓ El cliente dijo que SÍ (Pasar a Confirmada)
+                        </button>
+                      )}
+                    </div>
+                  );
+                })()}
+
+                <div className="flex items-center gap-2 pt-1 border-t border-slate-200">
                   <span className="text-slate-500">Método de pago:</span>
                   <select
                     value={selectedCitaDetalle.metodo_pago || "Pendiente"}
