@@ -8,6 +8,7 @@ import {
   updateCitaInDb,
   sincronizarCitaConSupabase,
   cancelCita,
+  deleteCitaFromDb,
   deleteCliente,
   clearAllData,
   resetToTwoExamples,
@@ -89,6 +90,11 @@ export async function POST(req: NextRequest) {
     if (body.action === "ADMIN_CANCEL_CITA") {
       const res = cancelCita(body.citaId, false, body.motivo);
       return NextResponse.json({ ok: true, cita: res.cita, db: getDatabase() });
+    }
+
+    if (body.action === "DELETE_CITA") {
+      const ok = deleteCitaFromDb(body.citaId);
+      return NextResponse.json({ ok, db: getDatabase() });
     }
 
     if (body.action === "DELETE_CLIENTE") {

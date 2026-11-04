@@ -61,6 +61,7 @@ interface CalendarViewProps {
     }
   ) => Promise<void>;
   onCancelCita: (citaId: string, motivo?: string) => Promise<void>;
+  onDeleteCita?: (citaId: string) => Promise<void>;
   onCreateCitaManual: (cita: {
     cliente_id?: string;
     cliente_data?: {
@@ -136,6 +137,7 @@ export function CalendarCitasView({
   onResetAutoOpenNewModal,
   onUpdateCita,
   onCancelCita,
+  onDeleteCita,
   onCreateCitaManual,
 }: CalendarViewProps) {
   const [viewMode, setViewMode] = useState<"dia" | "kanban">("dia");
@@ -803,7 +805,7 @@ export function CalendarCitasView({
                         >
                           Ver ficha
                         </button>
-                        {cita.estatus !== "Cancelada" && (
+                        {cita.estatus !== "Cancelada" ? (
                           <button
                             type="button"
                             onClick={() => setCancellingCita(cita)}
@@ -811,7 +813,19 @@ export function CalendarCitasView({
                           >
                             Cancelar
                           </button>
-                        )}
+                        ) : onDeleteCita ? (
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              if (confirm(`¿Eliminar definitivamente la cita ${cita.id}?`)) {
+                                await onDeleteCita(cita.id);
+                              }
+                            }}
+                            className="px-2 py-1 text-[11px] font-bold text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition"
+                          >
+                            Borrar
+                          </button>
+                        ) : null}
                       </div>
                     </div>
                   </div>
@@ -1614,12 +1628,27 @@ export function CalendarCitasView({
               >
                 Volver
               </button>
+              {onDeleteCita && (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (confirm(`¿Eliminar definitivamente ${cancellingCita.id} de la base de datos?`)) {
+                      await onDeleteCita(cancellingCita.id);
+                      setCancellingCita(null);
+                      setCancelMotivo("");
+                    }
+                  }}
+                  className="px-4 py-2 bg-slate-800 hover:bg-black text-white rounded-xl text-xs font-bold transition"
+                >
+                  Borrar Definitivamente
+                </button>
+              )}
               <button
                 type="button"
                 onClick={handleConfirmCancel}
                 className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold"
               >
-                Confirmar Cancelación
+                Marcar como Cancelada
               </button>
             </div>
           </div>

@@ -245,6 +245,19 @@ export default function AdminPage() {
     }
   };
 
+  // Eliminar cita permanentemente del sistema
+  const handleDeleteCita = async (citaId: string) => {
+    const res = await fetch("/api/crm", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "DELETE_CITA", citaId }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      setDb(data.db);
+    }
+  };
+
   // Actualizar configuración de marketing
   const handleUpdateMarketing = async (updates: Partial<MarketingMetrics>) => {
     const res = await fetch("/api/crm", {
@@ -572,6 +585,7 @@ export default function AdminPage() {
               onClearHighlight={() => setCalendarHighlightStatus(null)}
               onUpdateCita={handleUpdateCita}
               onCancelCita={handleCancelCita}
+              onDeleteCita={handleDeleteCita}
               onCreateCitaManual={handleCreateCitaManual}
               autoOpenNewModal={triggerNewCitaModal}
               onResetAutoOpenNewModal={() => setTriggerNewCitaModal(false)}

@@ -726,7 +726,39 @@ export function cancelCita(citaId: string, isClientRequest = false, motivo?: str
   }
 
   saveDatabase(db);
+
+  // Sincronizar en Supabase
+  sincronizarCitaConSupabase(cita, cliente).catch((e) => console.error("Error sync cancel Supabase:", e));
+
   return { ok: true, cita };
+}
+
+export function deleteCitaFromDb(citaId: string): boolean {
+  const db = getDatabase();
+  const index = db.servicios_citas.findIndex((c) => c.id === citaId);
+  if (index === -1) return false;
+
+  const cita = db.servicios_citas[index];
+  db.servicios_citas.splice(index, 1);
+  db.recurrencia = db.recurrencia.filter((r) => r.cita_id !== citaId);
+  db.mensajes_automatizacion = db.mensajes_automatizacion.filter((m) => m.cita_id !== citaId);
+
+  // Recalcular gasto del cliente
+  const cliente = db.clientes.find((c) => c.id === cita.cliente_id);
+  if (cliente) {
+    cliente.historico_gasto = db.servicios_citas
+      .filter((c) => c.cliente_id === cliente.id && c.estatus !== "Cancelada")
+      .reduce((acc, it) => acc + (it.monto_total || 0), 0);
+  }
+
+  saveDatabase(db);
+
+  // Eliminar en Supabase
+  supabase.from("servicios_citas").delete().eq("id", citaId).then(({ error }) => {
+    if (error) console.error("Error al eliminar cita en Supabase:", error);
+  });
+
+  return true;
 }
 
 export function deleteCliente(clienteId: string): boolean {
