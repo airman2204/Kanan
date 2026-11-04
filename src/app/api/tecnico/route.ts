@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getDatabase, updateCitaInDb } from "@/lib/db/store";
+import { getDatabase, getDatabaseAsync, updateCitaInDb, sincronizarCitaConSupabase } from "@/lib/db/store";
 import { ServicioCita, Cliente } from "@/types/crm";
 import {
   despacharEventoEnCamino,
@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const db = getDatabase();
+    const db = await getDatabaseAsync();
     // Obtener la fecha de hoy en formato YYYY-MM-DD
     const hoyStr = new Date().toISOString().split("T")[0];
 
@@ -158,6 +158,9 @@ export async function PATCH(req: NextRequest) {
     }
 
     const updated = updateCitaInDb(citaId, updatePayload);
+    if (updated) {
+      sincronizarCitaConSupabase(updated, cliente).catch((e) => console.error("Error sync Supabase Tecnico:", e));
+    }
 
     return NextResponse.json({
       ok: Boolean(updated),

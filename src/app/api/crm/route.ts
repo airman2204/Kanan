@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   getDatabase,
+  getDatabaseAsync,
   createBookingFromWizard,
   createClienteManual,
   createCitaManual,
   updateCitaInDb,
+  sincronizarCitaConSupabase,
   cancelCita,
   deleteCliente,
   clearAllData,
@@ -40,7 +42,7 @@ export async function GET(req: NextRequest) {
       { status: 401 }
     );
   }
-  const db = getDatabase();
+  const db = await getDatabaseAsync();
   return NextResponse.json(db);
 }
 
@@ -192,6 +194,13 @@ export async function POST(req: NextRequest) {
     const textoWhatsApp = generarMensajeWhatsAppReservaCliente(cita, cliente);
     const whatsappUrl = `https://wa.me/${KANAN_WHATSAPP_NUMBER}?text=${encodeURIComponent(textoWhatsApp)}`;
 
+    // Sincronizar de forma persistente en Supabase (evita pérdida de citas en Vercel Serverless)
+    try {
+      await sincronizarCitaConSupabase(cita, cliente);
+    } catch (syncErr) {
+      console.error("Error al sincronizar con Supabase en POST /api/crm:", syncErr);
+    }
+
     // Envío automático al WhatsApp del cliente vía servicio de Chat
     let autoEnviado = false;
     try {
@@ -246,6 +255,13 @@ export async function PATCH(req: NextRequest) {
         turno: body.turno,
         hora_especifica: body.hora_especifica,
       });
+
+      if (updated) {
+        const db = getDatabase();
+        const cli = db.clientes.find((c) => c.id === updated.cliente_id);
+        sincronizarCitaConSupabase(updated, cli).catch((e) => console.error("Error sync Supabase PATCH:", e));
+      }
+
       return NextResponse.json({
         ok: Boolean(updated),
         cita: updated,

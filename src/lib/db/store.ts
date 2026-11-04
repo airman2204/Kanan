@@ -18,6 +18,7 @@ import {
   generarSecuenciaPoservicio,
   generarMensajeCalificacionPoservicio,
 } from "@/lib/whatsapp/templates";
+import { supabase } from "@/lib/supabase";
 
 const LOCAL_DB_PATH = path.join(process.cwd(), "src", "data", "kanan-crm-db.json");
 const TMP_DB_PATH = path.join(os.tmpdir(), "kanan-crm-db.json");
@@ -143,6 +144,84 @@ export function getDatabase(): KananDatabase {
   return initial;
 }
 
+export async function getDatabaseAsync(): Promise<KananDatabase> {
+  const localDb = getDatabase();
+
+  try {
+    const [citasRes, clientesRes, msgsRes] = await Promise.all([
+      supabase.from("servicios_citas").select("*").order("created_at", { ascending: false }),
+      supabase.from("clientes").select("*").order("created_at", { ascending: false }),
+      supabase.from("mensajes_automatizacion").select("*").order("created_at", { ascending: false }),
+    ]);
+
+    if (!citasRes.error && citasRes.data && !clientesRes.error && clientesRes.data) {
+      // Reconstruir citas desde Supabase
+      const citasFromSb: ServicioCita[] = citasRes.data.map((c: any) => {
+        let metaCronometro: any = {};
+        if (Array.isArray(c.fotos_antes_despues) && c.fotos_antes_despues.length > 0) {
+          const first = c.fotos_antes_despues[0];
+          if (first && first._meta_cronometro) {
+            metaCronometro = first._meta_cronometro;
+          }
+        }
+        return {
+          id: c.id,
+          cliente_id: c.cliente_id,
+          fecha: c.fecha,
+          turno: c.turno,
+          hora_especifica: metaCronometro.hora_especifica || (c.turno.startsWith("Matutino") ? "10:00 AM" : "03:30 PM"),
+          items_contratados: c.items_contratados || [],
+          monto_total: c.monto_total !== null ? Number(c.monto_total) : null,
+          estatus: c.estatus,
+          tecnico_asignado: c.tecnico_asignado || "Por asignar",
+          ruta_geografica: c.ruta_geografica || "",
+          notas_servicio: c.notas_servicio || "",
+          coordenadas: metaCronometro.coordenadas,
+          fotos_estado_actual: c.fotos_estado_actual || [],
+          fotos_antes_despues: (c.fotos_antes_despues || []).filter((f: any) => !f._meta_cronometro),
+          calificacion: c.calificacion,
+          ticket_soporte: Boolean(c.ticket_soporte),
+          origen: metaCronometro.origen || "web",
+          created_at: c.created_at,
+          hora_inicio: metaCronometro.hora_inicio,
+          hora_fin: metaCronometro.hora_fin,
+          duracion_minutos: metaCronometro.duracion_minutos,
+          hora_en_camino: metaCronometro.hora_en_camino,
+          calificacion_estrellas: metaCronometro.calificacion_estrellas,
+          comentarios_encuesta: metaCronometro.comentarios_encuesta,
+          tarjeta_enviada: metaCronometro.tarjeta_enviada,
+        };
+      });
+
+      // Reconstruir clientes desde Supabase
+      const clientesFromSb: Cliente[] = clientesRes.data.map((cli: any) => ({
+        id: cli.id,
+        nombre: cli.nombre,
+        whatsapp: cli.whatsapp,
+        direccion: cli.direccion,
+        municipio: cli.municipio,
+        mascotas: Boolean(cli.mascotas),
+        notas_especiales: cli.notas_especiales || "",
+        historico_gasto: cli.historico_gasto !== null ? Number(cli.historico_gasto) : 0,
+        fecha_registro: cli.fecha_registro,
+        total_servicios: citasFromSb.filter((c) => c.cliente_id === cli.id).length,
+      }));
+
+      // Si Supabase tiene datos o tablas listas, sincronizamos la memoria local
+      localDb.servicios_citas = citasFromSb;
+      localDb.clientes = clientesFromSb;
+      if (!msgsRes.error && msgsRes.data) {
+        localDb.mensajes_automatizacion = msgsRes.data as any;
+      }
+      saveDatabase(localDb);
+    }
+  } catch (err) {
+    console.error("Error al sincronizar con Supabase en getDatabaseAsync:", err);
+  }
+
+  return localDb;
+}
+
 export function saveDatabase(db: KananDatabase): void {
   if (!db.config?.marketing) {
     db.config = { ...db.config, marketing: DEFAULT_MARKETING, modo_halloween: db.config?.modo_halloween ?? false };
@@ -162,6 +241,64 @@ export function saveDatabase(db: KananDatabase): void {
     fs.writeFileSync(TMP_DB_PATH, payload, "utf-8");
   } catch {
     // Continuar en memoria
+  }
+}
+
+/**
+ * Función auxiliar para sincronizar una cita y cliente con Supabase en segundo plano
+ */
+export async function sincronizarCitaConSupabase(cita: ServicioCita, cliente?: Cliente | null) {
+  try {
+    if (cliente) {
+      await supabase.from("clientes").upsert({
+        id: cliente.id,
+        nombre: cliente.nombre,
+        whatsapp: cliente.whatsapp,
+        direccion: cliente.direccion,
+        municipio: cliente.municipio,
+        mascotas: Boolean(cliente.mascotas),
+        notas_especiales: cliente.notas_especiales || "",
+        historico_gasto: cliente.historico_gasto || 0,
+        fecha_registro: cliente.fecha_registro || new Date().toISOString(),
+      });
+    }
+
+    // Empaquetar metadatos extendidos dentro del JSONB fotos_antes_despues
+    const metaCronometro = {
+      _meta_cronometro: {
+        hora_especifica: cita.hora_especifica,
+        coordenadas: cita.coordenadas,
+        origen: cita.origen,
+        hora_inicio: cita.hora_inicio,
+        hora_fin: cita.hora_fin,
+        duracion_minutos: cita.duracion_minutos,
+        hora_en_camino: cita.hora_en_camino,
+        calificacion_estrellas: cita.calificacion_estrellas,
+        comentarios_encuesta: cita.comentarios_encuesta,
+        tarjeta_enviada: cita.tarjeta_enviada,
+      },
+    };
+
+    const fotosConMeta = [metaCronometro, ...(cita.fotos_antes_despues || [])];
+
+    await supabase.from("servicios_citas").upsert({
+      id: cita.id,
+      cliente_id: cita.cliente_id,
+      fecha: cita.fecha,
+      turno: cita.turno,
+      items_contratados: cita.items_contratados || [],
+      monto_total: cita.monto_total,
+      estatus: cita.estatus,
+      tecnico_asignado: cita.tecnico_asignado || "Por asignar",
+      ruta_geografica: cita.ruta_geografica || "",
+      notas_servicio: cita.notas_servicio || "",
+      fotos_estado_actual: cita.fotos_estado_actual || [],
+      fotos_antes_despues: fotosConMeta,
+      calificacion: cita.calificacion,
+      ticket_soporte: Boolean(cita.ticket_soporte),
+    });
+  } catch (err) {
+    console.error("Error al sincronizar cita con Supabase:", err);
   }
 }
 
