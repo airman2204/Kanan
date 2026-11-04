@@ -11,7 +11,7 @@ app.use(cors());
 app.use(express.json());
 
 const PORT = process.env.PORT || 3001;
-const WEBHOOK_URL = process.env.WEBHOOK_URL || 'http://localhost:3000/api/chat/webhook';
+const WEBHOOK_URL = process.env.WEBHOOK_URL || 'https://kananlimpieza.mx/api/chat/webhook';
 const API_KEY = process.env.CHAT_API_KEY || 'kanan_secret_2026';
 
 let qrCodeData = null;

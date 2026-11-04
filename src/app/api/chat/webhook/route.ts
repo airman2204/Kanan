@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getDatabase, saveDatabase, updateCitaInDb } from "@/lib/db/store";
+import { getDatabase, getDatabaseAsync, saveDatabase, updateCitaInDb } from "@/lib/db/store";
 import { procesarRespuestaEncuesta } from "@/lib/chat/dispatcher";
+import { supabase } from "@/lib/supabase";
 
 export async function POST(req: NextRequest) {
   try {
@@ -12,7 +13,7 @@ export async function POST(req: NextRequest) {
     }
 
     const cleanPhone = phone.replace(/\D/g, "");
-    const db = getDatabase();
+    const db = await getDatabaseAsync();
 
     // 1. Buscar el cliente por su teléfono (probando con 10 dígitos o con prefijo 52)
     const cliente = db.clientes.find((cl) => {
@@ -43,7 +44,7 @@ export async function POST(req: NextRequest) {
       }
 
       // 3. Registrar el mensaje recibido en el historial de automatizaciones para visualización
-      db.mensajes_automatizacion.unshift({
+      const nuevoMsg = {
         id: `in-${Date.now()}`,
         cita_id: ultimaCita ? ultimaCita.id : "sin_cita",
         cliente_id: cliente.id,
@@ -53,9 +54,13 @@ export async function POST(req: NextRequest) {
         contenido_mensaje: `[Cliente]: ${text}`,
         estatus_envio: "Enviado",
         fecha_programada: timestamp || new Date().toISOString(),
-      });
+      };
 
+      db.mensajes_automatizacion.unshift(nuevoMsg as any);
       saveDatabase(db);
+
+      // Persistir mensaje en Supabase
+      await supabase.from("mensajes_automatizacion").insert(nuevoMsg);
     }
 
     return NextResponse.json({ ok: true });
