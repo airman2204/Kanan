@@ -16,9 +16,25 @@ export default function TecnicoPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  // Datos de ruta de hoy
+  // Datos de ruta de hoy con persistencia ante refrescos
   const [citasHoy, setCitasHoy] = useState<CitaConCliente[]>([]);
-  const [turnoActivo, setTurnoActivo] = useState<"matutino" | "vespertino">("matutino");
+  const [turnoActivo, setTurnoActivoState] = useState<"matutino" | "vespertino">("matutino");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("kanan_tecnico_turno");
+      if (saved === "matutino" || saved === "vespertino") {
+        setTurnoActivoState(saved);
+      }
+    }
+  }, []);
+
+  const setTurnoActivo = (t: "matutino" | "vespertino") => {
+    setTurnoActivoState(t);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("kanan_tecnico_turno", t);
+    }
+  };
 
   // Estado del servicio seleccionado
   const [metodoPagoSeleccionado, setMetodoPagoSeleccionado] = useState<MetodoPago>("Efectivo");

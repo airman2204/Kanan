@@ -47,10 +47,49 @@ export default function AdminPage() {
   const [db, setDb] = useState<KananDatabase | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Navegación en el Menú Lateral
-  const [activeSection, setActiveSection] = useState<AdminSection>("resumen");
+  // Navegación en el Menú Lateral con persistencia ante refrescos F5
+  const [activeSection, setActiveSectionState] = useState<AdminSection>("resumen");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  // Restaurar sección activa desde la URL (?tab=chat) o localStorage al montar
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const urlTab = (params.get("tab") || params.get("seccion")) as AdminSection | null;
+    const validSections: AdminSection[] = [
+      "resumen",
+      "kanban",
+      "calendario",
+      "clientes",
+      "chat",
+      "marketing",
+      "configuracion",
+    ];
+
+    if (urlTab && validSections.includes(urlTab)) {
+      setActiveSectionState(urlTab);
+      localStorage.setItem("kanan_admin_section", urlTab);
+    } else {
+      const saved = localStorage.getItem("kanan_admin_section") as AdminSection | null;
+      if (saved && validSections.includes(saved)) {
+        setActiveSectionState(saved);
+        const url = new URL(window.location.href);
+        url.searchParams.set("tab", saved);
+        window.history.replaceState({}, "", url.toString());
+      }
+    }
+  }, []);
+
+  const setActiveSection = (section: AdminSection) => {
+    setActiveSectionState(section);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("kanan_admin_section", section);
+      const url = new URL(window.location.href);
+      url.searchParams.set("tab", section);
+      window.history.replaceState({}, "", url.toString());
+    }
+  };
 
   // Filtro de calendario y trigger de nueva cita
   const [calendarHighlightStatus, setCalendarHighlightStatus] = useState<string | null>(null);
