@@ -16,8 +16,11 @@ import {
   Clock,
   Phone,
   ShieldCheck,
+  Workflow,
+  MessagesSquare,
 } from "lucide-react";
 import { Cliente, ServicioCita, MensajeAutomatizacion } from "@/types/crm";
+import { AgentFlowCanvas } from "./agent-flow/AgentFlowCanvas";
 
 interface ChatInboxProps {
   clientes: Cliente[];
@@ -38,6 +41,7 @@ export function ChatInbox({
 }: ChatInboxProps) {
   const [contactosLocales, setContactosLocales] = useState<Cliente[]>(clientes);
   const [selectedClienteId, setSelectedClienteId] = useState<string>(clientes[0]?.id || "");
+  const [activeTab, setActiveTab] = useState<"conversaciones" | "agente_flow">("conversaciones");
   const [inputMessage, setInputMessage] = useState("");
   const [busqueda, setBusqueda] = useState("");
   const [modoIaActivo, setModoIaActivo] = useState(true);
@@ -148,7 +152,53 @@ export function ChatInbox({
 
   return (
     <div className="space-y-4">
-      {/* Barra Superior: Estado de Conexión del Chat y Switch IA */}
+      {/* Selector Principal de Vista: Bandeja vs Configuración de Agente estilo n8n */}
+      <div className="bg-slate-900 p-2 rounded-2xl border border-slate-800 shadow-md flex items-center justify-between gap-3">
+        <div className="flex items-center gap-1.5 p-1 bg-slate-950/80 rounded-xl border border-slate-800">
+          <button
+            type="button"
+            onClick={() => setActiveTab("conversaciones")}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-2 ${
+              activeTab === "conversaciones"
+                ? "bg-[#1D71B5] text-white shadow"
+                : "text-slate-400 hover:text-slate-200"
+            }`}
+          >
+            <MessagesSquare className="w-4 h-4" />
+            <span>Bandeja de Conversaciones</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("agente_flow")}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-2 ${
+              activeTab === "agente_flow"
+                ? "bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow"
+                : "text-slate-400 hover:text-slate-200"
+            }`}
+          >
+            <Workflow className="w-4 h-4 text-cyan-400" />
+            <span>Configuración de Agente (Flujo n8n)</span>
+            <span className="text-[10px] bg-cyan-500/20 text-cyan-300 px-1.5 py-0.5 rounded-full border border-cyan-500/30 font-mono">
+              IA
+            </span>
+          </button>
+        </div>
+
+        {activeTab === "conversaciones" && (
+          <div className="hidden sm:flex items-center gap-2 pr-2 text-xs text-slate-400">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span>WhatsApp Conectado</span>
+          </div>
+        )}
+      </div>
+
+      {activeTab === "agente_flow" ? (
+        <div className="rounded-3xl overflow-hidden border border-slate-800 shadow-2xl h-[720px] bg-slate-950">
+          <AgentFlowCanvas />
+        </div>
+      ) : (
+        <>
+          {/* Barra Superior: Estado de Conexión del Chat y Switch IA */}
       <div className="bg-white p-4 rounded-3xl border border-slate-200/90 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
@@ -488,6 +538,8 @@ export function ChatInbox({
           )}
         </div>
       </div>
+      </>
+      )}
     </div>
   );
 }
