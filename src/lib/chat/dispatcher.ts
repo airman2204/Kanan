@@ -95,7 +95,7 @@ export async function despacharEventoEnCamino(
 
   await enviarMensajeChat(cleanPhone, mensaje);
   // Intentar enviar el sticker oficial
-  await enviarStickerChat(cleanPhone, "assets/kanan-movil.webp");
+  await enviarStickerChat(cleanPhone, "assets/stickers/kanan-sticker-en-camino.jpg");
 }
 
 /**
@@ -114,6 +114,8 @@ export async function despacharEventoInicioServicio(cita: ServicioCita, cliente:
   ].join("\n");
 
   await enviarMensajeChat(cleanPhone, mensaje);
+  // Enviar sticker de servicio en proceso
+  await enviarStickerChat(cleanPhone, "assets/stickers/kanan-sticker-en-proceso.jpg");
 }
 
 /**
@@ -141,6 +143,8 @@ export async function despacharEventoFinServicio(
     .join("\n");
 
   await enviarMensajeChat(cleanPhone, mensajeEntrega);
+  // Enviar sticker de servicio concluido
+  await enviarStickerChat(cleanPhone, "assets/stickers/kanan-sticker-concluido.jpg");
 
   // 2. Tarjeta Digital de Lealtad (Si es cliente nuevo)
   if (esClienteNuevo) {
