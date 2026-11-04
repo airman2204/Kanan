@@ -240,7 +240,7 @@ export function ChatInbox({
             <div className="bg-[#F8FAFC] border-2 border-dashed border-slate-200 rounded-2xl p-4 flex flex-col items-center justify-center min-h-[220px] text-center space-y-2">
               {bridgeQr ? (
                 <>
-                  <img src={bridgeQr} alt="QR Code" className="w-48 h-48 rounded-xl shadow-xs" />
+                  <img src={bridgeQr} alt="QR Code" className="w-52 h-52 rounded-xl shadow-md border border-slate-200 bg-white p-1" />
                   <p className="text-[11px] font-bold text-[#1D71B5] mt-1">
                     ⚡ Escanea este código desde Dispositivos Vinculados
                   </p>
