@@ -182,13 +182,9 @@ export async function POST(req: NextRequest) {
       await supabase.from("mensajes_automatizacion").insert(nuevoMsg);
 
       // EMISIÓN DUAL DE TIEMPO REAL: Broadcast instantáneo con Latencia Cero (<80ms)
-      // Garantiza llegada inmediata incluso si postgres_changes de la base de datos está pausado
       try {
-        const realtimeChannel = supabase.channel("kanan_chat_realtime", {
-          config: { broadcast: { ack: false } },
-        });
-        await realtimeChannel.send({
-          type: "broadcast",
+        const payloadToSend = {
+          type: "broadcast" as const,
           event: "nuevo_mensaje",
           payload: {
             mensaje: nuevoMsg,
@@ -198,7 +194,15 @@ export async function POST(req: NextRequest) {
               whatsapp: cliente.whatsapp,
             },
           },
-        });
+        };
+
+        const chAdmin = supabase.channel("kanan_admin_notifications_channel", { config: { broadcast: { ack: false } } });
+        const chInbox = supabase.channel("kanan_chat_inbox_channel", { config: { broadcast: { ack: false } } });
+        
+        await Promise.allSettled([
+          chAdmin.send(payloadToSend),
+          chInbox.send(payloadToSend),
+        ]);
       } catch (broadcastErr) {
         console.warn("[Webhook] Error en broadcast Supabase:", broadcastErr);
       }

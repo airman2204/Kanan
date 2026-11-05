@@ -72,10 +72,10 @@ export function ChatInbox({
     setMensajesLocales(initialMensajes);
   }, [initialMensajes]);
 
-  // SUSCRIPCIÓN EN TIEMPO REAL HÍBRIDA (Broadcast <80ms + Postgres Changes)
+  // SUSCRIPCIÓN EN TIEMPO REAL ULTRA RÁPIDA (Canal exclusivo y limpio de Chat)
   useEffect(() => {
     const channel = supabase
-      .channel("kanan_chat_realtime", {
+      .channel("kanan_chat_inbox_channel", {
         config: { broadcast: { self: false } },
       })
       .on("broadcast", { event: "nuevo_mensaje" }, (payload: any) => {
@@ -89,23 +89,6 @@ export function ChatInbox({
 
         if (onRefresh) onRefresh();
       })
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "mensajes_automatizacion",
-        },
-        (payload) => {
-          const nuevoMsg = payload.new as MensajeAutomatizacion;
-          setMensajesLocales((prev) => {
-            if (prev.some((m) => m.id === nuevoMsg.id)) return prev;
-            return [...prev, nuevoMsg];
-          });
-
-          if (onRefresh) onRefresh();
-        }
-      )
       .subscribe();
 
     return () => {

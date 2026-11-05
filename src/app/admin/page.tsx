@@ -304,9 +304,9 @@ export default function AdminPage() {
       fetchCrmData();
     }, 6000);
 
-    // ESCUCHA EN TIEMPO REAL GLOBAL PARA NOTIFICACIONES Y SONIDOS (Mismo canal de chat: kanan_chat_realtime)
+    // ESCUCHA EN TIEMPO REAL GLOBAL PARA NOTIFICACIONES Y SONIDOS (Canal dedicado para Admin)
     const realtimeChannel = supabase
-      .channel("kanan_chat_realtime")
+      .channel("kanan_admin_notifications_channel")
       .on("broadcast", { event: "nuevo_mensaje" }, (payload: any) => {
         const msg = payload.payload?.mensaje;
         const cli = payload.payload?.cliente;
