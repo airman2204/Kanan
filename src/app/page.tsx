@@ -18,12 +18,17 @@ export default function HomePage() {
   const [modoHalloween, setModoHalloween] = useState<boolean>(false);
 
   useEffect(() => {
-    // Evitar que al recargar la página el navegador haga scroll involuntario a #agendar
-    if (typeof window !== "undefined" && window.location.hash) {
-      if (window.location.hash === "#agendar" || window.location.hash.includes("agendar")) {
-        window.history.replaceState(null, "", window.location.pathname);
-        window.scrollTo({ top: 0, behavior: "instant" });
+    // 1. Desactivar restauración automática de scroll del navegador para que siempre inicie arriba al recargar
+    if (typeof window !== "undefined") {
+      if ("scrollRestoration" in window.history) {
+        window.history.scrollRestoration = "manual";
       }
+
+      // Si la URL traía hash a agendar, limpiarlo y asegurar scroll arriba
+      if (window.location.hash) {
+        window.history.replaceState(null, "", window.location.pathname);
+      }
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
     }
 
     // Consultar el estado del modo Halloween público sin requerir autenticación

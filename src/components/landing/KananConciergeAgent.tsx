@@ -1039,7 +1039,6 @@ export function KananConciergeAgent({
                     }}
                     placeholder={isValidatingCp ? "Consultando SEPOMEX..." : "Código Postal (ej. 45646 o 44600)"}
                     className="w-full px-4 py-2.5 rounded-full bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-cyan-500 font-mono font-bold disabled:opacity-60"
-                    autoFocus
                   />
                 </div>
                 <button
