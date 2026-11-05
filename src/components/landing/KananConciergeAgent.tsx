@@ -336,47 +336,86 @@ export function KananConciergeAgent({
     );
   };
 
-  // 3. Código Postal (Validación Estricta de Cobertura Jalisco)
-  const handleSubmitCp = (cpVal: string) => {
+  // 3. Código Postal (Validación Estricta de Cobertura Jalisco + SEPOMEX completo)
+  const [isValidatingCp, setIsValidatingCp] = useState(false);
+
+  const handleSubmitCp = async (cpVal: string) => {
     const cleanCp = cpVal.replace(/\D/g, "").slice(0, 5);
     if (cleanCp.length !== 5) {
       setErrorActivo("El Código Postal debe tener exactamente 5 números.");
       return;
     }
 
-    const info = consultarCodigoPostal(cleanCp);
-    if (!info.valido || !info.municipio) {
-      setErrorActivo(info.mensajeError || "Código postal fuera de nuestra zona de cobertura en Jalisco (Guadalajara, Zapopan, Tlajomulco, Tlaquepaque).");
-      return;
-    }
-
-    setCodigoPostal(cleanCp);
-    setMunicipioDetectado(info.municipio);
-    onSelectMunicipio(info.municipio);
-    setColoniasDisponibles(info.colonias || []);
+    setIsValidatingCp(true);
     setErrorActivo(null);
 
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: `user-${Date.now()}`,
-        sender: "user",
-        text: `CP ${cleanCp}`,
-        time: getCurrentTime(),
-      },
-    ]);
+    try {
+      // 1. Primero intentar catálogo local
+      let info = consultarCodigoPostal(cleanCp);
+      let colonias = info.colonias || [];
+      let municipio = info.municipio;
 
-    if (info.colonias && info.colonias.length > 0) {
-      appendAgentMessage(
-        `📍 Cobertura confirmada en ${info.municipio} (CP ${cleanCp}).\n\nPor favor selecciona tu colonia o fraccionamiento:`,
-        "ask_colonia"
-      );
-    } else {
-      setColonia("");
-      appendAgentMessage(
-        `📍 Cobertura confirmada en ${info.municipio} (CP ${cleanCp}).\n\n¿En qué colonia o fraccionamiento te ubicas?`,
-        "ask_colonia"
-      );
+      // 2. Si el catálogo local no tiene colonias o queremos la lista completa oficial, consultar API SEPOMEX
+      if (!colonias || colonias.length === 0) {
+        try {
+          const res = await fetch(`/api/postal?cp=${cleanCp}`);
+          if (res.ok) {
+            const apiData = await res.json();
+            if (apiData.valido) {
+              municipio = apiData.municipio;
+              colonias = apiData.colonias || [];
+              info = {
+                valido: true,
+                municipio: apiData.municipio,
+                colonias,
+              };
+            } else if (apiData.mensajeError) {
+              setErrorActivo(apiData.mensajeError);
+              setIsValidatingCp(false);
+              return;
+            }
+          }
+        } catch (fetchErr) {
+          console.error("Error al consultar API postal:", fetchErr);
+        }
+      }
+
+      if (!info.valido || !municipio) {
+        setErrorActivo(info.mensajeError || "Código postal fuera de nuestra zona de cobertura en Jalisco (Guadalajara, Zapopan, Tlajomulco, Tlaquepaque).");
+        setIsValidatingCp(false);
+        return;
+      }
+
+      setCodigoPostal(cleanCp);
+      setMunicipioDetectado(municipio);
+      onSelectMunicipio(municipio);
+      setColoniasDisponibles(colonias);
+      setErrorActivo(null);
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `user-${Date.now()}`,
+          sender: "user",
+          text: `CP ${cleanCp}`,
+          time: getCurrentTime(),
+        },
+      ]);
+
+      if (colonias.length > 0) {
+        appendAgentMessage(
+          `📍 Cobertura confirmada en ${municipio} (CP ${cleanCp}).\n\nPor favor selecciona tu colonia o fraccionamiento:`,
+          "ask_colonia"
+        );
+      } else {
+        setColonia("");
+        appendAgentMessage(
+          `📍 Cobertura confirmada en ${municipio} (CP ${cleanCp}).\n\n¿En qué colonia o fraccionamiento te ubicas?`,
+          "ask_colonia"
+        );
+      }
+    } finally {
+      setIsValidatingCp(false);
     }
   };
 
@@ -984,7 +1023,7 @@ export function KananConciergeAgent({
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
-                  handleSubmitCp(inputText);
+                  if (!isValidatingCp) handleSubmitCp(inputText);
                 }}
                 className="flex items-center gap-2 animate-in fade-in"
               >
@@ -993,22 +1032,27 @@ export function KananConciergeAgent({
                     type="text"
                     maxLength={5}
                     value={inputText}
+                    disabled={isValidatingCp}
                     onChange={(e) => {
                       setErrorActivo(null);
                       setInputText(e.target.value);
                     }}
-                    placeholder="Código Postal (ej. 44600 o 45010)"
-                    className="w-full px-4 py-2.5 rounded-full bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-cyan-500 font-mono font-bold"
+                    placeholder={isValidatingCp ? "Consultando SEPOMEX..." : "Código Postal (ej. 45646 o 44600)"}
+                    className="w-full px-4 py-2.5 rounded-full bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-cyan-500 font-mono font-bold disabled:opacity-60"
                     autoFocus
                   />
                 </div>
                 <button
                   type="submit"
-                  disabled={inputText.replace(/\D/g, "").length < 5}
-                  className="p-2.5 rounded-full bg-kanan-cyan hover:bg-[#009ec0] disabled:bg-slate-200 text-white transition active:scale-95 shadow-xs"
+                  disabled={inputText.replace(/\D/g, "").length < 5 || isValidatingCp}
+                  className="p-2.5 rounded-full bg-kanan-cyan hover:bg-[#009ec0] disabled:bg-slate-200 text-white transition active:scale-95 shadow-xs flex items-center justify-center min-w-9 min-h-9"
                   title="Verificar CP"
                 >
-                  <Send className="w-4 h-4" />
+                  {isValidatingCp ? (
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <Send className="w-4 h-4" />
+                  )}
                 </button>
               </form>
             )}
