@@ -1363,17 +1363,14 @@ export function KananConciergeAgent({
                           key={d.iso}
                           type="button"
                           onClick={() => handleSelectDay(d.iso, d.label)}
-                          className={`p-2.5 rounded-2xl border text-left transition-all active:scale-95 ${
-                            d.esFin
-                              ? "bg-amber-50/70 border-amber-200 hover:border-amber-400 text-amber-950"
-                              : "bg-slate-50 border-slate-200 hover:border-cyan-300 text-slate-800"
-                          }`}
+                          className="p-2.5 rounded-2xl border text-left transition-all active:scale-95 bg-white hover:bg-cyan-50/80 border-slate-200 hover:border-cyan-400 text-slate-800 shadow-2xs"
                         >
-                          <div className="flex items-center justify-between">
-                            <span className="font-heading font-extrabold text-xs">{d.label}</span>
-                            {d.esFin && <span className="text-[10px] text-amber-700 font-bold">Fin de sem</span>}
-                          </div>
-                          <span className="text-[10px] text-slate-500 block mt-0.5">{d.iso}</span>
+                          <span className="font-heading font-extrabold text-xs block text-slate-800">
+                            {d.label}
+                          </span>
+                          <span className="text-[10px] text-slate-400 block mt-0.5 font-mono">
+                            {d.iso}
+                          </span>
                         </button>
                       ))}
                     </div>
