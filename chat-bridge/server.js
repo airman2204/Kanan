@@ -351,3 +351,16 @@ app.listen(PORT, async () => {
     console.error("❌ Error al iniciar WhatsApp:", err);
   }
 });
+
+
+// ==========================================
+// 🔥 KEEPALIVE AUTOMÁTICO ANTI-SUSPENSIÓN RENDER:
+// Hace ping continuo cada 10 minutos a sí mismo
+// para que el contenedor NUNCA se duerma ni se apague.
+// ==========================================
+const SELF_URL = process.env.RENDER_EXTERNAL_URL || process.env.SELF_URL || 'https://kanan-chat-bridge.onrender.com';
+setInterval(() => {
+  fetch(`${SELF_URL}/api/status`, { headers: { 'x-api-key': API_KEY } })
+    .then(() => console.log('💓 [Keep-Alive] Ping exitoso a Render. El servicio permanece 24/7 activo.'))
+    .catch(() => {});
+}, 10 * 60 * 1000);
