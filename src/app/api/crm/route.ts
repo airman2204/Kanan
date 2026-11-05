@@ -201,7 +201,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // 3. Crear nueva cita o cotización desde el Asistente Conversacional o Wizard (Validación y desinfección)
+    // 3. Crear nueva cita desde el Asistente Conversacional o Wizard con validaciones completas y seguras
     const validNombre = validarNombre(body.nombre || "");
     if (!validNombre.valida) {
       return NextResponse.json({ ok: false, error: validNombre.error }, { status: 400 });
@@ -212,25 +212,52 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: false, error: validTel.error }, { status: 400 });
     }
 
-    // Permitir validación flexible de dirección si viene del Asistente Kanan o Wizard
-    const inputDireccion = body.calleNumero || body.direccion || "";
-    if (!inputDireccion || inputDireccion.trim().length < 5) {
-      return NextResponse.json({ ok: false, error: "Ingresa una dirección o referencia válida." }, { status: 400 });
+    const validDir = validarDireccion(body.calleNumero || body.direccion || "");
+    if (!validDir.valida) {
+      return NextResponse.json({ ok: false, error: validDir.error }, { status: 400 });
+    }
+
+    const validManchas = validarDetalleManchas(body.notas_servicio || "");
+    if (!validManchas.valida) {
+      return NextResponse.json({ ok: false, error: validManchas.error }, { status: 400 });
+    }
+
+    if (!Array.isArray(body.fotos_estado_actual) || body.fotos_estado_actual.length === 0) {
+      return NextResponse.json(
+        { ok: false, error: "Es requerido adjuntar al menos 1 foto del estado de tus muebles para preparar el desmanchado." },
+        { status: 400 }
+      );
+    }
+
+    // Validación de código postal con cobertura en Jalisco
+    if (body.codigo_postal) {
+      const infoCp = consultarCodigoPostal(body.codigo_postal);
+      if (!infoCp.valido) {
+        return NextResponse.json(
+          { ok: false, error: infoCp.mensajeError || "Código postal fuera de nuestra zona de cobertura en Jalisco." },
+          { status: 400 }
+        );
+      }
     }
 
     // Validación de municipio permitido
     const municipiosPermitidos = ["Guadalajara", "Zapopan", "Tlajomulco", "Tlaquepaque"];
-    const municipioEfectivo = municipiosPermitidos.includes(body.municipio) ? body.municipio : "Guadalajara";
+    if (!municipiosPermitidos.includes(body.municipio)) {
+      return NextResponse.json(
+        { ok: false, error: "Municipio no válido o fuera de zona autorizada de Jalisco." },
+        { status: 400 }
+      );
+    }
 
     const sanitizedNombre = sanitizeInput(body.nombre);
-    const sanitizedDireccion = sanitizeInput(body.direccion || inputDireccion);
-    const sanitizedNotas = sanitizeInput(body.notas_servicio || "Solicitud de cotización vía Kanan asistente");
+    const sanitizedDireccion = sanitizeInput(body.direccion || body.calleNumero);
+    const sanitizedNotas = sanitizeInput(body.notas_servicio);
 
     const { cita, cliente } = createBookingFromWizard({
       nombre: sanitizedNombre,
       whatsapp: body.whatsapp,
       direccion: sanitizedDireccion,
-      municipio: municipioEfectivo,
+      municipio: body.municipio,
       codigo_postal: body.codigo_postal,
       colonia: body.colonia,
       calle: body.calle,
