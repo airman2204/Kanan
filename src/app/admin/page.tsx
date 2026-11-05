@@ -597,7 +597,7 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F4F7F9] flex antialiased text-slate-800">
+    <div className="min-h-screen bg-[#F4F7F9] flex antialiased text-slate-800 overflow-x-hidden w-full max-w-full">
       
       {/* OVERLAY OSCURO PARA MÓVIL Y TABLET CUANDO EL SIDEBAR ESTÁ ABIERTO */}
       {sidebarOpen && (
@@ -609,15 +609,15 @@ export default function AdminPage() {
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " " || e.key === "Escape") setSidebarOpen(false);
           }}
-          className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-40 md:hidden transition-opacity animate-in fade-in"
+          className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 md:hidden transition-opacity animate-in fade-in"
         />
       )}
 
       {/* MENÚ LATERAL (SIDEBAR) */}
       <aside
-        className={`fixed md:sticky top-0 left-0 h-screen z-50 bg-[#0F172A] text-white flex flex-col justify-between transition-all duration-300 ease-in-out border-r border-slate-800/80 shadow-2xl relative ${
+        className={`fixed md:sticky top-0 left-0 h-screen z-50 bg-[#0F172A] text-white flex flex-col justify-between transition-all duration-300 ease-in-out border-r border-slate-800/80 shadow-2xl ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
-        } ${sidebarCollapsed ? "md:w-20" : "md:w-64"} w-72 sm:w-80 md:w-64`}
+        } ${sidebarCollapsed ? "md:w-20" : "md:w-64"} w-72 sm:w-80 md:w-64 shrink-0`}
       >
         {/* Pestaña flotante para colapsar / desplegar sidebar (estilo tab en el borde derecho) */}
         <button
@@ -809,7 +809,7 @@ export default function AdminPage() {
         <AdminToastContainer toasts={toasts} onDismiss={dismissToast} />
 
         {/* CONTENEDOR DE PÁGINA */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto space-y-6">
+        <main className="flex-1 p-3 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto space-y-4 sm:space-y-6 min-w-0 overflow-x-hidden">
           
           {/* SECCIÓN 1: RESUMEN */}
           {activeSection === "resumen" && (

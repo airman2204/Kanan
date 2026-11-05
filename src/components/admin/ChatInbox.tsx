@@ -232,15 +232,15 @@ export function ChatInbox({
   };
 
   return (
-    <div className="space-y-3">
-      {/* Barra de Control Compacta y Limpia (Sin subtítulos redundantes) */}
-      <div className="bg-white px-4 py-2.5 rounded-2xl border border-slate-200/80 shadow-xs flex flex-wrap items-center justify-between gap-3">
+    <div className="space-y-3 w-full max-w-full overflow-hidden">
+      {/* Barra de Control Compacta y Limpia */}
+      <div className="bg-white p-2.5 sm:px-4 sm:py-2.5 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
         {/* Selector de Pestañas */}
-        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
+        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl w-full sm:w-auto">
           <button
             type="button"
             onClick={() => setActiveTab("conversaciones")}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-2 ${
+            className={`flex-1 sm:flex-initial px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center justify-center gap-2 ${
               activeTab === "conversaciones"
                 ? "bg-[#1D71B5] text-white shadow-xs"
                 : "text-slate-600 hover:text-slate-900"
@@ -252,7 +252,7 @@ export function ChatInbox({
           <button
             type="button"
             onClick={() => setActiveTab("agente_flow")}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-2 ${
+            className={`flex-1 sm:flex-initial px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center justify-center gap-2 ${
               activeTab === "agente_flow"
                 ? "bg-[#1D71B5] text-white shadow-xs"
                 : "text-slate-600 hover:text-slate-900"
@@ -264,7 +264,7 @@ export function ChatInbox({
         </div>
 
         {/* Acciones y Conexión en una sola línea */}
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center justify-between sm:justify-end gap-2 flex-wrap">
           {/* Indicador de estado */}
           <div className="flex items-center gap-1.5 text-xs font-medium text-slate-600 px-2.5 py-1 bg-slate-50 border border-slate-200 rounded-xl">
             <span
