@@ -31,45 +31,53 @@ import {
 interface CatalogPiece {
   id: string;
   nombre: string;
-  descripcion: string;
   categoriaId: string;
   categoriaNombre: string;
 }
 
 const PIEZAS_CATALOGO: CatalogPiece[] = [
   // Salas
-  { id: "sala-l", nombre: "Sala en L / Seccional", descripcion: "Inyección-succión profunda y desinfección", categoriaId: "salas", categoriaNombre: "Salas y Sillas" },
-  { id: "sala-321", nombre: "Sala Tradicional (3-2-1)", descripcion: "Juego completo de 3 piezas", categoriaId: "salas", categoriaNombre: "Salas y Sillas" },
-  { id: "loveseat-sofa", nombre: "Sofá 2 o 3 Plazas / Sofá Cama", descripcion: "Limpieza y remoción de olores", categoriaId: "salas", categoriaNombre: "Salas y Sillas" },
-  { id: "sillon-individual", nombre: "Sillón Individual / Reclinable", descripcion: "Desmanchado textil profundo", categoriaId: "salas", categoriaNombre: "Salas y Sillas" },
-  { id: "silla-comedor", nombre: "Sillas de Comedor (por pieza)", descripcion: "Asiento y respaldo tapizados", categoriaId: "salas", categoriaNombre: "Salas y Sillas" },
+  { id: "sala-l", nombre: "Sala en L / Seccional", categoriaId: "salas", categoriaNombre: "Salas y Sillas" },
+  { id: "sala-321", nombre: "Sala Tradicional (3-2-1)", categoriaId: "salas", categoriaNombre: "Salas y Sillas" },
+  { id: "loveseat-sofa", nombre: "Sofá 2 o 3 Plazas / Sofá Cama", categoriaId: "salas", categoriaNombre: "Salas y Sillas" },
+  { id: "sillon-individual", nombre: "Sillón Individual / Reclinable", categoriaId: "salas", categoriaNombre: "Salas y Sillas" },
+  { id: "silla-comedor", nombre: "Sillas de Comedor Tapizadas", categoriaId: "salas", categoriaNombre: "Salas y Sillas" },
   // Tapetes
-  { id: "tapete-chico", nombre: "Tapete Chico (hasta 1.5x1m)", descripcion: "Recolección y entrega a domicilio", categoriaId: "tapetes", categoriaNombre: "Tapetes" },
-  { id: "tapete-mediano", nombre: "Tapete Mediano (hasta 2x1.5m)", descripcion: "Despolvado mecánico e inmersión", categoriaId: "tapetes", categoriaNombre: "Tapetes" },
-  { id: "tapete-grande", nombre: "Tapete Grande (hasta 3x2m)", descripcion: "Tratamiento bactericida y secado", categoriaId: "tapetes", categoriaNombre: "Tapetes" },
+  { id: "tapete-chico", nombre: "Tapete Chico (hasta 1.5x1m)", categoriaId: "tapetes", categoriaNombre: "Tapetes" },
+  { id: "tapete-mediano", nombre: "Tapete Mediano (hasta 2x1.5m)", categoriaId: "tapetes", categoriaNombre: "Tapetes" },
+  { id: "tapete-grande", nombre: "Tapete Grande (hasta 3x2m)", categoriaId: "tapetes", categoriaNombre: "Tapetes" },
   // Colchones
-  { id: "colchon-ind", nombre: "Colchón Individual", descripcion: "Eliminación de ácaros y alérgenos", categoriaId: "colchones", categoriaNombre: "Colchones" },
-  { id: "colchon-mat", nombre: "Colchón Matrimonial", descripcion: "Sanitización profunda en seco/húmedo", categoriaId: "colchones", categoriaNombre: "Colchones" },
-  { id: "colchon-queen", nombre: "Colchón Queen Size", descripcion: "Extracción profunda de humedad y polvo", categoriaId: "colchones", categoriaNombre: "Colchones" },
-  { id: "colchon-king", nombre: "Colchón King Size", descripcion: "Doble cara con desinfección total", categoriaId: "colchones", categoriaNombre: "Colchones" },
+  { id: "colchon-ind", nombre: "Colchón Individual", categoriaId: "colchones", categoriaNombre: "Colchones" },
+  { id: "colchon-mat", nombre: "Colchón Matrimonial", categoriaId: "colchones", categoriaNombre: "Colchones" },
+  { id: "colchon-queen", nombre: "Colchón Queen Size", categoriaId: "colchones", categoriaNombre: "Colchones" },
+  { id: "colchon-king", nombre: "Colchón King Size", categoriaId: "colchones", categoriaNombre: "Colchones" },
   // Autos
-  { id: "auto-sedan", nombre: "Auto Sedán / Hatchback", descripcion: "Asientos, alfombra y cajuela", categoriaId: "autos", categoriaNombre: "Vestiduras de Autos" },
-  { id: "auto-suv", nombre: "SUV / Camioneta (2 Filas)", descripcion: "Limpieza de tapicería y cielo", categoriaId: "autos", categoriaNombre: "Vestiduras de Autos" },
-  { id: "auto-3filas", nombre: "Camioneta Familiar (3 Filas)", descripcion: "Sanitización de cabina completa", categoriaId: "autos", categoriaNombre: "Vestiduras de Autos" },
+  { id: "auto-sedan", nombre: "Auto Sedán / Hatchback", categoriaId: "autos", categoriaNombre: "Vestiduras de Autos" },
+  { id: "auto-suv", nombre: "SUV / Camioneta (2 Filas)", categoriaId: "autos", categoriaNombre: "Vestiduras de Autos" },
+  { id: "auto-3filas", nombre: "Camioneta Familiar (3 Filas)", categoriaId: "autos", categoriaNombre: "Vestiduras de Autos" },
 ];
 
 const CATEGORIAS = [
-  { id: "salas", label: "🛋️ Salas y Sofás", icon: "🛋️" },
-  { id: "tapetes", label: "✨ Tapetes", icon: "✨" },
-  { id: "colchones", label: "🛏️ Colchones", icon: "🛏️" },
-  { id: "autos", label: "🚗 Autos", icon: "🚗" },
+  { id: "salas", label: "🛋️ Salas y Sofás" },
+  { id: "tapetes", label: "✨ Tapetes" },
+  { id: "colchones", label: "🛏️ Colchones" },
+  { id: "autos", label: "🚗 Autos" },
 ];
 
-interface ChatMessage {
+type StepId =
+  | "ask_category"
+  | "ask_piece"
+  | "ask_cp"
+  | "ask_address"
+  | "ask_date"
+  | "ask_name"
+  | "ask_phone"
+  | "finished";
+
+interface MessageItem {
   id: string;
   sender: "agent" | "user";
-  text?: string;
-  component?: "categories" | "pieces" | "location" | "datetime" | "contact" | "summary" | "confirmed";
+  text: string;
   time: string;
 }
 
@@ -84,225 +92,261 @@ export function KananConciergeAgent({
   onSelectMunicipio,
   preselectedCategory,
 }: KananConciergeAgentProps) {
-  // Carrito limpio estricto (cero piezas default)
-  const [quantities, setQuantities] = useState<Record<string, number>>({});
-  const [activeCat, setActiveCat] = useState<string>("salas");
+  const [messages, setMessages] = useState<MessageItem[]>([]);
+  const [isTyping, setIsTyping] = useState<boolean>(false);
+  const [step, setStep] = useState<StepId>("ask_category");
 
-  // Ubicación
-  const [codigoPostal, setCodigoPostal] = useState("");
-  const [colonia, setColonia] = useState("");
+  // Estado acumulado del cliente
+  const [selectedCat, setSelectedCat] = useState<string>("salas");
+  const [selectedPiece, setSelectedPiece] = useState<CatalogPiece | null>(null);
+  const [cantidad, setCantidad] = useState<number>(1);
+  const [codigoPostal, setCodigoPostal] = useState<string>("");
+  const [colonia, setColonia] = useState<string>("");
   const [coloniasDisponibles, setColoniasDisponibles] = useState<string[]>([]);
-  const [calleNumero, setCalleNumero] = useState("");
-  const [cpValido, setCpValido] = useState(false);
-  const [cpError, setCpError] = useState<string | null>(null);
+  const [direccion, setDireccion] = useState<string>("");
+  const [fecha, setFecha] = useState<string>("");
+  const [turno, setTurno] = useState<string>("Mañana (09:00 - 13:00)");
+  const [nombre, setNombre] = useState<string>("");
+  const [whatsapp, setWhatsapp] = useState<string>("");
 
-  // Fecha y Turno (México GMT-6)
-  const getTomorrow = () => {
-    const now = new Date();
-    const tzOffsetMs = -6 * 60 * 60 * 1000;
-    const mxNow = new Date(now.getTime() + tzOffsetMs + now.getTimezoneOffset() * 60000);
-    const tom = new Date(mxNow.getTime() + 86400000);
-    return tom.toISOString().split("T")[0];
-  };
-
-  const [fecha, setFecha] = useState(getTomorrow());
-  const [turno, setTurno] = useState<TurnoServicio>("Matutino (09:00 - 13:00)");
-
-  // Datos Cliente
-  const [nombre, setNombre] = useState("");
-  const [whatsapp, setWhatsapp] = useState("");
-  const [mascotas, setMascotas] = useState(true);
-  const [notas, setNotas] = useState("");
-
-  // Estado del flujo conversacional
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [currentStep, setCurrentStep] = useState<"pieces" | "location" | "datetime" | "contact" | "completed">("pieces");
-  const [submitting, setSubmitting] = useState(false);
+  // Input de texto general
+  const [inputText, setInputText] = useState<string>("");
+  const [submitting, setSubmitting] = useState<boolean>(false);
   const [bookingResult, setBookingResult] = useState<{ folio: string; whatsappUrl: string } | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   const getCurrentTime = () => {
-    const d = new Date();
-    return d.toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" });
+    return new Date().toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" });
   };
 
-  // Mensaje de bienvenida inicial
-  useEffect(() => {
-    const initialMessages: ChatMessage[] = [
-      {
-        id: "msg-welcome-1",
-        sender: "agent",
-        text: `¡Hola! 👋 Soy Kanan Concierge, tu asistente especializado de Kanan Servicios de Limpieza.`,
-        time: getCurrentTime(),
-      },
-      {
-        id: "msg-welcome-2",
-        sender: "agent",
-        text: `Con gusto preparo tu cotización formal y reservo el turno del Kanan Móvil a tu domicilio. 🐾✨\n\n¿Qué piezas o muebles te gustaría que limpiemos y desinfectemos hoy?`,
-        component: "pieces",
-        time: getCurrentTime(),
-      },
-    ];
-    setMessages(initialMessages);
+  const getTomorrowDate = () => {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    return d.toISOString().split("T")[0];
+  };
 
-    if (preselectedCategory) {
-      setActiveCat(preselectedCategory);
-    }
+  // Inicializar conversación
+  useEffect(() => {
+    setIsTyping(true);
+    const timer = setTimeout(() => {
+      setMessages([
+        {
+          id: "m-1",
+          sender: "agent",
+          text: "¡Hola! 👋 Soy Kanan asistente.",
+          time: getCurrentTime(),
+        },
+        {
+          id: "m-2",
+          sender: "agent",
+          text: "¿Qué muebles o piezas te gustaría que consintamos hoy?",
+          time: getCurrentTime(),
+        },
+      ]);
+      setIsTyping(false);
+
+      if (preselectedCategory) {
+        setSelectedCat(preselectedCategory);
+      }
+    }, 400);
+
+    return () => clearTimeout(timer);
   }, [preselectedCategory]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, currentStep, quantities]);
+  }, [messages, isTyping, step]);
 
-  // Manejar cantidades de piezas
-  const updatePieceQuantity = (id: string, delta: number) => {
-    setQuantities((prev) => {
-      const next = Math.max(0, (prev[id] || 0) + delta);
-      const copy = { ...prev };
-      if (next === 0) {
-        delete copy[id];
-      } else {
-        copy[id] = next;
-      }
-      return copy;
-    });
+  // Helper para simular respuesta natural del asistente con indicador de escritura
+  const appendAgentMessage = (text: string, nextStep: StepId, delayMs = 600) => {
+    setIsTyping(true);
+    setTimeout(() => {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `agent-${Date.now()}`,
+          sender: "agent",
+          text,
+          time: getCurrentTime(),
+        },
+      ]);
+      setIsTyping(false);
+      setStep(nextStep);
+    }, delayMs);
   };
 
-  const selectedItems: ItemContratado[] = Object.entries(quantities)
-    .filter(([_, qty]) => qty > 0)
-    .map(([id, qty]) => {
-      const pieza = PIEZAS_CATALOGO.find((p) => p.id === id);
-      return {
-        categoriaId: pieza?.categoriaId || "varios",
-        categoriaNombre: pieza?.categoriaNombre || "Servicio",
-        piezaId: id,
-        piezaNombre: pieza?.nombre || id,
-        cantidad: qty,
-      };
-    });
-
-  const totalPiezasCount = selectedItems.reduce((acc, i) => acc + i.cantidad, 0);
-
-  // Paso 1 completado -> Pasar a Ubicación
-  const handleConfirmPieces = () => {
-    if (selectedItems.length === 0) return;
-
-    const piezasTexto = selectedItems.map((i) => `${i.cantidad}x ${i.piezaNombre}`).join(", ");
-    
+  // 1. Elección de Categoría
+  const handleSelectCategory = (catId: string, label: string) => {
+    setSelectedCat(catId);
     setMessages((prev) => [
       ...prev,
       {
-        id: `user-pieces-${Date.now()}`,
+        id: `user-${Date.now()}`,
         sender: "user",
-        text: `Deseo cotizar: ${piezasTexto}`,
-        time: getCurrentTime(),
-      },
-      {
-        id: `agent-loc-${Date.now()}`,
-        sender: "agent",
-        text: `¡Excelente elección! 🧼 Dejaremos tus muebles relucientes.\n\nAhora, para asignarte la ruta técnica más rápida en la Zona Metropolitana de Guadalajara, ¿cuál es tu Código Postal y dirección?`,
-        component: "location",
+        text: label,
         time: getCurrentTime(),
       },
     ]);
-    setCurrentStep("location");
+
+    const catName = catId === "salas" ? "salas" : catId === "colchones" ? "colchones" : catId === "tapetes" ? "tapetes" : "autos";
+    appendAgentMessage(`¡Excelente! Para ${catName}, ¿cuál de estas opciones se adapta mejor a tu necesidad?`, "ask_piece");
   };
 
-  // Buscar CP
-  const handleCpChange = (val: string) => {
-    const clean = val.replace(/\D/g, "").slice(0, 5);
-    setCodigoPostal(clean);
-    setCpError(null);
+  // 2. Elección de Pieza
+  const handleSelectPiece = (piece: CatalogPiece) => {
+    setSelectedPiece(piece);
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: `user-${Date.now()}`,
+        sender: "user",
+        text: piece.nombre,
+        time: getCurrentTime(),
+      },
+    ]);
 
-    if (clean.length === 5) {
-      const res = consultarCodigoPostal(clean);
-      if (res.valido && res.municipio) {
-        setCpValido(true);
-        onSelectMunicipio(res.municipio);
-        setColoniasDisponibles(res.colonias || []);
-        if (res.colonias && res.colonias.length > 0) {
-          setColonia(res.colonias[0]);
-        }
-      } else {
-        setCpValido(false);
-        setCpError("Código Postal fuera de cobertura ZMG (Guadalajara, Zapopan, Tlajomulco o Tlaquepaque).");
-      }
+    appendAgentMessage(
+      `¡Anotado! 🐶 ${piece.nombre}.\n\nPara calcular tu ruta en Guadalajara o municipios vecinos, ¿cuál es tu Código Postal?`,
+      "ask_cp"
+    );
+  };
+
+  // 3. Envío de Código Postal
+  const handleSubmitCp = (cpVal: string) => {
+    const cleanCp = cpVal.replace(/\D/g, "").slice(0, 5);
+    if (cleanCp.length < 5) return;
+
+    setCodigoPostal(cleanCp);
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: `user-${Date.now()}`,
+        sender: "user",
+        text: cleanCp,
+        time: getCurrentTime(),
+      },
+    ]);
+    setInputText("");
+
+    const res = consultarCodigoPostal(cleanCp);
+    if (res.valido && res.municipio) {
+      onSelectMunicipio(res.municipio);
+      setColoniasDisponibles(res.colonias || []);
+      const primeraColonia = res.colonias && res.colonias.length > 0 ? res.colonias[0] : "";
+      setColonia(primeraColonia);
+
+      appendAgentMessage(
+        `¡Tenemos Kanan Móvil cerca en ${res.municipio}! 🚐💨\n\n¿Cuál es tu calle, número exterior y coto o privada?`,
+        "ask_address"
+      );
     } else {
-      setCpValido(false);
+      appendAgentMessage(
+        `Detecté el CP ${cleanCp}. ¿Podrías indicarme tu calle, número exterior, colonia y municipio para verificar la ruta?`,
+        "ask_address"
+      );
     }
   };
 
-  // Paso 2 completado -> Pasar a Fecha y Horario
-  const handleConfirmLocation = () => {
-    if (!cpValido) {
-      setCpError("Ingresa un Código Postal válido.");
-      return;
-    }
-    const valDir = validarDireccion(calleNumero);
-    if (!valDir.valida) {
-      setCpError(valDir.error || "Dirección incompleta");
-      return;
-    }
+  // 4. Envío de Dirección
+  const handleSubmitAddress = (addrVal: string) => {
+    if (!addrVal.trim()) return;
+    setDireccion(addrVal.trim());
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: `user-${Date.now()}`,
+        sender: "user",
+        text: addrVal.trim(),
+        time: getCurrentTime(),
+      },
+    ]);
+    setInputText("");
 
-    const dirResumen = `${calleNumero}, Col. ${colonia || "S/N"}, CP ${codigoPostal}, ${selectedMunicipio}`;
+    const tom = getTomorrowDate();
+    setFecha(tom);
+
+    appendAgentMessage(
+      `¡Perfecto! Llegamos directo a tu puerta.\n\n¿Qué fecha y turno te viene mejor? (Nuestro secado rápido toma de 3 a 4 horas).`,
+      "ask_date"
+    );
+  };
+
+  // 5. Envío de Fecha y Turno
+  const handleSubmitDateTurno = (fechaVal: string, turnoVal: string) => {
+    const textResp = `Para el día ${fechaVal} (${turnoVal})`;
+    setFecha(fechaVal);
+    setTurno(turnoVal);
 
     setMessages((prev) => [
       ...prev,
       {
-        id: `user-loc-${Date.now()}`,
+        id: `user-${Date.now()}`,
         sender: "user",
-        text: `Mi dirección es: ${dirResumen}`,
-        time: getCurrentTime(),
-      },
-      {
-        id: `agent-date-${Date.now()}`,
-        sender: "agent",
-        text: `¡Perfecto! Tenemos cobertura con Kanan Móvil en ${selectedMunicipio}. 🚐💨\n\n¿Qué día y turno te viene mejor para recibir a nuestro equipo? (Recuerda que con inyección-succión secan en solo 3 a 4 horas).`,
-        component: "datetime",
+        text: textResp,
         time: getCurrentTime(),
       },
     ]);
-    setCurrentStep("datetime");
+
+    appendAgentMessage(
+      `¡Listo para apartarlo! 📅\n\nPor favor compárteme tu Nombre Completo para preparar tu ficha formal de servicio.`,
+      "ask_name"
+    );
   };
 
-  // Paso 3 completado -> Pasar a Contacto
-  const handleConfirmDateTime = () => {
+  // 6. Envío de Nombre
+  const handleSubmitName = (nombreVal: string) => {
+    if (!nombreVal.trim()) return;
+    setNombre(nombreVal.trim());
+
     setMessages((prev) => [
       ...prev,
       {
-        id: `user-date-${Date.now()}`,
+        id: `user-${Date.now()}`,
         sender: "user",
-        text: `Para el ${fecha} en horario ${turno}`,
-        time: getCurrentTime(),
-      },
-      {
-        id: `agent-contact-${Date.now()}`,
-        sender: "agent",
-        text: `¡Casi listo! 🎉 Para generar tu folio y enviarte la cotización formal por WhatsApp, ¿a nombre de quién registramos el servicio y cuál es tu WhatsApp a 10 dígitos?`,
-        component: "contact",
+        text: nombreVal.trim(),
         time: getCurrentTime(),
       },
     ]);
-    setCurrentStep("contact");
+    setInputText("");
+
+    appendAgentMessage(
+      `Mucho gusto, ${nombreVal.trim().split(" ")[0]}! 🐾\n\nPor último, ¿cuál es tu número de WhatsApp a 10 dígitos para enviarte de inmediato tu folio y cotización formal?`,
+      "ask_phone"
+    );
   };
 
-  // Paso 4: Envío y Registro en CRM
-  const handleFinalSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const valNom = validarNombre(nombre);
-    if (!valNom.valida) {
-      alert(valNom.error || "Nombre no válido");
-      return;
-    }
-    const valTel = validarWhatsApp(whatsapp);
-    if (!valTel.valida) {
-      alert(valTel.error || "Ingresa tu WhatsApp a 10 dígitos");
-      return;
-    }
+  // 7. Envío de Teléfono y Guardado en CRM
+  const handleSubmitPhone = async (telVal: string) => {
+    const cleanTel = telVal.replace(/\D/g, "");
+    if (cleanTel.length < 10) return;
+    setWhatsapp(cleanTel);
 
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: `user-${Date.now()}`,
+        sender: "user",
+        text: cleanTel,
+        time: getCurrentTime(),
+      },
+    ]);
+    setInputText("");
+
+    setIsTyping(true);
     setSubmitting(true);
-    const fullDir = `${calleNumero}, Col. ${colonia}, CP ${codigoPostal}, ${selectedMunicipio}`;
+
+    const items: ItemContratado[] = [
+      {
+        categoriaId: selectedPiece?.categoriaId || "salas",
+        categoriaNombre: selectedPiece?.categoriaNombre || "Salas y Sillas",
+        piezaId: selectedPiece?.id || "pieza_manual",
+        piezaNombre: selectedPiece?.nombre || "Servicio Kanan",
+        cantidad: cantidad || 1,
+      },
+    ];
+
+    const dirCompleta = `${direccion}${colonia ? `, Col. ${colonia}` : ""}${codigoPostal ? `, CP ${codigoPostal}` : ""}, ${selectedMunicipio}`;
 
     try {
       const res = await fetch("/api/crm", {
@@ -310,437 +354,363 @@ export function KananConciergeAgent({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           nombre: sanitizeInput(nombre),
-          whatsapp: whatsapp.replace(/\D/g, ""),
-          direccion: fullDir,
-          calleNumero: sanitizeInput(calleNumero),
+          whatsapp: cleanTel,
+          direccion: dirCompleta,
+          calleNumero: sanitizeInput(direccion),
           codigo_postal: codigoPostal,
           colonia,
           municipio: selectedMunicipio,
-          mascotas,
-          fecha,
-          turno,
-          items_contratados: selectedItems,
-          notas_servicio: sanitizeInput(notas || "Solicitud vía Kanan Concierge"),
+          mascotas: true,
+          fecha: fecha || getTomorrowDate(),
+          turno: turno || "Matutino (09:00 - 13:00)",
+          items_contratados: items,
+          notas_servicio: "Solicitud registrada a través de Kanan asistente",
         }),
       });
 
       const data = await res.json();
       if (!res.ok || !data.ok) {
-        throw new Error(data.error || "Error al registrar cita");
+        throw new Error(data.error || "No se pudo registrar la solicitud");
       }
 
       const folio = data.cita?.id || `KAN-${Date.now().toString().slice(-4)}`;
       const waUrl = data.whatsappUrl || `https://wa.me/523343359207?text=${encodeURIComponent(`Hola Kanan Limpieza, registré mi solicitud con folio ${folio}.`)}`;
 
       setBookingResult({ folio, whatsappUrl: waUrl });
-      setCurrentStep("completed");
+      setIsTyping(false);
+      setStep("finished");
 
       setMessages((prev) => [
         ...prev,
         {
-          id: `user-contact-${Date.now()}`,
-          sender: "user",
-          text: `Mi nombre es ${nombre} y mi WhatsApp es ${whatsapp}.`,
-          time: getCurrentTime(),
-        },
-        {
           id: `agent-done-${Date.now()}`,
           sender: "agent",
-          text: `🎉 ¡Solicitud recibida con éxito!\n\n📋 **Tu Folio de Servicio es:** *${folio}*\n\nNuestro administrador ya recibió tus datos en el panel y en menos de 5 minutos te enviará tu cotización formal a tu WhatsApp (${whatsapp}).\n\n¿Quieres abrir la conversación de WhatsApp ahora mismo?`,
-          component: "confirmed",
+          text: `🎉 ¡Excelente, ${nombre.split(" ")[0]}! Tu solicitud ha sido registrada.\n\n📋 *Folio de Servicio:* **${folio}**\n🛋️ *Pieza:* ${items[0].cantidad}x ${items[0].piezaNombre}\n📅 *Fecha tentativa:* ${fecha}\n\nNuestro administrador ya recibió tus datos en el panel y en breve te enviará tu cotización formal por WhatsApp. ✨`,
           time: getCurrentTime(),
         },
       ]);
     } catch (err: any) {
-      alert(err.message || "Error de conexión al enviar la cita");
+      setIsTyping(false);
+      appendAgentMessage(
+        "Tuvimos un detalle de conexión, pero no te preocupes. Haz clic en el botón de abajo para conectarte directo con nuestro equipo por WhatsApp.",
+        "finished"
+      );
     } finally {
       setSubmitting(false);
     }
   };
 
-  const handleResetChat = () => {
-    setQuantities({});
-    setBookingResult(null);
-    setCurrentStep("pieces");
+  const handleResetConversation = () => {
+    setMessages([]);
+    setStep("ask_category");
+    setSelectedPiece(null);
+    setCodigoPostal("");
+    setDireccion("");
     setNombre("");
     setWhatsapp("");
-    setCodigoPostal("");
-    setCalleNumero("");
-    setMessages([
-      {
-        id: "msg-welcome-restart",
-        sender: "agent",
-        text: `¡Hola de nuevo! 🐾 Empecemos una nueva cotización. ¿Qué muebles deseas limpiar?`,
-        component: "pieces",
-        time: getCurrentTime(),
-      },
-    ]);
+    setBookingResult(null);
+
+    setIsTyping(true);
+    setTimeout(() => {
+      setMessages([
+        {
+          id: "m-reset-1",
+          sender: "agent",
+          text: "¡Hola de nuevo! 👋 Soy Kanan asistente.",
+          time: getCurrentTime(),
+        },
+        {
+          id: "m-reset-2",
+          sender: "agent",
+          text: "¿Qué muebles o piezas te gustaría que consintamos hoy?",
+          time: getCurrentTime(),
+        },
+      ]);
+      setIsTyping(false);
+    }, 400);
   };
 
   return (
-    <section id="agendar" className="py-12 sm:py-20 bg-gradient-to-b from-white via-slate-50 to-white">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6">
-        
-        {/* Cabecera del Agente */}
-        <div className="text-center space-y-3 mb-8">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-50 border border-cyan-200 text-cyan-800 text-xs font-bold shadow-xs">
-            <Sparkles className="w-4 h-4 text-cyan-600 animate-spin" style={{ animationDuration: "8s" }} />
-            <span>Kanan Concierge • Asistente Inteligente de Citas</span>
-          </div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-            Cotiza y Agenda tu Servicio a Domicilio
-          </h2>
-          <p className="text-sm text-slate-600 max-w-xl mx-auto">
-            Conversa con nuestro asistente. Te guía en 1 minuto, sin precios sorpresa ni servicios duplicados.
-          </p>
-        </div>
+    <section id="agendar" className="py-8 sm:py-16 bg-gradient-to-b from-white via-slate-50 to-white">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6">
 
-        {/* Ventana de Chat del Agente Especializado */}
-        <div className="bg-slate-900 rounded-3xl border border-slate-800 shadow-2xl overflow-hidden flex flex-col">
+        {/* Ventana de Conversación estilo Mensajería Limpia */}
+        <div className="bg-white rounded-3xl border border-slate-200/90 shadow-[0_12px_40px_-10px_rgba(15,36,56,0.12)] overflow-hidden flex flex-col">
           
-          {/* Header del Chat */}
-          <div className="bg-slate-950/90 border-b border-slate-800 p-4 sm:px-6 flex items-center justify-between">
+          {/* Header de la Conversación */}
+          <div className="bg-white border-b border-slate-100 px-4 py-3 sm:px-5 sm:py-3.5 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="relative">
-                <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-cyan-600 to-blue-600 flex items-center justify-center text-white text-lg font-bold shadow-md">
-                  🐾
-                </div>
-                <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-slate-950" />
+                <img
+                  src="/assets/brand/kanan-dog.png"
+                  alt="Kanan asistente"
+                  className="w-10 h-10 sm:w-11 sm:h-11 rounded-full object-cover border border-cyan-200 shadow-sm bg-cyan-50"
+                />
+                <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white ring-1 ring-emerald-500/30" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                  Kanan Concierge
-                  <span className="text-[10px] bg-cyan-950 text-cyan-400 border border-cyan-800/60 px-2 py-0.5 rounded-full font-mono">
-                    OFICIAL
-                  </span>
+                <h3 className="text-sm sm:text-base font-bold text-slate-900 leading-tight">
+                  Kanan asistente
                 </h3>
-                <p className="text-xs text-slate-400">Atención personalizada • Respuesta instantánea</p>
+                <span className="text-[11px] text-emerald-600 font-medium">en línea</span>
               </div>
             </div>
 
             <button
               type="button"
-              onClick={handleResetChat}
-              className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 text-xs font-medium transition flex items-center gap-1.5"
-              title="Reiniciar cotización limpia"
+              onClick={handleResetConversation}
+              className="p-2 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition"
+              title="Reiniciar conversación"
             >
-              <RefreshCw className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Reiniciar</span>
+              <RefreshCw className="w-4 h-4" />
             </button>
           </div>
 
-          {/* Cuerpo de Mensajes */}
-          <div className="p-4 sm:p-6 space-y-5 min-h-[420px] max-h-[620px] overflow-y-auto bg-[radial-gradient(#1e293b_1.5px,transparent_1.5px)] [background-size:24px_24px]">
-            {messages.map((msg) => {
-              const isAgent = msg.sender === "agent";
+          {/* Área de Globos de Conversación */}
+          <div className="p-4 sm:p-6 space-y-4 min-h-[380px] max-h-[520px] overflow-y-auto bg-[#F7F9FB]">
+            {messages.map((m) => {
+              const isAgent = m.sender === "agent";
 
               return (
                 <div
-                  key={msg.id}
-                  className={`flex flex-col ${isAgent ? "items-start" : "items-end"} animate-in fade-in slide-in-from-bottom-2 duration-200`}
+                  key={m.id}
+                  className={`flex items-end gap-2.5 ${isAgent ? "justify-start" : "justify-end"} animate-in fade-in slide-in-from-bottom-2 duration-150`}
                 >
+                  {isAgent && (
+                    <img
+                      src="/assets/brand/kanan-dog.png"
+                      alt="Kanan"
+                      className="w-7 h-7 rounded-full object-cover shrink-0 mb-1 border border-cyan-200 bg-cyan-50"
+                    />
+                  )}
+
                   <div
-                    className={`max-w-[92%] sm:max-w-[85%] rounded-2xl p-4 text-xs sm:text-sm leading-relaxed shadow-lg ${
+                    className={`max-w-[85%] sm:max-w-[78%] rounded-2xl px-4 py-2.5 text-xs sm:text-sm leading-relaxed shadow-xs ${
                       isAgent
-                        ? "bg-slate-800 text-slate-100 rounded-tl-sm border border-slate-700/80"
-                        : "bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-tr-sm font-medium"
+                        ? "bg-white text-slate-800 rounded-bl-xs border border-slate-200/80"
+                        : "bg-gradient-to-r from-kanan-cyan to-kanan-cerulean text-white rounded-br-xs font-medium shadow-cyan-glow/20"
                     }`}
                   >
-                    <p className="whitespace-pre-wrap">{msg.text}</p>
-
-                    {/* COMPONENTES INTERACTIVOS INCRUSTADOS EN EL CHAT */}
-
-                    {/* 1. SELECCIÓN DE PIEZAS (CERO DEFAULT) */}
-                    {msg.component === "pieces" && currentStep === "pieces" && (
-                      <div className="mt-4 pt-3 border-t border-slate-700/80 space-y-4">
-                        {/* Selector de Categorías */}
-                        <div className="flex flex-wrap gap-1.5">
-                          {CATEGORIAS.map((cat) => (
-                            <button
-                              key={cat.id}
-                              type="button"
-                              onClick={() => setActiveCat(cat.id)}
-                              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                                activeCat === cat.id
-                                  ? "bg-cyan-500 text-slate-950 shadow-md"
-                                  : "bg-slate-900/80 text-slate-300 hover:bg-slate-700"
-                              }`}
-                            >
-                              {cat.label}
-                            </button>
-                          ))}
-                        </div>
-
-                        {/* Piezas Disponibles */}
-                        <div className="space-y-2 bg-slate-950/60 p-3 rounded-2xl border border-slate-800">
-                          {PIEZAS_CATALOGO.filter((p) => p.categoriaId === activeCat).map((pieza) => {
-                            const qty = quantities[pieza.id] || 0;
-                            return (
-                              <div
-                                key={pieza.id}
-                                className="flex items-center justify-between p-2 rounded-xl bg-slate-900/80 border border-slate-800 hover:border-slate-700 transition"
-                              >
-                                <div className="pr-2">
-                                  <p className="text-xs font-bold text-white">{pieza.nombre}</p>
-                                  <p className="text-[11px] text-slate-400">{pieza.descripcion}</p>
-                                </div>
-                                <div className="flex items-center gap-2 shrink-0">
-                                  <button
-                                    type="button"
-                                    onClick={() => updatePieceQuantity(pieza.id, -1)}
-                                    disabled={qty === 0}
-                                    className="w-7 h-7 rounded-lg bg-slate-800 text-white disabled:opacity-30 hover:bg-slate-700 flex items-center justify-center text-xs font-bold"
-                                  >
-                                    <Minus className="w-3 h-3" />
-                                  </button>
-                                  <span className="w-5 text-center text-xs font-bold font-mono text-cyan-300">
-                                    {qty}
-                                  </span>
-                                  <button
-                                    type="button"
-                                    onClick={() => updatePieceQuantity(pieza.id, 1)}
-                                    className="w-7 h-7 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white flex items-center justify-center text-xs font-bold shadow-xs"
-                                  >
-                                    <Plus className="w-3 h-3" />
-                                  </button>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-
-                        {/* Botón de Confirmación de Piezas */}
-                        <div className="flex items-center justify-between pt-1">
-                          <span className="text-xs text-slate-400">
-                            Piezas seleccionadas: <strong className="text-cyan-400">{totalPiezasCount}</strong>
-                          </span>
-                          <button
-                            type="button"
-                            disabled={selectedItems.length === 0}
-                            onClick={handleConfirmPieces}
-                            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 disabled:opacity-40 text-slate-950 font-bold text-xs transition shadow-md flex items-center gap-1.5"
-                          >
-                            <span>Continuar con mi selección ({totalPiezasCount})</span>
-                            <ArrowRight className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* 2. UBICACIÓN Y DIRECCIÓN */}
-                    {msg.component === "location" && currentStep === "location" && (
-                      <div className="mt-4 pt-3 border-t border-slate-700/80 space-y-3">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                          <div>
-                            <label className="text-[11px] font-bold text-slate-300 block mb-1">
-                              Código Postal (ZMG):
-                            </label>
-                            <input
-                              type="text"
-                              maxLength={5}
-                              value={codigoPostal}
-                              onChange={(e) => handleCpChange(e.target.value)}
-                              placeholder="Ej. 45010"
-                              className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 font-mono"
-                            />
-                          </div>
-
-                          {coloniasDisponibles.length > 0 && (
-                            <div>
-                              <label className="text-[11px] font-bold text-slate-300 block mb-1">
-                                Colonia:
-                              </label>
-                              <select
-                                value={colonia}
-                                onChange={(e) => setColonia(e.target.value)}
-                                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-400"
-                              >
-                                {coloniasDisponibles.map((c) => (
-                                  <option key={c} value={c}>{c}</option>
-                                ))}
-                              </select>
-                            </div>
-                          )}
-                        </div>
-
-                        <div>
-                          <label className="text-[11px] font-bold text-slate-300 block mb-1">
-                            Calle, Número Exterior e Interior / Coto:
-                          </label>
-                          <input
-                            type="text"
-                            value={calleNumero}
-                            onChange={(e) => setCalleNumero(e.target.value)}
-                            placeholder="Ej. Av. Vallarta 1234, Coto Fresno Casa 12"
-                            className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
-                          />
-                        </div>
-
-                        {cpError && (
-                          <p className="text-[11px] text-rose-400 bg-rose-500/10 p-2 rounded-lg border border-rose-500/20">
-                            ⚠️ {cpError}
-                          </p>
-                        )}
-
-                        <div className="flex justify-end pt-1">
-                          <button
-                            type="button"
-                            disabled={!cpValido || !calleNumero.trim()}
-                            onClick={handleConfirmLocation}
-                            className="px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 disabled:opacity-40 text-slate-950 font-bold text-xs transition shadow-md flex items-center gap-1.5"
-                          >
-                            <span>Confirmar Dirección</span>
-                            <ArrowRight className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* 3. FECHA Y TURNO */}
-                    {msg.component === "datetime" && currentStep === "datetime" && (
-                      <div className="mt-4 pt-3 border-t border-slate-700/80 space-y-3">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                          <div>
-                            <label className="text-[11px] font-bold text-slate-300 block mb-1">
-                              Fecha sugerida:
-                            </label>
-                            <input
-                              type="date"
-                              value={fecha}
-                              min={getTomorrow()}
-                              onChange={(e) => setFecha(e.target.value)}
-                              className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-400 font-mono"
-                            />
-                          </div>
-
-                          <div>
-                            <label className="text-[11px] font-bold text-slate-300 block mb-1">
-                              Turno preferido:
-                            </label>
-                            <select
-                              value={turno}
-                              onChange={(e) => setTurno(e.target.value as TurnoServicio)}
-                              className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-400"
-                            >
-                              <option value="Matutino (09:00 - 13:00)">Mañana (09:00 - 13:00 hrs)</option>
-                              <option value="Vespertino (14:00 - 18:00)">Tarde (14:00 - 18:00 hrs)</option>
-                              <option value="Lunes a Domingo (09:00 - 16:00)">Turno Abierto (09:00 - 16:00 hrs)</option>
-                            </select>
-                          </div>
-                        </div>
-
-                        <div className="flex justify-end pt-1">
-                          <button
-                            type="button"
-                            onClick={handleConfirmDateTime}
-                            className="px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs transition shadow-md flex items-center gap-1.5"
-                          >
-                            <span>Confirmar Horario</span>
-                            <ArrowRight className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* 4. DATOS DE CONTACTO (WHATSAPP + NOMBRE) */}
-                    {msg.component === "contact" && currentStep === "contact" && (
-                      <form onSubmit={handleFinalSubmit} className="mt-4 pt-3 border-t border-slate-700/80 space-y-3">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                          <div>
-                            <label className="text-[11px] font-bold text-slate-300 block mb-1">
-                              Tu Nombre Completo:
-                            </label>
-                            <input
-                              type="text"
-                              required
-                              value={nombre}
-                              onChange={(e) => setNombre(e.target.value)}
-                              placeholder="Ej. Mario González"
-                              className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
-                            />
-                          </div>
-
-                          <div>
-                            <label className="text-[11px] font-bold text-slate-300 block mb-1">
-                              WhatsApp (10 dígitos):
-                            </label>
-                            <input
-                              type="tel"
-                              required
-                              value={whatsapp}
-                              onChange={(e) => setWhatsapp(e.target.value)}
-                              placeholder="Ej. 3312345678"
-                              className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 font-mono"
-                            />
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-2 pt-1">
-                          <input
-                            type="checkbox"
-                            id="pet-friendly-check"
-                            checked={mascotas}
-                            onChange={(e) => setMascotas(e.target.checked)}
-                            className="w-4 h-4 rounded text-cyan-500 focus:ring-cyan-400"
-                          />
-                          <label htmlFor="pet-friendly-check" className="text-xs text-slate-300 cursor-pointer">
-                            🐶 ¿Tienes mascotas en casa? (Aplicaremos sanitización bactericida pet-friendly)
-                          </label>
-                        </div>
-
-                        <div className="flex justify-end pt-2">
-                          <button
-                            type="submit"
-                            disabled={submitting}
-                            className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold text-xs transition shadow-lg flex items-center justify-center gap-2"
-                          >
-                            {submitting ? (
-                              <span>Registrando solicitud...</span>
-                            ) : (
-                              <>
-                                <Send className="w-3.5 h-3.5" />
-                                <span>Enviar y Recibir Cotización en WhatsApp</span>
-                              </>
-                            )}
-                          </button>
-                        </div>
-                      </form>
-                    )}
-
-                    {/* 5. CITA CONFIRMADA */}
-                    {msg.component === "confirmed" && bookingResult && (
-                      <div className="mt-4 pt-3 border-t border-slate-700/80 space-y-3">
-                        <a
-                          href={bookingResult.whatsappUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center justify-center gap-2 w-full py-3 px-4 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-slate-950 font-extrabold text-xs shadow-lg transition active:scale-98"
-                        >
-                          <MessageSquare className="w-4 h-4" />
-                          <span>Abrir Chat de WhatsApp Directo con Folio {bookingResult.folio}</span>
-                        </a>
-                      </div>
-                    )}
+                    <p className="whitespace-pre-wrap">{m.text}</p>
+                    <span
+                      className={`block text-[10px] text-right mt-1 font-sans ${
+                        isAgent ? "text-slate-400" : "text-white/80"
+                      }`}
+                    >
+                      {m.time}
+                    </span>
                   </div>
-
-                  <span className="text-[10px] text-slate-500 mt-1 px-1 font-mono">
-                    {msg.time}
-                  </span>
                 </div>
               );
             })}
+
+            {/* Indicador de "Escribiendo..." */}
+            {isTyping && (
+              <div className="flex items-center gap-2.5 justify-start animate-in fade-in">
+                <img
+                  src="/assets/brand/kanan-dog.png"
+                  alt="Kanan"
+                  className="w-7 h-7 rounded-full object-cover shrink-0 border border-cyan-200 bg-cyan-50"
+                />
+                <div className="bg-white border border-slate-200/80 rounded-2xl rounded-bl-xs px-3.5 py-2.5 shadow-xs flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-bounce" style={{ animationDelay: "0ms" }} />
+                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-bounce" style={{ animationDelay: "150ms" }} />
+                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-bounce" style={{ animationDelay: "300ms" }} />
+                </div>
+              </div>
+            )}
+
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Footer del Asistente */}
-          <div className="bg-slate-950 p-3 sm:px-6 border-t border-slate-800 flex flex-wrap items-center justify-between text-[11px] text-slate-400 gap-2">
-            <span className="flex items-center gap-1.5">
-              <ShieldCheck className="w-4 h-4 text-emerald-400" />
-              <span>Garantía 100% Kanan • Secado rápido en 3-4 horas</span>
-            </span>
-            <span className="text-slate-500 font-mono">
-              Atención en ZMG (Guadalajara, Zapopan, Tlajomulco, Tlaquepaque)
-            </span>
+          {/* Área Interactiva de Respuesta (Opciones Rápidas / Input) */}
+          <div className="p-3 sm:p-4 bg-white border-t border-slate-100 space-y-3">
+            
+            {/* 1. Chips de Categorías */}
+            {step === "ask_category" && !isTyping && (
+              <div className="flex flex-wrap gap-2 animate-in fade-in">
+                {CATEGORIAS.map((c) => (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => handleSelectCategory(c.id, c.label)}
+                    className="px-3.5 py-2 rounded-full bg-cyan-50 hover:bg-cyan-100 text-cyan-900 border border-cyan-200 text-xs sm:text-sm font-bold transition-all active:scale-95 shadow-xs"
+                  >
+                    {c.label}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* 2. Chips de Piezas Específicas */}
+            {step === "ask_piece" && !isTyping && (
+              <div className="flex flex-wrap gap-2 animate-in fade-in">
+                {PIEZAS_CATALOGO.filter((p) => p.categoriaId === selectedCat).map((piece) => (
+                  <button
+                    key={piece.id}
+                    type="button"
+                    onClick={() => handleSelectPiece(piece)}
+                    className="px-3.5 py-2 rounded-full bg-slate-50 hover:bg-cyan-50 text-slate-800 hover:text-cyan-900 border border-slate-200 hover:border-cyan-300 text-xs sm:text-sm font-semibold transition-all active:scale-95 shadow-xs"
+                  >
+                    + {piece.nombre}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* 3. Input de Código Postal */}
+            {step === "ask_cp" && !isTyping && (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSubmitCp(inputText);
+                }}
+                className="flex items-center gap-2 animate-in fade-in"
+              >
+                <input
+                  type="text"
+                  maxLength={5}
+                  value={inputText}
+                  onChange={(e) => setInputText(e.target.value)}
+                  placeholder="Escribe tu Código Postal (ej. 45010)"
+                  className="flex-1 px-4 py-2.5 rounded-full bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-cyan-500 font-mono"
+                  autoFocus
+                />
+                <button
+                  type="submit"
+                  disabled={inputText.replace(/\D/g, "").length < 5}
+                  className="p-2.5 rounded-full bg-kanan-cyan hover:bg-[#009ec0] disabled:bg-slate-200 text-white transition active:scale-95 shadow-xs"
+                >
+                  <Send className="w-4 h-4" />
+                </button>
+              </form>
+            )}
+
+            {/* 4. Input de Dirección (Calle y Número) */}
+            {step === "ask_address" && !isTyping && (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSubmitAddress(inputText);
+                }}
+                className="flex items-center gap-2 animate-in fade-in"
+              >
+                <input
+                  type="text"
+                  value={inputText}
+                  onChange={(e) => setInputText(e.target.value)}
+                  placeholder="Calle, número exterior y coto..."
+                  className="flex-1 px-4 py-2.5 rounded-full bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-cyan-500"
+                  autoFocus
+                />
+                <button
+                  type="submit"
+                  disabled={!inputText.trim()}
+                  className="p-2.5 rounded-full bg-kanan-cyan hover:bg-[#009ec0] disabled:bg-slate-200 text-white transition active:scale-95 shadow-xs"
+                >
+                  <Send className="w-4 h-4" />
+                </button>
+              </form>
+            )}
+
+            {/* 5. Selector de Fecha y Turno */}
+            {step === "ask_date" && !isTyping && (
+              <div className="space-y-2.5 animate-in fade-in">
+                <div className="flex flex-wrap items-center gap-2">
+                  <input
+                    type="date"
+                    min={getTomorrowDate()}
+                    value={fecha || getTomorrowDate()}
+                    onChange={(e) => setFecha(e.target.value)}
+                    className="px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-mono font-bold text-slate-700 focus:outline-none focus:border-cyan-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleSubmitDateTurno(fecha || getTomorrowDate(), "Mañana (09:00 - 13:00)")}
+                    className="px-3.5 py-2 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-900 border border-cyan-200 text-xs font-bold transition shadow-xs"
+                  >
+                    ☀️ Mañana (9-13h)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSubmitDateTurno(fecha || getTomorrowDate(), "Tarde (14:00 - 18:00)")}
+                    className="px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-800 border border-slate-200 text-xs font-bold transition shadow-xs"
+                  >
+                    🌤️ Tarde (14-18h)
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* 6. Input de Nombre */}
+            {step === "ask_name" && !isTyping && (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSubmitName(inputText);
+                }}
+                className="flex items-center gap-2 animate-in fade-in"
+              >
+                <input
+                  type="text"
+                  value={inputText}
+                  onChange={(e) => setInputText(e.target.value)}
+                  placeholder="Escribe tu Nombre Completo..."
+                  className="flex-1 px-4 py-2.5 rounded-full bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-cyan-500"
+                  autoFocus
+                />
+                <button
+                  type="submit"
+                  disabled={!inputText.trim()}
+                  className="p-2.5 rounded-full bg-kanan-cyan hover:bg-[#009ec0] disabled:bg-slate-200 text-white transition active:scale-95 shadow-xs"
+                >
+                  <Send className="w-4 h-4" />
+                </button>
+              </form>
+            )}
+
+            {/* 7. Input de WhatsApp */}
+            {step === "ask_phone" && !isTyping && (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSubmitPhone(inputText);
+                }}
+                className="flex items-center gap-2 animate-in fade-in"
+              >
+                <input
+                  type="tel"
+                  maxLength={10}
+                  value={inputText}
+                  onChange={(e) => setInputText(e.target.value)}
+                  placeholder="WhatsApp a 10 dígitos (ej. 3312345678)"
+                  className="flex-1 px-4 py-2.5 rounded-full bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-cyan-500 font-mono"
+                  autoFocus
+                />
+                <button
+                  type="submit"
+                  disabled={submitting || inputText.replace(/\D/g, "").length < 10}
+                  className="p-2.5 rounded-full bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-200 text-white transition active:scale-95 shadow-xs"
+                >
+                  <Send className="w-4 h-4" />
+                </button>
+              </form>
+            )}
+
+            {/* 8. Botón Directo a WhatsApp si ya terminó */}
+            {step === "finished" && bookingResult && (
+              <div className="pt-1 animate-in fade-in">
+                <a
+                  href={bookingResult.whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full inline-flex items-center justify-center gap-2 py-3 px-5 rounded-2xl bg-[#25D366] hover:bg-[#20bd5a] text-white font-extrabold text-xs sm:text-sm shadow-md transition active:scale-98"
+                >
+                  <MessageSquare className="w-4 h-4" />
+                  <span>Abrir Chat de WhatsApp con Folio {bookingResult.folio}</span>
+                </a>
+              </div>
+            )}
           </div>
         </div>
 
