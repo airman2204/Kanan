@@ -19,6 +19,8 @@ import {
 import { Cliente, ServicioCita, MensajeAutomatizacion } from "@/types/crm";
 import { AgentFlowCanvas } from "./agent-flow/AgentFlowCanvas";
 import { STICKERS_DISPONIBLES } from "@/types/agentFlow";
+import { supabase } from "@/lib/supabase";
+import { soundEngine } from "@/lib/audio/soundEffects";
 
 interface ChatInboxProps {
   clientes: Cliente[];
@@ -67,6 +69,43 @@ export function ChatInbox({
   useEffect(() => {
     setMensajesLocales(initialMensajes);
   }, [initialMensajes]);
+
+  // SUSCRIPCIÓN WEBSOCKET EN TIEMPO REAL (Idéntica a FoxDrop - Latencia Cero)
+  useEffect(() => {
+    const channelName = `kanan_chat_rt_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+    const channel = supabase
+      .channel(channelName)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "mensajes_automatizacion",
+        },
+        (payload) => {
+          const nuevoMsg = payload.new as MensajeAutomatizacion;
+          setMensajesLocales((prev) => {
+            if (prev.some((m) => m.id === nuevoMsg.id)) return prev;
+            return [...prev, nuevoMsg];
+          });
+
+          // Si es mensaje entrante del cliente, disparar sonido instantáneamente
+          if (
+            nuevoMsg.contenido_mensaje?.startsWith("[Cliente]:") ||
+            nuevoMsg.etapa_titulo === "Mensaje Recibido Cliente"
+          ) {
+            soundEngine.playIncomingChatSound();
+          }
+
+          if (onRefresh) onRefresh();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [onRefresh]);
 
   // Estado del bridge
   const [bridgeStatus, setBridgeStatus] = useState<"connected" | "qr_ready" | "connecting" | "disconnected">("connecting");
