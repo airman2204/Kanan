@@ -251,10 +251,19 @@ export default function AdminPage() {
         // 3. Detectar mensajes de chat entrantes
         if (lastMensajesCountRef.current !== null && data.mensajes_automatizacion) {
           if (data.mensajes_automatizacion.length > lastMensajesCountRef.current) {
-            const nuevoMsg = data.mensajes_automatizacion[0];
-            if (nuevoMsg.contenido_mensaje.startsWith("[Cliente]:")) {
-              const cli = data.clientes.find((c) => c.id === nuevoMsg.cliente_id);
-              const textoLimpio = nuevoMsg.contenido_mensaje.replace("[Cliente]:", "").trim();
+            // Obtener todos los mensajes nuevos que entraron en este ciclo
+            const nuevosMensajes = data.mensajes_automatizacion.slice(
+              0,
+              data.mensajes_automatizacion.length - lastMensajesCountRef.current
+            );
+            const msgCliente = nuevosMensajes.find(
+              (m) =>
+                m.contenido_mensaje.startsWith("[Cliente]:") ||
+                m.etapa_titulo === "Mensaje Recibido Cliente"
+            );
+            if (msgCliente) {
+              const cli = data.clientes.find((c) => c.id === msgCliente.cliente_id);
+              const textoLimpio = msgCliente.contenido_mensaje.replace("[Cliente]:", "").trim();
               soundEngine.playIncomingChatSound();
               addToast({
                 tipo: "mensaje_chat",

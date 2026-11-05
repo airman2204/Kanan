@@ -4,6 +4,25 @@
 class SoundEngine {
   private ctx: AudioContext | null = null;
   private muted: boolean = false;
+  private audioUnlocked: boolean = false;
+
+  constructor() {
+    if (typeof window !== "undefined") {
+      const unlock = () => {
+        const c = this.getContext();
+        if (c && c.state === "suspended") {
+          c.resume().catch(() => {});
+        }
+        this.audioUnlocked = true;
+        window.removeEventListener("click", unlock);
+        window.removeEventListener("touchstart", unlock);
+        window.removeEventListener("keydown", unlock);
+      };
+      window.addEventListener("click", unlock, { once: true });
+      window.addEventListener("touchstart", unlock, { once: true });
+      window.addEventListener("keydown", unlock, { once: true });
+    }
+  }
 
   private getContext(): AudioContext | null {
     if (typeof window === "undefined") return null;
