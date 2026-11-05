@@ -194,6 +194,7 @@ export function KananConciergeAgent({
   };
 
   // Obtener turnos oficiales según el municipio y si el día es entre semana o fin de semana
+  // Regla operativa: Cada servicio toma mín. 2 hrs + 2 hrs de traslado entre domicilios.
   const obtenerTurnosPorDia = (fechaStr: string) => {
     if (!fechaStr) return [];
     const parts = fechaStr.split("-");
@@ -206,7 +207,7 @@ export function KananConciergeAgent({
       return [
         {
           turno: "Lunes a Domingo (09:00 - 16:00)",
-          label: "☀️ Turno Abierto (09:00 - 16:00)",
+          label: "☀️ Rango de Servicio (09:00 - 16:00)",
           secado: "Secado listo esa misma tarde",
         },
       ];
@@ -618,11 +619,12 @@ export function KananConciergeAgent({
       },
     ]);
 
-    const tom = getTomorrowDate();
-    setFecha(tom);
+    // Iniciar con fecha vacía para que el usuario siempre vea y elija su día primero
+    setFecha("");
+    setTurno("");
 
     appendAgentMessage(
-      `¡Fotos recibidas y cargadas! 📸 Ya tenemos todo para tu desmanchado profesional.\n\n¿Qué día prefieres para tu servicio? Puedes elegir entre mañana o el fin de semana:`,
+      `¡Fotos recibidas y cargadas! 📸 Ya tenemos todo para tu desmanchado profesional.\n\n¿Qué día prefieres para tu servicio? Elige un día de la lista o en el calendario:`,
       "ask_date"
     );
   };
