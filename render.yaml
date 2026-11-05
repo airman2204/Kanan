@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: kanan-chat-bridge
+    env: node
+    plan: free
+    region: oregon
+    rootDir: chat-bridge
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: SUPABASE_URL
+        value: https://gkiqxexacyhnhjfbmvqw.supabase.co
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdraXF4ZXhhY3lobmhqZmJtdnF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMwMzM5MzEsImV4cCI6MjEwODYwOTkzMX0.2VQs1EMRZNZ2SCPuxzcLJ5G1IvQrdJrqJ2SAKodD-lM
+      - key: WEBHOOK_URL
+        value: https://kananlimpieza.mx/api/chat/webhook
+      - key: CHAT_API_KEY
+        value: kanan_secret_2026
