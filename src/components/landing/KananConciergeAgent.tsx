@@ -837,7 +837,7 @@ export function KananConciergeAgent({
         {
           id: `agent-done-${Date.now()}`,
           sender: "agent",
-          text: `🎉 ¡Excelente, ${nombre.split(" ")[0]}! Tu cita y cotización han sido registradas formalmente.\n\n📋 *Folio de Servicio:* **${folio}**\n🛋️ *Pieza:* ${items[0].cantidad}x ${items[0].piezaNombre}\n📍 *Ubicación:* ${municipioDetectado} (CP ${codigoPostal})\n📸 *Fotos recibidas:* ${fotosPreview.length} foto(s)\n📅 *Fecha:* ${fecha} a las ${horaEspecifica || turno}\n\nTu expediente completo ya está en nuestro panel de control y te hemos despachado tu confirmación a WhatsApp. ✨`,
+          text: `🎉 ¡Excelente, ${nombre.split(" ")[0]}! Tu solicitud ha sido registrada con éxito.\n\n📋 *Folio de Servicio:* **${folio}**\n🛋️ *Pieza:* ${items[0].cantidad}x ${items[0].piezaNombre}\n📍 *Ubicación:* ${municipioDetectado} (CP ${codigoPostal})\n📸 *Fotos recibidas:* ${fotosPreview.length} foto(s)\n📅 *Fecha y Horario:* ${fecha} a las ${horaEspecifica || turno}\n\nEn breve recibirás la cotización y confirmación de tu cita vía WhatsApp. ✨`,
           time: getCurrentTime(),
         },
       ]);
@@ -1519,18 +1519,17 @@ export function KananConciergeAgent({
               </form>
             )}
 
-            {/* 12. Botón Directo a WhatsApp si ya terminó */}
-            {step === "finished" && bookingResult && (
-              <div className="pt-1 animate-in fade-in">
-                <a
-                  href={bookingResult.whatsappUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full inline-flex items-center justify-center gap-2 py-3 px-5 rounded-2xl bg-[#25D366] hover:bg-[#20bd5a] text-white font-extrabold text-xs sm:text-sm shadow-md transition active:scale-98"
+            {/* 12. Estado final completado */}
+            {step === "finished" && (
+              <div className="pt-2 text-center animate-in fade-in">
+                <button
+                  type="button"
+                  onClick={handleResetConversation}
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-kanan-cerulean transition py-1 px-3 rounded-full hover:bg-slate-100"
                 >
-                  <MessageSquare className="w-4 h-4" />
-                  <span>Abrir Chat de WhatsApp con Folio {bookingResult.folio}</span>
-                </a>
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  <span>Realizar otra consulta</span>
+                </button>
               </div>
             )}
           </div>
