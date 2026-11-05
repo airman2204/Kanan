@@ -20,7 +20,7 @@ export function middleware(request: NextRequest) {
       return NextResponse.rewrite(url);
     }
 
-    // Si acceden escribiendo explícitamente /admin o /admin/login, redirigir a la raíz limpia "/"
+    // Si acceden escribiendo explícitamente /admin o /admin/login, redirigir a la raíz limpia "/" (preservando parámetros como ?tab=)
     if (pathname === "/admin" || pathname === "/admin/login" || pathname === "/login") {
       const url = request.nextUrl.clone();
       url.pathname = "/";
