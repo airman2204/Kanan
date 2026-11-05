@@ -143,6 +143,7 @@ export function KananConciergeAgent({
   const [bookingResult, setBookingResult] = useState<{ folio: string; whatsappUrl: string } | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const chatContainerRef = useRef<HTMLDivElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const getCurrentTime = () => {
@@ -269,8 +270,14 @@ export function KananConciergeAgent({
   }, [preselectedCategory]);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isTyping, step]);
+    // Desplazar suavemente SOLO dentro del contenedor interno del chat sin mover la ventana del navegador
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTo({
+        top: chatContainerRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  }, [messages, isTyping]);
 
   const appendAgentMessage = (text: string, nextStep: StepId, delayMs = 500) => {
     setIsTyping(true);
@@ -765,35 +772,56 @@ export function KananConciergeAgent({
   };
 
   return (
-    <section id="agendar" className="py-8 sm:py-16 bg-gradient-to-b from-white via-slate-50 to-white">
-      <div className="max-w-2xl mx-auto px-4 sm:px-6">
+    <section id="agendar" className="py-12 sm:py-20 bg-gradient-to-b from-[#F4F7F9] via-white to-[#F4F7F9] border-t border-slate-200/70 relative overflow-hidden">
+      {/* Orbes de luz sutiles que armonizan con el Hero */}
+      <div className="absolute top-1/4 -right-24 w-80 h-80 rounded-full bg-kanan-cyan/10 blur-3xl pointer-events-none" />
+      <div className="absolute bottom-10 -left-20 w-80 h-80 rounded-full bg-kanan-cerulean/10 blur-3xl pointer-events-none" />
 
-        {/* Ventana de Conversación estilo Mensajería Limpia */}
-        <div className="bg-white rounded-3xl border border-slate-200/90 shadow-[0_12px_40px_-10px_rgba(15,36,56,0.12)] overflow-hidden flex flex-col">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 relative">
+
+        {/* Encabezado elegante de sección con identidad Kanan */}
+        <div className="text-center max-w-xl mx-auto mb-6 sm:mb-8">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-kanan-ice border border-kanan-cyan/30 text-kanan-cerulean text-xs font-heading font-bold shadow-xs mb-3">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span>Asistente Oficial Kanan</span>
+          </div>
+          <h2 className="font-heading text-2xl sm:text-3xl font-extrabold text-kanan-deep">
+            Cotiza y Agenda en Conversación Directa
+          </h2>
+          <p className="text-slate-500 text-xs sm:text-sm mt-1.5">
+            Sin formularios fríos: plática guiada con nuestro asistente para coordinar tu servicio.
+          </p>
+        </div>
+
+        {/* Ventana de Conversación estilo Mensajería Premium Integrada */}
+        <div className="bg-white rounded-3xl border border-slate-200/90 shadow-[0_16px_50px_-12px_rgba(53,85,129,0.14)] overflow-hidden flex flex-col">
           
-          {/* Header de la Conversación */}
-          <div className="bg-white border-b border-slate-100 px-4 py-3 sm:px-5 sm:py-3.5 flex items-center justify-between">
+          {/* Header de la Conversación con degradado suave Kanan */}
+          <div className="bg-gradient-to-r from-slate-50 via-white to-slate-50 border-b border-slate-100 px-4 py-3 sm:px-6 sm:py-3.5 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="relative">
                 <img
                   src="/assets/brand/kanan-dog.png"
                   alt="Kanan asistente"
-                  className="w-10 h-10 sm:w-11 sm:h-11 rounded-full object-cover border border-cyan-200 shadow-sm bg-cyan-50"
+                  className="w-10 h-10 sm:w-11 sm:h-11 rounded-full object-cover border-2 border-kanan-cyan/40 shadow-xs bg-cyan-50"
                 />
                 <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white ring-1 ring-emerald-500/30" />
               </div>
               <div>
-                <h3 className="text-sm sm:text-base font-bold text-slate-900 leading-tight">
+                <h3 className="text-sm sm:text-base font-heading font-bold text-slate-900 leading-tight">
                   Kanan asistente
                 </h3>
-                <span className="text-[11px] text-emerald-600 font-medium">en línea</span>
+                <span className="text-[11px] text-emerald-600 font-medium flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  en línea
+                </span>
               </div>
             </div>
 
             <button
               type="button"
               onClick={handleResetConversation}
-              className="p-2 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition"
+              className="p-2 rounded-xl text-slate-400 hover:text-kanan-cerulean hover:bg-slate-100 transition"
               title="Reiniciar conversación"
             >
               <RefreshCw className="w-4 h-4" />
@@ -801,7 +829,10 @@ export function KananConciergeAgent({
           </div>
 
           {/* Área de Globos de Conversación */}
-          <div className="p-4 sm:p-6 space-y-4 min-h-[380px] max-h-[520px] overflow-y-auto bg-[#F7F9FB]">
+          <div
+            ref={chatContainerRef}
+            className="p-4 sm:p-6 space-y-4 min-h-[340px] max-h-[460px] overflow-y-auto bg-gradient-to-b from-slate-50/80 via-[#F7F9FB] to-white"
+          >
             {messages.map((m) => {
               const isAgent = m.sender === "agent";
 
