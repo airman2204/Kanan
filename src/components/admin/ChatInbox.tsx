@@ -95,10 +95,11 @@ export function ChatInbox({
 
   useEffect(() => {
     consultarStatus();
+    // Consultar cada 30 segundos (en lugar de cada 5s) para no ahogar los recursos de Render
     const interval = setInterval(() => {
       consultarStatus();
       if (onRefresh) onRefresh();
-    }, 5000);
+    }, 30000);
     return () => clearInterval(interval);
   }, [onRefresh]);
 

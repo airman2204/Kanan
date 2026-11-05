@@ -15,6 +15,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
 const PORT = process.env.PORT || 3001;
 const WEBHOOK_URL = process.env.WEBHOOK_URL || 'https://kananlimpieza.mx/api/chat/webhook';
@@ -191,6 +192,41 @@ app.get('/api/reconnect', authMiddleware, (req, res) => {
   }
 });
 
+// Función auxiliar idéntica a FoxDrop para verificar el JID activo en los servidores de WhatsApp
+async function getVerifiedJid(rawNumber) {
+  if (rawNumber.includes('@lid') || rawNumber.includes('@s.whatsapp.net')) {
+    return rawNumber;
+  }
+  let digits = rawNumber.replace(/\D/g, '');
+  if (digits.length >= 14 && digits.startsWith('64')) {
+    return `${digits}@lid`;
+  }
+  try {
+    const candidates = [];
+    if (digits.startsWith('52') && digits.length === 12) {
+      candidates.push(`521${digits.slice(2)}@s.whatsapp.net`, `${digits}@s.whatsapp.net`);
+    } else if (digits.startsWith('521') && digits.length === 13) {
+      candidates.push(`${digits}@s.whatsapp.net`, `52${digits.slice(3)}@s.whatsapp.net`);
+    } else if (digits.length === 10) {
+      candidates.push(`521${digits}@s.whatsapp.net`, `52${digits}@s.whatsapp.net`);
+    } else {
+      candidates.push(`${digits}@s.whatsapp.net`);
+    }
+
+    if (sock && connectionStatus === 'connected') {
+      const results = await sock.onWhatsApp(...candidates);
+      const valid = results?.find(r => r.exists && r.jid);
+      if (valid && valid.jid) {
+        console.log(`🎯 [Kanan Chat] JID exacto verificado para ${rawNumber}: ${valid.jid}`);
+        return valid.jid;
+      }
+    }
+  } catch (err) {
+    console.warn('[Kanan Chat] Error en onWhatsApp check:', err.message);
+  }
+  return digits.length === 10 ? `521${digits}@s.whatsapp.net` : `${digits}@s.whatsapp.net`;
+}
+
 app.post('/api/send-message', authMiddleware, async (req, res) => {
   try {
     const { to, message } = req.body;
@@ -201,18 +237,10 @@ app.post('/api/send-message', authMiddleware, async (req, res) => {
       return res.status(400).json({ ok: false, error: 'Faltan parámetros (to, message)' });
     }
 
-    let cleanPhone = to.replace(/\D/g, '');
-    // En México, WhatsApp requiere el prefijo internacional 521 para celulares de 10 dígitos
-    if (!cleanPhone.startsWith('52') && cleanPhone.length === 10) {
-      cleanPhone = `521${cleanPhone}`;
-    } else if (cleanPhone.startsWith('52') && !cleanPhone.startsWith('521') && cleanPhone.length === 12) {
-      cleanPhone = `521${cleanPhone.slice(2)}`;
-    }
-    const jid = `${cleanPhone}@s.whatsapp.net`;
-
+    const jid = await getVerifiedJid(to);
     await sock.sendMessage(jid, { text: message });
-    console.log(`📤 [Kanan Chat] Mensaje enviado con éxito a ${cleanPhone}`);
-    res.json({ ok: true, to: cleanPhone });
+    console.log(`📤 [Kanan Chat] Mensaje enviado con éxito a ${jid}`);
+    res.json({ ok: true, to: jid });
   } catch (err) {
     console.error('[Kanan Chat] Error enviando mensaje:', err);
     res.status(500).json({ ok: false, error: err.message });
@@ -229,14 +257,7 @@ app.post('/api/send-sticker', authMiddleware, async (req, res) => {
       return res.status(400).json({ ok: false, error: 'Falta teléfono destino' });
     }
 
-    let cleanPhone = to.replace(/\D/g, '');
-    // En México, WhatsApp requiere el prefijo internacional 521 para celulares de 10 dígitos
-    if (!cleanPhone.startsWith('52') && cleanPhone.length === 10) {
-      cleanPhone = `521${cleanPhone}`;
-    } else if (cleanPhone.startsWith('52') && !cleanPhone.startsWith('521') && cleanPhone.length === 12) {
-      cleanPhone = `521${cleanPhone.slice(2)}`;
-    }
-    const jid = `${cleanPhone}@s.whatsapp.net`;
+    const jid = await getVerifiedJid(to);
 
     // 1. Extraer nombre base del archivo sin importar si viene como png o webp
     const filename = path.basename(stickerPath || 'kanan-mascota-agendado.webp').replace('.png', '.webp');
@@ -278,8 +299,8 @@ app.post('/api/send-sticker', authMiddleware, async (req, res) => {
 
     if (stickerBuffer && stickerBuffer.length > 0) {
       await sock.sendMessage(jid, { sticker: stickerBuffer });
-      console.log(`👾 [Kanan Chat] Sticker (${filename}, ${stickerBuffer.length} bytes) enviado con éxito a ${cleanPhone}`);
-      return res.json({ ok: true, to: cleanPhone });
+      console.log(`👾 [Kanan Chat] Sticker (${filename}, ${stickerBuffer.length} bytes) enviado con éxito a ${jid}`);
+      return res.json({ ok: true, to: jid });
     } else {
       console.warn(`⚠️ [Kanan Chat] No se pudo encontrar el buffer para el sticker: ${stickerPath}`);
       return res.status(404).json({ ok: false, error: 'Sticker no encontrado' });
