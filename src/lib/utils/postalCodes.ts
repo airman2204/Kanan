@@ -118,6 +118,7 @@ const CODIGOS_POSTALES_KANAN: Record<string, { municipio: MunicipioZMG; colonias
   "45645": {
     municipio: "Tlajomulco",
     colonias: [
+      "Alta California",
       "Punto Sur",
       "Nueva Galicia",
       "La Rioja",
