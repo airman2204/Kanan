@@ -221,15 +221,15 @@ export function ClientesTable({
   return (
     <div className="space-y-6">
       {/* Barra Superior: Búsqueda, Filtro y Botón Alta */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex flex-1 items-center gap-3">
-          <div className="relative flex-1 max-w-md">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div className="flex flex-col sm:flex-row flex-1 items-stretch sm:items-center gap-2.5">
+          <div className="relative flex-1">
             <input
               type="text"
               placeholder="Buscar por nombre, teléfono o colonia..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-2xl text-xs font-medium text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#36A6DE]/20 focus:border-[#1D71B5]"
+              className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-2xl text-xs font-medium text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#36A6DE]/20 focus:border-[#1D71B5] min-h-[42px]"
             />
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
           </div>
@@ -237,7 +237,7 @@ export function ClientesTable({
           <select
             value={selectedMunicipio}
             onChange={(e) => setSelectedMunicipio(e.target.value)}
-            className="px-3 py-2.5 bg-white border border-slate-200 rounded-2xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#36A6DE]/20"
+            className="px-3 py-2.5 bg-white border border-slate-200 rounded-2xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#36A6DE]/20 min-h-[42px]"
           >
             <option value="todos">Todos los municipios</option>
             {MUNICIPIOS.map((m) => (
@@ -253,7 +253,7 @@ export function ClientesTable({
             type="button"
             onClick={handleExportCSV}
             disabled={filteredClientes.length === 0}
-            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 bg-white hover:bg-slate-50 text-slate-700 font-heading font-bold text-xs rounded-2xl border border-slate-200 shadow-sm transition active:scale-[0.99] disabled:opacity-50 shrink-0"
+            className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 min-h-[42px] bg-white hover:bg-slate-50 text-slate-700 font-heading font-bold text-xs rounded-2xl border border-slate-200 shadow-sm transition active:scale-[0.99] disabled:opacity-50 shrink-0"
             title="Descargar lista de clientes en formato CSV para Excel"
           >
             <Download className="w-4 h-4 text-emerald-600" />
@@ -263,10 +263,10 @@ export function ClientesTable({
           <button
             type="button"
             onClick={() => setShowCreateModal(true)}
-            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#355581] to-[#1D71B5] hover:from-[#2a4468] hover:to-[#175c94] text-white font-heading font-bold text-xs rounded-2xl transition-all shadow-md active:scale-[0.99] shrink-0"
+            className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-4 py-2.5 min-h-[42px] bg-gradient-to-r from-[#355581] to-[#1D71B5] hover:from-[#2a4468] hover:to-[#175c94] text-white font-heading font-bold text-xs rounded-2xl transition-all shadow-md active:scale-[0.99] shrink-0"
           >
             <Plus className="w-4 h-4" />
-            <span>+ Dar de alta cliente</span>
+            <span>+ Dar de alta</span>
           </button>
         </div>
       </div>
@@ -478,16 +478,16 @@ export function ClientesTable({
 
       {/* MODAL: ALTA MANUAL DE CLIENTE */}
       {showCreateModal && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-lg bg-white rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+          <div className="w-full max-w-lg bg-white rounded-3xl p-5 sm:p-8 space-y-5 shadow-2xl max-h-[92vh] overflow-y-auto my-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 sticky top-0 bg-white z-10">
               <h3 className="font-heading font-extrabold text-lg text-[#355581]">
                 Dar de alta cliente
               </h3>
               <button
                 type="button"
                 onClick={() => setShowCreateModal(false)}
-                className="p-1 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-600"
+                className="min-h-[40px] min-w-[40px] flex items-center justify-center rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-600"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -667,16 +667,16 @@ export function ClientesTable({
 
       {/* MODAL: EDITAR CLIENTE */}
       {editingClient && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-lg bg-white rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+          <div className="w-full max-w-lg bg-white rounded-3xl p-5 sm:p-8 space-y-5 shadow-2xl max-h-[92vh] overflow-y-auto my-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 sticky top-0 bg-white z-10">
               <h3 className="font-heading font-extrabold text-lg text-[#355581]">
                 Editar cliente
               </h3>
               <button
                 type="button"
                 onClick={() => setEditingClient(null)}
-                className="p-1 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-600"
+                className="min-h-[40px] min-w-[40px] flex items-center justify-center rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-600"
               >
                 <X className="w-5 h-5" />
               </button>

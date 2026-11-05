@@ -895,9 +895,9 @@ export function CalendarCitasView({
 
       {/* MODAL: FICHA DETALLADA DE LA CITA + FOTOS ANTES/DESPUÉS + PAGO */}
       {selectedCitaDetalle && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-2xl bg-white rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+          <div className="w-full max-w-2xl bg-white rounded-3xl p-5 sm:p-8 space-y-5 shadow-2xl max-h-[92vh] overflow-y-auto my-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 sticky top-0 bg-white z-10">
               <div>
                 <span className="text-xs font-bold text-slate-400">Detalles de la Cita</span>
                 <h3 className="font-heading font-extrabold text-lg text-[#355581] flex items-center gap-2">
@@ -910,7 +910,7 @@ export function CalendarCitasView({
               <button
                 type="button"
                 onClick={() => setSelectedCitaDetalle(null)}
-                className="p-1 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-600"
+                className="min-h-[40px] min-w-[40px] flex items-center justify-center rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-600"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1309,16 +1309,16 @@ export function CalendarCitasView({
 
       {/* MODAL: NUEVA CITA MANUAL (COMPLETO CON SEMÁFORO, TELA, ACCESOS Y PAGO) */}
       {showNewModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-2xl bg-white rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+          <div className="w-full max-w-2xl bg-white rounded-3xl p-5 sm:p-8 space-y-5 shadow-2xl max-h-[92vh] overflow-y-auto my-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 sticky top-0 bg-white z-10">
               <h3 className="font-heading font-extrabold text-lg text-[#355581]">
                 Agendar nueva cita de servicio
               </h3>
               <button
                 type="button"
                 onClick={() => setShowNewModal(false)}
-                className="p-1 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-600"
+                className="min-h-[40px] min-w-[40px] flex items-center justify-center rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-600"
               >
                 <X className="w-5 h-5" />
               </button>

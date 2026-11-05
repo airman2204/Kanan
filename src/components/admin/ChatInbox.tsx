@@ -14,7 +14,8 @@ import {
   MessagesSquare,
   Smile,
   Image as ImageIcon,
-  Sparkles
+  Sparkles,
+  ChevronLeft
 } from "lucide-react";
 import { Cliente, ServicioCita, MensajeAutomatizacion } from "@/types/crm";
 import { AgentFlowCanvas } from "./agent-flow/AgentFlowCanvas";
@@ -48,6 +49,7 @@ export function ChatInbox({
   const [contactosLocales, setContactosLocales] = useState<Cliente[]>(clientes);
   const [mensajesLocales, setMensajesLocales] = useState<MensajeAutomatizacion[]>(initialMensajes);
   const [selectedClienteId, setSelectedClienteId] = useState<string>(clientes[0]?.id || "");
+  const [mobileChatOpen, setMobileChatOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"conversaciones" | "agente_flow">("conversaciones");
   const [inputMessage, setInputMessage] = useState("");
   const [busqueda, setBusqueda] = useState("");
@@ -398,11 +400,13 @@ export function ChatInbox({
           <AgentFlowCanvas />
         </div>
       ) : (
-        /* Bandeja de Chat con Estilo Moderno Limpio (Sin fondo amarillento) */
-        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs h-[660px] flex flex-col md:flex-row">
+        /* Bandeja de Chat con Estilo Moderno Limpio (Sin fondo amarillento) y Responsivo Móvil */
+        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs h-[640px] sm:h-[680px] flex flex-col md:flex-row relative">
           
-          {/* Columna Izquierda: Lista de Contactos */}
-          <div className="w-full md:w-80 lg:w-88 border-r border-slate-200 flex flex-col bg-slate-50/70">
+          {/* Columna Izquierda: Lista de Contactos (Oculta en móvil si hay chat abierto) */}
+          <div className={`w-full md:w-80 lg:w-88 border-r border-slate-200 flex flex-col bg-slate-50/70 h-full ${
+            mobileChatOpen ? "hidden md:flex" : "flex"
+          }`}>
             {/* Buscador */}
             <div className="p-3 border-b border-slate-200/80 bg-white">
               <div className="relative">
@@ -430,14 +434,17 @@ export function ChatInbox({
                   <button
                     key={cli.id}
                     type="button"
-                    onClick={() => setSelectedClienteId(cli.id)}
-                    className={`w-full p-3 text-left flex items-start gap-3 transition-colors ${
+                    onClick={() => {
+                      setSelectedClienteId(cli.id);
+                      setMobileChatOpen(true);
+                    }}
+                    className={`w-full p-3.5 text-left flex items-start gap-3 transition-colors min-h-[58px] ${
                       isSelected 
                         ? "bg-white shadow-2xs border-l-3 border-[#1D71B5]" 
                         : "hover:bg-slate-100/60"
                     }`}
                   >
-                    <div className="w-9 h-9 rounded-full bg-[#1D71B5]/10 text-[#1D71B5] flex items-center justify-center shrink-0 font-bold text-xs">
+                    <div className="w-10 h-10 rounded-full bg-[#1D71B5]/10 text-[#1D71B5] flex items-center justify-center shrink-0 font-bold text-xs">
                       {cli.nombre.slice(0, 2).toUpperCase()}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -464,27 +471,38 @@ export function ChatInbox({
             </div>
           </div>
 
-          {/* Columna Derecha: Conversación */}
-          <div className="flex-1 flex flex-col bg-white">
+          {/* Columna Derecha: Conversación (Ocupa pantalla completa en móvil cuando se selecciona chat) */}
+          <div className={`flex-1 flex-col bg-white h-full ${
+            mobileChatOpen ? "flex" : "hidden md:flex"
+          }`}>
             {activeCliente ? (
               <>
-                {/* Cabecera del Chat Activo */}
-                <div className="px-4 py-3 border-b border-slate-200 bg-white flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-[#1D71B5] text-white flex items-center justify-center font-bold text-xs shadow-2xs">
+                {/* Cabecera del Chat Activo con Botón Volver en móvil */}
+                <div className="px-3 sm:px-4 py-2.5 sm:py-3 border-b border-slate-200 bg-white flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                    <button
+                      type="button"
+                      onClick={() => setMobileChatOpen(false)}
+                      className="md:hidden p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 min-h-[40px] min-w-[40px] flex items-center justify-center shrink-0"
+                      title="Volver a la lista de contactos"
+                    >
+                      <ChevronLeft className="w-5 h-5" />
+                    </button>
+
+                    <div className="w-9 h-9 rounded-full bg-[#1D71B5] text-white flex items-center justify-center font-bold text-xs shadow-2xs shrink-0">
                       {activeCliente.nombre.slice(0, 2).toUpperCase()}
                     </div>
-                    <div>
-                      <h3 className="font-bold text-xs text-slate-900">
+                    <div className="min-w-0">
+                      <h3 className="font-bold text-xs text-slate-900 truncate">
                         {activeCliente.nombre}
                       </h3>
-                      <p className="text-[11px] text-slate-500">
+                      <p className="text-[11px] text-slate-500 truncate">
                         {activeCliente.whatsapp}
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 shrink-0">
                     {/* Botón rápido para confirmar si está pendiente */}
                     {(() => {
                       const citaPorConfirmar = activeCitas.find((c) => c.estatus === "Por Confirmar");
@@ -641,31 +659,31 @@ export function ChatInbox({
                 )}
 
                 {/* Input de Mensaje Limpio con Botón de Emoticones y Stickers */}
-                <form onSubmit={handleSendMessage} className="p-2.5 bg-white border-t border-slate-200 flex items-center gap-1.5">
+                <form onSubmit={handleSendMessage} className="p-2 sm:p-2.5 bg-white border-t border-slate-200 flex items-center gap-1 sm:gap-1.5">
                   <button
                     type="button"
                     onClick={() => setMostrarPicker(mostrarPicker === "emojis" ? null : "emojis")}
-                    className={`p-2 rounded-xl transition ${
+                    className={`min-h-[42px] min-w-[42px] flex items-center justify-center rounded-xl transition ${
                       mostrarPicker === "emojis"
                         ? "bg-[#1D71B5] text-white shadow-2xs"
                         : "text-slate-500 hover:text-slate-700 hover:bg-slate-100"
                     }`}
                     title="Emoticones"
                   >
-                    <Smile className="w-4 h-4" />
+                    <Smile className="w-5 h-5" />
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setMostrarPicker(mostrarPicker === "stickers" ? null : "stickers")}
-                    className={`p-2 rounded-xl transition ${
+                    className={`min-h-[42px] min-w-[42px] flex items-center justify-center rounded-xl transition ${
                       mostrarPicker === "stickers"
                         ? "bg-[#1D71B5] text-white shadow-2xs"
                         : "text-slate-500 hover:text-slate-700 hover:bg-slate-100"
                     }`}
                     title="Stickers de Kanan"
                   >
-                    <ImageIcon className="w-4 h-4" />
+                    <ImageIcon className="w-5 h-5" />
                   </button>
 
                   <input
@@ -674,13 +692,13 @@ export function ChatInbox({
                     placeholder="Escribe un mensaje..."
                     value={inputMessage}
                     onChange={(e) => setInputMessage(e.target.value)}
-                    className="flex-1 px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#1D71B5]"
+                    className="flex-1 px-3 sm:px-3.5 py-2 sm:py-2.5 min-h-[42px] rounded-xl border border-slate-200 bg-slate-50 text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#1D71B5]"
                   />
 
                   <button
                     type="submit"
                     disabled={!inputMessage.trim() || enviando}
-                    className="p-2 rounded-xl bg-[#1D71B5] hover:bg-[#175c94] text-white disabled:opacity-40 transition active:scale-95 shadow-2xs"
+                    className="min-h-[42px] min-w-[42px] flex items-center justify-center rounded-xl bg-[#1D71B5] hover:bg-[#175c94] text-white disabled:opacity-40 transition active:scale-95 shadow-2xs shrink-0"
                     title="Enviar"
                   >
                     <Send className="w-4 h-4" />

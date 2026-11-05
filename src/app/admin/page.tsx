@@ -573,11 +573,25 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen bg-[#F4F7F9] flex antialiased text-slate-800">
       
+      {/* OVERLAY OSCURO PARA MÓVIL Y TABLET CUANDO EL SIDEBAR ESTÁ ABIERTO */}
+      {sidebarOpen && (
+        <div
+          role="button"
+          tabIndex={0}
+          aria-label="Cerrar menú"
+          onClick={() => setSidebarOpen(false)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " " || e.key === "Escape") setSidebarOpen(false);
+          }}
+          className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-40 md:hidden transition-opacity animate-in fade-in"
+        />
+      )}
+
       {/* MENÚ LATERAL (SIDEBAR) */}
       <aside
         className={`fixed md:sticky top-0 left-0 h-screen z-50 bg-[#0F172A] text-white flex flex-col justify-between transition-all duration-300 ease-in-out border-r border-slate-800/80 shadow-2xl relative ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
-        } ${sidebarCollapsed ? "md:w-20" : "md:w-64"} w-64`}
+        } ${sidebarCollapsed ? "md:w-20" : "md:w-64"} w-72 sm:w-80 md:w-64`}
       >
         {/* Pestaña flotante para colapsar / desplegar sidebar (estilo tab en el borde derecho) */}
         <button
@@ -704,34 +718,35 @@ export default function AdminPage() {
       <div className="flex-1 flex flex-col min-w-0">
         
         {/* BARRA SUPERIOR FIJA */}
-        <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-8 py-3.5 flex items-center justify-between shadow-[0_1px_6px_rgba(0,0,0,0.02)]">
-          <div className="flex items-center gap-3 min-w-0">
+        <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/80 px-3 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-2 shadow-[0_1px_6px_rgba(0,0,0,0.02)]">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <button
               type="button"
               onClick={() => setSidebarOpen(true)}
-              className="md:hidden p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
+              className="md:hidden min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors shrink-0"
               aria-label="Abrir menú"
             >
               <Menu className="w-5 h-5" />
             </button>
 
-            <h1 className="font-heading font-extrabold text-lg sm:text-xl text-[#355581] truncate">
+            <h1 className="font-heading font-extrabold text-base sm:text-xl text-[#355581] truncate">
               {sectionTitles[activeSection]}
             </h1>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             {/* Control de Sonidos y Alertas de Tableta */}
             <div className="flex items-center bg-slate-100 p-1 rounded-2xl border border-slate-200">
               <button
                 type="button"
                 onClick={toggleSound}
-                className={`p-1.5 rounded-xl transition flex items-center gap-1.5 text-xs font-heading font-bold ${
+                className={`min-h-[38px] px-2.5 sm:px-3 rounded-xl transition flex items-center gap-1.5 text-xs font-heading font-bold ${
                   soundMuted
                     ? "bg-slate-200 text-slate-500"
                     : "bg-white text-[#1D71B5] shadow-xs"
                 }`}
                 title={soundMuted ? "Sonidos silenciados" : "Sonidos activos"}
+                aria-label={soundMuted ? "Activar sonidos" : "Silenciar sonidos"}
               >
                 {soundMuted ? <BellOff className="w-4 h-4 text-slate-400" /> : <Bell className="w-4 h-4 text-[#1D71B5]" />}
                 <span className="hidden sm:inline">{soundMuted ? "Silencio" : "Sonido"}</span>
@@ -741,10 +756,10 @@ export default function AdminPage() {
                 <button
                   type="button"
                   onClick={solicitarPermisoNotificaciones}
-                  className="px-2 py-1 rounded-xl text-[11px] font-heading font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 transition flex items-center gap-1"
-                  title="Activar alertas en segundo plano para tableta"
+                  className="min-h-[38px] px-2.5 py-1 rounded-xl text-[11px] font-heading font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 transition flex items-center gap-1"
+                  title="Activar alertas en segundo plano para tableta y celular"
                 >
-                  <span>🔔 Activar Alertas 2do Plano</span>
+                  <span>🔔 <span className="hidden sm:inline">Alertas</span> 2do Plano</span>
                 </button>
               )}
             </div>
@@ -756,10 +771,10 @@ export default function AdminPage() {
                 setActiveSection("calendario");
                 setTriggerNewCitaModal(true);
               }}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-[#1D71B5] to-[#36A6DE] hover:from-[#175c94] hover:to-[#2c8fc0] text-white font-heading font-bold text-xs shadow-sm hover:shadow-md transition-all active:scale-[0.98]"
+              className="inline-flex items-center gap-1.5 min-h-[42px] px-3 sm:px-4 py-2 rounded-xl bg-gradient-to-r from-[#1D71B5] to-[#36A6DE] hover:from-[#175c94] hover:to-[#2c8fc0] text-white font-heading font-bold text-xs shadow-sm hover:shadow-md transition-all active:scale-[0.98]"
             >
               <Plus className="w-4 h-4" />
-              <span>Nueva Cita</span>
+              <span className="hidden sm:inline">Nueva Cita</span>
             </button>
           </div>
         </header>

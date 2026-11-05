@@ -168,15 +168,15 @@ export function KanbanBoard({
         </div>
       </div>
 
-      {/* Tablero Kanban (5 Columnas) */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3.5 items-start">
+      {/* Tablero Kanban (Scroll horizontal natural en tablet y móvil para evitar columnas aplastadas) */}
+      <div className="flex md:grid md:grid-cols-3 lg:grid-cols-5 gap-3.5 items-start overflow-x-auto pb-4 pt-1 snap-x no-scrollbar -mx-2 px-2 sm:mx-0 sm:px-0">
         {COLUMNAS.map((col) => {
           const citasColumna = citasFiltradas.filter((c) => c.estatus === col.id);
 
           return (
             <div
               key={col.id}
-              className={`rounded-3xl border ${col.colorBorde} ${col.colorBg} p-3.5 flex flex-col min-h-[480px] space-y-3 transition shadow-xs`}
+              className={`rounded-3xl border ${col.colorBorde} ${col.colorBg} p-3.5 flex flex-col min-h-[460px] sm:min-h-[480px] w-[280px] sm:w-[300px] md:w-auto shrink-0 snap-start space-y-3 transition shadow-xs`}
             >
               {/* Encabezado de Columna */}
               <div className="flex items-center justify-between pb-2 border-b border-slate-200/80">
