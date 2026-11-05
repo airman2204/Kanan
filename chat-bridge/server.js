@@ -50,9 +50,13 @@ async function startWhatsApp() {
 
   sock = makeWASocket({
     auth: state,
-    printQRInTerminal: true,
+    printQRInTerminal: false,
     logger: pino({ level: 'silent' }),
     browser: ['Kanan Limpieza CRM', 'Chrome', '1.0.0'],
+    keepAliveIntervalMs: 25000,
+    connectTimeoutMs: 60000,
+    defaultQueryTimeoutMs: 60000,
+    syncFullHistory: false,
   });
 
   sock.ev.on('creds.update', saveCreds);
