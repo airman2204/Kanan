@@ -134,9 +134,10 @@ export function KananConciergeAgent({
   // Agenda y contacto
   const [fecha, setFecha] = useState<string>("");
   const [turno, setTurno] = useState<string>("");
+  const [horaEspecifica, setHoraEspecifica] = useState<string>("");
   const [nombre, setNombre] = useState<string>("");
   const [whatsapp, setWhatsapp] = useState<string>("");
-  const [slotsOcupados, setSlotsOcupados] = useState<{ fecha: string; turno: string; municipio: string }[]>([]);
+  const [slotsOcupados, setSlotsOcupados] = useState<{ fecha: string; turno: string; hora_especifica?: string; municipio?: string }[]>([]);
 
   // Input libre para el paso activo y errores en vivo
   const [inputText, setInputText] = useState<string>("");
@@ -193,9 +194,11 @@ export function KananConciergeAgent({
     return dias;
   };
 
-  // Obtener turnos oficiales según el municipio y si el día es entre semana o fin de semana
-  // Regla operativa: Cada servicio toma mín. 2 hrs + 2 hrs de traslado entre domicilios.
-  const obtenerTurnosPorDia = (fechaStr: string) => {
+  // Generador inteligente de horas con semáforo y regla de ruta:
+  // - Ventana operativa de 09:00 a 16:00 (Tlajomulco o fin de semana hasta 13:00 / entre semana hasta 16:00-18:00)
+  // - Cada cita dura mín. 2 horas de servicio + 2 horas de traslado técnico.
+  // - Conflicto si abs(hora - cita.hora) < 4 horas para el mismo técnico/zona o cita a la misma hora.
+  const obtenerHorasDisponiblesPorDia = (fechaStr: string) => {
     if (!fechaStr) return [];
     const parts = fechaStr.split("-");
     const d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
@@ -203,45 +206,79 @@ export function KananConciergeAgent({
     const esFin = diaNum === 0 || diaNum === 6;
     const muniLower = (municipioDetectado || selectedMunicipio).toLowerCase();
 
-    if (muniLower.includes("tlajomulco")) {
-      return [
-        {
-          turno: "Lunes a Domingo (09:00 - 16:00)",
-          label: "☀️ Rango de Servicio (09:00 - 16:00)",
-          secado: "Secado listo esa misma tarde",
-        },
-      ];
+    // Rango de inicio según día y municipio
+    let horaInicio = 9;
+    let horaFin = 16; // 16:00 última hora de inicio estándar para terminar ~18:00
+
+    if (esFin && !muniLower.includes("tlajomulco")) {
+      horaInicio = 8;
+      horaFin = 13;
     }
 
-    if (esFin) {
-      return [
-        {
-          turno: "Sábado y Domingo (08:00 - 13:00)",
-          label: "☀️ Mañana Fin de Semana (08:00 - 13:00)",
-          secado: "Secado listo entre 1:00 PM y 4:00 PM",
-        },
-      ];
+    const slotsHora = [];
+    const parseHour = (hStr?: string) => {
+      if (!hStr) return null;
+      const clean = hStr.toLowerCase().trim();
+      const match = clean.match(/(\d{1,2}):?(\d{2})?\s*(am|pm)?/);
+      if (!match) return null;
+      let hr = parseInt(match[1], 10);
+      const isPm = match[3] === "pm";
+      const isAm = match[3] === "am";
+      if (isPm && hr < 12) hr += 12;
+      if (isAm && hr === 12) hr = 0;
+      return hr;
+    };
+
+    // Citas existentes en esa fecha
+    const citasDelDia = slotsOcupados.filter((s) => s.fecha === fechaStr);
+
+    for (let h = horaInicio; h <= horaFin; h++) {
+      const horaFormato24 = `${h.toString().padStart(2, "0")}:00`;
+      const horaFormatoAmPm = `${h > 12 ? h - 12 : h === 0 ? 12 : h}:00 ${h >= 12 ? "PM" : "AM"}`;
+
+      // Verificar si hay conflicto con otra cita registrada
+      // Regla: 2 hrs servicio + 2 hrs traslado = 4 hrs de ventana de separación
+      let ocupado = false;
+      let razonOcupado = "";
+
+      for (const c of citasDelDia) {
+        const cHour = parseHour(c.hora_especifica || c.turno);
+        if (cHour !== null) {
+          const diff = Math.abs(h - cHour);
+          if (diff < 3) {
+            ocupado = true;
+            razonOcupado = "Ocupado por servicio activo y traslado (+2h)";
+            break;
+          }
+        } else if (c.turno && c.turno.includes(`${h.toString().padStart(2, "0")}:00`)) {
+          ocupado = true;
+          razonOcupado = "Ruta reservada";
+          break;
+        }
+      }
+
+      // Si ya son más de 3 citas en el día, el día está saturado
+      if (citasDelDia.length >= 3) {
+        ocupado = true;
+        razonOcupado = "Ruta completa del día";
+      }
+
+      slotsHora.push({
+        hora: horaFormato24,
+        label: horaFormatoAmPm,
+        ocupado,
+        razonOcupado,
+        secado: h <= 12 ? "Secado listo esa misma tarde" : "Secado listo en la noche",
+      });
     }
 
-    return [
-      {
-        turno: "Lunes a Viernes (09:00 - 14:00)",
-        label: "☀️ Mañana (09:00 - 14:00)",
-        secado: "Secado listo entre 2:00 PM y 5:00 PM",
-      },
-      {
-        turno: "Vespertino (14:00 - 18:00)",
-        label: "🌤️ Tarde (14:00 - 18:00)",
-        secado: "Secado listo esa misma noche",
-      },
-    ];
+    return slotsHora;
   };
 
-  // Verificar si un turno ya está reservado en esa fecha en la base de datos
-  const isTurnoOcupado = (fechaStr: string, turnoStr: string) => {
-    return slotsOcupados.some(
-      (slot) => slot.fecha === fechaStr && slot.turno === turnoStr
-    );
+  // Verificar si un día completo ya no tiene ninguna hora disponible
+  const isDiaSinHorasDisponibles = (fechaStr: string) => {
+    const horas = obtenerHorasDisponiblesPorDia(fechaStr);
+    return horas.length > 0 && horas.every((h) => h.ocupado);
   };
 
   // Inicializar conversación natural
@@ -629,18 +666,19 @@ export function KananConciergeAgent({
     );
   };
 
-  // 9. Selección de Día y Turno
+  // 9. Selección de Día y Hora
   const handleSelectDay = (fechaIso: string, labelDia: string) => {
-    setFecha(fechaIso);
     setErrorActivo(null);
 
-    const turnosParaDia = obtenerTurnosPorDia(fechaIso);
-    const slotsDisponibles = turnosParaDia.filter((t) => !isTurnoOcupado(fechaIso, t.turno));
+    const horas = obtenerHorasDisponiblesPorDia(fechaIso);
+    const disponibles = horas.filter((h) => !h.ocupado);
 
-    if (slotsDisponibles.length === 0) {
-      setErrorActivo(`El día ${labelDia} ya cuenta con su ruta 100% llena. Por favor selecciona otro día.`);
+    if (disponibles.length === 0) {
+      setErrorActivo(`El día ${labelDia} ya cuenta con su ruta 100% llena sin horas libres. Por favor selecciona otro día.`);
       return;
     }
+
+    setFecha(fechaIso);
 
     setMessages((prev) => [
       ...prev,
@@ -653,13 +691,27 @@ export function KananConciergeAgent({
     ]);
 
     appendAgentMessage(
-      `¡Excelente fecha! (${labelDia}). 📅\n\n¿En qué turno te viene mejor que acudamos? (Nuestros turnos consideran el secado rápido de 3 a 4 horas):`,
+      `¡Excelente fecha! (${labelDia}). 📅\n\nPor favor selecciona el horario de llegada de tu especialista dentro del rango operativo (consideramos 2 hrs de servicio + traslado y secado en 3 a 4 horas):`,
       "ask_date"
     );
   };
 
-  const handleSelectTurno = (turnoElegido: string, turnoLabel: string) => {
-    setTurno(turnoElegido);
+  const handleSelectHora = (hora24: string, horaLabel: string) => {
+    setHoraEspecifica(horaLabel);
+    // Asignar turno correspondiente según la hora seleccionada
+    const hrNum = parseInt(hora24.split(":")[0], 10);
+    const muniLower = (municipioDetectado || selectedMunicipio).toLowerCase();
+
+    let turnoCalculado = "Lunes a Domingo (09:00 - 16:00)";
+    if (muniLower.includes("tlajomulco")) {
+      turnoCalculado = "Lunes a Domingo (09:00 - 16:00)";
+    } else if (hrNum < 14) {
+      turnoCalculado = "Matutino (09:00 - 13:00)";
+    } else {
+      turnoCalculado = "Vespertino (14:00 - 18:00)";
+    }
+
+    setTurno(turnoCalculado);
     setErrorActivo(null);
 
     setMessages((prev) => [
@@ -667,13 +719,13 @@ export function KananConciergeAgent({
       {
         id: `user-${Date.now()}`,
         sender: "user",
-        text: `Turno: ${turnoLabel}`,
+        text: `Horario: ${horaLabel}`,
         time: getCurrentTime(),
       },
     ]);
 
     appendAgentMessage(
-      `¡Apartado en agenda! 📅\n\nPor favor compárteme tu Nombre Completo para preparar tu ficha formal de servicio.`,
+      `¡Apartado a las ${horaLabel} en agenda! ⏰📅\n\nPor favor compárteme tu Nombre Completo para preparar tu ficha formal de servicio.`,
       "ask_name"
     );
   };
@@ -761,6 +813,7 @@ export function KananConciergeAgent({
           mascotas: true,
           fecha: fecha || getTomorrowDate(),
           turno: turno || "Matutino (09:00 - 13:00)",
+          hora_especifica: horaEspecifica || undefined,
           items_contratados: items,
           notas_servicio: sanitizeInput(notasLibres || "Solicitud vía Kanan asistente"),
           fotos_estado_actual: fotosPreview,
@@ -784,7 +837,7 @@ export function KananConciergeAgent({
         {
           id: `agent-done-${Date.now()}`,
           sender: "agent",
-          text: `🎉 ¡Excelente, ${nombre.split(" ")[0]}! Tu cita y cotización han sido registradas formalmente.\n\n📋 *Folio de Servicio:* **${folio}**\n🛋️ *Pieza:* ${items[0].cantidad}x ${items[0].piezaNombre}\n📍 *Ubicación:* ${municipioDetectado} (CP ${codigoPostal})\n📸 *Fotos recibidas:* ${fotosPreview.length} foto(s)\n📅 *Fecha:* ${fecha} (${turno})\n\nTu expediente completo ya está en nuestro panel de control y te hemos despachado tu confirmación a WhatsApp. ✨`,
+          text: `🎉 ¡Excelente, ${nombre.split(" ")[0]}! Tu cita y cotización han sido registradas formalmente.\n\n📋 *Folio de Servicio:* **${folio}**\n🛋️ *Pieza:* ${items[0].cantidad}x ${items[0].piezaNombre}\n📍 *Ubicación:* ${municipioDetectado} (CP ${codigoPostal})\n📸 *Fotos recibidas:* ${fotosPreview.length} foto(s)\n📅 *Fecha:* ${fecha} a las ${horaEspecifica || turno}\n\nTu expediente completo ya está en nuestro panel de control y te hemos despachado tu confirmación a WhatsApp. ✨`,
           time: getCurrentTime(),
         },
       ]);
@@ -1341,11 +1394,11 @@ export function KananConciergeAgent({
                     </div>
                   </div>
                 ) : (
-                  /* 9.2: Turnos disponibles para la fecha seleccionada */
+                  /* 9.2: Horas disponibles para la fecha seleccionada con semáforo inteligente */
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <p className="text-xs text-slate-600 font-medium">
-                        Turnos disponibles para <strong className="text-slate-900">{fecha}</strong>:
+                        Horarios para <strong className="text-slate-900">{fecha}</strong> (rango 09:00 - 16:00):
                       </p>
                       <button
                         type="button"
@@ -1356,45 +1409,53 @@ export function KananConciergeAgent({
                       </button>
                     </div>
 
-                    <div className="space-y-2">
-                      {obtenerTurnosPorDia(fecha).map((t) => {
-                        const ocupado = isTurnoOcupado(fecha, t.turno);
-                        return (
-                          <button
-                            key={t.turno}
-                            type="button"
-                            disabled={ocupado}
-                            onClick={() => handleSelectTurno(t.turno, t.label)}
-                            className={`w-full p-3 rounded-2xl border text-left flex items-center justify-between transition-all ${
-                              ocupado
-                                ? "bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed opacity-60"
-                                : "bg-white hover:bg-cyan-50/70 border-slate-200 hover:border-cyan-300 text-slate-800 shadow-xs active:scale-98"
-                            }`}
-                          >
-                            <div>
-                              <div className="flex items-center gap-2">
+                    {/* Grilla visual de horas de llegada */}
+                    {obtenerHorasDisponiblesPorDia(fecha).some((h) => !h.ocupado) ? (
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        {obtenerHorasDisponiblesPorDia(fecha).map((h) => {
+                          return (
+                            <button
+                              key={h.hora}
+                              type="button"
+                              disabled={h.ocupado}
+                              onClick={() => handleSelectHora(h.hora, h.label)}
+                              className={`p-3 rounded-2xl border text-left transition-all ${
+                                h.ocupado
+                                  ? "bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed opacity-50"
+                                  : "bg-white hover:bg-cyan-50/80 border-slate-200 hover:border-cyan-400 text-slate-800 shadow-xs active:scale-95"
+                              }`}
+                            >
+                              <div className="flex items-center justify-between">
                                 <span className="font-heading font-extrabold text-xs sm:text-sm">
-                                  {t.label}
+                                  {h.label}
                                 </span>
-                                {ocupado ? (
-                                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700">
-                                    Ruta Llena
-                                  </span>
+                                {h.ocupado ? (
+                                  <span className="w-2 h-2 rounded-full bg-rose-400" title="Ocupado" />
                                 ) : (
-                                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700">
-                                    Disponible
-                                  </span>
+                                  <span className="w-2 h-2 rounded-full bg-emerald-500" title="Disponible" />
                                 )}
                               </div>
-                              <span className="text-[11px] text-slate-500 block mt-0.5">
-                                {t.secado}
+                              <span className="text-[10px] text-slate-500 block mt-1">
+                                {h.ocupado ? h.razonOcupado || "Ocupado" : h.secado}
                               </span>
-                            </div>
-                            {!ocupado && <ChevronRight className="w-4 h-4 text-cyan-600" />}
-                          </button>
-                        );
-                      })}
-                    </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-2xl text-center space-y-2">
+                        <p className="text-xs text-rose-800 font-medium">
+                          ⚠️ No hay horas disponibles para este día debido a rutas y tiempos de servicio (+2 hrs de traslado).
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => setFecha("")}
+                          className="px-4 py-1.5 rounded-full bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition"
+                        >
+                          Consultar otro día
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

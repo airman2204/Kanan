@@ -517,6 +517,7 @@ export function createBookingFromWizard(payload: {
   mascotas: boolean;
   fecha: string;
   turno: TurnoServicio;
+  hora_especifica?: string;
   items_contratados: ItemContratado[];
   notas_servicio: string;
   fotos_estado_actual?: string[];
@@ -563,7 +564,7 @@ export function createBookingFromWizard(payload: {
     cliente_id: cliente.id,
     fecha: payload.fecha,
     turno: payload.turno,
-    hora_especifica: payload.turno.startsWith("Matutino") ? "10:00 AM" : "03:30 PM",
+    hora_especifica: payload.hora_especifica || (payload.turno.startsWith("Matutino") ? "10:00 AM" : "03:30 PM"),
     items_contratados: payload.items_contratados,
     monto_total: null,
     estatus: "Por Confirmar",

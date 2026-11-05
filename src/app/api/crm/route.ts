@@ -267,6 +267,7 @@ export async function POST(req: NextRequest) {
       mascotas: Boolean(body.mascotas),
       fecha: body.fecha,
       turno: body.turno,
+      hora_especifica: body.hora_especifica,
       items_contratados: body.items_contratados || [],
       notas_servicio: sanitizedNotas,
       fotos_estado_actual: body.fotos_estado_actual || [],
