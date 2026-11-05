@@ -144,8 +144,8 @@ export function ChatInbox({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          telefono: activeCliente.whatsapp,
-          mensaje: textToSend,
+          to: activeCliente.whatsapp,
+          message: textToSend || `[Sticker]: ${stickerUrlCustom}`,
           stickerUrl: stickerUrlCustom,
           cliente_id: activeCliente.id,
         }),
