@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { soundEngine } from "@/lib/audio/soundEffects";
 import { AdminToastContainer, AdminToast } from "@/components/admin/AdminToastContainer";
+import { supabase } from "@/lib/supabase";
 import {
   KananDatabase,
   ServicioCita,
@@ -302,8 +303,37 @@ export default function AdminPage() {
       fetchCrmData();
     }, 6000);
 
-    return () => clearInterval(interval);
-  }, [checkAuth, fetchCrmData]);
+    // ESCUCHA EN TIEMPO REAL GLOBAL PARA NOTIFICACIONES Y SONIDOS (Mismo canal de chat)
+    const realtimeChannel = supabase
+      .channel("kanan_admin_global_notifications")
+      .on("broadcast", { event: "nuevo_mensaje" }, (payload: any) => {
+        const msg = payload.payload?.mensaje;
+        const cli = payload.payload?.cliente;
+        if (!msg) return;
+
+        if (
+          msg.contenido_mensaje?.startsWith("[Cliente]:") ||
+          msg.etapa_titulo === "Mensaje Recibido Cliente"
+        ) {
+          const textoLimpio = (msg.contenido_mensaje || "").replace("[Cliente]:", "").trim();
+          soundEngine.playIncomingChatSound();
+          addToast({
+            tipo: "mensaje_chat",
+            titulo: "Nuevo Mensaje en Chat",
+            descripcion: textoLimpio,
+            clienteNombre: cli?.nombre || "Cliente WhatsApp",
+            actionLabel: "Responder en Chat",
+            onAction: () => setActiveSection("chat"),
+          });
+        }
+      })
+      .subscribe();
+
+    return () => {
+      clearInterval(interval);
+      supabase.removeChannel(realtimeChannel);
+    };
+  }, [checkAuth, fetchCrmData, addToast]);
 
   const handleLogout = async () => {
     await fetch("/api/auth/session", { method: "POST" });

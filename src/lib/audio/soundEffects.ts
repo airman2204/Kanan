@@ -56,11 +56,24 @@ class SoundEngine {
     if (this.isMuted()) return;
     try {
       if (typeof window !== "undefined") {
+        // Asegurarse de que el AudioContext y subsistema de audio esté reanudado
+        const ctx = this.getContext();
+        if (ctx && ctx.state === "suspended") {
+          ctx.resume().catch(() => {});
+        }
+
         const audio = new Audio(src);
         audio.volume = volume;
-        audio.play().catch(() => {});
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+          playPromise.catch((err) => {
+            console.warn("[SoundEngine] Autoplay bloqueado o no iniciado:", err);
+          });
+        }
       }
-    } catch {}
+    } catch (e) {
+      console.warn("[SoundEngine] Error reproduciendo audio:", e);
+    }
   }
 
   /**

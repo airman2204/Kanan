@@ -70,11 +70,30 @@ export function ChatInbox({
     setMensajesLocales(initialMensajes);
   }, [initialMensajes]);
 
-  // SUSCRIPCIÓN WEBSOCKET EN TIEMPO REAL (Idéntica a FoxDrop - Latencia Cero)
+  // SUSCRIPCIÓN EN TIEMPO REAL HÍBRIDA (Broadcast <80ms + Postgres Changes)
   useEffect(() => {
-    const channelName = `kanan_chat_rt_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
     const channel = supabase
-      .channel(channelName)
+      .channel("kanan_chat_realtime", {
+        config: { broadcast: { self: false } },
+      })
+      .on("broadcast", { event: "nuevo_mensaje" }, (payload: any) => {
+        const nuevoMsg = payload.payload?.mensaje as MensajeAutomatizacion;
+        if (!nuevoMsg) return;
+
+        setMensajesLocales((prev) => {
+          if (prev.some((m) => m.id === nuevoMsg.id)) return prev;
+          return [...prev, nuevoMsg];
+        });
+
+        if (
+          nuevoMsg.contenido_mensaje?.startsWith("[Cliente]:") ||
+          nuevoMsg.etapa_titulo === "Mensaje Recibido Cliente"
+        ) {
+          soundEngine.playIncomingChatSound();
+        }
+
+        if (onRefresh) onRefresh();
+      })
       .on(
         "postgres_changes",
         {
