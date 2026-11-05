@@ -342,6 +342,12 @@ app.get('/', (req, res) => {
   `);
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`🚀 [Kanan Chat Bridge] Servidor corriendo en puerto ${PORT}`);
+  try {
+    console.log("[Kanan Chat] Iniciando socket de WhatsApp al arrancar...");
+    await startWhatsApp();
+  } catch (err) {
+    console.error("❌ Error al iniciar WhatsApp:", err);
+  }
 });
