@@ -380,7 +380,7 @@ export function ChatInbox({
                 const isSelected = cli.id === activeCliente?.id;
                 const cliCitas = citas.filter((c) => c.cliente_id === cli.id);
                 const ultimaCita = cliCitas[0];
-                const ultimosMensajes = mensajes.filter((m) => m.cliente_id === cli.id);
+                const ultimosMensajes = mensajesLocales.filter((m) => m.cliente_id === cli.id);
                 const ultimoMsg = ultimosMensajes[ultimosMensajes.length - 1];
 
                 return (

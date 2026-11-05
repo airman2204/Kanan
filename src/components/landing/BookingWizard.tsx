@@ -666,7 +666,22 @@ export function BookingWizard({
                     ¡Solicitud Recibida, {nombre}! 🐾
                   </h3>
                   <p className="text-slate-600 text-sm sm:text-base mt-2">
-                    Tu cita para el <strong>{fecha}</strong> ({turno}) en{" "}
+                    Tu cita para el{" "}
+                    <strong>
+                      {(() => {
+                        try {
+                          const parts = fecha.split("-");
+                          if (parts.length === 3) {
+                            const d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+                            const dias = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+                            const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+                            return `${dias[d.getDay()]} ${Number(parts[2])} de ${meses[Number(parts[1]) - 1]}`;
+                          }
+                        } catch {}
+                        return fecha;
+                      })()}
+                    </strong>{" "}
+                    ({turno.replace(/^(Lunes a Domingo|Lunes a Viernes|Sábado y Domingo)\s*/i, "Horario ")}) en{" "}
                     <strong>{selectedMunicipio}</strong> ha sido agendada con éxito en Kanan Servicios.
                   </p>
                 </div>

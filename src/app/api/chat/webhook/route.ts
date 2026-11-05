@@ -16,10 +16,14 @@ export async function POST(req: NextRequest) {
     const db = await getDatabaseAsync();
 
     // 1. Buscar el cliente por su teléfono (probando con 10 dígitos o con prefijo 52)
+    const targetDigits = cleanPhone.slice(-10);
     const cliente = db.clientes.find((cl) => {
       const p = cl.whatsapp.replace(/\D/g, "");
-      return cleanPhone.endsWith(p) || p.endsWith(cleanPhone);
+      return p.endsWith(targetDigits) || cleanPhone.endsWith(p) || p.endsWith(cleanPhone);
     });
+
+    // Siempre usar el número de teléfono oficial del cliente en el CRM para cualquier respuesta automática
+    const phoneParaResponder = cliente?.whatsapp ? cliente.whatsapp.replace(/\D/g, "") : cleanPhone;
 
     if (cliente) {
       // Buscar su cita más reciente
@@ -41,7 +45,7 @@ export async function POST(req: NextRequest) {
         });
         const { enviarMensajeChat } = await import("@/lib/chat/bridgeClient");
         await enviarMensajeChat(
-          cleanPhone,
+          phoneParaResponder,
           `¡Excelente, ${primerNombre}! 🎉 Tu cita ha quedado *Confirmada* con éxito.\n\nNuestro técnico asignado te notificará el día de tu servicio en cuanto vaya en camino a tu domicilio.\n\nRecuerda que si necesitas reprogramar o cancelar, cuentas con hasta *2 horas antes* del horario de tu servicio para avisarnos por este medio. ¡Muchas gracias por tu confianza! 🐾✨`
         );
       }
@@ -57,7 +61,7 @@ export async function POST(req: NextRequest) {
         });
         const { enviarMensajeChat } = await import("@/lib/chat/bridgeClient");
         await enviarMensajeChat(
-          cleanPhone,
+          phoneParaResponder,
           `Entendido, ${primerNombre}. Hemos cancelado tu solicitud de servicio.\n\nSi en el futuro requieres de nuestros servicios de limpieza y desinfección, con gusto estaremos a tus órdenes por este mismo chat. ¡Que tengas un excelente día! 🐾✨`
         );
       }
@@ -86,7 +90,7 @@ export async function POST(req: NextRequest) {
         if (ultimaCita.estatus === "En Ruta" || (horaCitaMs > 0 && diffHoras < 2)) {
           const { enviarMensajeChat } = await import("@/lib/chat/bridgeClient");
           await enviarMensajeChat(
-            cleanPhone,
+            phoneParaResponder,
             `Hola ${primerNombre}. ⚠️ Te informamos que por políticas de logística operativa, *no es posible cancelar tu servicio*, debido a que nos encontramos a menos de 2 horas de tu horario programado o nuestra unidad móvil ya está en camino a tu domicilio.\n\nPara cualquier duda o aclaración especial, nuestro equipo de soporte se pondrá en contacto contigo a la brevedad.`
           );
         } else {
@@ -100,7 +104,7 @@ export async function POST(req: NextRequest) {
 
           const { enviarMensajeChat } = await import("@/lib/chat/bridgeClient");
           await enviarMensajeChat(
-            cleanPhone,
+            phoneParaResponder,
             `Tu cita con folio *${ultimaCita.id}* ha sido *Cancelada con éxito*, ${primerNombre}. 🤝\n\nMuchas gracias por avisarnos con la anticipación debida (+2 hrs). Esperamos poder atenderte en una próxima ocasión. ¡Lindo día! 🐾`
           );
         }

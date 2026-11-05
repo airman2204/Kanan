@@ -80,7 +80,10 @@ async function startWhatsApp() {
       connectedPhone = null;
 
       if (shouldReconnect) {
-        setTimeout(startWhatsApp, 4000);
+        // Margen prudente para reconexión limpia
+        setTimeout(() => {
+          startWhatsApp().catch(err => console.error('Error al reconectar:', err));
+        }, 5000);
       }
     } else if (connection === 'open') {
       console.log('✅ [Kanan Chat] ¡Sesión de Chat Conectada exitosamente!');
@@ -96,48 +99,78 @@ async function startWhatsApp() {
 
   // Mensajes entrantes del cliente
   sock.ev.on('messages.upsert', async ({ messages, type }) => {
-    if (type !== 'notify') return;
+    try {
+      if (type !== 'notify' && type !== 'append') return;
 
-    for (const msg of messages) {
-      if (!msg.message || msg.key.fromMe) continue;
+      for (const msg of messages) {
+        if (!msg.message || msg.key.fromMe) continue;
 
-      const senderJid = msg.key.remoteJid || '';
-      if (senderJid.includes('@g.us')) continue; // Ignorar grupos
+        let senderJid = msg.key.remoteJid || '';
+        if (senderJid.includes('@g.us')) continue; // Ignorar grupos de WhatsApp
 
-      const cleanPhone = senderJid.replace(/@.+/, '');
-      const text =
-        msg.message.conversation ||
-        msg.message.extendedTextMessage?.text ||
-        msg.message.imageMessage?.caption ||
-        '';
+        // Manejo de privacidad LID de WhatsApp
+        let rawLid = undefined;
+        if (senderJid.endsWith('@lid')) {
+          rawLid = senderJid.replace(/@.+/, '');
+          if (msg.key.remoteJidAlt && !msg.key.remoteJidAlt.endsWith('@lid')) {
+            senderJid = msg.key.remoteJidAlt;
+          } else if (msg.key.participant && !msg.key.participant.endsWith('@lid')) {
+            senderJid = msg.key.participant;
+          }
+        }
 
-      const pushName = msg.pushName || 'Cliente';
+        const cleanPhone = senderJid.replace(/@.+/, '');
+        const text =
+          msg.message.conversation ||
+          msg.message.extendedTextMessage?.text ||
+          msg.message.imageMessage?.caption ||
+          (msg.message.stickerMessage ? '👾 Sticker recibido' : '') ||
+          '';
 
-      console.log(`📩 [Kanan Chat] Mensaje recibido de ${cleanPhone} (${pushName}): ${text}`);
+        const pushName = msg.pushName || 'Cliente';
 
-      if (WEBHOOK_URL && text) {
-        try {
-          await fetch(WEBHOOK_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              type: 'message',
-              phone: cleanPhone,
-              text: text.trim(),
-              clientName: pushName,
-              timestamp: new Date().toISOString(),
-            }),
-          });
-        } catch (err) {
-          console.error('[Kanan Chat] Error enviando webhook a Kanan CRM:', err.message);
+        console.log(`📩 [Kanan Chat] Mensaje recibido de ${cleanPhone} (${pushName}): ${text}`);
+
+        if (WEBHOOK_URL && text) {
+          try {
+            await fetch(WEBHOOK_URL, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                type: 'message',
+                phone: cleanPhone,
+                lid: rawLid,
+                text: text.trim(),
+                clientName: pushName,
+                timestamp: new Date().toISOString(),
+              }),
+            });
+          } catch (err) {
+            console.error('[Kanan Chat] Error enviando webhook a Kanan CRM:', err.message);
+          }
         }
       }
+    } catch (upsertErr) {
+      console.error('[Kanan Chat] Error en messages.upsert (protegido contra crash):', upsertErr.message);
     }
   });
 }
 
 // Iniciar sesión Baileys
-startWhatsApp();
+// (Se inicia una sola vez de forma controlada)
+let isStarting = false;
+async function safeStartWhatsApp() {
+  if (isStarting) return;
+  isStarting = true;
+  try {
+    await startWhatsApp();
+  } catch (err) {
+    console.error('Error al iniciar WhatsApp:', err);
+  } finally {
+    isStarting = false;
+  }
+}
+safeStartWhatsApp();
 
 // ==========================================
 // RUTAS DE LA API DE CHAT
@@ -425,12 +458,6 @@ app.get('/', (req, res) => {
 
 app.listen(PORT, async () => {
   console.log(`🚀 [Kanan Chat Bridge] Servidor corriendo en puerto ${PORT}`);
-  try {
-    console.log("[Kanan Chat] Iniciando socket de WhatsApp al arrancar...");
-    await startWhatsApp();
-  } catch (err) {
-    console.error("❌ Error al iniciar WhatsApp:", err);
-  }
 });
 
 

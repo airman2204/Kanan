@@ -36,6 +36,43 @@ export async function calcularTiempoRutaMinutos(
 }
 
 /**
+ * Formatea una fecha YYYY-MM-DD a un texto amigable en español (ej. Jueves 5 de Noviembre)
+ */
+export function formatearFechaEspanol(fechaStr: string): string {
+  if (!fechaStr) return "";
+  try {
+    const parts = fechaStr.split("-");
+    if (parts.length === 3) {
+      const year = Number(parts[0]);
+      const month = Number(parts[1]) - 1;
+      const day = Number(parts[2]);
+      const date = new Date(year, month, day);
+      const dias = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+      const meses = [
+        "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+        "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+      ];
+      return `${dias[date.getDay()]} ${day} de ${meses[month]}`;
+    }
+  } catch {
+    // fallback
+  }
+  return fechaStr;
+}
+
+/**
+ * Limpia el texto del turno para mostrar sólo el horario exacto amigable
+ */
+export function formatearTurnoHorario(turnoStr: string): string {
+  if (!turnoStr) return "";
+  const match = turnoStr.match(/\((.*?)\)/);
+  if (match && match[1]) {
+    return `Horario: ${match[1]} hrs`;
+  }
+  return turnoStr;
+}
+
+/**
  * HITO 0: Notificación automática inmediata tras agendar en la Web
  */
 export async function despacharConfirmacionReservaAutomatica(
@@ -48,12 +85,15 @@ export async function despacharConfirmacionReservaAutomatica(
     .map((item) => `• ${item.cantidad}x ${item.piezaNombre}`)
     .join("\n");
 
+  const fechaAmigable = formatearFechaEspanol(cita.fecha);
+  const horarioAmigable = formatearTurnoHorario(cita.turno);
+
   const mensaje = [
     `¡Hola ${primerNombre}! 👋🐾`,
     `Hemos recibido tu solicitud de cotización en *Kanan Servicios de Limpieza*.`,
     ``,
     `📋 *Folio de Servicio:* ${cita.id}`,
-    `📅 *Fecha solicitada:* ${cita.fecha} (${cita.turno})`,
+    `📅 *Fecha solicitada:* ${fechaAmigable} (${horarioAmigable})`,
     `📍 *Ubicación:* ${cliente.direccion}, ${cliente.municipio}`,
     ``,
     `🛋️ *Piezas registradas:*`,

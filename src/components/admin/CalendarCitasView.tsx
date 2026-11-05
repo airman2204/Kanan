@@ -1001,9 +1001,11 @@ export function CalendarCitasView({
                 <span className="text-slate-400 block font-bold text-[10px] uppercase">Datos Técnicos del Mueble</span>
                 <p><strong>Tipo de tela:</strong> {selectedCitaDetalle.tipo_tela || "No especificada"}</p>
                 <p>
-                  <strong>Manchas críticas:</strong>{" "}
+                  <strong>Manchas reportadas:</strong>{" "}
                   {selectedCitaDetalle.manchas_dificiles && selectedCitaDetalle.manchas_dificiles.length > 0
                     ? selectedCitaDetalle.manchas_dificiles.join(", ")
+                    : selectedCitaDetalle.notas_servicio
+                    ? selectedCitaDetalle.notas_servicio
                     : "Ninguna reportada"}
                 </p>
                 <p>
@@ -1048,7 +1050,25 @@ export function CalendarCitasView({
                   const cli = clientes.find((c) => c.id === selectedCitaDetalle.cliente_id);
                   const piezasStr = (selectedCitaDetalle.items_contratados || []).map((it) => `${it.cantidad}x ${it.piezaNombre}`).join(", ");
                   const precioFinal = montoCotizadoInput !== "" ? montoCotizadoInput : (selectedCitaDetalle.monto_total || 0);
-                  const msgWhats = `¡Hola ${cli?.nombre || "Cliente"}! 👋 En Kanan revisamos los detalles de tu servicio (${piezasStr}). Con gusto te confirmamos tu cotización por *$${precioFinal} MXN* para el día *${selectedCitaDetalle.fecha}* (${selectedCitaDetalle.turno}).\n\n¿Deseas confirmar tu cita? Responde a este chat con un *"Sí"* para apartar tu lugar o *"No"* si prefieres cancelarla. 🐾✨`;
+
+                  // Formateo elegante de fecha en español (ej. Jueves 5 de Noviembre)
+                  const formatearFechaAmigable = (f: string) => {
+                    if (!f) return "";
+                    const parts = f.split("-");
+                    if (parts.length === 3) {
+                      const d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+                      const dias = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+                      const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+                      return `${dias[d.getDay()]} ${Number(parts[2])} de ${meses[Number(parts[1]) - 1]}`;
+                    }
+                    return f;
+                  };
+                  const fechaBonita = formatearFechaAmigable(selectedCitaDetalle.fecha);
+                  const turnoLimpio = selectedCitaDetalle.turno
+                    ? selectedCitaDetalle.turno.replace(/^(Lunes a Domingo|Lunes a Viernes|Sábado y Domingo)\s*/i, "Horario ")
+                    : "";
+
+                  const msgWhats = `¡Hola ${cli?.nombre || "Cliente"}! 👋 En Kanan revisamos los detalles de tu servicio (${piezasStr}). Con gusto te confirmamos tu cotización por *$${precioFinal} MXN* para el día *${fechaBonita}* (${turnoLimpio}).\n\n¿Deseas confirmar tu cita? Responde a este chat con un *"Sí"* para apartar tu lugar o *"No"* si prefieres cancelarla. 🐾✨`;
 
                   return (
                     <div className="pt-2 border-t border-slate-200 space-y-2">
