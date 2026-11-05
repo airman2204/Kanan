@@ -1,18 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
-import { enviarMensajeChat } from "@/lib/chat/bridgeClient";
+import { enviarMensajeChat, enviarStickerChat } from "@/lib/chat/bridgeClient";
 import { getDatabase, saveDatabase } from "@/lib/db/store";
 import { supabase } from "@/lib/supabase";
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { to, message, cliente_id } = body;
+    const { to, message, stickerUrl, cliente_id } = body;
 
-    if (!to || !message) {
-      return NextResponse.json({ ok: false, error: "Faltan parámetros (to, message)" }, { status: 400 });
+    if (!to || (!message && !stickerUrl)) {
+      return NextResponse.json({ ok: false, error: "Faltan parámetros (to, message/stickerUrl)" }, { status: 400 });
     }
 
-    const sent = await enviarMensajeChat(to, message);
+    let sent = false;
+    let contenidoGuardar = message || "";
+
+    if (stickerUrl) {
+      sent = await enviarStickerChat(to, stickerUrl);
+      contenidoGuardar = `[Sticker]: ${stickerUrl}`;
+    } else if (message) {
+      sent = await enviarMensajeChat(to, message);
+    }
 
     // Guardar en el log de mensajes si hay cliente_id
     if (cliente_id) {
@@ -24,7 +32,7 @@ export async function POST(req: NextRequest) {
         etapa: "1_confirmacion_inmediata",
         etapa_titulo: "Chat Manual Admin",
         destinatario_whatsapp: to,
-        contenido_mensaje: message,
+        contenido_mensaje: contenidoGuardar,
         estatus_envio: sent ? "Enviado" : "Programado",
         fecha_programada: new Date().toISOString(),
       };

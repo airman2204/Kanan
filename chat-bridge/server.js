@@ -234,18 +234,43 @@ app.post('/api/send-sticker', authMiddleware, async (req, res) => {
     }
     const jid = `${cleanPhone}@s.whatsapp.net`;
 
-    // Buscar archivo de sticker local o en public
-    let resolvedPath = path.isAbsolute(stickerPath || '')
-      ? stickerPath
-      : path.join(__dirname, stickerPath || 'assets/kanan-movil.webp');
-
-    if (!fs.existsSync(resolvedPath)) {
-      // Probar en public/assets/stickers si existe en la app raíz
-      resolvedPath = path.join(__dirname, '..', 'public', stickerPath || 'assets/stickers/kanan-movil.webp');
+    // Si es una ruta relativa a la web, descargar el buffer directamente de producción
+    let stickerBuffer = null;
+    if (stickerPath && (stickerPath.startsWith('http://') || stickerPath.startsWith('https://'))) {
+      const resp = await fetch(stickerPath);
+      const arrayBuf = await resp.arrayBuffer();
+      stickerBuffer = Buffer.from(arrayBuf);
+    } else if (stickerPath && stickerPath.startsWith('/assets/')) {
+      // Descargar desde la web oficial de Kanan
+      const webUrl = `https://kananlimpieza.mx${stickerPath}`;
+      try {
+        const resp = await fetch(webUrl);
+        if (resp.ok) {
+          const arrayBuf = await resp.arrayBuffer();
+          stickerBuffer = Buffer.from(arrayBuf);
+        }
+      } catch (e) {
+        console.warn('Error descargando sticker de la web:', e.message);
+      }
     }
 
-    if (fs.existsSync(resolvedPath)) {
-      await sock.sendMessage(jid, { sticker: fs.readFileSync(resolvedPath) });
+    if (!stickerBuffer) {
+      // Intentar buscar archivo de sticker en disco local si existe
+      let resolvedPath = path.isAbsolute(stickerPath || '')
+        ? stickerPath
+        : path.join(__dirname, stickerPath || 'assets/kanan-movil.webp');
+
+      if (!fs.existsSync(resolvedPath)) {
+        resolvedPath = path.join(__dirname, '..', 'public', stickerPath || 'assets/stickers/kanan-movil.webp');
+      }
+
+      if (fs.existsSync(resolvedPath)) {
+        stickerBuffer = fs.readFileSync(resolvedPath);
+      }
+    }
+
+    if (stickerBuffer) {
+      await sock.sendMessage(jid, { sticker: stickerBuffer });
       console.log(`👾 [Kanan Chat] Sticker enviado con éxito a ${cleanPhone}`);
       return res.json({ ok: true, to: cleanPhone });
     } else {

@@ -454,35 +454,57 @@ export function ChatInbox({
                   ) : (
                     activeMensajes.map((m) => {
                       const isClient = m.contenido_mensaje.startsWith("[Cliente]:");
-                      const cleanContent = isClient
+                      const rawContent = isClient
                         ? m.contenido_mensaje.replace("[Cliente]:", "").trim()
-                        : m.contenido_mensaje;
+                        : m.contenido_mensaje.trim();
+
+                      // Detección de sticker
+                      const isSticker = rawContent.startsWith("[Sticker]:") || rawContent.startsWith("/assets/stickers/");
+                      const stickerSrc = isSticker
+                        ? rawContent.replace("[Sticker]:", "").trim()
+                        : null;
 
                       return (
                         <div
                           key={m.id}
                           className={`flex flex-col ${isClient ? "items-start" : "items-end"}`}
                         >
-                          <div
-                            className={`max-w-[85%] sm:max-w-md p-3 rounded-2xl text-xs space-y-1 shadow-2xs leading-relaxed ${
-                              isClient
-                                ? "bg-white text-slate-800 rounded-tl-xs border border-slate-200/80"
-                                : "bg-[#1D71B5] text-white rounded-tr-xs"
-                            }`}
-                          >
-                            <p className="whitespace-pre-line font-sans">{cleanContent}</p>
-                            <div className={`flex items-center justify-end gap-1 text-[9px] ${
-                              isClient ? "text-slate-400" : "text-blue-100"
-                            }`}>
-                              <span>
+                          {isSticker && stickerSrc ? (
+                            <div className="p-1 rounded-2xl max-w-[200px] flex flex-col items-end">
+                              <img
+                                src={stickerSrc}
+                                alt="Sticker Kanan"
+                                className="w-36 h-36 object-contain drop-shadow-md hover:scale-105 transition-transform"
+                              />
+                              <span className="text-[9px] text-slate-400 mt-1">
                                 {new Date(m.fecha_programada).toLocaleTimeString("es-MX", {
                                   hour: "2-digit",
                                   minute: "2-digit",
                                 })}
                               </span>
-                              {!isClient && <CheckCheck className="w-3 h-3 text-cyan-200" />}
                             </div>
-                          </div>
+                          ) : (
+                            <div
+                              className={`max-w-[85%] sm:max-w-md p-3 rounded-2xl text-xs space-y-1 shadow-2xs leading-relaxed ${
+                                isClient
+                                  ? "bg-white text-slate-800 rounded-tl-xs border border-slate-200/80"
+                                  : "bg-[#1D71B5] text-white rounded-tr-xs"
+                              }`}
+                            >
+                              <p className="whitespace-pre-line font-sans">{rawContent}</p>
+                              <div className={`flex items-center justify-end gap-1 text-[9px] ${
+                                isClient ? "text-slate-400" : "text-blue-100"
+                              }`}>
+                                <span>
+                                  {new Date(m.fecha_programada).toLocaleTimeString("es-MX", {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  })}
+                                </span>
+                                {!isClient && <CheckCheck className="w-3 h-3 text-cyan-200" />}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       );
                     })
