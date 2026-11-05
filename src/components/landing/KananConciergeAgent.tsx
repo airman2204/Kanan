@@ -131,9 +131,10 @@ export function KananConciergeAgent({
 
   // Agenda y contacto
   const [fecha, setFecha] = useState<string>("");
-  const [turno, setTurno] = useState<string>("Matutino (09:00 - 13:00)");
+  const [turno, setTurno] = useState<string>("");
   const [nombre, setNombre] = useState<string>("");
   const [whatsapp, setWhatsapp] = useState<string>("");
+  const [slotsOcupados, setSlotsOcupados] = useState<{ fecha: string; turno: string; municipio: string }[]>([]);
 
   // Input libre para el paso activo y errores en vivo
   const [inputText, setInputText] = useState<string>("");
@@ -152,6 +153,91 @@ export function KananConciergeAgent({
     const d = new Date();
     d.setDate(d.getDate() + 1);
     return d.toISOString().split("T")[0];
+  };
+
+  // Cargar slots ocupados desde la API pública
+  useEffect(() => {
+    fetch("/api/config")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.slotsOcupados && Array.isArray(data.slotsOcupados)) {
+          setSlotsOcupados(data.slotsOcupados);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  // Calcular días sugeridos interactivos (Mañana, Próximo Sábado/Domingo, etc.)
+  const obtenerDiasSugeridos = () => {
+    const dias = [];
+    const nombresDias = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+    const meses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+
+    for (let i = 1; i <= 7; i++) {
+      const d = new Date();
+      d.setDate(d.getDate() + i);
+      const iso = d.toISOString().split("T")[0];
+      const diaNum = d.getDay();
+      const esFin = diaNum === 0 || diaNum === 6;
+      const label = i === 1 ? "Mañana" : `${nombresDias[diaNum]} ${d.getDate()} ${meses[d.getMonth()]}`;
+      dias.push({
+        iso,
+        label,
+        esFin,
+        detalle: esFin ? "Fin de semana" : "Entre semana",
+      });
+    }
+    return dias;
+  };
+
+  // Obtener turnos oficiales según el municipio y si el día es entre semana o fin de semana
+  const obtenerTurnosPorDia = (fechaStr: string) => {
+    if (!fechaStr) return [];
+    const parts = fechaStr.split("-");
+    const d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+    const diaNum = d.getDay();
+    const esFin = diaNum === 0 || diaNum === 6;
+    const muniLower = (municipioDetectado || selectedMunicipio).toLowerCase();
+
+    if (muniLower.includes("tlajomulco")) {
+      return [
+        {
+          turno: "Lunes a Domingo (09:00 - 16:00)",
+          label: "☀️ Turno Abierto (09:00 - 16:00)",
+          secado: "Secado listo esa misma tarde",
+        },
+      ];
+    }
+
+    if (esFin) {
+      return [
+        {
+          turno: "Sábado y Domingo (08:00 - 13:00)",
+          label: "☀️ Mañana Fin de Semana (08:00 - 13:00)",
+          secado: "Secado listo entre 1:00 PM y 4:00 PM",
+        },
+      ];
+    }
+
+    return [
+      {
+        turno: "Lunes a Viernes (09:00 - 14:00)",
+        label: "☀️ Mañana (09:00 - 14:00)",
+        secado: "Secado listo entre 2:00 PM y 5:00 PM",
+      },
+      {
+        turno: "Vespertino (14:00 - 18:00)",
+        label: "🌤️ Tarde (14:00 - 18:00)",
+        secado: "Secado listo esa misma noche",
+      },
+    ];
+  };
+
+  // Verificar si un turno ya está reservado en esa fecha en la base de datos
+  const isTurnoOcupado = (fechaStr: string, turnoStr: string) => {
+    return slotsOcupados.some(
+      (slot) => slot.fecha === fechaStr && slot.turno === turnoStr
+    );
   };
 
   // Inicializar conversación natural
@@ -464,15 +550,42 @@ export function KananConciergeAgent({
     setFecha(tom);
 
     appendAgentMessage(
-      `¡Fotos recibidas y cargadas! 📸 Ya tenemos todo para tu desmanchado profesional.\n\n¿Qué fecha y turno te viene mejor? (Nuestro secado rápido toma de 3 a 4 horas).`,
+      `¡Fotos recibidas y cargadas! 📸 Ya tenemos todo para tu desmanchado profesional.\n\n¿Qué día prefieres para tu servicio? Puedes elegir entre mañana o el fin de semana:`,
       "ask_date"
     );
   };
 
-  // 9. Fecha y Turno
-  const handleSubmitDateTurno = (fechaVal: string, turnoVal: string) => {
-    setFecha(fechaVal);
-    setTurno(turnoVal);
+  // 9. Selección de Día y Turno
+  const handleSelectDay = (fechaIso: string, labelDia: string) => {
+    setFecha(fechaIso);
+    setErrorActivo(null);
+
+    const turnosParaDia = obtenerTurnosPorDia(fechaIso);
+    const slotsDisponibles = turnosParaDia.filter((t) => !isTurnoOcupado(fechaIso, t.turno));
+
+    if (slotsDisponibles.length === 0) {
+      setErrorActivo(`El día ${labelDia} ya cuenta con su ruta 100% llena. Por favor selecciona otro día.`);
+      return;
+    }
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: `user-${Date.now()}`,
+        sender: "user",
+        text: `Día: ${labelDia}`,
+        time: getCurrentTime(),
+      },
+    ]);
+
+    appendAgentMessage(
+      `¡Excelente fecha! (${labelDia}). 📅\n\n¿En qué turno te viene mejor que acudamos? (Nuestros turnos consideran el secado rápido de 3 a 4 horas):`,
+      "ask_date"
+    );
+  };
+
+  const handleSelectTurno = (turnoElegido: string, turnoLabel: string) => {
+    setTurno(turnoElegido);
     setErrorActivo(null);
 
     setMessages((prev) => [
@@ -480,7 +593,7 @@ export function KananConciergeAgent({
       {
         id: `user-${Date.now()}`,
         sender: "user",
-        text: `Fecha: ${fechaVal} (${turnoVal})`,
+        text: `Turno: ${turnoLabel}`,
         time: getCurrentTime(),
       },
     ]);
@@ -1048,32 +1161,108 @@ export function KananConciergeAgent({
               </div>
             )}
 
-            {/* 9. Selector de Fecha y Turno */}
+            {/* 9. Selector Inteligente de Día y Turno (con semáforo de disponibilidad y fines de semana) */}
             {step === "ask_date" && !isTyping && (
-              <div className="space-y-2.5 animate-in fade-in">
-                <div className="flex flex-wrap items-center gap-2">
-                  <input
-                    type="date"
-                    min={getTomorrowDate()}
-                    value={fecha || getTomorrowDate()}
-                    onChange={(e) => setFecha(e.target.value)}
-                    className="px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-mono font-bold text-slate-700 focus:outline-none focus:border-cyan-500"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => handleSubmitDateTurno(fecha || getTomorrowDate(), "Mañana (09:00 - 13:00)")}
-                    className="px-3.5 py-2 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-900 border border-cyan-200 text-xs font-bold transition shadow-xs"
-                  >
-                    ☀️ Mañana (9-13h)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleSubmitDateTurno(fecha || getTomorrowDate(), "Tarde (14:00 - 18:00)")}
-                    className="px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-800 border border-slate-200 text-xs font-bold transition shadow-xs"
-                  >
-                    🌤️ Tarde (14-18h)
-                  </button>
-                </div>
+              <div className="space-y-3 animate-in fade-in">
+                {/* 9.1: Si aún no elige fecha o quiere cambiarla */}
+                {!fecha ? (
+                  <div className="space-y-2">
+                    <p className="text-[11px] font-semibold text-slate-500">
+                      Selecciona un día disponible (próximos 7 días):
+                    </p>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {obtenerDiasSugeridos().map((d) => (
+                        <button
+                          key={d.iso}
+                          type="button"
+                          onClick={() => handleSelectDay(d.iso, d.label)}
+                          className={`p-2.5 rounded-2xl border text-left transition-all active:scale-95 ${
+                            d.esFin
+                              ? "bg-amber-50/70 border-amber-200 hover:border-amber-400 text-amber-950"
+                              : "bg-slate-50 border-slate-200 hover:border-cyan-300 text-slate-800"
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="font-heading font-extrabold text-xs">{d.label}</span>
+                            {d.esFin && <span className="text-[10px] text-amber-700 font-bold">Fin de sem</span>}
+                          </div>
+                          <span className="text-[10px] text-slate-500 block mt-0.5">{d.iso}</span>
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Selector de fecha libre */}
+                    <div className="pt-1 flex items-center gap-2">
+                      <span className="text-xs text-slate-500 font-medium">O elige otra fecha:</span>
+                      <input
+                        type="date"
+                        min={getTomorrowDate()}
+                        onChange={(e) => {
+                          if (e.target.value) {
+                            handleSelectDay(e.target.value, e.target.value);
+                          }
+                        }}
+                        className="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-mono font-bold text-slate-700 focus:outline-none focus:border-cyan-500"
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  /* 9.2: Turnos disponibles para la fecha seleccionada */
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs text-slate-600 font-medium">
+                        Turnos disponibles para <strong className="text-slate-900">{fecha}</strong>:
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setFecha("")}
+                        className="text-[11px] text-cyan-700 hover:underline font-semibold"
+                      >
+                        Cambiar fecha
+                      </button>
+                    </div>
+
+                    <div className="space-y-2">
+                      {obtenerTurnosPorDia(fecha).map((t) => {
+                        const ocupado = isTurnoOcupado(fecha, t.turno);
+                        return (
+                          <button
+                            key={t.turno}
+                            type="button"
+                            disabled={ocupado}
+                            onClick={() => handleSelectTurno(t.turno, t.label)}
+                            className={`w-full p-3 rounded-2xl border text-left flex items-center justify-between transition-all ${
+                              ocupado
+                                ? "bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed opacity-60"
+                                : "bg-white hover:bg-cyan-50/70 border-slate-200 hover:border-cyan-300 text-slate-800 shadow-xs active:scale-98"
+                            }`}
+                          >
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="font-heading font-extrabold text-xs sm:text-sm">
+                                  {t.label}
+                                </span>
+                                {ocupado ? (
+                                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700">
+                                    Ruta Llena
+                                  </span>
+                                ) : (
+                                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700">
+                                    Disponible
+                                  </span>
+                                )}
+                              </div>
+                              <span className="text-[11px] text-slate-500 block mt-0.5">
+                                {t.secado}
+                              </span>
+                            </div>
+                            {!ocupado && <ChevronRight className="w-4 h-4 text-cyan-600" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
