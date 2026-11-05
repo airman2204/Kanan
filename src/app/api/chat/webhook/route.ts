@@ -81,10 +81,20 @@ export async function POST(req: NextRequest) {
           estatus: "Confirmada",
         });
         const { enviarMensajeChat } = await import("@/lib/chat/bridgeClient");
-        await enviarMensajeChat(
-          phoneParaResponder,
-          `¡Excelente, ${primerNombre}! 🎉 Tu cita ha quedado *Confirmada* con éxito.\n\nNuestro técnico asignado te notificará el día de tu servicio en cuanto vaya en camino a tu domicilio.\n\nRecuerda que si necesitas reprogramar o cancelar, cuentas con hasta *2 horas antes* del horario de tu servicio para avisarnos por este medio. ¡Muchas gracias por tu confianza! 🐾✨`
-        );
+        const msgConfirmacion = [
+          `¡Excelente, ${primerNombre}! 🎉`,
+          ``,
+          `Tu cita ha quedado *Confirmada* con éxito con folio *${ultimaCita.id}*.`,
+          ``,
+          `🚐 *¿Qué sigue?*`,
+          `Nuestro técnico asignado te enviará una notificación por este mismo chat en cuanto vaya en camino a tu domicilio el día de tu servicio.`,
+          ``,
+          `ℹ️ *Política de cambios y cancelaciones:*`,
+          `Recuerda que cuentas con hasta *2 horas antes* del horario de tu servicio para avisarnos por este medio ante cualquier cambio.`,
+          ``,
+          `¡Muchas gracias por tu confianza en *Kanan*! 🐾✨`
+        ].join("\n");
+        await enviarMensajeChat(phoneParaResponder, msgConfirmacion);
       }
 
       // B) Detección de Rechazo Inicial (Cliente dice "No" a la cotización)
@@ -97,10 +107,16 @@ export async function POST(req: NextRequest) {
           cancelada_por_cliente: true,
         });
         const { enviarMensajeChat } = await import("@/lib/chat/bridgeClient");
-        await enviarMensajeChat(
-          phoneParaResponder,
-          `Entendido, ${primerNombre}. Hemos cancelado tu solicitud de servicio.\n\nSi en el futuro requieres de nuestros servicios de limpieza y desinfección, con gusto estaremos a tus órdenes por este mismo chat. ¡Que tengas un excelente día! 🐾✨`
-        );
+        const msgRechazo = [
+          `Entendido, ${primerNombre}. 🤝`,
+          ``,
+          `Hemos cancelado tu solicitud de servicio conforme a lo solicitado.`,
+          ``,
+          `Si en el futuro requieres de nuestros servicios de limpieza y desinfección profunda, con gusto estaremos a tus órdenes por este mismo chat.`,
+          ``,
+          `¡Que tengas un excelente día! 🐾✨`
+        ].join("\n");
+        await enviarMensajeChat(phoneParaResponder, msgRechazo);
       }
 
       // C) Detección de Cancelación (Cita ya Confirmada o En Ruta)

@@ -1064,11 +1064,33 @@ export function CalendarCitasView({
                     return f;
                   };
                   const fechaBonita = formatearFechaAmigable(selectedCitaDetalle.fecha);
-                  const turnoLimpio = selectedCitaDetalle.turno
-                    ? selectedCitaDetalle.turno.replace(/^(Lunes a Domingo|Lunes a Viernes|Sábado y Domingo)\s*/i, "Horario ")
-                    : "";
+                  
+                  // Limpieza profesional del horario (ej. "09:00 a 16:00 hrs")
+                  let horarioLimpio = "09:00 a 16:00 hrs";
+                  if (selectedCitaDetalle.hora_especifica) {
+                    horarioLimpio = `${selectedCitaDetalle.hora_especifica} hrs`;
+                  } else if (selectedCitaDetalle.turno) {
+                    const match = selectedCitaDetalle.turno.match(/\((.*?)\)/);
+                    if (match && match[1]) {
+                      horarioLimpio = `${match[1].replace("-", "a")} hrs`;
+                    } else if (selectedCitaDetalle.turno.includes("Matutino")) {
+                      horarioLimpio = "09:00 a 13:00 hrs (Turno Mañana)";
+                    } else if (selectedCitaDetalle.turno.includes("Vespertino")) {
+                      horarioLimpio = "14:00 a 18:00 hrs (Turno Tarde)";
+                    }
+                  }
 
-                  const msgWhats = `¡Hola ${cli?.nombre || "Cliente"}! 👋 En Kanan revisamos los detalles de tu servicio (${piezasStr}). Con gusto te confirmamos tu cotización por *$${precioFinal} MXN* para el día *${fechaBonita}* (${turnoLimpio}).\n\n¿Deseas confirmar tu cita? Responde a este chat con un *"Sí"* para apartar tu lugar o *"No"* si prefieres cancelarla. 🐾✨`;
+                  const msgWhats = [
+                    `¡Hola ${cli?.nombre || "Cliente"}! 👋`,
+                    ``,
+                    `En *Kanan Servicios de Limpieza* revisamos tu solicitud:`,
+                    `🛋️ *Servicio:* ${piezasStr || "Limpieza y desinfección profunda"}`,
+                    `📅 *Fecha:* ${fechaBonita}`,
+                    `⏰ *Horario estimado:* ${horarioLimpio}`,
+                    `💰 *Total de tu cotización:* $${precioFinal} MXN`,
+                    ``,
+                    `¿Deseas confirmar tu servicio? Responde a este mensaje con un *"Sí"* para apartar tu turno o *"No"* si prefieres cancelarlo. 🐾✨`
+                  ].join("\n");
 
                   return (
                     <div className="pt-2 border-t border-slate-200 space-y-2">
