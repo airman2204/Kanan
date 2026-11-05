@@ -81,7 +81,9 @@ export async function POST(req: NextRequest) {
           estatus: "Confirmada",
         });
         const { enviarMensajeChat } = await import("@/lib/chat/bridgeClient");
-        const msgConfirmacion = [
+        const { getMensajeDesdeFlujo } = await import("@/lib/chat/flowConfigStore");
+
+        const fallbackConfirmacion = [
           `¡Excelente, ${primerNombre}! 🎉`,
           ``,
           `Tu cita ha quedado *Confirmada* con éxito con folio *${ultimaCita.id}*.`,
@@ -94,6 +96,19 @@ export async function POST(req: NextRequest) {
           ``,
           `¡Muchas gracias por tu confianza en *Kanan*! 🐾✨`
         ].join("\n");
+
+        const msgConfirmacion = getMensajeDesdeFlujo(
+          "nodo_cita_confirmada",
+          {
+            nombre: primerNombre,
+            folio: ultimaCita.id,
+            fecha: ultimaCita.fecha,
+            turno: ultimaCita.turno,
+            direccion: cliente.direccion || ""
+          },
+          fallbackConfirmacion
+        );
+
         await enviarMensajeChat(phoneParaResponder, msgConfirmacion);
       }
 
@@ -107,7 +122,9 @@ export async function POST(req: NextRequest) {
           cancelada_por_cliente: true,
         });
         const { enviarMensajeChat } = await import("@/lib/chat/bridgeClient");
-        const msgRechazo = [
+        const { getMensajeDesdeFlujo } = await import("@/lib/chat/flowConfigStore");
+
+        const fallbackRechazo = [
           `Entendido, ${primerNombre}. 🤝`,
           ``,
           `Hemos cancelado tu solicitud de servicio conforme a lo solicitado.`,
@@ -116,6 +133,16 @@ export async function POST(req: NextRequest) {
           ``,
           `¡Que tengas un excelente día! 🐾✨`
         ].join("\n");
+
+        const msgRechazo = getMensajeDesdeFlujo(
+          "nodo_cancelacion_cita",
+          {
+            nombre: primerNombre,
+            folio: ultimaCita.id
+          },
+          fallbackRechazo
+        );
+
         await enviarMensajeChat(phoneParaResponder, msgRechazo);
       }
 

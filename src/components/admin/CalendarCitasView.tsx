@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import { ServicioCita, Cliente, EstatusCita, TurnoServicio, MunicipioZMG, MetodoPago, FotoAntesDespues } from "@/types/crm";
 import { CATALOGO_SERVICIOS_KANAN, ServicioItemCatalogo } from "@/data/catalogoServicios";
+import { getMensajeDesdeFlujo } from "@/lib/chat/flowConfigStore";
 
 interface CalendarViewProps {
   citas: ServicioCita[];
@@ -1080,7 +1081,7 @@ export function CalendarCitasView({
                     }
                   }
 
-                  const msgWhats = [
+                  const defaultMsg = [
                     `¡Hola ${cli?.nombre || "Cliente"}! 👋`,
                     ``,
                     `En *Kanan Servicios de Limpieza* revisamos tu solicitud:`,
@@ -1091,6 +1092,20 @@ export function CalendarCitasView({
                     ``,
                     `¿Deseas confirmar tu servicio? Responde a este mensaje con un *"Sí"* para apartar tu turno o *"No"* si prefieres cancelarlo. 🐾✨`
                   ].join("\n");
+
+                  // Obtenemos la plantilla configurada en el Editor de Flujos (o fallback profesional)
+                  const msgWhats = getMensajeDesdeFlujo(
+                    "nodo_cotizacion_formal",
+                    {
+                      nombre: cli?.nombre || "Cliente",
+                      folio: selectedCitaDetalle.id,
+                      piezas: piezasStr || "Limpieza y desinfección profunda",
+                      fecha: fechaBonita,
+                      turno: horarioLimpio,
+                      precio: `$${precioFinal} MXN`
+                    },
+                    defaultMsg
+                  );
 
                   return (
                     <div className="pt-2 border-t border-slate-200 space-y-2">

@@ -55,21 +55,22 @@ export const DEFAULT_AGENT_FLOW_CONFIG: AgentFlowConfig = {
       id: 'nodo_cotizacion_formal',
       tipo: 'whatsapp_message',
       titulo: '4. Cotización Formal',
-      subtitulo: 'Envío de monto total y solicitud de confirmación',
+      subtitulo: 'Envío de cotización estructurada y solicitud de confirmación',
       icono: 'DollarSign',
       enabled: true,
       x: 1020,
       y: 200,
       stickerPath: '/assets/stickers/kanan-sticker-cotizacion.png',
       delaySegundos: 3,
-      mensajePlantilla: `💰 ¡Hola *{nombre}*! Tu cotización para el folio *{folio}* está lista:
+      mensajePlantilla: `¡Hola {nombre}! 👋
 
-🏷️ *Servicios:* {piezas}
-💵 *Monto Total:* *{precio}*
-📅 *Fecha acordada:* {fecha} ({turno})
+En *Kanan Servicios de Limpieza* revisamos tu solicitud:
+🛋️ *Servicio:* {piezas}
+📅 *Fecha:* {fecha}
+⏰ *Horario estimado:* {turno}
+💰 *Total de tu cotización:* {precio}
 
-¿Nos confirmas tu cita para apartar el equipo técnico?
-👉 Por favor responde con un *Sí* para confirmar o *No* para cancelar.`,
+¿Deseas confirmar tu servicio? Responde a este mensaje con un *"Sí"* para apartar tu turno o *"No"* si prefieres cancelarlo. 🐾✨`,
       siguienteNodoId: ['nodo_decision_cliente'],
       variablesDisponibles: ['{nombre}', '{folio}', '{piezas}', '{precio}', '{fecha}', '{turno}']
     },
@@ -95,13 +96,17 @@ export const DEFAULT_AGENT_FLOW_CONFIG: AgentFlowConfig = {
       y: 60,
       stickerPath: '/assets/stickers/kanan-sticker-listo.png',
       delaySegundos: 2,
-      mensajePlantilla: `🎉 ¡Excelente, *{nombre}*! Tu cita ha quedado *CONFIRMADA*.
+      mensajePlantilla: `¡Excelente, {nombre}! 🎉
 
-📋 *Folio:* {folio}
-📅 *Fecha:* {fecha} ({turno})
-📍 *Dirección:* {direccion}
+Tu cita ha quedado *Confirmada* con éxito con folio *{folio}*.
 
-Nuestros técnicos acudirán en el horario programado. ¡Gracias por confiar en Kanan Limpieza! 🧼✨`,
+🚐 *¿Qué sigue?*
+Nuestro técnico asignado te enviará una notificación por este mismo chat en cuanto vaya en camino a tu domicilio el día de tu servicio.
+
+ℹ️ *Política de cambios y cancelaciones:*
+Recuerda que cuentas con hasta *2 horas antes* del horario de tu servicio para avisarnos por este medio ante cualquier cambio.
+
+¡Muchas gracias por tu confianza en *Kanan*! 🐾✨`,
       siguienteNodoId: ['nodo_recordatorio_24h'],
       variablesDisponibles: ['{nombre}', '{folio}', '{fecha}', '{turno}', '{direccion}']
     },
@@ -115,7 +120,13 @@ Nuestros técnicos acudirán en el horario programado. ¡Gracias por confiar en 
       x: 1680,
       y: 360,
       delaySegundos: 2,
-      mensajePlantilla: `Entendido *{nombre}*, tu solicitud con folio *{folio}* ha sido cancelada. Esperamos servirte en una próxima ocasión. ¡Lindo día!`,
+      mensajePlantilla: `Entendido, {nombre}. 🤝
+
+Hemos cancelado tu solicitud de servicio conforme a lo solicitado.
+
+Si en el futuro requieres de nuestros servicios de limpieza y desinfección profunda, con gusto estaremos a tus órdenes por este mismo chat.
+
+¡Que tengas un excelente día! 🐾✨`,
       siguienteNodoId: [],
       variablesDisponibles: ['{nombre}', '{folio}']
     },
@@ -323,7 +334,7 @@ Los expertos recomiendan realizar limpieza profunda cada 6 meses para eliminar �
   }
 };
 
-const STORAGE_KEY = 'kanan_agent_flow_config_v3';
+const STORAGE_KEY = 'kanan_agent_flow_config_v4';
 
 export function getAgentFlowConfig(): AgentFlowConfig {
   if (typeof window === 'undefined') {
@@ -365,4 +376,28 @@ export function resetAgentFlowConfig(): AgentFlowConfig {
     localStorage.removeItem(STORAGE_KEY);
   }
   return DEFAULT_AGENT_FLOW_CONFIG;
+}
+
+/**
+ * Helper para obtener y formatear el mensaje de un nodo del flujo
+ * reemplazando las variables correspondientes ({nombre}, {precio}, {fecha}, etc.)
+ */
+export function getMensajeDesdeFlujo(
+  nodoId: string,
+  variables: Record<string, string | number | undefined | null>,
+  fallbackMensaje?: string
+): string {
+  const config = getAgentFlowConfig();
+  const nodo = config.nodos[nodoId];
+
+  let plantilla = nodo?.mensajePlantilla || fallbackMensaje || '';
+  if (!plantilla) return '';
+
+  for (const [key, val] of Object.entries(variables)) {
+    const token = `{${key}}`;
+    const valorReemplazo = val !== undefined && val !== null ? String(val) : '';
+    plantilla = plantilla.split(token).join(valorReemplazo);
+  }
+
+  return plantilla;
 }
