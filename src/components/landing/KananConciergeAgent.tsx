@@ -17,6 +17,8 @@ import {
   X,
   UploadCloud,
   ChevronRight,
+  ArrowLeft,
+  RotateCcw,
 } from "lucide-react";
 import { MunicipioZMG, TurnoServicio, ItemContratado } from "@/types/crm";
 import { consultarCodigoPostal } from "@/lib/utils/postalCodes";
@@ -376,6 +378,30 @@ export function KananConciergeAgent({
         "ask_colonia"
       );
     }
+  };
+
+  // Regresar al paso de Código Postal si el usuario se equivocó
+  const handleRegresarACP = () => {
+    setCodigoPostal("");
+    setColonia("");
+    setColoniasDisponibles([]);
+    setErrorActivo(null);
+    setInputText("");
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: `user-${Date.now()}`,
+        sender: "user",
+        text: "Deseo corregir mi Código Postal ↩️",
+        time: getCurrentTime(),
+      },
+    ]);
+
+    appendAgentMessage(
+      "¡Sin problema! 🐾 ¿Cuál es tu Código Postal correcto de 5 dígitos en Jalisco?",
+      "ask_cp"
+    );
   };
 
   // 4. Colonia
@@ -990,6 +1016,21 @@ export function KananConciergeAgent({
             {/* 4. Selector Desplegable o Botones de Colonia */}
             {step === "ask_colonia" && !isTyping && (
               <div className="space-y-3 animate-in fade-in">
+                {/* Botón para corregir / regresar el CP */}
+                <div className="flex items-center justify-between pb-1 border-b border-slate-100">
+                  <span className="text-xs text-slate-500 font-medium">
+                    CP detectado: <strong className="text-slate-800">{codigoPostal}</strong> ({municipioDetectado})
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleRegresarACP}
+                    className="inline-flex items-center gap-1 text-[11px] font-bold text-kanan-cerulean hover:text-kanan-deep bg-cyan-50/70 hover:bg-cyan-100/70 px-2.5 py-1 rounded-full transition"
+                  >
+                    <ArrowLeft className="w-3 h-3" />
+                    <span>Cambiar CP</span>
+                  </button>
+                </div>
+
                 {coloniasDisponibles.length > 0 ? (
                   <div className="space-y-2">
                     <label className="block text-xs font-heading font-bold text-slate-700">
