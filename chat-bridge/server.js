@@ -249,7 +249,7 @@ app.post('/api/send-message', authMiddleware, async (req, res) => {
 
 app.post('/api/send-sticker', authMiddleware, async (req, res) => {
   try {
-    const { to, stickerPath } = req.body;
+    const { to, stickerPath, stickerBase64 } = req.body;
     if (!sock || connectionStatus !== 'connected') {
       return res.status(503).json({ ok: false, error: 'Chat bridge no está conectado' });
     }
@@ -258,48 +258,55 @@ app.post('/api/send-sticker', authMiddleware, async (req, res) => {
     }
 
     const jid = await getVerifiedJid(to);
-
-    // 1. Extraer nombre base del archivo sin importar si viene como png o webp
-    const filename = path.basename(stickerPath || 'kanan-mascota-agendado.webp').replace('.png', '.webp');
     let stickerBuffer = null;
 
-    // A. Buscar primero en la carpeta interna assets/ del bridge
-    const localAssetPath = path.join(__dirname, 'assets', filename);
-    if (fs.existsSync(localAssetPath)) {
-      stickerBuffer = fs.readFileSync(localAssetPath);
+    // 0. Si viene directo en Base64 desde el cliente/Vercel (100% inmune a errores de red)
+    if (stickerBase64) {
+      stickerBuffer = Buffer.from(stickerBase64, 'base64');
     }
 
-    // B. Si no está en disco local, descargar WebP desde el dominio oficial
+    // 1. Extraer nombre base del archivo sin importar si viene como png o webp
     if (!stickerBuffer) {
-      const webpUrl = `https://kananlimpieza.mx/assets/stickers/${filename}`;
-      try {
-        const resp = await fetch(webpUrl);
-        if (resp.ok) {
-          const arrayBuf = await resp.arrayBuffer();
-          stickerBuffer = Buffer.from(arrayBuf);
-        }
-      } catch (e) {
-        console.warn('Error descargando sticker webp:', e.message);
-      }
-    }
+      const filename = path.basename(stickerPath || 'kanan-mascota-agendado.webp').replace('.png', '.webp');
 
-    // C. Si sigue sin existir, descargar la URL exacta que pasaron
-    if (!stickerBuffer && stickerPath) {
-      const rawUrl = stickerPath.startsWith('http') ? stickerPath : `https://kananlimpieza.mx${stickerPath.startsWith('/') ? '' : '/'}${stickerPath}`;
-      try {
-        const resp = await fetch(rawUrl);
-        if (resp.ok) {
-          const arrayBuf = await resp.arrayBuffer();
-          stickerBuffer = Buffer.from(arrayBuf);
+      // A. Buscar primero en la carpeta interna assets/ del bridge
+      const localAssetPath = path.join(__dirname, 'assets', filename);
+      if (fs.existsSync(localAssetPath)) {
+        stickerBuffer = fs.readFileSync(localAssetPath);
+      }
+
+      // B. Si no está en disco local, descargar WebP desde el dominio oficial
+      if (!stickerBuffer) {
+        const webpUrl = `https://kananlimpieza.mx/assets/stickers/${filename}`;
+        try {
+          const resp = await fetch(webpUrl);
+          if (resp.ok) {
+            const arrayBuf = await resp.arrayBuffer();
+            stickerBuffer = Buffer.from(arrayBuf);
+          }
+        } catch (e) {
+          console.warn('Error descargando sticker webp:', e.message);
         }
-      } catch (e) {
-        console.warn('Error descargando sticker raw url:', e.message);
+      }
+
+      // C. Si sigue sin existir, descargar la URL exacta que pasaron
+      if (!stickerBuffer && stickerPath) {
+        const rawUrl = stickerPath.startsWith('http') ? stickerPath : `https://kananlimpieza.mx${stickerPath.startsWith('/') ? '' : '/'}${stickerPath}`;
+        try {
+          const resp = await fetch(rawUrl);
+          if (resp.ok) {
+            const arrayBuf = await resp.arrayBuffer();
+            stickerBuffer = Buffer.from(arrayBuf);
+          }
+        } catch (e) {
+          console.warn('Error descargando sticker raw url:', e.message);
+        }
       }
     }
 
     if (stickerBuffer && stickerBuffer.length > 0) {
       await sock.sendMessage(jid, { sticker: stickerBuffer });
-      console.log(`👾 [Kanan Chat] Sticker (${filename}, ${stickerBuffer.length} bytes) enviado con éxito a ${jid}`);
+      console.log(`👾 [Kanan Chat] Sticker (${stickerBuffer.length} bytes) enviado con éxito a ${jid}`);
       return res.json({ ok: true, to: jid });
     } else {
       console.warn(`⚠️ [Kanan Chat] No se pudo encontrar el buffer para el sticker: ${stickerPath}`);

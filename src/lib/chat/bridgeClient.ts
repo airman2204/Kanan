@@ -75,13 +75,28 @@ export async function enviarStickerChat(toPhone: string, stickerPath: string): P
     } else if (cleanPhone.startsWith("52") && !cleanPhone.startsWith("521") && cleanPhone.length === 12) {
       cleanPhone = `521${cleanPhone.slice(2)}`;
     }
+
+    // Si el sticker está localmente en public/assets/stickers, leerlo y mandarlo en Base64 para garantizar entrega inmediata
+    let stickerBase64: string | undefined = undefined;
+    try {
+      const fs = await import("fs");
+      const path = await import("path");
+      const filename = path.basename(stickerPath).replace(".png", ".webp");
+      const localPath = path.join(process.cwd(), "public", "assets", "stickers", filename);
+      if (fs.existsSync(localPath)) {
+        stickerBase64 = fs.readFileSync(localPath).toString("base64");
+      }
+    } catch {
+      // continuar con stickerPath normal
+    }
+
     const res = await fetch(`${CHAT_BRIDGE_URL}/api/send-sticker`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "x-api-key": CHAT_API_KEY,
       },
-      body: JSON.stringify({ to: cleanPhone, stickerPath }),
+      body: JSON.stringify({ to: cleanPhone, stickerPath, stickerBase64 }),
     });
     const data = await res.json();
     return Boolean(data.ok);
