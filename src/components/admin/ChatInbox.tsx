@@ -38,12 +38,13 @@ const EMOJIS_FRECUENTES = [
 export function ChatInbox({
   clientes,
   citas,
-  mensajes,
+  mensajes: initialMensajes,
   onTriggerMessage,
   onRefresh,
   onConfirmCita,
 }: ChatInboxProps) {
   const [contactosLocales, setContactosLocales] = useState<Cliente[]>(clientes);
+  const [mensajesLocales, setMensajesLocales] = useState<MensajeAutomatizacion[]>(initialMensajes);
   const [selectedClienteId, setSelectedClienteId] = useState<string>(clientes[0]?.id || "");
   const [activeTab, setActiveTab] = useState<"conversaciones" | "agente_flow">("conversaciones");
   const [inputMessage, setInputMessage] = useState("");
@@ -55,13 +56,17 @@ export function ChatInbox({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Sincronizar clientes cuando cambie la prop
+  // Sincronizar clientes y mensajes cuando cambie la prop
   useEffect(() => {
     setContactosLocales(clientes);
     if (!selectedClienteId && clientes.length > 0) {
       setSelectedClienteId(clientes[0].id);
     }
   }, [clientes, selectedClienteId]);
+
+  useEffect(() => {
+    setMensajesLocales(initialMensajes);
+  }, [initialMensajes]);
 
   // Estado del bridge
   const [bridgeStatus, setBridgeStatus] = useState<"connected" | "qr_ready" | "connecting" | "disconnected">("connecting");
@@ -112,7 +117,7 @@ export function ChatInbox({
 
   // ORDEN CRONOLÓGICO NATURAL (WhatsApp Style):
   // Mensajes más viejos arriba -> Mensajes más nuevos abajo
-  const activeMensajes = mensajes
+  const activeMensajes = mensajesLocales
     .filter((m) => m.cliente_id === activeCliente?.id)
     .sort((a, b) => new Date(a.fecha_programada).getTime() - new Date(b.fecha_programada).getTime());
 
@@ -137,15 +142,33 @@ export function ChatInbox({
     const textToSend = inputMessage.trim();
     if ((!textToSend && !stickerUrlCustom) || !activeCliente || enviando) return;
 
+    const contenidoGuardar = stickerUrlCustom ? `[Sticker]: ${stickerUrlCustom}` : textToSend;
+
+    // Actualización optimista instantánea en la interfaz
+    const msgOptimista: MensajeAutomatizacion = {
+      id: `chat-opt-${Date.now()}`,
+      cita_id: "manual",
+      cliente_id: activeCliente.id,
+      etapa: "1_confirmacion_inmediata",
+      etapa_titulo: "Chat Manual Admin",
+      destinatario_whatsapp: activeCliente.whatsapp,
+      contenido_mensaje: contenidoGuardar,
+      estatus_envio: "Enviado",
+      fecha_programada: new Date().toISOString(),
+    };
+
+    setMensajesLocales((prev) => [...prev, msgOptimista]);
+    setInputMessage("");
     setEnviando(true);
     setMostrarPicker(null);
+
     try {
       const res = await fetch("/api/chat/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           to: activeCliente.whatsapp,
-          message: textToSend || `[Sticker]: ${stickerUrlCustom}`,
+          message: textToSend,
           stickerUrl: stickerUrlCustom,
           cliente_id: activeCliente.id,
         }),
@@ -153,7 +176,6 @@ export function ChatInbox({
 
       const data = await res.json();
       if (data.ok) {
-        setInputMessage("");
         setModoIaActivo(false);
         if (onRefresh) onRefresh();
       } else {
@@ -163,7 +185,6 @@ export function ChatInbox({
           `https://wa.me/${fullPhone}?text=${encodeURIComponent(textToSend)}`,
           "_blank"
         );
-        setInputMessage("");
       }
     } catch {
       const cleanPhone = activeCliente.whatsapp.replace(/\D/g, "");
@@ -172,7 +193,6 @@ export function ChatInbox({
         `https://wa.me/${fullPhone}?text=${encodeURIComponent(textToSend)}`,
         "_blank"
       );
-      setInputMessage("");
     } finally {
       setEnviando(false);
     }
