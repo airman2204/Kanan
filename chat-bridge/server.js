@@ -38,16 +38,73 @@ if (!fs.existsSync(assetsDir)) {
   fs.mkdirSync(assetsDir, { recursive: true });
 }
 
-async function startWhatsApp() {
-  let authStateResult;
+// 1. Restaurar sesión desde Supabase hacia el disco local al arrancar el contenedor (idéntico a FoxDrop)
+async function restoreSessionFromCloud() {
   try {
-    authStateResult = await useSupabaseAuthState(supabase, 'kanan_primary_session');
-    console.log('✅ [Kanan Chat] Persistencia remota en Supabase conectada con éxito.');
-  } catch (supabaseErr) {
-    console.warn('⚠️ [Kanan Chat] Falló Supabase auth state, usando respaldo local:', supabaseErr.message);
-    authStateResult = await useMultiFileAuthState(authDir);
+    const { data, error } = await supabase
+      .from('whatsapp_sessions')
+      .select('value')
+      .eq('session_id', '_backup_cluster')
+      .eq('key', '_system_baileys_auth')
+      .maybeSingle();
+
+    if (!error && data && data.value) {
+      const files = data.value;
+      let count = 0;
+      for (const [filename, contentBase64] of Object.entries(files)) {
+        const filePath = path.join(authDir, filename);
+        fs.writeFileSync(filePath, Buffer.from(contentBase64, 'base64'));
+        count++;
+      }
+      console.log(`📦 [Kanan Chat] ¡Sesión de WhatsApp restaurada desde Supabase con éxito (${count} llaves)!`);
+    } else {
+      console.log('ℹ️ [Kanan Chat] No hay respaldo en cluster de Supabase aún. Usando persistencia local.');
+    }
+  } catch (err) {
+    console.warn('⚠️ [Kanan Chat] Advertencia restaurando sesión desde Supabase:', err.message);
   }
-  const { state, saveCreds } = authStateResult;
+}
+
+// 2. Guardar sesión desde el disco local hacia Supabase para sobrevivir reinicios de Render (idéntico a FoxDrop)
+let syncTimeout = null;
+function scheduleCloudBackup() {
+  if (syncTimeout) clearTimeout(syncTimeout);
+  syncTimeout = setTimeout(async () => {
+    try {
+      if (!fs.existsSync(authDir)) return;
+      const fileNames = fs.readdirSync(authDir);
+      if (fileNames.length === 0) return;
+
+      const filesObj = {};
+      for (const f of fileNames) {
+        const fullPath = path.join(authDir, f);
+        if (fs.statSync(fullPath).isFile()) {
+          filesObj[f] = fs.readFileSync(fullPath).toString('base64');
+        }
+      }
+
+      await supabase
+        .from('whatsapp_sessions')
+        .upsert(
+          {
+            session_id: '_backup_cluster',
+            key: '_system_baileys_auth',
+            value: filesObj,
+          },
+          { onConflict: 'session_id,key' }
+        );
+      console.log(`☁️ [Kanan Chat] Respaldo de sesión de WhatsApp guardado en Supabase (${fileNames.length} archivos).`);
+    } catch (err) {
+      console.warn('⚠️ [Kanan Chat] Error respaldando sesión en Supabase:', err.message);
+    }
+  }, 2000);
+}
+
+async function startWhatsApp() {
+  // Primero restaurar sesión guardada si el disco de Render está recién formateado
+  await restoreSessionFromCloud();
+
+  const { state, saveCreds } = await useMultiFileAuthState(authDir);
 
   sock = makeWASocket({
     auth: state,
@@ -60,7 +117,10 @@ async function startWhatsApp() {
     syncFullHistory: false,
   });
 
-  sock.ev.on('creds.update', saveCreds);
+  sock.ev.on('creds.update', async () => {
+    await saveCreds();
+    scheduleCloudBackup();
+  });
 
   sock.ev.on('connection.update', async (update) => {
     const { connection, lastDisconnect, qr } = update;
@@ -79,11 +139,22 @@ async function startWhatsApp() {
       qrCodeData = null;
       connectedPhone = null;
 
-      if (shouldReconnect) {
-        // Margen prudente para reconexión limpia
+      const isExplicitLogOut = statusCode === DisconnectReason.loggedOut;
+      if (isExplicitLogOut) {
+        console.log(`🚪 [Kanan Chat] Sesión cerrada explícitamente desde el celular (status: ${statusCode}). Purgando llaves...`);
+        try {
+          await supabase.from('whatsapp_sessions').delete().eq('session_id', '_backup_cluster');
+          if (fs.existsSync(authDir)) fs.rmSync(authDir, { recursive: true, force: true });
+        } catch (e) {
+          console.warn('Error purgando authDir:', e.message);
+        }
+        setTimeout(startWhatsApp, 2000);
+      } else {
+        // En cualquier otra desconexión, reconectar con las credenciales existentes
+        console.log('🔄 [Kanan Chat] Reconectando WhatsApp automáticamente usando sesión guardada...');
         setTimeout(() => {
           startWhatsApp().catch(err => console.error('Error al reconectar:', err));
-        }, 5000);
+        }, 3000);
       }
     } else if (connection === 'open') {
       console.log('✅ [Kanan Chat] ¡Sesión de Chat Conectada exitosamente!');
@@ -94,6 +165,7 @@ async function startWhatsApp() {
       } catch {
         connectedPhone = 'Conectado';
       }
+      scheduleCloudBackup();
     }
   });
 
