@@ -80,8 +80,8 @@ export function ChatInbox({
     try {
       const res = await fetch("/api/chat/status");
       const data = await res.json();
-      if (data.ok) {
-        setBridgeStatus(data.status || "disconnected");
+      if (data.ok && data.status) {
+        setBridgeStatus(data.status);
         setBridgeQr(data.qr || null);
       } else {
         setBridgeStatus("disconnected");
@@ -95,11 +95,11 @@ export function ChatInbox({
 
   useEffect(() => {
     consultarStatus();
-    // Consultar cada 30 segundos (en lugar de cada 5s) para no ahogar los recursos de Render
+    // Consultar cada 10 segundos para feedback en tiempo real
     const interval = setInterval(() => {
       consultarStatus();
       if (onRefresh) onRefresh();
-    }, 30000);
+    }, 10000);
     return () => clearInterval(interval);
   }, [onRefresh]);
 
