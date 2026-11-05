@@ -110,6 +110,7 @@ export default function AdminPage() {
   const lastCitasCountRef = React.useRef<number | null>(null);
   const lastMensajesCountRef = React.useRef<number | null>(null);
   const lastCitasHashRef = React.useRef<Record<string, EstatusCita>>({});
+  const processedMessageIdsRef = React.useRef<Set<string>>(new Set());
 
   // Registrar Service Worker y cargar estado de sonido
   useEffect(() => {
@@ -249,11 +250,32 @@ export default function AdminPage() {
           });
         }
 
-        // 3. Detectar mensajes de chat entrantes (sólo como fallback si no llegó por realtime)
+        // 3. Detectar mensajes de chat entrantes (Fallback infalible con deduplicación por ID)
         if (lastMensajesCountRef.current !== null && data.mensajes_automatizacion) {
           if (data.mensajes_automatizacion.length > lastMensajesCountRef.current) {
-            // Referencia histórica actualizada, el sonido y toast primario se manejan de forma síncrona
-            // en el listener realtime de broadcast para evitar duplicidad de sonido
+            const nuevosMensajes = data.mensajes_automatizacion.slice(
+              0,
+              data.mensajes_automatizacion.length - lastMensajesCountRef.current
+            );
+            const msgCliente = nuevosMensajes.find(
+              (m) =>
+                m.contenido_mensaje.startsWith("[Cliente]:") ||
+                m.etapa_titulo === "Mensaje Recibido Cliente"
+            );
+            if (msgCliente && !processedMessageIdsRef.current.has(msgCliente.id)) {
+              processedMessageIdsRef.current.add(msgCliente.id);
+              const cli = data.clientes.find((c) => c.id === msgCliente.cliente_id);
+              const textoLimpio = msgCliente.contenido_mensaje.replace("[Cliente]:", "").trim();
+              soundEngine.playIncomingChatSound();
+              addToast({
+                tipo: "mensaje_chat",
+                titulo: "Nuevo Mensaje en Chat",
+                descripcion: textoLimpio,
+                clienteNombre: cli?.nombre || "Cliente WhatsApp",
+                actionLabel: "Responder en Chat",
+                onAction: () => setActiveSection("chat"),
+              });
+            }
           }
         }
 
@@ -282,9 +304,9 @@ export default function AdminPage() {
       fetchCrmData();
     }, 6000);
 
-    // ESCUCHA EN TIEMPO REAL GLOBAL PARA NOTIFICACIONES Y SONIDOS (Mismo canal de chat)
+    // ESCUCHA EN TIEMPO REAL GLOBAL PARA NOTIFICACIONES Y SONIDOS (Mismo canal de chat: kanan_chat_realtime)
     const realtimeChannel = supabase
-      .channel("kanan_admin_global_notifications")
+      .channel("kanan_chat_realtime")
       .on("broadcast", { event: "nuevo_mensaje" }, (payload: any) => {
         const msg = payload.payload?.mensaje;
         const cli = payload.payload?.cliente;
@@ -294,6 +316,10 @@ export default function AdminPage() {
           msg.contenido_mensaje?.startsWith("[Cliente]:") ||
           msg.etapa_titulo === "Mensaje Recibido Cliente"
         ) {
+          if (msg.id) {
+            if (processedMessageIdsRef.current.has(msg.id)) return;
+            processedMessageIdsRef.current.add(msg.id);
+          }
           const textoLimpio = (msg.contenido_mensaje || "").replace("[Cliente]:", "").trim();
           soundEngine.playIncomingChatSound();
           addToast({
