@@ -324,16 +324,17 @@ Por favor califícanos respondiendo con un número del *1 al 5*:
       id: 'nodo_soporte_garantia',
       tipo: 'whatsapp_message',
       titulo: '⚠️ Atención de Inconformidad (Garantía)',
-      subtitulo: 'Se dispara si responde 1, 2 o 3 (Retiene queja internamente)',
+      subtitulo: 'Se dispara si responde 1, 2 o 3 (Retiene queja y activa garantía)',
       icono: 'XCircle',
       enabled: true,
       x: 4060,
-      y: 150,
+      y: 160,
+      stickerPath: '/assets/stickers/kanan-sticker-garantia.png',
       delaySegundos: 2,
       mensajePlantilla: `Lamentamos mucho que tu experiencia no haya sido perfecta, *{nombre}*. Tu satisfacción es nuestra prioridad #1.
 
 He generado un ticket prioritario con folio *{folio}* para nuestro supervisor de calidad. En breve nos comunicaremos contigo para hacer válida tu *Garantía 100% Kanan* sin ningún costo extra.`,
-      siguienteNodoId: [],
+      siguienteNodoId: ['nodo_seguimiento_secado'],
       variablesDisponibles: ['{nombre}', '{folio}']
     },
     // MEJORA 4: Seguimiento Post-Secado (Mismo día por la tarde)
@@ -377,7 +378,7 @@ Los expertos recomiendan realizar limpieza profunda cada 6 meses para eliminar �
   }
 };
 
-const STORAGE_KEY = 'kanan_agent_flow_config_v5';
+const STORAGE_KEY = 'kanan_agent_flow_config_v6';
 
 export function getAgentFlowConfig(): AgentFlowConfig {
   if (typeof window === 'undefined') {

@@ -19,6 +19,7 @@ import { FlowNode, VARIABLES_SISTEMA, STICKERS_DISPONIBLES } from '@/types/agent
 
 interface NodeEditorDrawerProps {
   node: FlowNode | null;
+  allNodes?: FlowNode[];
   onClose: () => void;
   onSave: (updatedNode: FlowNode) => void;
   onDelete?: (nodeId: string) => void;
@@ -28,6 +29,7 @@ interface NodeEditorDrawerProps {
 
 export const NodeEditorDrawer: React.FC<NodeEditorDrawerProps> = ({
   node,
+  allNodes = [],
   onClose,
   onSave,
   onDelete,
@@ -150,13 +152,66 @@ export const NodeEditorDrawer: React.FC<NodeEditorDrawerProps> = ({
 
         {/* Info si no es nodo de mensaje */}
         {!isMessageNode && (
-          <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-start gap-3 text-blue-200 text-xs">
-            <Info className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
-            <div>
-              <p className="font-semibold text-blue-300">Nodo de Control Operativo</p>
-              <p className="mt-0.5 text-blue-300/80">
-                Este nodo representa una acción del administrador, un disparador web o una bifurcación de decisión lógica. No envía mensajes de texto directamente al cliente.
-              </p>
+          <div className="space-y-4">
+            <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-start gap-3 text-blue-200 text-xs">
+              <Info className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
+              <div>
+                <p className="font-semibold text-blue-300">Nodo de Control Operativo</p>
+                <p className="mt-0.5 text-blue-300/80">
+                  Este nodo representa una acción del administrador, un disparador web o una bifurcación de decisión lógica. No envía mensajes de texto directamente al cliente.
+                </p>
+              </div>
+            </div>
+
+            {/* Conexión de Nodos / Siguiente Paso para nodos operativos o de decisión */}
+            <div className="p-4 rounded-xl bg-slate-800/60 border border-slate-700/60 space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                  <span className="text-cyan-400 font-mono text-sm">🔗</span>
+                  Siguientes Nodos Conectados ({formData.siguienteNodoId?.length || 0})
+                </label>
+                <span className="text-[10px] text-slate-400">
+                  Activa los nodos que continuarán después de este
+                </span>
+              </div>
+
+              <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+                {allNodes
+                  .filter((other) => other.id !== formData.id)
+                  .map((other) => {
+                    const isConnected = (formData.siguienteNodoId || []).includes(other.id);
+                    return (
+                      <div
+                        key={other.id}
+                        onClick={() => {
+                          const current = formData.siguienteNodoId || [];
+                          const updated = isConnected
+                            ? current.filter((id) => id !== other.id)
+                            : [...current, other.id];
+                          setFormData({ ...formData, siguienteNodoId: updated });
+                        }}
+                        className={`p-2.5 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
+                          isConnected
+                            ? 'bg-cyan-950/60 border-cyan-500 text-cyan-200'
+                            : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className={`w-2 h-2 rounded-full ${isConnected ? 'bg-cyan-400 animate-pulse' : 'bg-slate-600'}`} />
+                          <div>
+                            <p className="text-xs font-bold">{other.titulo}</p>
+                            <p className="text-[10px] text-slate-500 line-clamp-1">{other.subtitulo}</p>
+                          </div>
+                        </div>
+                        <span className={`text-[11px] font-bold px-2 py-0.5 rounded ${
+                          isConnected ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40' : 'bg-slate-800 text-slate-500'
+                        }`}>
+                          {isConnected ? 'Conectado ✓' : '+ Conectar'}
+                        </span>
+                      </div>
+                    );
+                  })}
+              </div>
             </div>
           </div>
         )}
@@ -291,6 +346,57 @@ export const NodeEditorDrawer: React.FC<NodeEditorDrawerProps> = ({
                     </button>
                   );
                 })}
+              </div>
+            </div>
+
+            {/* Conexión de Nodos / Siguiente Paso */}
+            <div className="p-4 rounded-xl bg-slate-800/60 border border-slate-700/60 space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                  <span className="text-cyan-400 font-mono text-sm">🔗</span>
+                  Siguientes Nodos Conectados ({formData.siguienteNodoId?.length || 0})
+                </label>
+                <span className="text-[10px] text-slate-400">
+                  Activa los nodos que continuarán después de este
+                </span>
+              </div>
+
+              <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+                {allNodes
+                  .filter((other) => other.id !== formData.id)
+                  .map((other) => {
+                    const isConnected = (formData.siguienteNodoId || []).includes(other.id);
+                    return (
+                      <div
+                        key={other.id}
+                        onClick={() => {
+                          const current = formData.siguienteNodoId || [];
+                          const updated = isConnected
+                            ? current.filter((id) => id !== other.id)
+                            : [...current, other.id];
+                          setFormData({ ...formData, siguienteNodoId: updated });
+                        }}
+                        className={`p-2.5 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
+                          isConnected
+                            ? 'bg-cyan-950/60 border-cyan-500 text-cyan-200'
+                            : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className={`w-2 h-2 rounded-full ${isConnected ? 'bg-cyan-400 animate-pulse' : 'bg-slate-600'}`} />
+                          <div>
+                            <p className="text-xs font-bold">{other.titulo}</p>
+                            <p className="text-[10px] text-slate-500 line-clamp-1">{other.subtitulo}</p>
+                          </div>
+                        </div>
+                        <span className={`text-[11px] font-bold px-2 py-0.5 rounded ${
+                          isConnected ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40' : 'bg-slate-800 text-slate-500'
+                        }`}>
+                          {isConnected ? 'Conectado ✓' : '+ Conectar'}
+                        </span>
+                      </div>
+                    );
+                  })}
               </div>
             </div>
 

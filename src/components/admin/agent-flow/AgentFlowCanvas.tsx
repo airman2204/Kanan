@@ -77,6 +77,20 @@ export const AgentFlowCanvas: React.FC<AgentFlowCanvasProps> = ({ onNotify }) =>
 
   const nodes = Object.values(config.nodos);
 
+  // Manejador del zoom con la rueda del mouse (Scroll para acercar/alejar)
+  const handleWheelCanvas = (e: React.WheelEvent) => {
+    // Si se está scrolleando dentro de un drawer o modal, ignorar
+    if ((e.target as HTMLElement).closest('.overflow-y-auto')) return;
+    e.preventDefault();
+
+    const zoomFactor = 0.0015;
+    const delta = -e.deltaY * zoomFactor;
+    setZoomLevel((prevZoom) => {
+      const newZoom = Math.min(Math.max(prevZoom + delta, 0.35), 1.8);
+      return Math.round(newZoom * 100) / 100;
+    });
+  };
+
   // Manejadores de Panning del Lienzo (Arrastrar fondo con mouse o touch)
   const handleMouseDownCanvas = (e: React.MouseEvent) => {
     // Si se hace clic directo en el fondo del lienzo o svg
@@ -369,7 +383,7 @@ export const AgentFlowCanvas: React.FC<AgentFlowCanvasProps> = ({ onNotify }) =>
 
           <div className="hidden md:flex items-center gap-1 text-[11px] text-slate-400 bg-slate-800/60 px-2.5 py-1 rounded-lg border border-slate-700/60">
             <Move className="w-3.5 h-3.5 text-cyan-400" />
-            <span>Arrastra para mover el lienzo o cada nodo libremente</span>
+            <span>Rueda del mouse: Zoom | Arrastra fondo: Mover lienzo | Arrastra nodo: Reorganizar</span>
           </div>
 
           <div className="flex items-center bg-slate-800/80 rounded-lg p-0.5 border border-slate-700">
@@ -415,6 +429,7 @@ export const AgentFlowCanvas: React.FC<AgentFlowCanvasProps> = ({ onNotify }) =>
 
       {/* Área del Lienzo Interactivo con Panning Arrastrable (Sin Barras de Scroll) */}
       <div 
+        onWheel={handleWheelCanvas}
         onMouseDown={handleMouseDownCanvas}
         onMouseMove={handleMouseMoveCanvas}
         onMouseUp={handleMouseUpCanvas}
@@ -622,6 +637,7 @@ export const AgentFlowCanvas: React.FC<AgentFlowCanvasProps> = ({ onNotify }) =>
       {/* Drawer Lateral de Edición de Nodo */}
       <NodeEditorDrawer
         node={selectedNode}
+        allNodes={nodes}
         onClose={() => setSelectedNode(null)}
         onSave={handleUpdateNode}
         onDelete={handleDeleteNode}
