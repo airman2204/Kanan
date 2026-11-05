@@ -77,17 +77,30 @@ class SoundEngine {
   }
 
   /**
-   * 1. Sonido de Nueva Cita Agendada (Campana Armónica de Éxito)
+   * 1. Sonido de Nueva Cita Agendada (Ding Reserva + Doble Ladrido o Timbre)
+   * Timbre de mostrador con el perro para cuando agenden un nuevo servicio
    */
   public playNewBookingSound() {
-    this.playAudioFile("/sounds/calendar_confirm.mp3", 0.85);
+    if (this.isMuted()) return;
+    try {
+      if (typeof window !== "undefined") {
+        const a1 = new Audio("/sounds/bell_service.mp3");
+        const a2 = new Audio("/sounds/bark1.mp3");
+        a1.volume = 0.85;
+        a2.volume = 0.9;
+        a1.play().catch(() => {});
+        setTimeout(() => {
+          a2.play().catch(() => {});
+        }, 550);
+      }
+    } catch {}
   }
 
   /**
-   * 2. Sonido de Mensaje Entrante de Chat (Pop WhatsApp Crisp Oficial)
+   * 2. Sonido de Mensaje Entrante de Chat (Opción elegida: "Ding Reserva" /sounds/booking_ding.mp3)
    */
   public playIncomingChatSound() {
-    this.playAudioFile("/sounds/pop_whatsapp_clean.mp3", 0.9);
+    this.playAudioFile("/sounds/booking_ding.mp3", 0.9);
   }
 
   /**

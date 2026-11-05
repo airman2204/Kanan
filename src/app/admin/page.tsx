@@ -249,32 +249,11 @@ export default function AdminPage() {
           });
         }
 
-        // 3. Detectar mensajes de chat entrantes
+        // 3. Detectar mensajes de chat entrantes (sólo como fallback si no llegó por realtime)
         if (lastMensajesCountRef.current !== null && data.mensajes_automatizacion) {
           if (data.mensajes_automatizacion.length > lastMensajesCountRef.current) {
-            // Obtener todos los mensajes nuevos que entraron en este ciclo
-            const nuevosMensajes = data.mensajes_automatizacion.slice(
-              0,
-              data.mensajes_automatizacion.length - lastMensajesCountRef.current
-            );
-            const msgCliente = nuevosMensajes.find(
-              (m) =>
-                m.contenido_mensaje.startsWith("[Cliente]:") ||
-                m.etapa_titulo === "Mensaje Recibido Cliente"
-            );
-            if (msgCliente) {
-              const cli = data.clientes.find((c) => c.id === msgCliente.cliente_id);
-              const textoLimpio = msgCliente.contenido_mensaje.replace("[Cliente]:", "").trim();
-              soundEngine.playIncomingChatSound();
-              addToast({
-                tipo: "mensaje_chat",
-                titulo: "Nuevo Mensaje en Chat",
-                descripcion: textoLimpio,
-                clienteNombre: cli?.nombre || "Cliente WhatsApp",
-                actionLabel: "Responder en Chat",
-                onAction: () => setActiveSection("chat"),
-              });
-            }
+            // Referencia histórica actualizada, el sonido y toast primario se manejan de forma síncrona
+            // en el listener realtime de broadcast para evitar duplicidad de sonido
           }
         }
 

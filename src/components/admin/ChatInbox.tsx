@@ -85,13 +85,6 @@ export function ChatInbox({
           return [...prev, nuevoMsg];
         });
 
-        if (
-          nuevoMsg.contenido_mensaje?.startsWith("[Cliente]:") ||
-          nuevoMsg.etapa_titulo === "Mensaje Recibido Cliente"
-        ) {
-          soundEngine.playIncomingChatSound();
-        }
-
         if (onRefresh) onRefresh();
       })
       .on(
@@ -107,14 +100,6 @@ export function ChatInbox({
             if (prev.some((m) => m.id === nuevoMsg.id)) return prev;
             return [...prev, nuevoMsg];
           });
-
-          // Si es mensaje entrante del cliente, disparar sonido instantáneamente
-          if (
-            nuevoMsg.contenido_mensaje?.startsWith("[Cliente]:") ||
-            nuevoMsg.etapa_titulo === "Mensaje Recibido Cliente"
-          ) {
-            soundEngine.playIncomingChatSound();
-          }
 
           if (onRefresh) onRefresh();
         }
