@@ -159,10 +159,32 @@ app.get('/api/qr', authMiddleware, (req, res) => {
   if (connectionStatus === 'connected') {
     return res.json({ ok: true, status: 'connected', qr: null, message: 'Ya está conectado' });
   }
+
+  // Si no hay socket activo o quedó desconectado, forzar inicio
+  if (!sock || (!qrCodeData && connectionStatus === 'disconnected')) {
+    console.log('🔄 [Kanan Chat] Petición /api/qr sin socket activo o desconectado. Iniciando WhatsApp...');
+    startWhatsApp().catch(err => console.error('Error iniciando:', err));
+  }
+
   if (!qrCodeData) {
     return res.json({ ok: false, status: connectionStatus, qr: null, message: 'Generando nuevo código QR...' });
   }
   res.json({ ok: true, status: connectionStatus, qr: qrCodeData });
+});
+
+app.get('/api/reconnect', authMiddleware, (req, res) => {
+  try {
+    console.log('🔄 [Kanan Chat] Forzando reinicio manual de sesión WhatsApp...');
+    qrCodeData = null;
+    connectionStatus = 'connecting';
+    if (sock) {
+      try { sock.end(); } catch (_) {}
+    }
+    startWhatsApp().catch(err => console.error('Error al reiniciar WhatsApp:', err));
+    res.json({ ok: true, message: 'Reconexión iniciada' });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err.message });
+  }
 });
 
 app.post('/api/send-message', authMiddleware, async (req, res) => {
