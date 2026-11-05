@@ -105,14 +105,14 @@ export function StickyHeader({
               <span>WhatsApp</span>
             </a>
 
-            {/* Botón de Agendar Cita */}
+            {/* Botón de Cotizar y Agendar Cita */}
             <button
               type="button"
               onClick={onOpenWizard}
               className="group inline-flex items-center justify-center gap-1.5 bg-gradient-to-r from-kanan-cyan to-kanan-cerulean hover:from-[#009ec0] hover:to-kanan-navy text-white font-heading font-bold text-xs sm:text-sm px-4 sm:px-5 py-2.5 sm:py-3 rounded-full shadow-cyan-glow transition-all active:scale-95 h-11"
             >
               <CalendarCheck className="w-4 h-4 shrink-0" />
-              <span>Agendar Cita</span>
+              <span>Cotizar y Agendar</span>
             </button>
           </div>
         </div>

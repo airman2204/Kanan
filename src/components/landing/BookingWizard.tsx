@@ -156,7 +156,7 @@ const CATALOGO_KANAN: CatalogCategory[] = [
 const KANAN_DOG_TIPS: Record<number, { title: string; tip: string }> = {
   1: {
     title: "Paso 1 de 4: Selecciona tus muebles 🛋️",
-    tip: "Elige las salas, tapetes, colchones o vestiduras que deseas limpiar y desinfectar. Al final te daremos atención y cotización personalizada.",
+    tip: "¡Hola! 🐾 Usa el botón (+) para agregar solo las piezas que deseas limpiar. Nuestro equipo revisará los detalles y te enviará tu cotización formal a tu WhatsApp.",
   },
   2: {
     title: "Paso 2 de 4: Ubicación verificada y fotos de tus piezas 📷",
@@ -168,7 +168,7 @@ const KANAN_DOG_TIPS: Record<number, { title: string; tip: string }> = {
   },
   4: {
     title: "Paso 4 de 4: Confirmación del servicio ✅",
-    tip: "Revisa tu resumen. Al confirmar, registraremos tu cita en nuestro sistema y te conectaremos directo por WhatsApp con tu folio.",
+    tip: "Revisa tu resumen. Al confirmar, tu solicitud se enviará al panel de control y te conectaremos directo a tu WhatsApp con tu folio.",
   },
 };
 
@@ -185,9 +185,7 @@ export function BookingWizard({
 }: BookingWizardProps) {
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [activeCategory, setActiveCategory] = useState<string>("salas");
-  const [quantities, setQuantities] = useState<Record<string, number>>({
-    "sala-l": 1,
-  });
+  const [quantities, setQuantities] = useState<Record<string, number>>({});
 
   // Paso 2: Ubicación Inteligente por Código Postal, GPS y Fotos
   const [codigoPostal, setCodigoPostal] = useState("");

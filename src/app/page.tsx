@@ -18,6 +18,14 @@ export default function HomePage() {
   const [modoHalloween, setModoHalloween] = useState<boolean>(false);
 
   useEffect(() => {
+    // Evitar que al recargar la página el navegador haga scroll involuntario a #agendar
+    if (typeof window !== "undefined" && window.location.hash) {
+      if (window.location.hash === "#agendar" || window.location.hash.includes("agendar")) {
+        window.history.replaceState(null, "", window.location.pathname);
+        window.scrollTo({ top: 0, behavior: "instant" });
+      }
+    }
+
     // Consultar el estado del modo Halloween público sin requerir autenticación
     fetch("/api/config")
       .then((res) => res.json())

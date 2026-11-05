@@ -77,7 +77,7 @@ export function HeroSection({ selectedMunicipio, onOpenWizard }: HeroSectionProp
                   className="flex-1 inline-flex items-center justify-center gap-2 bg-kanan-cyan hover:bg-[#009ec0] text-white font-heading font-bold text-sm sm:text-base px-6 py-4 rounded-2xl shadow-cyan-glow transition-all active:scale-95"
                 >
                   <CalendarCheck className="w-5 h-5 shrink-0" />
-                  <span>Cotizar Cita a Domicilio</span>
+                  <span>Cotizar y Agendar a Domicilio</span>
                   <ArrowRight className="w-4 h-4 shrink-0" />
                 </button>
                 <a
