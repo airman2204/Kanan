@@ -84,6 +84,70 @@ export async function POST(req: NextRequest) {
 
     if (body.action === "CREATE_CITA_MANUAL") {
       const { cita, cliente } = createCitaManual(body.cita);
+
+      // Si se solicitó enviar confirmación automática por WhatsApp
+      if (body.enviarWhatsApp !== false && cliente.whatsapp) {
+        try {
+          const { enviarMensajeChat } = await import("@/lib/chat/bridgeClient");
+          const { getMensajeDesdeFlujo } = await import("@/lib/chat/flowConfigStore");
+
+          const piezasStr = (cita.items_contratados || []).map((it) => `${it.cantidad}x ${it.piezaNombre}`).join(", ");
+          
+          let horarioLimpio = "09:00 a 16:00 hrs";
+          if (cita.hora_especifica) {
+            horarioLimpio = `${cita.hora_especifica} hrs`;
+          } else if (cita.turno) {
+            const match = cita.turno.match(/\((.*?)\)/);
+            if (match && match[1]) {
+              horarioLimpio = `${match[1].replace("-", "a")} hrs`;
+            } else if (cita.turno.includes("Matutino")) {
+              horarioLimpio = "09:00 a 13:00 hrs (Turno Mañana)";
+            } else if (cita.turno.includes("Vespertino")) {
+              horarioLimpio = "14:00 a 18:00 hrs (Turno Tarde)";
+            }
+          }
+
+          const fallbackMsg = [
+            `¡Hola ${cliente.nombre}! 👋`,
+            ``,
+            `Te confirmamos que tu cita ha sido agendada con éxito por nuestro equipo de *Kanan Servicios de Limpieza*:`,
+            ``,
+            `📋 *Folio:* ${cita.id}`,
+            `🛋️ *Servicio:* ${piezasStr || "Limpieza y desinfección profunda"}`,
+            `📅 *Fecha:* ${cita.fecha}`,
+            `⏰ *Horario estimado:* ${horarioLimpio}`,
+            `💰 *Total pactado:* $${cita.monto_total || 0} MXN`,
+            `📍 *Dirección:* ${cliente.direccion}`,
+            ``,
+            `🚐 *¿Qué sigue?*`,
+            `El día de tu servicio, nuestro técnico te enviará un mensaje por este medio en cuanto vaya en camino a tu domicilio.`,
+            ``,
+            `ℹ️ *Política de cambios:*`,
+            `Recuerda que cuentas con hasta *2 horas antes* del horario de tu servicio para avisarnos por este medio ante cualquier cambio o reprogramación.`,
+            ``,
+            `¡Muchas gracias por tu preferencia en *Kanan*! 🐾✨`
+          ].join("\n");
+
+          const msgConfirmacion = getMensajeDesdeFlujo(
+            "nodo_confirmacion_manual_admin",
+            {
+              nombre: cliente.nombre,
+              folio: cita.id,
+              piezas: piezasStr || "Limpieza y desinfección profunda",
+              fecha: cita.fecha,
+              turno: horarioLimpio,
+              precio: `$${cita.monto_total || 0} MXN`,
+              direccion: cliente.direccion
+            },
+            fallbackMsg
+          );
+
+          await enviarMensajeChat(cliente.whatsapp, msgConfirmacion);
+        } catch (errWa) {
+          console.warn("[CRM] No se pudo enviar WhatsApp automático de cita manual:", errWa);
+        }
+      }
+
       return NextResponse.json({ ok: true, cita, cliente, db: getDatabase() });
     }
 

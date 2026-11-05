@@ -470,6 +470,34 @@ export function createCitaManual(payload: {
     cliente.historico_gasto = (cliente.historico_gasto || 0) + payload.monto_total;
   }
 
+  // Generar secuencia de seguimiento post-servicio (recordatorio 24h, secado, encuesta, etc.)
+  const mesesDisparador = cliente.mascotas ? 3 : 6;
+  const nuevoRegistroRecurrencia: RegistroRecurrencia = {
+    id: `rec-${Date.now()}`,
+    cliente_id: cliente.id,
+    cita_id: nuevaCita.id,
+    ultimo_servicio: payload.fecha,
+    disparador: cliente.mascotas ? "3 Meses (Mascotas)" : "6 Meses (Semestral)",
+    proxima_fecha_contacto: calcularFechaFutura(payload.fecha, mesesDisparador),
+    estatus_contacto: "Programado",
+  };
+  db.recurrencia.unshift(nuevoRegistroRecurrencia);
+
+  const secuencia = generarSecuenciaPoservicio(nuevaCita, cliente);
+  secuencia.forEach((etapaItem, idx) => {
+    db.mensajes_automatizacion.unshift({
+      id: `msg-${nuevaCita.id}-${idx + 1}-${Date.now()}`,
+      cita_id: nuevaCita.id,
+      cliente_id: cliente!.id,
+      etapa: etapaItem.etapa,
+      etapa_titulo: etapaItem.etapa_titulo,
+      destinatario_whatsapp: cliente!.whatsapp,
+      contenido_mensaje: etapaItem.contenido_mensaje,
+      estatus_envio: etapaItem.estatus_envio,
+      fecha_programada: new Date(Date.now() + idx * 3600000).toISOString(),
+    });
+  });
+
   saveDatabase(db);
   return { cita: nuevaCita, cliente };
 }

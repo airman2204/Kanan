@@ -17,6 +17,49 @@ export const DEFAULT_AGENT_FLOW_CONFIG: AgentFlowConfig = {
       y: 200,
       siguienteNodoId: ['nodo_recepcion_cliente']
     },
+    'nodo_cita_manual_admin': {
+      id: 'nodo_cita_manual_admin',
+      tipo: 'trigger',
+      titulo: '1B. Cita Manual (Admin)',
+      subtitulo: 'Agendada desde Calendario / CRM con confirmación directa',
+      icono: 'CalendarCheck',
+      enabled: true,
+      x: 40,
+      y: -60,
+      siguienteNodoId: ['nodo_confirmacion_manual_admin']
+    },
+    'nodo_confirmacion_manual_admin': {
+      id: 'nodo_confirmacion_manual_admin',
+      tipo: 'whatsapp_message',
+      titulo: '2B. Confirmación Inmediata',
+      subtitulo: 'Notificación directa con folio, fecha, horario y monto pactado',
+      icono: 'CheckCircle2',
+      enabled: true,
+      x: 360,
+      y: -60,
+      stickerPath: '/assets/stickers/kanan-sticker-listo.png',
+      delaySegundos: 2,
+      mensajePlantilla: `¡Hola {nombre}! 👋
+
+Te confirmamos que tu cita ha sido agendada con éxito por nuestro equipo de *Kanan Servicios de Limpieza*:
+
+📋 *Folio:* {folio}
+🛋️ *Servicio:* {piezas}
+📅 *Fecha:* {fecha}
+⏰ *Horario estimado:* {turno}
+💰 *Total pactado:* {precio}
+📍 *Dirección:* {direccion}
+
+🚐 *¿Qué sigue?*
+El día de tu servicio, nuestro técnico te enviará un mensaje por este medio en cuanto vaya en camino a tu domicilio.
+
+ℹ️ *Política de cambios:*
+Recuerda que cuentas con hasta *2 horas antes* del horario de tu servicio para avisarnos por este medio ante cualquier cambio o reprogramación.
+
+¡Muchas gracias por tu preferencia en *Kanan*! 🐾✨`,
+      siguienteNodoId: ['nodo_recordatorio_24h'],
+      variablesDisponibles: ['{nombre}', '{folio}', '{piezas}', '{fecha}', '{turno}', '{precio}', '{direccion}']
+    },
     'nodo_recepcion_cliente': {
       id: 'nodo_recepcion_cliente',
       tipo: 'whatsapp_message',
@@ -334,7 +377,7 @@ Los expertos recomiendan realizar limpieza profunda cada 6 meses para eliminar �
   }
 };
 
-const STORAGE_KEY = 'kanan_agent_flow_config_v4';
+const STORAGE_KEY = 'kanan_agent_flow_config_v5';
 
 export function getAgentFlowConfig(): AgentFlowConfig {
   if (typeof window === 'undefined') {

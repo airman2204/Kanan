@@ -64,36 +64,39 @@ interface CalendarViewProps {
   onCancelCita: (citaId: string, motivo?: string) => Promise<void>;
   onDeleteCita?: (citaId: string) => Promise<void>;
   onNavigateToChat?: (clienteId: string) => void;
-  onCreateCitaManual: (cita: {
-    cliente_id?: string;
-    cliente_data?: {
-      nombre: string;
-      whatsapp: string;
-      direccion: string;
-      municipio: MunicipioZMG;
-      mascotas: boolean;
-      notas_especiales?: string;
-      email?: string;
-    };
-    fecha: string;
-    turno: TurnoServicio;
-    hora_especifica?: string;
-    items_contratados: {
-      categoriaId: string;
-      categoriaNombre: string;
-      piezaId: string;
-      piezaNombre: string;
-      cantidad: number;
-    }[];
-    monto_total?: number | null;
-    metodo_pago?: MetodoPago;
-    tipo_tela?: string;
-    manchas_dificiles?: string[];
-    instrucciones_acceso?: string;
-    cuenta_con_agua_y_luz?: boolean;
-    tecnico_asignado?: string;
-    notas_servicio?: string;
-  }) => Promise<void>;
+  onCreateCitaManual: (
+    cita: {
+      cliente_id?: string;
+      cliente_data?: {
+        nombre: string;
+        whatsapp: string;
+        direccion: string;
+        municipio: MunicipioZMG;
+        mascotas: boolean;
+        notas_especiales?: string;
+        email?: string;
+      };
+      fecha: string;
+      turno: TurnoServicio;
+      hora_especifica?: string;
+      items_contratados: {
+        categoriaId: string;
+        categoriaNombre: string;
+        piezaId: string;
+        piezaNombre: string;
+        cantidad: number;
+      }[];
+      monto_total?: number | null;
+      metodo_pago?: MetodoPago;
+      tipo_tela?: string;
+      manchas_dificiles?: string[];
+      instrucciones_acceso?: string;
+      cuenta_con_agua_y_luz?: boolean;
+      tecnico_asignado?: string;
+      notas_servicio?: string;
+    },
+    enviarWhatsApp?: boolean
+  ) => Promise<void>;
 }
 
 const ESTATUS_COLUMNS: EstatusCita[] = [
@@ -177,6 +180,7 @@ export function CalendarCitasView({
   const [newAcceso, setNewAcceso] = useState("");
   const [newAguaLuz, setNewAguaLuz] = useState(true);
   const [newNotasServicio, setNewNotasServicio] = useState("");
+  const [enviarWhatsAppConfirmacion, setEnviarWhatsAppConfirmacion] = useState(true);
 
   // Modal Detalle Cita / Edición / Fotos
   const [selectedCitaDetalle, setSelectedCitaDetalle] = useState<ServicioCita | null>(null);
@@ -369,7 +373,7 @@ export function CalendarCitasView({
       await onCreateCitaManual({
         cliente_id: selectedClientId,
         ...payloadBase,
-      });
+      }, enviarWhatsAppConfirmacion);
     } else {
       await onCreateCitaManual({
         cliente_data: {
@@ -381,7 +385,7 @@ export function CalendarCitasView({
           mascotas: newMascotas,
         },
         ...payloadBase,
-      });
+      }, enviarWhatsAppConfirmacion);
     }
 
     setShowNewModal(false);
@@ -1664,6 +1668,21 @@ export function CalendarCitasView({
                   />
                   <label htmlFor="new-agua-luz" className="text-xs font-semibold text-slate-700 cursor-pointer">
                     Cliente cuenta con toma de agua y conexión eléctrica funcional
+                  </label>
+                </div>
+
+                {/* Notificación automática de WhatsApp basada en el flujo */}
+                <div className="flex items-center gap-2 pt-2 border-t border-slate-200">
+                  <input
+                    type="checkbox"
+                    id="new-enviar-wa"
+                    checked={enviarWhatsAppConfirmacion}
+                    onChange={(e) => setEnviarWhatsAppConfirmacion(e.target.checked)}
+                    className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500"
+                  />
+                  <label htmlFor="new-enviar-wa" className="text-xs font-bold text-slate-800 cursor-pointer flex items-center gap-1.5">
+                    <span>📲 Enviar confirmación formal por WhatsApp al cliente</span>
+                    <span className="text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-semibold">Flujo Agente</span>
                   </label>
                 </div>
               </div>

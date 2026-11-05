@@ -20,7 +20,8 @@ import {
   Plus,
   Move,
   Clock,
-  Layers
+  Layers,
+  CalendarCheck
 } from 'lucide-react';
 import { FlowNode, FlowNodeType, AgentFlowConfig } from '@/types/agentFlow';
 import { getAgentFlowConfig, saveAgentFlowConfig, resetAgentFlowConfig } from '@/lib/chat/flowConfigStore';
@@ -41,7 +42,8 @@ const ICON_MAP: Record<string, React.ElementType> = {
   Truck,
   Sparkles,
   Award,
-  Clock
+  Clock,
+  CalendarCheck
 };
 
 export const AgentFlowCanvas: React.FC<AgentFlowCanvasProps> = ({ onNotify }) => {

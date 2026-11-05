@@ -406,11 +406,11 @@ export default function AdminPage() {
   };
 
   // Crear cita manual
-  const handleCreateCitaManual = async (citaData: any) => {
+  const handleCreateCitaManual = async (citaData: any, enviarWhatsApp = true) => {
     const res = await fetch("/api/crm", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "CREATE_CITA_MANUAL", cita: citaData }),
+      body: JSON.stringify({ action: "CREATE_CITA_MANUAL", cita: citaData, enviarWhatsApp }),
     });
     const data = await res.json();
     if (data.ok) {
