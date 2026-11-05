@@ -6,7 +6,7 @@ import { StickyHeader } from "@/components/landing/StickyHeader";
 import { HeroSection } from "@/components/landing/HeroSection";
 import { ServicesSection } from "@/components/landing/ServicesSection";
 import { BeforeAfterGallery } from "@/components/landing/BeforeAfterGallery";
-import { BookingWizard } from "@/components/landing/BookingWizard";
+import { KananConciergeAgent } from "@/components/landing/KananConciergeAgent";
 import { SocialProofAndFAQ } from "@/components/landing/SocialProofAndFAQ";
 import { Footer } from "@/components/landing/Footer";
 import { HalloweenBats } from "@/components/landing/HalloweenBats";
@@ -70,7 +70,7 @@ export default function HomePage() {
 
         <BeforeAfterGallery onOpenWizard={() => scrollToWizard()} />
 
-        <BookingWizard
+        <KananConciergeAgent
           selectedMunicipio={selectedMunicipio}
           onSelectMunicipio={setSelectedMunicipio}
           preselectedCategory={preselectedCategory}
