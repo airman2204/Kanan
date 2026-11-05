@@ -987,21 +987,40 @@ export function KananConciergeAgent({
               </form>
             )}
 
-            {/* 4. Selector o Input de Colonia */}
+            {/* 4. Selector Desplegable o Botones de Colonia */}
             {step === "ask_colonia" && !isTyping && (
-              <div className="space-y-2 animate-in fade-in">
+              <div className="space-y-3 animate-in fade-in">
                 {coloniasDisponibles.length > 0 ? (
-                  <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto p-1">
-                    {coloniasDisponibles.map((col) => (
-                      <button
-                        key={col}
-                        type="button"
-                        onClick={() => handleSelectColonia(col)}
-                        className="px-3 py-1.5 rounded-full bg-slate-100 hover:bg-cyan-50 hover:text-cyan-900 text-slate-700 text-xs font-semibold border border-slate-200 transition active:scale-95"
-                      >
-                        {col}
-                      </button>
-                    ))}
+                  <div className="space-y-2">
+                    <label className="block text-xs font-heading font-bold text-slate-700">
+                      Selecciona tu colonia en la lista:
+                    </label>
+                    <select
+                      defaultValue=""
+                      onChange={(e) => {
+                        if (e.target.value === "__OTRA__") {
+                          // Permite al usuario escribir libremente abajo
+                          setInputText("");
+                        } else if (e.target.value) {
+                          handleSelectColonia(e.target.value);
+                        }
+                      }}
+                      className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-300 text-xs sm:text-sm font-semibold text-slate-800 focus:outline-none focus:border-cyan-500 shadow-xs cursor-pointer"
+                    >
+                      <option value="" disabled>
+                        -- Elige tu colonia o fraccionamiento --
+                      </option>
+                      {coloniasDisponibles.map((col) => (
+                        <option key={col} value={col}>
+                          📍 {col}
+                        </option>
+                      ))}
+                      <option value="__OTRA__">➕ Otra colonia o fraccionamiento no listado...</option>
+                    </select>
+
+                    <p className="text-[11px] text-slate-400">
+                      ¿Tu coto o fraccionamiento es privado o nuevo? Escríbelo aquí:
+                    </p>
                   </div>
                 ) : null}
 
@@ -1019,7 +1038,11 @@ export function KananConciergeAgent({
                       setErrorActivo(null);
                       setInputText(e.target.value);
                     }}
-                    placeholder="O escribe el nombre de tu colonia..."
+                    placeholder={
+                      coloniasDisponibles.length > 0
+                        ? "O escribe aquí el nombre de tu colonia o coto..."
+                        : "Escribe el nombre de tu colonia o coto..."
+                    }
                     className="flex-1 px-4 py-2.5 rounded-full bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-cyan-500"
                     autoFocus={coloniasDisponibles.length === 0}
                   />
@@ -1027,6 +1050,7 @@ export function KananConciergeAgent({
                     type="submit"
                     disabled={!inputText.trim()}
                     className="p-2.5 rounded-full bg-kanan-cyan hover:bg-[#009ec0] disabled:bg-slate-200 text-white transition active:scale-95 shadow-xs"
+                    title="Confirmar colonia"
                   >
                     <Send className="w-4 h-4" />
                   </button>
