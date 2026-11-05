@@ -2,7 +2,11 @@
  * Cliente HTTP interno para comunicarse con el microservicio chat-bridge
  */
 
-const CHAT_BRIDGE_URL = process.env.CHAT_BRIDGE_URL || "http://localhost:3001";
+const CHAT_BRIDGE_URL =
+  process.env.CHAT_BRIDGE_URL ||
+  (process.env.NODE_ENV === "production"
+    ? "https://kanan-chat-bridge.onrender.com"
+    : "http://localhost:3001");
 const CHAT_API_KEY = process.env.CHAT_API_KEY || "kanan_secret_2026";
 
 interface BridgeResponse {

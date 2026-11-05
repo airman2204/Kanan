@@ -287,6 +287,13 @@ export default function AdminPage() {
   useEffect(() => {
     checkAuth();
     fetchCrmData();
+
+    // Sincronización en vivo cada 6 segundos para detectar citas nuevas, sonar campana y actualizar sin recargar F5
+    const interval = setInterval(() => {
+      fetchCrmData();
+    }, 6000);
+
+    return () => clearInterval(interval);
   }, [checkAuth, fetchCrmData]);
 
   const handleLogout = async () => {

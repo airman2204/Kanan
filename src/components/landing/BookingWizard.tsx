@@ -210,9 +210,20 @@ export function BookingWizard({
   const [fotosPreview, setFotosPreview] = useState<string[]>([]);
   const [fotosError, setFotosError] = useState<string | null>(null);
 
-  // Paso 3: Fecha y Turno
-  const tomorrowStr = new Date(Date.now() + 86400000).toISOString().split("T")[0];
-  const [fecha, setFecha] = useState<string>(tomorrowStr);
+  // Paso 3: Fecha y Turno (Calculada en zona horaria de México GMT-6)
+  const getTomorrowMexico = () => {
+    const now = new Date();
+    // Offset para Ciudad de México / Guadalajara (GMT-6)
+    const tzOffsetMs = -6 * 60 * 60 * 1000;
+    const mexicoNow = new Date(now.getTime() + tzOffsetMs + now.getTimezoneOffset() * 60000);
+    const tomorrow = new Date(mexicoNow.getTime() + 86400000);
+    const y = tomorrow.getFullYear();
+    const m = String(tomorrow.getMonth() + 1).padStart(2, "0");
+    const d = String(tomorrow.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  };
+
+  const [fecha, setFecha] = useState<string>(getTomorrowMexico());
   const [turno, setTurno] = useState<TurnoServicio>("Matutino (09:00 - 13:00)");
 
   // Paso 4: Datos del Cliente
@@ -489,6 +500,12 @@ export function BookingWizard({
   const handleContinuarAPaso3 = () => {
     if (validarPaso2()) {
       setStep(3);
+      if (typeof window !== "undefined") {
+        const wizardElement = document.getElementById("agendar");
+        if (wizardElement) {
+          wizardElement.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }
     }
   };
 
@@ -643,15 +660,14 @@ export function BookingWizard({
 
                 <div>
                   <span className="inline-block px-3.5 py-1 rounded-full bg-kanan-ice border border-slate-200 text-kanan-navy font-heading font-bold text-xs uppercase tracking-wider">
-                    Folio Registrado en CRM: {bookingResult.folio}
+                    Folio de Servicio: {bookingResult.folio}
                   </span>
                   <h3 className="font-heading text-2xl sm:text-3xl font-extrabold text-kanan-deep mt-3">
-                    ¡Solicitud Lista, {nombre}! 🐾
+                    ¡Solicitud Recibida, {nombre}! 🐾
                   </h3>
                   <p className="text-slate-600 text-sm sm:text-base mt-2">
                     Tu cita para el <strong>{fecha}</strong> ({turno}) en{" "}
-                    <strong>{selectedMunicipio}</strong> ya quedó guardada en nuestro Panel
-                    Operativo CRM y activó la secuencia de atención Kanan.
+                    <strong>{selectedMunicipio}</strong> ha sido agendada con éxito en Kanan Servicios.
                   </p>
                 </div>
 
@@ -1468,7 +1484,7 @@ export function BookingWizard({
                         <MessageCircle className="w-5 h-5" />
                         <span>
                           {submitting
-                            ? "Registrando en CRM..."
+                            ? "Confirmando tu reserva..."
                             : "Confirmar Reserva y Cotizar por WhatsApp"}
                         </span>
                       </button>
