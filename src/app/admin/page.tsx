@@ -851,46 +851,6 @@ export default function AdminPage() {
           {activeSection === "configuracion" && (
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                
-                {/* Ajustes de Campaña Temporal (Modo Halloween) */}
-                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-5">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-orange-100 text-orange-600 flex items-center justify-center text-lg">
-                      🎃
-                    </div>
-                    <div>
-                      <h3 className="font-heading font-bold text-sm text-slate-800">
-                        Campaña de Temporada
-                      </h3>
-                      <p className="text-xs text-slate-400">
-                        Efectos temáticos en el sitio web público
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between p-4 bg-slate-50/80 rounded-2xl border border-slate-100">
-                    <div>
-                      <p className="text-xs font-bold text-slate-800">Modo Halloween & Papel Picado</p>
-                      <p className="text-[11px] text-slate-500">Muestra los murciélagos y decoración temática</p>
-                    </div>
-                    <button
-                      type="button"
-                      role="switch"
-                      aria-checked={db?.config?.modo_halloween ?? true}
-                      onClick={() => handleToggleHalloween(!(db?.config?.modo_halloween ?? true))}
-                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
-                        (db?.config?.modo_halloween ?? true) ? "bg-orange-500" : "bg-slate-300"
-                      }`}
-                    >
-                      <span
-                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                          (db?.config?.modo_halloween ?? true) ? "translate-x-5" : "translate-x-0"
-                        }`}
-                      />
-                    </button>
-                  </div>
-                </div>
-
                 {/* Políticas Operativas y Cancelaciones */}
                 <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-5">
                   <div className="flex items-center gap-3">
@@ -917,115 +877,8 @@ export default function AdminPage() {
                   </div>
                 </div>
 
-                {/* Laboratorio de Pruebas de Audio & Notificaciones */}
-                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-5 md:col-span-2">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center">
-                      <Volume2 className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <h3 className="font-heading font-bold text-sm text-slate-800">
-                        Laboratorio de Audio & Alertas Auditivas
-                      </h3>
-                      <p className="text-xs text-slate-400">
-                        Escucha en vivo y selecciona los sonidos del CRM
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {/* COMBO ELEGIDO */}
-                    <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-200 space-y-3">
-                      <h4 className="font-bold text-xs text-emerald-800">🏆 Tu Combo Elegido (Citas)</h4>
-                      <p className="text-[11px] text-emerald-700">Campana Recepción + Doble Ladrido</p>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const a1 = new Audio("/sounds/bell_service.mp3");
-                          const a2 = new Audio("/sounds/bark1.mp3");
-                          a1.play();
-                          setTimeout(() => a2.play(), 550);
-                        }}
-                        className="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs"
-                      >
-                        ▶ Escuchar Combo
-                      </button>
-                    </div>
-
-                    {/* OPCIONES AGENDAR */}
-                    <div className="p-4 bg-blue-50 rounded-2xl border border-blue-200 space-y-2">
-                      <h4 className="font-bold text-xs text-blue-900">📅 Opciones: Al Agendar Servicio</h4>
-                      <div className="space-y-1.5">
-                        <button
-                          type="button"
-                          onClick={() => new Audio("/sounds/calendar_confirm.mp3").play()}
-                          className="w-full text-left p-2 bg-white hover:bg-blue-100/70 rounded-xl text-xs font-bold text-blue-800 border border-blue-100 flex items-center justify-between"
-                        >
-                          <span>1. Campana Armónica</span>
-                          <span className="text-[10px] text-blue-600">▶ Probar</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => new Audio("/sounds/magic_chime_agenda.mp3").play()}
-                          className="w-full text-left p-2 bg-white hover:bg-blue-100/70 rounded-xl text-xs font-bold text-blue-800 border border-blue-100 flex items-center justify-between"
-                        >
-                          <span>2. Chime Mágico</span>
-                          <span className="text-[10px] text-blue-600">▶ Probar</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => new Audio("/sounds/booking_ding.mp3").play()}
-                          className="w-full text-left p-2 bg-white hover:bg-blue-100/70 rounded-xl text-xs font-bold text-blue-800 border border-blue-100 flex items-center justify-between"
-                        >
-                          <span>3. Ding Reserva</span>
-                          <span className="text-[10px] text-blue-600">▶ Probar</span>
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* OPCIONES CHAT */}
-                    <div className="p-4 bg-indigo-50 rounded-2xl border border-indigo-200 space-y-2">
-                      <h4 className="font-bold text-xs text-indigo-900">💬 Opciones: Mensaje de Chat</h4>
-                      <div className="space-y-1.5">
-                        <button
-                          type="button"
-                          onClick={() => new Audio("/sounds/pop_whatsapp_clean.mp3").play()}
-                          className="w-full text-left p-2 bg-white hover:bg-indigo-100/70 rounded-xl text-xs font-bold text-indigo-800 border border-indigo-100 flex items-center justify-between"
-                        >
-                          <span>1. Pop WhatsApp Crisp</span>
-                          <span className="text-[10px] text-indigo-600">▶ Probar</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => new Audio("/sounds/chat_ping.mp3").play()}
-                          className="w-full text-left p-2 bg-white hover:bg-indigo-100/70 rounded-xl text-xs font-bold text-indigo-800 border border-indigo-100 flex items-center justify-between"
-                        >
-                          <span>2. Ping Cristalino</span>
-                          <span className="text-[10px] text-indigo-600">▶ Probar</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => new Audio("/sounds/chat_pop.mp3").play()}
-                          className="w-full text-left p-2 bg-white hover:bg-indigo-100/70 rounded-xl text-xs font-bold text-indigo-800 border border-indigo-100 flex items-center justify-between"
-                        >
-                          <span>3. Pop Corto Clásico</span>
-                          <span className="text-[10px] text-indigo-600">▶ Probar</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => new Audio("/sounds/chat_notification.mp3").play()}
-                          className="w-full text-left p-2 bg-white hover:bg-indigo-100/70 rounded-xl text-xs font-bold text-indigo-800 border border-indigo-100 flex items-center justify-between"
-                        >
-                          <span>4. Campana Notificación</span>
-                          <span className="text-[10px] text-indigo-600">▶ Probar</span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
                 {/* Administración del PIN y App Móvil del Técnico */}
-                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-5 md:col-span-2">
+                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-5">
                   <div className="flex items-center justify-between flex-wrap gap-3">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-2xl bg-blue-50 text-[#1D71B5] flex items-center justify-center text-lg">
@@ -1052,7 +905,7 @@ export default function AdminPage() {
                     </a>
                   </div>
 
-                  <div className="p-5 bg-slate-50/80 rounded-2xl border border-slate-100 space-y-4">
+                  <div className="p-4 bg-slate-50/80 rounded-2xl border border-slate-100 space-y-4">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                       <div>
                         <p className="text-xs font-bold text-slate-800">PIN Numérico de Acceso en Campo</p>
@@ -1084,7 +937,7 @@ export default function AdminPage() {
 
                     <div className="pt-3 border-t border-slate-200/80 text-[11px] text-slate-500 flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
-                      <span>URL para el celular del técnico: <strong className="text-slate-700">admin.kananlimpieza.mx/tecnico</strong> (o kananlimpieza.mx/tecnico)</span>
+                      <span>URL para el técnico: <strong className="text-slate-700">admin.kananlimpieza.mx/tecnico</strong></span>
                     </div>
                   </div>
                 </div>

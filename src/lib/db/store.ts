@@ -100,7 +100,7 @@ export function getTwoDemoExamples(): KananDatabase {
     recurrencia: [],
     mensajes_automatizacion: [],
     config: {
-      modo_halloween: true,
+      modo_halloween: false,
       marketing: DEFAULT_MARKETING,
     },
   };
