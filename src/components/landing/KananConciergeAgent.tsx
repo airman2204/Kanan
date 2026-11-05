@@ -247,12 +247,12 @@ export function KananConciergeAgent({
           const diff = Math.abs(h - cHour);
           if (diff < 3) {
             ocupado = true;
-            razonOcupado = "Ocupado por servicio activo y traslado (+2h)";
+            razonOcupado = "Horario reservado";
             break;
           }
         } else if (c.turno && c.turno.includes(`${h.toString().padStart(2, "0")}:00`)) {
           ocupado = true;
-          razonOcupado = "Ruta reservada";
+          razonOcupado = "Horario reservado";
           break;
         }
       }
@@ -260,7 +260,7 @@ export function KananConciergeAgent({
       // Si ya son más de 3 citas en el día, el día está saturado
       if (citasDelDia.length >= 3) {
         ocupado = true;
-        razonOcupado = "Ruta completa del día";
+        razonOcupado = "Agenda llena";
       }
 
       slotsHora.push({
@@ -691,7 +691,7 @@ export function KananConciergeAgent({
     ]);
 
     appendAgentMessage(
-      `¡Excelente fecha! (${labelDia}). 📅\n\nPor favor selecciona el horario de llegada de tu especialista dentro del rango operativo (consideramos 2 hrs de servicio + traslado y secado en 3 a 4 horas):`,
+      `¡Excelente fecha! (${labelDia}). 📅\n\n¿A qué hora te gustaría que llegue el especialista a tu domicilio? Elige tu horario preferido:`,
       "ask_date"
     );
   };
@@ -1398,7 +1398,7 @@ export function KananConciergeAgent({
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <p className="text-xs text-slate-600 font-medium">
-                        Horarios para <strong className="text-slate-900">{fecha}</strong> (rango 09:00 - 16:00):
+                        Horarios para <strong className="text-slate-900">{fecha}</strong>:
                       </p>
                       <button
                         type="button"
@@ -1430,13 +1430,13 @@ export function KananConciergeAgent({
                                   {h.label}
                                 </span>
                                 {h.ocupado ? (
-                                  <span className="w-2 h-2 rounded-full bg-rose-400" title="Ocupado" />
+                                  <span className="w-2 h-2 rounded-full bg-rose-400" title="No disponible" />
                                 ) : (
                                   <span className="w-2 h-2 rounded-full bg-emerald-500" title="Disponible" />
                                 )}
                               </div>
                               <span className="text-[10px] text-slate-500 block mt-1">
-                                {h.ocupado ? h.razonOcupado || "Ocupado" : h.secado}
+                                {h.ocupado ? h.razonOcupado || "No disponible" : h.secado}
                               </span>
                             </button>
                           );
@@ -1445,14 +1445,14 @@ export function KananConciergeAgent({
                     ) : (
                       <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-2xl text-center space-y-2">
                         <p className="text-xs text-rose-800 font-medium">
-                          ⚠️ No hay horas disponibles para este día debido a rutas y tiempos de servicio (+2 hrs de traslado).
+                          No tenemos horarios disponibles para este día. Por favor elige otra fecha en el calendario.
                         </p>
                         <button
                           type="button"
                           onClick={() => setFecha("")}
                           className="px-4 py-1.5 rounded-full bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition"
                         >
-                          Consultar otro día
+                          Ver otros días
                         </button>
                       </div>
                     )}
