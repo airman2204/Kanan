@@ -908,6 +908,113 @@ export default function AdminPage() {
                   </div>
                 </div>
 
+                {/* Laboratorio de Pruebas de Audio & Notificaciones */}
+                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-5 md:col-span-2">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center">
+                      <Volume2 className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="font-heading font-bold text-sm text-slate-800">
+                        Laboratorio de Audio & Alertas Auditivas
+                      </h3>
+                      <p className="text-xs text-slate-400">
+                        Escucha en vivo y selecciona los sonidos del CRM
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* COMBO ELEGIDO */}
+                    <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-200 space-y-3">
+                      <h4 className="font-bold text-xs text-emerald-800">🏆 Tu Combo Elegido (Citas)</h4>
+                      <p className="text-[11px] text-emerald-700">Campana Recepción + Doble Ladrido</p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const a1 = new Audio("/sounds/bell_service.mp3");
+                          const a2 = new Audio("/sounds/bark1.mp3");
+                          a1.play();
+                          setTimeout(() => a2.play(), 550);
+                        }}
+                        className="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs"
+                      >
+                        ▶ Escuchar Combo
+                      </button>
+                    </div>
+
+                    {/* OPCIONES AGENDAR */}
+                    <div className="p-4 bg-blue-50 rounded-2xl border border-blue-200 space-y-2">
+                      <h4 className="font-bold text-xs text-blue-900">📅 Opciones: Al Agendar Servicio</h4>
+                      <div className="space-y-1.5">
+                        <button
+                          type="button"
+                          onClick={() => new Audio("/sounds/calendar_confirm.mp3").play()}
+                          className="w-full text-left p-2 bg-white hover:bg-blue-100/70 rounded-xl text-xs font-bold text-blue-800 border border-blue-100 flex items-center justify-between"
+                        >
+                          <span>1. Campana Armónica</span>
+                          <span className="text-[10px] text-blue-600">▶ Probar</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => new Audio("/sounds/magic_chime_agenda.mp3").play()}
+                          className="w-full text-left p-2 bg-white hover:bg-blue-100/70 rounded-xl text-xs font-bold text-blue-800 border border-blue-100 flex items-center justify-between"
+                        >
+                          <span>2. Chime Mágico</span>
+                          <span className="text-[10px] text-blue-600">▶ Probar</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => new Audio("/sounds/booking_ding.mp3").play()}
+                          className="w-full text-left p-2 bg-white hover:bg-blue-100/70 rounded-xl text-xs font-bold text-blue-800 border border-blue-100 flex items-center justify-between"
+                        >
+                          <span>3. Ding Reserva</span>
+                          <span className="text-[10px] text-blue-600">▶ Probar</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* OPCIONES CHAT */}
+                    <div className="p-4 bg-indigo-50 rounded-2xl border border-indigo-200 space-y-2">
+                      <h4 className="font-bold text-xs text-indigo-900">💬 Opciones: Mensaje de Chat</h4>
+                      <div className="space-y-1.5">
+                        <button
+                          type="button"
+                          onClick={() => new Audio("/sounds/pop_whatsapp_clean.mp3").play()}
+                          className="w-full text-left p-2 bg-white hover:bg-indigo-100/70 rounded-xl text-xs font-bold text-indigo-800 border border-indigo-100 flex items-center justify-between"
+                        >
+                          <span>1. Pop WhatsApp Crisp</span>
+                          <span className="text-[10px] text-indigo-600">▶ Probar</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => new Audio("/sounds/chat_ping.mp3").play()}
+                          className="w-full text-left p-2 bg-white hover:bg-indigo-100/70 rounded-xl text-xs font-bold text-indigo-800 border border-indigo-100 flex items-center justify-between"
+                        >
+                          <span>2. Ping Cristalino</span>
+                          <span className="text-[10px] text-indigo-600">▶ Probar</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => new Audio("/sounds/chat_pop.mp3").play()}
+                          className="w-full text-left p-2 bg-white hover:bg-indigo-100/70 rounded-xl text-xs font-bold text-indigo-800 border border-indigo-100 flex items-center justify-between"
+                        >
+                          <span>3. Pop Corto Clásico</span>
+                          <span className="text-[10px] text-indigo-600">▶ Probar</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => new Audio("/sounds/chat_notification.mp3").play()}
+                          className="w-full text-left p-2 bg-white hover:bg-indigo-100/70 rounded-xl text-xs font-bold text-indigo-800 border border-indigo-100 flex items-center justify-between"
+                        >
+                          <span>4. Campana Notificación</span>
+                          <span className="text-[10px] text-indigo-600">▶ Probar</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Administración del PIN y App Móvil del Técnico */}
                 <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-5 md:col-span-2">
                   <div className="flex items-center justify-between flex-wrap gap-3">
