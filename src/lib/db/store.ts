@@ -523,9 +523,15 @@ export function createBookingFromWizard(payload: {
   fotos_estado_actual?: string[];
 }): { cita: ServicioCita; cliente: Cliente } {
   const db = getDatabase();
-  const cleanPhone = payload.whatsapp.replace(/\D/g, "");
+  // Normalizar rigurosamente a los últimos 10 dígitos para evitar duplicados por prefijos (+52, 521, etc.)
+  const rawDigits = payload.whatsapp.replace(/\D/g, "");
+  const cleanPhone = rawDigits.length >= 10 ? rawDigits.slice(-10) : rawDigits;
 
-  let cliente = db.clientes.find((c) => c.whatsapp.replace(/\D/g, "") === cleanPhone);
+  let cliente = db.clientes.find((c) => {
+    const cDigits = c.whatsapp.replace(/\D/g, "");
+    const c10 = cDigits.length >= 10 ? cDigits.slice(-10) : cDigits;
+    return c10 === cleanPhone;
+  });
 
   if (!cliente) {
     cliente = {
@@ -547,6 +553,8 @@ export function createBookingFromWizard(payload: {
     };
     db.clientes.unshift(cliente);
   } else {
+    // Si ya existía, conservar su ID histórico y actualizar sus datos con la información más reciente
+    if (payload.nombre.trim()) cliente.nombre = payload.nombre.trim();
     cliente.direccion = payload.direccion.trim();
     cliente.municipio = payload.municipio;
     if (payload.codigo_postal) cliente.codigo_postal = payload.codigo_postal;

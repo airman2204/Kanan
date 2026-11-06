@@ -218,8 +218,15 @@ export function CalendarCitasView({
     }
   }, [highlightStatus]);
 
-  // Citas del día seleccionado con filtro de status opcional
+  // Citas a mostrar:
+  // Si selecciona "Por Confirmar" o "TODAS_GLOBAL", mostrar todas las pendientes sin importar la fecha para no perder seguimiento
   const citasDelDia = citas.filter((c) => {
+    if (selectedStatusTab === "Por Confirmar") {
+      return c.estatus === "Por Confirmar";
+    }
+    if (selectedStatusTab === "TODAS_GLOBAL") {
+      return true;
+    }
     if (c.fecha !== selectedDate) return false;
     if (selectedStatusTab !== "TODOS" && c.estatus !== selectedStatusTab) return false;
     return true;
@@ -504,66 +511,39 @@ export function CalendarCitasView({
     <div className="space-y-6">
       {/* Barra de Controles Superiores */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        {/* Selector de Modos y Fecha */}
+        {/* Selector de Fecha */}
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-          <div className="bg-slate-200/80 p-1 rounded-2xl flex items-center gap-1 text-xs font-heading font-bold">
+          <div className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-2xl p-1 shadow-sm">
             <button
               type="button"
-              onClick={() => setViewMode("dia")}
-              className={`px-3 py-1.5 rounded-xl transition-all ${
-                viewMode === "dia"
-                  ? "bg-white text-[#355581] shadow-sm"
-                  : "text-slate-600 hover:text-slate-900"
-              }`}
+              onClick={handlePrevDay}
+              className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-500"
+              title="Día anterior"
             >
-              Citas del día
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="text-xs font-heading font-bold text-slate-700 bg-transparent px-1 focus:outline-none"
+            />
+            <button
+              type="button"
+              onClick={handleNextDay}
+              className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-500"
+              title="Día siguiente"
+            >
+              <ChevronRight className="w-4 h-4" />
             </button>
             <button
               type="button"
-              onClick={() => setViewMode("kanban")}
-              className={`px-3 py-1.5 rounded-xl transition-all ${
-                viewMode === "kanban"
-                  ? "bg-white text-[#355581] shadow-sm"
-                  : "text-slate-600 hover:text-slate-900"
-              }`}
+              onClick={handleSetToday}
+              className="px-2.5 py-1 text-[11px] font-bold text-[#1D71B5] hover:bg-blue-50 rounded-xl"
             >
-              Tablero Kanban
+              Hoy
             </button>
           </div>
-
-          {viewMode === "dia" && (
-            <div className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-2xl p-1 shadow-sm">
-              <button
-                type="button"
-                onClick={handlePrevDay}
-                className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-500"
-                title="Día anterior"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <input
-                type="date"
-                value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-                className="text-xs font-heading font-bold text-slate-700 bg-transparent px-1 focus:outline-none"
-              />
-              <button
-                type="button"
-                onClick={handleNextDay}
-                className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-500"
-                title="Día siguiente"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
-              <button
-                type="button"
-                onClick={handleSetToday}
-                className="px-2.5 py-1 text-[11px] font-bold text-[#1D71B5] hover:bg-blue-50 rounded-xl"
-              >
-                Hoy
-              </button>
-            </div>
-          )}
         </div>
 
         {/* Botón Nueva Cita */}
@@ -585,12 +565,12 @@ export function CalendarCitasView({
       {/* PESTAÑAS DE FILTRO RÁPIDO POR ESTATUS (Linear Style Segmented Tabs) */}
       <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
         {[
-          { id: "TODOS", label: "Todas", count: citas.filter((c) => c.fecha === selectedDate).length },
-          { id: "Por Confirmar", label: "Por Confirmar", count: citas.filter((c) => c.fecha === selectedDate && c.estatus === "Por Confirmar").length, color: "text-amber-700 bg-amber-50 border-amber-200" },
-          { id: "Confirmada", label: "Confirmadas", count: citas.filter((c) => c.fecha === selectedDate && c.estatus === "Confirmada").length, color: "text-blue-700 bg-blue-50 border-blue-200" },
-          { id: "En Ruta", label: "En Ruta", count: citas.filter((c) => c.fecha === selectedDate && (c.estatus === "En Ruta" || c.estatus === "En Proceso")).length, color: "text-indigo-700 bg-indigo-50 border-indigo-200" },
-          { id: "Completada", label: "Completadas", count: citas.filter((c) => c.fecha === selectedDate && c.estatus === "Completada").length, color: "text-emerald-700 bg-emerald-50 border-emerald-200" },
-          { id: "Cancelada", label: "Canceladas", count: citas.filter((c) => c.fecha === selectedDate && c.estatus === "Cancelada").length, color: "text-rose-700 bg-rose-50 border-rose-200" },
+          { id: "TODOS", label: `Citas de ${selectedDate === new Date().toISOString().split("T")[0] ? "Hoy" : selectedDate}`, count: citas.filter((c) => c.fecha === selectedDate).length },
+          { id: "Por Confirmar", label: "🔔 Por Confirmar (Todas)", count: citas.filter((c) => c.estatus === "Por Confirmar").length, color: "text-amber-700 bg-amber-50 border-amber-200" },
+          { id: "Confirmada", label: "Confirmadas (Día)", count: citas.filter((c) => c.fecha === selectedDate && c.estatus === "Confirmada").length, color: "text-blue-700 bg-blue-50 border-blue-200" },
+          { id: "En Ruta", label: "En Ruta (Día)", count: citas.filter((c) => c.fecha === selectedDate && (c.estatus === "En Ruta" || c.estatus === "En Proceso")).length, color: "text-indigo-700 bg-indigo-50 border-indigo-200" },
+          { id: "Completada", label: "Completadas (Día)", count: citas.filter((c) => c.fecha === selectedDate && c.estatus === "Completada").length, color: "text-emerald-700 bg-emerald-50 border-emerald-200" },
+          { id: "TODAS_GLOBAL", label: "Ver Historial Completo", count: citas.length, color: "text-slate-700 bg-slate-50 border-slate-200" },
         ].map((tab) => {
           const isActive = selectedStatusTab === tab.id;
           return (
@@ -626,54 +606,53 @@ export function CalendarCitasView({
         })}
       </div>
 
-      {/* SEMÁFORO DE CAPACIDAD DEL DÍA EN PANTALLA (Para 1 solo técnico) */}
-      {viewMode === "dia" && (
-        <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm ${
-              citasDelDia.filter((c) => c.estatus !== "Cancelada").length >= 2
-                ? "bg-rose-50 text-rose-600 border border-rose-200"
-                : citasDelDia.filter((c) => c.estatus !== "Cancelada").length === 1
-                ? "bg-amber-50 text-amber-600 border border-amber-200"
-                : "bg-emerald-50 text-emerald-600 border border-emerald-200"
-            }`}>
-              {citasDelDia.filter((c) => c.estatus !== "Cancelada").length}/2
-            </div>
-            <div>
-              <h4 className="font-bold text-xs sm:text-sm text-slate-800">
-                Capacidad del Técnico para este Día
-              </h4>
-              <p className="text-[11px] text-slate-500">
-                {citasDelDia.filter((c) => c.estatus !== "Cancelada").length >= 2
-                  ? "Día Completo (2 de 2 turnos ocupados). No se recomienda agendar más para evitar demoras."
-                  : citasDelDia.filter((c) => c.estatus !== "Cancelada").length === 1
-                  ? "Capacidad Media (1 turno ocupado, 1 turno libre)."
-                  : "Día Totalmente Disponible (Ambos turnos libres para agendar)."}
-              </p>
-            </div>
+      {/* SEMÁFORO DE CAPACIDAD DEL DÍA EN PANTALLA (Rango de 09:00 a 16:00 hrs) */}
+      <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm ${
+            citas.filter((c) => c.fecha === selectedDate && c.estatus !== "Cancelada").length >= 3
+              ? "bg-rose-50 text-rose-600 border border-rose-200"
+              : citas.filter((c) => c.fecha === selectedDate && c.estatus !== "Cancelada").length > 0
+              ? "bg-amber-50 text-amber-600 border border-amber-200"
+              : "bg-emerald-50 text-emerald-600 border border-emerald-200"
+          }`}>
+            {citas.filter((c) => c.fecha === selectedDate && c.estatus !== "Cancelada").length}
           </div>
-
-          <div className="flex gap-2 w-full sm:w-auto">
-            <span className={`px-3 py-1.5 rounded-xl text-xs font-bold border flex items-center gap-1.5 ${
-              citasMatutino.length > 0
-                ? "bg-rose-50 text-rose-700 border-rose-200"
-                : "bg-emerald-50 text-emerald-700 border-emerald-200"
-            }`}>
-              <span className={`w-2 h-2 rounded-full ${citasMatutino.length > 0 ? "bg-rose-500" : "bg-emerald-500"}`} />
-              Mañana (9-1pm): {citasMatutino.length > 0 ? "Ocupado" : "Libre"}
-            </span>
-
-            <span className={`px-3 py-1.5 rounded-xl text-xs font-bold border flex items-center gap-1.5 ${
-              citasVespertino.length > 0
-                ? "bg-rose-50 text-rose-700 border-rose-200"
-                : "bg-emerald-50 text-emerald-700 border-emerald-200"
-            }`}>
-              <span className={`w-2 h-2 rounded-full ${citasVespertino.length > 0 ? "bg-rose-500" : "bg-emerald-500"}`} />
-              Tarde (2-6pm): {citasVespertino.length > 0 ? "Ocupado" : "Libre"}
-            </span>
+          <div>
+            <h4 className="font-bold text-xs sm:text-sm text-slate-800">
+              Agenda y Capacidad del Técnico ({selectedDate})
+            </h4>
+            <p className="text-[11px] text-slate-500">
+              {citas.filter((c) => c.fecha === selectedDate && c.estatus !== "Cancelada").length >= 3
+                ? "Día con cupo completo (3 servicios asignados en ruta)."
+                : citas.filter((c) => c.fecha === selectedDate && c.estatus !== "Cancelada").length > 0
+                ? `${citas.filter((c) => c.fecha === selectedDate && c.estatus !== "Cancelada").length} cita(s) agendada(s). Aún hay horarios libres entre 09:00 y 16:00.`
+                : "Día totalmente libre (Horarios de 09:00 a 16:00 disponibles)."}
+            </p>
           </div>
         </div>
-      )}
+
+        <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+          {citas.filter((c) => c.fecha === selectedDate && c.estatus !== "Cancelada").length > 0 ? (
+            citas
+              .filter((c) => c.fecha === selectedDate && c.estatus !== "Cancelada")
+              .map((c) => (
+                <span
+                  key={c.id}
+                  className="px-2.5 py-1 rounded-xl text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200 flex items-center gap-1.5"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                  <span>{c.hora_especifica || c.turno.split("(")[0].trim()}: {c.id}</span>
+                </span>
+              ))
+          ) : (
+            <span className="px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-500" />
+              Ruta 100% disponible
+            </span>
+          )}
+        </div>
+      </div>
 
       {highlightStatus && (
         <div className="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-2xl text-xs text-[#1D71B5]">
@@ -688,9 +667,8 @@ export function CalendarCitasView({
         </div>
       )}
 
-      {/* VISTA 1: CITAS AL DÍA */}
-      {viewMode === "dia" && (
-        <div className="space-y-4">
+      {/* VISTA: CITAS AL DÍA Y SEGUIMIENTO */}
+      <div className="space-y-4">
           {citasDelDia.length === 0 ? (
             <div className="bg-white rounded-3xl p-12 text-center border border-slate-200 shadow-sm space-y-3">
               <CalendarIcon className="w-10 h-10 text-slate-300 mx-auto" />
@@ -842,61 +820,6 @@ export function CalendarCitasView({
             </div>
           )}
         </div>
-      )}
-
-      {/* VISTA 2: TABLERO KANBAN */}
-      {viewMode === "kanban" && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 overflow-x-auto pb-4">
-          {ESTATUS_COLUMNS.map((colEstatus) => {
-            const citasCol = citas.filter((c) => c.estatus === colEstatus);
-            return (
-              <div
-                key={colEstatus}
-                className="bg-slate-100/70 rounded-3xl p-3 space-y-3 min-w-[240px] border border-slate-200/60 flex flex-col justify-between"
-              >
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between px-2 pt-1">
-                    <h3 className="font-heading font-extrabold text-xs text-slate-700 uppercase tracking-wider">
-                      {colEstatus}
-                    </h3>
-                    <span className="text-[11px] font-bold bg-white text-slate-600 px-2 py-0.5 rounded-full border border-slate-200">
-                      {citasCol.length}
-                    </span>
-                  </div>
-
-                  <div className="space-y-2.5">
-                    {citasCol.map((cita) => {
-                      const cliente = clientes.find((c) => c.id === cita.cliente_id);
-                      return (
-                        <div
-                          key={cita.id}
-                          onClick={() => setSelectedCitaDetalle(cita)}
-                          className="bg-white rounded-2xl p-3 border border-slate-200 shadow-sm space-y-2 cursor-pointer hover:border-[#1D71B5] transition"
-                        >
-                          <div className="flex items-center justify-between text-[11px]">
-                            <span className="font-bold text-[#355581]">{cita.id}</span>
-                            <span className="text-slate-400">{cita.fecha}</span>
-                          </div>
-                          <p className="font-heading font-bold text-xs text-slate-800 line-clamp-1">
-                            {cliente?.nombre || "Cliente"}
-                          </p>
-                          <p className="text-[11px] text-slate-500 line-clamp-1">
-                            {cita.items_contratados.map((it) => it.piezaNombre).join(", ")}
-                          </p>
-                          <div className="pt-1 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-600">
-                            <span>{cita.turno.split(" ")[0]}</span>
-                            <strong className="text-slate-800">${(cita.monto_total || 0).toLocaleString("es-MX")}</strong>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
 
       {/* MODAL: FICHA DETALLADA DE LA CITA + FOTOS ANTES/DESPUÉS + PAGO */}
       {selectedCitaDetalle && (

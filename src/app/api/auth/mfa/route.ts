@@ -35,15 +35,16 @@ export async function POST(req: NextRequest) {
       await saveAdminUser(admin);
     }
 
-    // Crear sesión autenticada completa
+    // Crear sesión autenticada completa persistente (por defecto 30 días para evitar cierres inesperados)
+    const remember = pendingSession.rememberMe !== false;
     const finalSessionToken = createSessionToken(
       {
         email: admin.email,
         mfaVerified: true,
         mustChangePassword: admin.mustChangePassword,
-        rememberMe: pendingSession.rememberMe,
+        rememberMe: remember,
       },
-      pendingSession.rememberMe
+      remember
     );
 
     const response = NextResponse.json({
@@ -51,14 +52,14 @@ export async function POST(req: NextRequest) {
       mustChangePassword: admin.mustChangePassword,
     });
 
-    const maxAgeSec = pendingSession.rememberMe ? 30 * 24 * 60 * 60 : 8 * 60 * 60;
+    const maxAgeSec = 30 * 24 * 60 * 60; // 30 días garantizados
 
     response.cookies.set({
       name: "kanan_admin_session",
       value: finalSessionToken,
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: "lax", // Lax previene pérdida de cookies al navegar o refrescar
       path: "/",
       maxAge: maxAgeSec,
     });

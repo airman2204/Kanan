@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
       session.rememberMe
     );
 
-    const maxAgeSec = session.rememberMe ? 30 * 24 * 60 * 60 : 8 * 60 * 60;
+    const maxAgeSec = 30 * 24 * 60 * 60;
     const response = NextResponse.json({ ok: true });
 
     response.cookies.set({
@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
       value: refreshedToken,
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: "lax",
       path: "/",
       maxAge: maxAgeSec,
     });
