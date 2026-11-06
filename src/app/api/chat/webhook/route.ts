@@ -58,14 +58,6 @@ export async function POST(req: NextRequest) {
         console.warn("Error guardando nuevo cliente en Supabase:", e);
       }
     }
-      db.clientes.unshift(nuevoCliente as any);
-      cliente = nuevoCliente as any;
-      try {
-        await supabase.from("clientes").insert(nuevoCliente);
-      } catch (e) {
-        console.warn("Error guardando nuevo cliente en Supabase:", e);
-      }
-    }
 
     // Siempre usar el número de teléfono oficial del cliente en el CRM para cualquier respuesta automática
     const phoneParaResponder = cliente?.whatsapp ? cliente.whatsapp.replace(/\D/g, "") : cleanPhone;
