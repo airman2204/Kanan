@@ -28,11 +28,20 @@ export async function POST(req: NextRequest) {
     // Bajo NINGUNA circunstancia se busca por nombre similar ni se vincula con clientes previos
     if (!cliente) {
       console.log(`🆕 [Kanan Webhook] Contacto 100% aislado creado para: ${cleanPhone} (${clientName})`);
+      // Si no tenemos un nombre explícito personal del cliente, mostrar directamente su número de teléfono
+      let nombreAMostrar = cleanPhone;
+      if (cleanPhone.length === 10) {
+        nombreAMostrar = `${cleanPhone.slice(0, 3)} ${cleanPhone.slice(3, 6)} ${cleanPhone.slice(6)}`;
+      } else if (cleanPhone.startsWith("52") && cleanPhone.length >= 12) {
+        const local = cleanPhone.slice(-10);
+        nombreAMostrar = `+52 ${local.slice(0, 3)} ${local.slice(3, 6)} ${local.slice(6)}`;
+      } else if (clientName && clientName !== "Cliente" && clientName !== "Cliente WhatsApp") {
+        nombreAMostrar = clientName;
+      }
+
       const nuevoCliente = {
         id: `cli-${Date.now()}`,
-        nombre: clientName && clientName !== "Cliente" && clientName !== "Cliente WhatsApp"
-          ? clientName
-          : `Contacto ${cleanPhone.slice(-4)}`,
+        nombre: nombreAMostrar,
         whatsapp: cleanPhone,
         direccion: "Contacto vía WhatsApp",
         municipio: "Guadalajara" as const,
