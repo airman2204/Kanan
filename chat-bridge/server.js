@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const QRCode = require('qrcode');
-const { default: makeWASocket, useMultiFileAuthState, DisconnectReason } = require('@whiskeysockets/baileys');
+const { default: makeWASocket, useMultiFileAuthState, DisconnectReason, makeCacheableSignalKeyStore, proto } = require('@whiskeysockets/baileys');
 const pino = require('pino');
 const path = require('path');
 const fs = require('fs');
@@ -118,11 +118,15 @@ async function startWhatsApp() {
   await restoreSessionFromCloud();
 
   const { state, saveCreds } = await useMultiFileAuthState(authDir);
+  const logger = pino({ level: 'silent' });
 
   sock = makeWASocket({
-    auth: state,
+    auth: {
+      creds: state.creds,
+      keys: makeCacheableSignalKeyStore(state.keys, logger),
+    },
     printQRInTerminal: false,
-    logger: pino({ level: 'silent' }),
+    logger,
     browser: ['Ubuntu', 'Chrome', '120.0.6099.109'],
     keepAliveIntervalMs: 30000,
     connectTimeoutMs: 60000,
@@ -135,7 +139,7 @@ async function startWhatsApp() {
       if (key && key.id && messageStore.has(key.id)) {
         return messageStore.get(key.id);
       }
-      return undefined;
+      return proto.Message.fromObject({});
     },
   });
 
