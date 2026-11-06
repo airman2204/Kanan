@@ -61,6 +61,24 @@ export async function POST(req: NextRequest) {
     const phoneParaResponder = cliente?.whatsapp ? cliente.whatsapp.replace(/\D/g, "") : cleanPhone;
 
     if (cliente) {
+      // Verificar si el cliente tiene pausado el modo IA (Modo Manual por el operador en el CRM)
+      let iaHabilitadaParaCliente = true;
+      try {
+        const { data: iaRow } = await supabase
+          .from("whatsapp_sessions")
+          .select("value")
+          .eq("session_id", "ia_settings")
+          .eq("key", cliente.id)
+          .maybeSingle();
+
+        if (iaRow?.value && iaRow.value.modo_ia === false) {
+          iaHabilitadaParaCliente = false;
+          console.log(`⏸️ [Kanan Webhook] IA en pausa para ${cliente.nombre} (${cliente.whatsapp}). Respuestas automáticas desactivadas.`);
+        }
+      } catch (errIa) {
+        console.warn("Error consultando estado de IA de cliente:", errIa);
+      }
+
       // Buscar su cita más reciente
       const citasCliente = db.servicios_citas
         .filter((c) => c.cliente_id === cliente.id)
@@ -68,13 +86,14 @@ export async function POST(req: NextRequest) {
       const ultimaCita = citasCliente[0];
 
       // 2. DETECCIÓN INTELIGENTE DE RESPUESTAS (Aprobación, Rechazo y Cancelación con Política 2hrs)
+      // Solo se procesan respuestas automáticas si la IA está activa para este cliente
       const cleanLower = text.trim().toLowerCase();
       const primerNombre = cliente.nombre.split(" ")[0];
 
       // A) Detección de Aprobación (Confirmar Cita)
       const esAprobacion = /^(s[ií]+|si|sii|siii|confirmar|confirmo|de acuerdo|adelante|ok|sale|va|perfecto|enterado)\b/i.test(cleanLower);
 
-      if (esAprobacion && ultimaCita && ultimaCita.estatus === "Por Confirmar") {
+      if (iaHabilitadaParaCliente && esAprobacion && ultimaCita && ultimaCita.estatus === "Por Confirmar") {
         updateCitaInDb(ultimaCita.id, {
           estatus: "Confirmada",
         });
@@ -165,7 +184,7 @@ export async function POST(req: NextRequest) {
 
       // B) Detección de Rechazo Inicial (Cliente dice "No" a la cotización)
       const esRechazo = /^(no|nop|no gracias|cancelar cotizacion|ya no)\b/i.test(cleanLower);
-      if (esRechazo && ultimaCita && ultimaCita.estatus === "Por Confirmar") {
+      if (iaHabilitadaParaCliente && esRechazo && ultimaCita && ultimaCita.estatus === "Por Confirmar") {
         updateCitaInDb(ultimaCita.id, {
           estatus: "Cancelada",
           cancelled_at: new Date().toISOString(),
@@ -326,7 +345,7 @@ export async function POST(req: NextRequest) {
       const cleanText = text.trim();
       const ratingMatch = cleanText.match(/^[1-5]$/);
 
-      if (ratingMatch && ultimaCita) {
+      if (iaHabilitadaParaCliente && ratingMatch && ultimaCita) {
         const rating = parseInt(ratingMatch[0], 10);
         updateCitaInDb(ultimaCita.id, {
           calificacion_estrellas: rating,

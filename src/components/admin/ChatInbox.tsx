@@ -15,11 +15,20 @@ import {
   Smile,
   Image as ImageIcon,
   Sparkles,
-  ChevronLeft
+  ChevronLeft,
+  Zap,
+  Clock,
+  Calendar,
+  DollarSign,
+  FileText,
+  SlidersHorizontal,
+  ChevronRight,
+  Plus
 } from "lucide-react";
-import { Cliente, ServicioCita, MensajeAutomatizacion } from "@/types/crm";
+import { Cliente, ServicioCita, MensajeAutomatizacion, EstatusCita } from "@/types/crm";
 import { AgentFlowCanvas } from "./agent-flow/AgentFlowCanvas";
 import { STICKERS_DISPONIBLES } from "@/types/agentFlow";
+import { RESPUESTAS_RAPIDAS, RespuestaRapida } from "@/data/respuestasRapidas";
 import { supabase } from "@/lib/supabase";
 import { soundEngine } from "@/lib/audio/soundEffects";
 
@@ -54,8 +63,12 @@ export function ChatInbox({
   const [inputMessage, setInputMessage] = useState("");
   const [busqueda, setBusqueda] = useState("");
   const [modoIaActivo, setModoIaActivo] = useState(true);
+  const [actualizandoIa, setActualizandoIa] = useState(false);
   const [enviando, setEnviando] = useState(false);
-  const [mostrarPicker, setMostrarPicker] = useState<"emojis" | "stickers" | null>(null);
+  const [mostrarPicker, setMostrarPicker] = useState<"emojis" | "stickers" | "respuestas_rapidas" | null>(null);
+  const [mostrarPanelCita, setMostrarPanelCita] = useState(false);
+  const [editandoMonto, setEditandoMonto] = useState(false);
+  const [nuevoMonto, setNuevoMonto] = useState("");
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -96,7 +109,44 @@ export function ChatInbox({
     };
   }, [onRefresh]);
 
-  // Estado del bridge
+  // Consultar estado de IA del cliente seleccionado
+  useEffect(() => {
+    if (!selectedClienteId) return;
+    const fetchIaStatus = async () => {
+      try {
+        const res = await fetch(`/api/chat/ia-control?clienteId=${selectedClienteId}`);
+        const data = await res.json();
+        if (data.ok && typeof data.modoIa === "boolean") {
+          setModoIaActivo(data.modoIa);
+        }
+      } catch (e) {
+        console.warn("Error cargando estado de IA:", e);
+      }
+    };
+    fetchIaStatus();
+  }, [selectedClienteId]);
+
+  // Cambiar modo de IA para el cliente activo
+  const handleToggleModoIa = async () => {
+    if (!activeCliente || actualizandoIa) return;
+    const nuevoEstado = !modoIaActivo;
+    setModoIaActivo(nuevoEstado);
+    setActualizandoIa(true);
+    try {
+      await fetch("/api/chat/ia-control", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          clienteId: activeCliente.id,
+          modoIa: nuevoEstado,
+        }),
+      });
+    } catch (e) {
+      console.warn("Error guardando switch IA:", e);
+    } finally {
+      setActualizandoIa(false);
+    }
+  };
   const [bridgeStatus, setBridgeStatus] = useState<"connected" | "qr_ready" | "connecting" | "disconnected">("connecting");
   const [bridgeQr, setBridgeQr] = useState<string | null>(null);
   const [mostrarModalQr, setMostrarModalQr] = useState(false);
@@ -515,6 +565,46 @@ export function ChatInbox({
                   </div>
 
                   <div className="flex items-center gap-2 shrink-0">
+                    {/* Switch de Modo IA vs Modo Manual Operador */}
+                    <button
+                      type="button"
+                      onClick={handleToggleModoIa}
+                      disabled={actualizandoIa}
+                      className={`px-2.5 py-1 rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-2xs border ${
+                        modoIaActivo
+                          ? "bg-blue-50 text-[#1D71B5] border-blue-200 hover:bg-blue-100"
+                          : "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100"
+                      }`}
+                      title={modoIaActivo ? "La IA responde automáticamente. Clic para pasar a Modo Manual." : "Modo Manual activo (IA pausada). Clic para reactivar IA."}
+                    >
+                      {modoIaActivo ? (
+                        <>
+                          <Bot className="w-3.5 h-3.5 text-[#1D71B5] animate-pulse" />
+                          <span className="hidden sm:inline">IA Activa</span>
+                        </>
+                      ) : (
+                        <>
+                          <UserCheck className="w-3.5 h-3.5 text-amber-600" />
+                          <span className="hidden sm:inline">Manual</span>
+                        </>
+                      )}
+                    </button>
+
+                    {/* Botón rápido para ver/gestionar la cita activa */}
+                    <button
+                      type="button"
+                      onClick={() => setMostrarPanelCita(!mostrarPanelCita)}
+                      className={`px-2.5 py-1 rounded-xl text-xs font-bold flex items-center gap-1 transition border ${
+                        mostrarPanelCita
+                          ? "bg-slate-800 text-white border-slate-800"
+                          : "bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200"
+                      }`}
+                      title="Ver o editar cita del cliente"
+                    >
+                      <Calendar className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">Cita</span>
+                    </button>
+
                     {/* Botón rápido para confirmar si está pendiente */}
                     {(() => {
                       const citaPorConfirmar = activeCitas.find((c) => c.estatus === "Por Confirmar");
@@ -606,6 +696,173 @@ export function ChatInbox({
                   <div ref={messagesEndRef} />
                 </div>
 
+                {/* Popover de Respuestas Rápidas (Plantillas de 1 Clic) */}
+                {mostrarPicker === "respuestas_rapidas" && (
+                  <div className="p-3 bg-white border-t border-slate-200 shadow-md animate-in fade-in">
+                    <div className="flex items-center justify-between pb-1.5 border-b border-slate-100 mb-2">
+                      <span className="text-[11px] font-bold text-slate-700 flex items-center gap-1.5">
+                        <Zap className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                        Respuestas Rápidas Kanan (1 Clic)
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setMostrarPicker(null)}
+                        className="text-xs text-slate-400 hover:text-slate-700"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto p-1">
+                      {RESPUESTAS_RAPIDAS.map((rr) => (
+                        <button
+                          key={rr.id}
+                          type="button"
+                          onClick={() => {
+                            setInputMessage(rr.mensaje);
+                            setMostrarPicker(null);
+                            if (inputRef.current) inputRef.current.focus();
+                          }}
+                          className="p-2 text-left rounded-xl border border-slate-200 hover:border-[#1D71B5] hover:bg-blue-50/50 transition flex flex-col gap-0.5 group"
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-bold text-slate-900 group-hover:text-[#1D71B5]">
+                              {rr.titulo}
+                            </span>
+                            <span className="text-[10px] font-mono text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">
+                              {rr.atajo}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-slate-500 line-clamp-2">
+                            {rr.mensaje.replace(/\n/g, " ")}
+                          </p>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Drawer / Panel Desplegable de Cita del Cliente */}
+                {mostrarPanelCita && (
+                  <div className="p-3 bg-slate-50 border-t border-b border-slate-200 text-xs space-y-2 animate-in fade-in">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-slate-800 flex items-center gap-1.5">
+                        <Calendar className="w-3.5 h-3.5 text-[#1D71B5]" />
+                        Ficha del Servicio Activo
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setMostrarPanelCita(false)}
+                        className="text-xs text-slate-400 hover:text-slate-700"
+                      >
+                        ✕
+                      </button>
+                    </div>
+
+                    {activeCitas[0] ? (
+                      (() => {
+                        const c = activeCitas[0];
+                        return (
+                          <div className="bg-white p-2.5 rounded-xl border border-slate-200 shadow-2xs space-y-2">
+                            <div className="flex items-center justify-between">
+                              <span className="font-mono font-bold text-[#1D71B5]">Folio: {c.id}</span>
+                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                c.estatus === "Confirmada" ? "bg-emerald-100 text-emerald-700" :
+                                c.estatus === "Por Confirmar" ? "bg-amber-100 text-amber-700" :
+                                c.estatus === "Completada" ? "bg-blue-100 text-blue-700" :
+                                "bg-slate-100 text-slate-700"
+                              }`}>
+                                {c.estatus}
+                              </span>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-2 text-[11px]">
+                              <div>
+                                <span className="text-slate-400 block">Fecha y Turno:</span>
+                                <span className="font-semibold text-slate-800">{c.fecha} ({c.turno})</span>
+                              </div>
+                              <div>
+                                <span className="text-slate-400 block">Técnico:</span>
+                                <span className="font-semibold text-slate-800">{c.tecnico_asignado || "Por asignar"}</span>
+                              </div>
+                            </div>
+
+                            <div className="pt-1 border-t border-slate-100 flex items-center justify-between">
+                              <div>
+                                <span className="text-slate-400 block text-[10px]">Total Cotización:</span>
+                                {editandoMonto ? (
+                                  <div className="flex items-center gap-1 mt-0.5">
+                                    <input
+                                      type="number"
+                                      value={nuevoMonto}
+                                      onChange={(e) => setNuevoMonto(e.target.value)}
+                                      placeholder={String(c.monto_total || 0)}
+                                      className="w-20 px-2 py-0.5 border border-slate-300 rounded text-xs font-bold"
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={async () => {
+                                        const valor = Number(nuevoMonto);
+                                        if (isNaN(valor)) return;
+                                        await fetch("/api/crm", {
+                                          method: "POST",
+                                          headers: { "Content-Type": "application/json" },
+                                          body: JSON.stringify({
+                                            action: "UPDATE_CITA",
+                                            citaId: c.id,
+                                            patch: { monto_total: valor },
+                                          }),
+                                        });
+                                        setEditandoMonto(false);
+                                        if (onRefresh) onRefresh();
+                                      }}
+                                      className="px-2 py-0.5 rounded bg-emerald-600 text-white font-bold text-[10px]"
+                                    >
+                                      Guardar
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="font-bold text-slate-900 text-sm">
+                                      ${c.monto_total || 0} MXN
+                                    </span>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setNuevoMonto(String(c.monto_total || 0));
+                                        setEditandoMonto(true);
+                                      }}
+                                      className="text-[10px] text-[#1D71B5] hover:underline font-semibold"
+                                    >
+                                      Editar
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
+
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const textCotizacion = `¡Hola ${activeCliente.nombre.split(" ")[0]}! Te confirmo los detalles de tu cita en Kanan:\n🛋️ Folio: *${c.id}*\n📅 Fecha: *${c.fecha}* (${c.turno})\n💰 Total: *$${c.monto_total || 0} MXN*\n🚐 Técnico: ${c.tecnico_asignado || "Equipo Kanan"}`;
+                                  setInputMessage(textCotizacion);
+                                  setMostrarPanelCita(false);
+                                  if (inputRef.current) inputRef.current.focus();
+                                }}
+                                className="px-2.5 py-1 rounded-lg bg-blue-50 text-[#1D71B5] hover:bg-blue-100 font-bold text-[11px] transition"
+                              >
+                                Insertar en Chat
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })()
+                    ) : (
+                      <div className="bg-white p-3 rounded-xl border border-dashed border-slate-200 text-center text-slate-400">
+                        <p className="text-xs">Este cliente aún no tiene citas agendadas.</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {/* Popover de Emojis */}
                 {mostrarPicker === "emojis" && (
                   <div className="p-2.5 bg-white border-t border-slate-200 shadow-sm animate-in fade-in">
@@ -672,6 +929,20 @@ export function ChatInbox({
 
                 {/* Input de Mensaje Limpio con Botón de Emoticones y Stickers */}
                 <form onSubmit={handleSendMessage} className="p-2 sm:p-2.5 bg-white border-t border-slate-200 flex items-center gap-1 sm:gap-1.5">
+                  {/* Botón de Respuestas Rápidas (Plantillas) */}
+                  <button
+                    type="button"
+                    onClick={() => setMostrarPicker(mostrarPicker === "respuestas_rapidas" ? null : "respuestas_rapidas")}
+                    className={`min-h-[42px] min-w-[42px] flex items-center justify-center rounded-xl transition ${
+                      mostrarPicker === "respuestas_rapidas"
+                        ? "bg-amber-500 text-white shadow-2xs"
+                        : "text-amber-500 hover:text-amber-600 hover:bg-amber-50"
+                    }`}
+                    title="Respuestas Rápidas y Plantillas (1 Clic)"
+                  >
+                    <Zap className="w-5 h-5 fill-current" />
+                  </button>
+
                   <button
                     type="button"
                     onClick={() => setMostrarPicker(mostrarPicker === "emojis" ? null : "emojis")}
