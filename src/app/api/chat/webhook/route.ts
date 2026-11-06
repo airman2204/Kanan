@@ -111,6 +111,25 @@ export async function POST(req: NextRequest) {
         );
 
         await enviarMensajeChat(phoneParaResponder, msgConfirmacion);
+
+        // Guardar también la respuesta automática en el historial para que se vea en el chat del admin
+        const msgConfirmacionRegistro = {
+          id: `auto-${Date.now()}`,
+          cita_id: ultimaCita.id,
+          cliente_id: cliente.id,
+          etapa: "1_confirmacion_inmediata",
+          etapa_titulo: "Confirmación Automática WhatsApp",
+          destinatario_whatsapp: phoneParaResponder,
+          contenido_mensaje: msgConfirmacion,
+          estatus_envio: "Enviado",
+          fecha_programada: new Date().toISOString(),
+        };
+        db.mensajes_automatizacion.unshift(msgConfirmacionRegistro as any);
+        try {
+          await supabase.from("mensajes_automatizacion").insert(msgConfirmacionRegistro);
+        } catch (e) {
+          console.warn("Error guardando confirmación automática en Supabase:", e);
+        }
       }
 
       // B) Detección de Rechazo Inicial (Cliente dice "No" a la cotización)
@@ -145,6 +164,25 @@ export async function POST(req: NextRequest) {
         );
 
         await enviarMensajeChat(phoneParaResponder, msgRechazo);
+
+        // Guardar respuesta automática de rechazo en historial
+        const msgRechazoRegistro = {
+          id: `auto-${Date.now()}`,
+          cita_id: ultimaCita.id,
+          cliente_id: cliente.id,
+          etapa: "1_confirmacion_inmediata",
+          etapa_titulo: "Cancelación Automática WhatsApp",
+          destinatario_whatsapp: phoneParaResponder,
+          contenido_mensaje: msgRechazo,
+          estatus_envio: "Enviado",
+          fecha_programada: new Date().toISOString(),
+        };
+        db.mensajes_automatizacion.unshift(msgRechazoRegistro as any);
+        try {
+          await supabase.from("mensajes_automatizacion").insert(msgRechazoRegistro);
+        } catch (e) {
+          console.warn("Error guardando rechazo automático en Supabase:", e);
+        }
       }
 
       // C) Detección de Cancelación (Cita ya Confirmada o En Ruta)
@@ -188,6 +226,24 @@ export async function POST(req: NextRequest) {
             phoneParaResponder,
             `Tu cita con folio *${ultimaCita.id}* ha sido *Cancelada con éxito*, ${primerNombre}. 🤝\n\nMuchas gracias por avisarnos con la anticipación debida (+2 hrs). Esperamos poder atenderte en una próxima ocasión. ¡Lindo día! 🐾`
           );
+
+          const msgCancRegistro = {
+            id: `auto-${Date.now()}`,
+            cita_id: ultimaCita.id,
+            cliente_id: cliente.id,
+            etapa: "1_confirmacion_inmediata",
+            etapa_titulo: "Cancelación Exitosa WhatsApp",
+            destinatario_whatsapp: phoneParaResponder,
+            contenido_mensaje: `Tu cita con folio *${ultimaCita.id}* ha sido *Cancelada con éxito*, ${primerNombre}. 🤝\n\nMuchas gracias por avisarnos con la anticipación debida (+2 hrs). Esperamos poder atenderte en una próxima ocasión. ¡Lindo día! 🐾`,
+            estatus_envio: "Enviado",
+            fecha_programada: new Date().toISOString(),
+          };
+          db.mensajes_automatizacion.unshift(msgCancRegistro as any);
+          try {
+            await supabase.from("mensajes_automatizacion").insert(msgCancRegistro);
+          } catch (e) {
+            console.warn("Error guardando aviso cancelacion en Supabase:", e);
+          }
         }
       }
 
