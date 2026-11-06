@@ -122,6 +122,12 @@ export async function POST(req: NextRequest) {
           fecha_programada: new Date().toISOString(),
         };
         db.mensajes_automatizacion.unshift(msgConfirmacionRegistro as any);
+        try {
+          await supabase.from("mensajes_automatizacion").insert(msgConfirmacionRegistro);
+        } catch (e) {
+          console.warn("Error guardando confirmacion en Supabase:", e);
+        }
+
         // Mensaje de seguimiento para consultar método de pago (solo Efectivo o SPEI)
         const msgMetodoPago = [
           `Por último ${primerNombre}, para preparar el comprobante de tu servicio:`,
