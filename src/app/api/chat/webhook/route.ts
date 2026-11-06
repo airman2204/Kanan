@@ -20,36 +20,29 @@ export async function POST(req: NextRequest) {
     let cliente = db.clientes.find((cl) => {
       const p = cl.whatsapp.replace(/\D/g, "");
       const p10 = p.length >= 10 ? p.slice(-10) : p;
-      return p10 === targetDigits || p.endsWith(targetDigits) || cleanPhone.endsWith(p);
+      return p === cleanPhone || p10 === targetDigits || p.endsWith(targetDigits) || cleanPhone.endsWith(p);
     });
 
-    // Heurística de vinculación inteligente tipo FoxDrop:
-    // Si cleanPhone es un ID numérico de LID (longitud > 12) o no encontró cliente por número directo,
-    // buscar por nombre coincidente o por el último cliente que interactuó en el CRM
-    if (!cliente) {
-      if (clientName && clientName !== "Cliente" && clientName !== "Cliente WhatsApp") {
-        const firstName = clientName.split(" ")[0].trim().toLowerCase();
-        cliente = db.clientes.find((cl) =>
-          cl.nombre.toLowerCase().includes(firstName) || firstName.includes(cl.nombre.toLowerCase().split(" ")[0])
-        );
-      }
-      // Si aún no se encuentra y sólo hay un cliente activo o reciente en el sistema
-      if (!cliente && db.clientes.length > 0) {
-        cliente = db.clientes[0];
-      }
+    // 2. Si no encontró por teléfono exacto o viene con nombre explícito del perfil de WhatsApp
+    if (!cliente && clientName && clientName !== "Cliente" && clientName !== "Cliente WhatsApp") {
+      const firstName = clientName.split(" ")[0].trim().toLowerCase();
+      cliente = db.clientes.find((cl) =>
+        cl.nombre.toLowerCase().includes(firstName) || firstName.includes(cl.nombre.toLowerCase().split(" ")[0])
+      );
     }
 
+    // 3. Si NO coincide con ningún cliente existente, CREAR UN NUEVO CONTACTO DE INMEDIATO
+    // (Jamás asociar a la fuerza al primer cliente de la lista para evitar mezclar conversaciones)
     if (!cliente) {
-      console.warn(`[Kanan Webhook] No se encontró cliente para teléfono/LID: ${cleanPhone} (${clientName})`);
-      // Crear un cliente temporal para que el mensaje jamás se pierda en el inbox
+      console.log(`🆕 [Kanan Webhook] Nuevo contacto entrante por WhatsApp: ${cleanPhone} (${clientName})`);
       const nuevoCliente = {
         id: `cli-${Date.now()}`,
-        nombre: clientName || `Contacto ${cleanPhone.slice(-4)}`,
+        nombre: clientName && clientName !== "Cliente" ? clientName : `Contacto ${cleanPhone.slice(-4)}`,
         whatsapp: cleanPhone,
         direccion: "Contacto vía WhatsApp",
-        municipio: "Tlajomulco" as const,
+        municipio: "Guadalajara" as const,
         mascotas: false,
-        notas_especiales: `Registrado automáticamente desde WhatsApp (ID/LID: ${cleanPhone})`,
+        notas_especiales: `Registrado automáticamente desde WhatsApp`,
         historico_gasto: 0,
         fecha_registro: new Date().toISOString(),
       };
@@ -57,7 +50,9 @@ export async function POST(req: NextRequest) {
       cliente = nuevoCliente as any;
       try {
         await supabase.from("clientes").insert(nuevoCliente);
-      } catch {}
+      } catch (e) {
+        console.warn("Error guardando nuevo cliente en Supabase:", e);
+      }
     }
 
     // Siempre usar el número de teléfono oficial del cliente en el CRM para cualquier respuesta automática
