@@ -125,11 +125,39 @@ export async function POST(req: NextRequest) {
           fecha_programada: new Date().toISOString(),
         };
         db.mensajes_automatizacion.unshift(msgConfirmacionRegistro as any);
-        try {
-          await supabase.from("mensajes_automatizacion").insert(msgConfirmacionRegistro);
-        } catch (e) {
-          console.warn("Error guardando confirmación automática en Supabase:", e);
-        }
+        // Mensaje de seguimiento para consultar método de pago (solo Efectivo o SPEI)
+        const msgMetodoPago = [
+          `Por último ${primerNombre}, para preparar el comprobante de tu servicio:`,
+          `¿Cómo prefieres realizar tu pago el día de tu cita?`,
+          ``,
+          `1️⃣ *Efectivo*`,
+          `2️⃣ *Transferencia SPEI*`,
+          ``,
+          `Responde con *1* o *2* (o escribe Efectivo / Transferencia). 💵📲`
+        ].join("\n");
+
+        setTimeout(async () => {
+          try {
+            await enviarMensajeChat(phoneParaResponder, msgMetodoPago);
+            const msgPagoRegistro = {
+              id: `auto-${Date.now() + 1}`,
+              cita_id: ultimaCita.id,
+              cliente_id: cliente.id,
+              etapa: "1_confirmacion_inmediata",
+              etapa_titulo: "Consulta Método de Pago",
+              destinatario_whatsapp: phoneParaResponder,
+              contenido_mensaje: msgMetodoPago,
+              estatus_envio: "Enviado",
+              fecha_programada: new Date().toISOString(),
+            };
+            const currentDb = await getDatabaseAsync();
+            currentDb.mensajes_automatizacion.unshift(msgPagoRegistro as any);
+            saveDatabase(currentDb);
+            await supabase.from("mensajes_automatizacion").insert(msgPagoRegistro);
+          } catch (e) {
+            console.warn("Error enviando consulta de método de pago:", e);
+          }
+        }, 1500);
       }
 
       // B) Detección de Rechazo Inicial (Cliente dice "No" a la cotización)
@@ -243,6 +271,50 @@ export async function POST(req: NextRequest) {
             await supabase.from("mensajes_automatizacion").insert(msgCancRegistro);
           } catch (e) {
             console.warn("Error guardando aviso cancelacion en Supabase:", e);
+          }
+        }
+      }
+
+      // D) Detección de Elección de Método de Pago (1 = Efectivo, 2 = Transferencia SPEI)
+      if (ultimaCita && (ultimaCita.estatus === "Confirmada" || ultimaCita.estatus === "Por Confirmar")) {
+        let metodoElegido: "Efectivo" | "Transferencia SPEI" | null = null;
+        if (/^(1|efectivo|cash)\b/i.test(cleanLower)) {
+          metodoElegido = "Efectivo";
+        } else if (/^(2|transferencia|spei|transfer)\b/i.test(cleanLower)) {
+          metodoElegido = "Transferencia SPEI";
+        }
+
+        if (metodoElegido) {
+          updateCitaInDb(ultimaCita.id, { metodo_pago: metodoElegido });
+          const { enviarMensajeChat } = await import("@/lib/chat/bridgeClient");
+          const msgAgradecimientoPago = [
+            `¡Perfecto, ${primerNombre}! 💳✨`,
+            `Hemos anotado tu método de pago como *${metodoElegido}*.`,
+            metodoElegido === "Transferencia SPEI"
+              ? `El técnico te proporcionará los datos de transferencia al momento de concluir tu servicio.`
+              : `Puedes pagar directamente en efectivo al técnico al finalizar la limpieza de tus muebles.`,
+            ``,
+            `¡Nos vemos pronto! 🐾🛋️`
+          ].join("\n");
+
+          await enviarMensajeChat(phoneParaResponder, msgAgradecimientoPago);
+
+          const msgAgradeceRegistro = {
+            id: `auto-${Date.now()}`,
+            cita_id: ultimaCita.id,
+            cliente_id: cliente.id,
+            etapa: "1_confirmacion_inmediata",
+            etapa_titulo: "Confirmación Método de Pago",
+            destinatario_whatsapp: phoneParaResponder,
+            contenido_mensaje: msgAgradecimientoPago,
+            estatus_envio: "Enviado",
+            fecha_programada: new Date().toISOString(),
+          };
+          db.mensajes_automatizacion.unshift(msgAgradeceRegistro as any);
+          try {
+            await supabase.from("mensajes_automatizacion").insert(msgAgradeceRegistro);
+          } catch (e) {
+            console.warn("Error guardando método de pago en Supabase:", e);
           }
         }
       }

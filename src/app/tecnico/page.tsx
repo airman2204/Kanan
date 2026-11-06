@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { ServicioCita, Cliente, MetodoPago, FotoAntesDespues } from "@/types/crm";
 import { KananLogo } from "@/components/brand/KananLogo";
+import { soundEngine } from "@/lib/audio/soundEffects";
 
 interface CitaConCliente extends ServicioCita {
   cliente: Cliente | null;
@@ -18,7 +19,9 @@ export default function TecnicoPage() {
 
   // Datos de ruta de hoy con persistencia ante refrescos
   const [citasHoy, setCitasHoy] = useState<CitaConCliente[]>([]);
+  const [citaSeleccionadaId, setCitaSeleccionadaId] = useState<string | null>(null);
   const [turnoActivo, setTurnoActivoState] = useState<"matutino" | "vespertino">("matutino");
+  const prevCitasCountRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -63,10 +66,17 @@ export default function TecnicoPage() {
       const data = await res.json();
       if (data.ok) {
         setPinAutenticado(true);
-        setCitasHoy(data.citas || []);
+        const fetchedCitas = data.citas || [];
+        // Si hay una nueva cita asignada en tiempo real mientras el técnico tiene la app abierta
+        if (prevCitasCountRef.current !== null && fetchedCitas.length > prevCitasCountRef.current) {
+          soundEngine.playNewBookingSound();
+        }
+        prevCitasCountRef.current = fetchedCitas.length;
+        setCitasHoy(fetchedCitas);
+
         // Si hay citas vespertinas y no matutinas, preseleccionar vespertino
-        const mat = (data.citas || []).find((c: CitaConCliente) => c.turno.includes("Matutino"));
-        if (!mat && (data.citas || []).some((c: CitaConCliente) => c.turno.includes("Vespertino"))) {
+        const mat = fetchedCitas.find((c: CitaConCliente) => c.turno.includes("Matutino"));
+        if (!mat && fetchedCitas.some((c: CitaConCliente) => c.turno.includes("Vespertino"))) {
           setTurnoActivo("vespertino");
         }
       } else {
@@ -96,8 +106,8 @@ export default function TecnicoPage() {
     return () => window.removeEventListener("resize", checkIsMobile);
   }, []);
 
-  // Cita actual según el turno seleccionado
-  const citaActual = citasHoy.find((c) =>
+  // Cita actual según la selección del técnico o el turno activo
+  const citaActual = (citaSeleccionadaId ? citasHoy.find((c) => c.id === citaSeleccionadaId) : null) || citasHoy.find((c) =>
     turnoActivo === "matutino"
       ? c.turno.includes("Matutino")
       : c.turno.includes("Vespertino")
@@ -174,7 +184,7 @@ export default function TecnicoPage() {
     if (!citaActual || !citaActual.cliente) return;
     const telefono = citaActual.cliente.whatsapp.replace(/\D/g, "");
     const msg = encodeURIComponent(
-      `Hola ${citaActual.cliente.nombre}, te saludo de Kanan Limpieza Especializada. Voy en camino a tu domicilio.`
+      `Hola ${citaActual.cliente.nombre}, te saludo de Kanan Limpieza. ¿Podrías compartirme tu ubicación actual en tiempo real por aquí para llegar directo a tu domicilio? ¡Gracias!`
     );
     window.open(`https://wa.me/52${telefono}?text=${msg}`, "_blank");
   };
@@ -501,60 +511,126 @@ export default function TecnicoPage() {
                 <div className="flex items-center gap-2">
                   <span className="font-heading font-black text-sm tracking-wide">KANAN MÓVIL</span>
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#36A6DE]/30 text-cyan-100 border border-white/20">
-                    1 UNIDAD
+                    {citasHoy.length} {citasHoy.length === 1 ? "SERVICIO" : "SERVICIOS"}
                   </span>
                 </div>
                 <p className="text-[11px] text-blue-100 font-medium">Ruta de Hoy ({fechaTexto}) · ZMG</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-1.5 bg-black/25 backdrop-blur-md px-3 py-1.5 rounded-full text-xs font-bold border border-white/10 text-white">
-              <span className={`w-2 h-2 rounded-full ${citaActual?.estatus === "Completada" ? "bg-emerald-400" : "bg-amber-400 animate-pulse"}`}></span>
-              <span>{citaActual?.estatus || "En Ruta"}</span>
+            {citaSeleccionadaId && (
+              <button
+                type="button"
+                onClick={() => setCitaSeleccionadaId(null)}
+                className="px-2.5 py-1 bg-white/20 hover:bg-white/30 rounded-xl text-white text-xs font-bold transition flex items-center gap-1"
+              >
+                <span>←</span>
+                <span>Ver Lista</span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* SI NO HAY CITA SELECCIONADA Y HAY MÚLTIPLES CITAS: VISTA LISTA COMPACTA (EVITA SCROLL INFINITO) */}
+        {!citaSeleccionadaId && citasHoy.length > 0 && (
+          <div className="p-4 space-y-3 bg-[#F4F7F9] flex-1">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-heading font-extrabold text-slate-700">
+                Paradas Programadas para Hoy
+              </span>
+              <span className="text-[11px] text-slate-400">Toca para abrir detalles</span>
+            </div>
+
+            <div className="space-y-2.5">
+              {citasHoy.map((c) => {
+                const isCompl = c.estatus === "Completada";
+                const isProc = c.estatus === "En Proceso";
+                const isRuta = c.estatus === "En Ruta";
+
+                return (
+                  <div
+                    key={c.id}
+                    onClick={() => setCitaSeleccionadaId(c.id)}
+                    className="p-4 bg-white rounded-2xl border border-slate-200/90 shadow-xs hover:shadow-md transition active:scale-[0.99] cursor-pointer space-y-2"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-heading font-black text-xs text-[#1D71B5]">{c.id}</span>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                        isCompl
+                          ? "bg-emerald-100 text-emerald-800"
+                          : isProc
+                          ? "bg-cyan-100 text-cyan-800"
+                          : isRuta
+                          ? "bg-amber-100 text-amber-800"
+                          : "bg-slate-100 text-slate-600"
+                      }`}>
+                        {c.estatus}
+                      </span>
+                    </div>
+
+                    <div className="space-y-0.5">
+                      <p className="font-heading font-bold text-xs text-slate-900">{c.cliente?.nombre || "Cliente"}</p>
+                      <p className="text-[11px] text-slate-500 truncate">{c.cliente?.direccion}, {c.cliente?.municipio}</p>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-1 border-t border-slate-100 text-[11px]">
+                      <span className="font-bold text-slate-600">
+                        {c.turno.includes("Matutino") ? "☀️ 09:00 - 13:00" : "🌤️ 14:00 - 18:00"}
+                      </span>
+                      <span className="font-extrabold text-emerald-600">
+                        {c.monto_total ? `$${c.monto_total} MXN` : "Por cotizar"}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
-        </div>
+        )}
 
-        {/* SELECTOR DE PARADAS DEL DÍA */}
-        <div className="px-4 py-3 bg-white border-b border-slate-200 sticky top-[68px] z-20 shadow-xs">
-          <div className="bg-[#F4F7F9] p-1 rounded-2xl grid grid-cols-2 gap-1.5 border border-slate-200">
-            <button
-              onClick={() => setTurnoActivo("matutino")}
-              className={`py-2 px-3 rounded-xl font-heading font-bold text-xs transition-all flex flex-col items-center ${
-                turnoActivo === "matutino"
-                  ? "bg-[#1D71B5] text-white shadow-sm"
-                  : "bg-white text-slate-500 hover:text-[#355581]"
-              }`}
-            >
-              <span className="flex items-center gap-1.5">
-                <span>☀️</span>
-                <span>Parada 1 (Mañana)</span>
-              </span>
-              <span className={`text-[10px] font-normal font-sans mt-0.5 ${turnoActivo === "matutino" ? "opacity-90" : "text-slate-400"}`}>
-                09:00 - 13:00
-              </span>
-            </button>
+        {/* SELECTOR DE PARADAS DEL DÍA (SOLO VISIBLE SI SE ESTÁ VIENDO EL DETALLE DE UNA CITA) */}
+        {citaSeleccionadaId && (
+          <div className="px-4 py-3 bg-white border-b border-slate-200 sticky top-[68px] z-20 shadow-xs">
+            <div className="bg-[#F4F7F9] p-1 rounded-2xl grid grid-cols-2 gap-1.5 border border-slate-200">
+              <button
+                onClick={() => setTurnoActivo("matutino")}
+                className={`py-2 px-3 rounded-xl font-heading font-bold text-xs transition-all flex flex-col items-center ${
+                  turnoActivo === "matutino"
+                    ? "bg-[#1D71B5] text-white shadow-sm"
+                    : "bg-white text-slate-500 hover:text-[#355581]"
+                }`}
+              >
+                <span className="flex items-center gap-1.5">
+                  <span>☀️</span>
+                  <span>Parada 1 (Mañana)</span>
+                </span>
+                <span className={`text-[10px] font-normal font-sans mt-0.5 ${turnoActivo === "matutino" ? "opacity-90" : "text-slate-400"}`}>
+                  09:00 - 13:00
+                </span>
+              </button>
 
-            <button
-              onClick={() => setTurnoActivo("vespertino")}
-              className={`py-2 px-3 rounded-xl font-heading font-bold text-xs transition-all flex flex-col items-center ${
-                turnoActivo === "vespertino"
-                  ? "bg-[#1D71B5] text-white shadow-sm"
-                  : "bg-white text-slate-500 hover:text-[#355581]"
-              }`}
-            >
-              <span className="flex items-center gap-1.5">
-                <span>🌤️</span>
-                <span>Parada 2 (Tarde)</span>
-              </span>
-              <span className={`text-[10px] font-normal font-sans mt-0.5 ${turnoActivo === "vespertino" ? "opacity-90" : "text-slate-400"}`}>
-                14:00 - 18:00
-              </span>
-            </button>
+              <button
+                onClick={() => setTurnoActivo("vespertino")}
+                className={`py-2 px-3 rounded-xl font-heading font-bold text-xs transition-all flex flex-col items-center ${
+                  turnoActivo === "vespertino"
+                    ? "bg-[#1D71B5] text-white shadow-sm"
+                    : "bg-white text-slate-500 hover:text-[#355581]"
+                }`}
+              >
+                <span className="flex items-center gap-1.5">
+                  <span>🌤️</span>
+                  <span>Parada 2 (Tarde)</span>
+                </span>
+                <span className={`text-[10px] font-normal font-sans mt-0.5 ${turnoActivo === "vespertino" ? "opacity-90" : "text-slate-400"}`}>
+                  14:00 - 18:00
+                </span>
+              </button>
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* CUERPO DEL SERVICIO SELECCIONADO */}
+        {/* CUERPO DEL SERVICIO SELECCIONADO (O SI SÓLO HAY 1 CITA) */}
+        {(citaSeleccionadaId || citasHoy.length <= 1) && (
         <div className="flex-1 bg-[#F4F7F9] flex flex-col">
           {/* BANNER DE ALERTA SI LA CITA FUE CANCELADA POR EL CLIENTE */}
           {citaActual?.estatus === "Cancelada" && (
@@ -781,8 +857,8 @@ export default function TecnicoPage() {
                   onClick={contactarWhatsApp}
                   className="w-full py-3 px-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-heading font-bold text-xs flex flex-col items-center justify-center gap-1 shadow-sm active:scale-[0.98] transition"
                 >
-                  <span className="text-base">📞</span>
-                  <span>WhatsApp</span>
+                  <span className="text-base">📍</span>
+                  <span>Pedir Ubicación</span>
                 </button>
               </div>
             </div>
@@ -828,15 +904,19 @@ export default function TecnicoPage() {
 
                 <div className="grid grid-cols-2 gap-2.5 text-xs pt-1">
                   <div className="p-2.5 rounded-xl border border-slate-200 bg-white">
-                    <span className="text-[10px] uppercase font-bold text-slate-400 block">🧵 Tipo de Tela</span>
+                    <span className="text-[10px] uppercase font-bold text-slate-400 block">Tipo de Tela</span>
                     <strong className="font-bold text-slate-800 mt-0.5 block">
                       {citaActual.tipo_tela || "No especificada"}
                     </strong>
                   </div>
                   <div className="p-2.5 rounded-xl border border-slate-200 bg-white">
-                    <span className="text-[10px] uppercase font-bold text-slate-400 block">⚠️ Manchas Críticas</span>
-                    <strong className="font-bold text-amber-700 mt-0.5 block truncate">
-                      {citaActual.manchas_dificiles?.join(", ") || "Ninguna reportada"}
+                    <span className="text-[10px] uppercase font-bold text-slate-400 block">Manchas Críticas</span>
+                    <strong className="font-bold text-amber-700 mt-0.5 block break-words">
+                      {citaActual.manchas_dificiles && citaActual.manchas_dificiles.length > 0
+                        ? citaActual.manchas_dificiles.join(", ")
+                        : citaActual.notas_servicio
+                        ? citaActual.notas_servicio
+                        : "Ninguna reportada"}
                     </strong>
                   </div>
                 </div>
@@ -854,21 +934,34 @@ export default function TecnicoPage() {
                 </span>
               </div>
 
-              {/* Selector de Método de Pago */}
-              <div className="grid grid-cols-3 gap-2 text-xs font-heading font-bold">
-                {(["Efectivo", "Transferencia SPEI", "Tarjeta / Terminal"] as MetodoPago[]).map((metodo) => {
+              {/* Selector de Método de Pago (Solo Efectivo o SPEI - Terminal Desactivada) */}
+              <div className="grid grid-cols-2 gap-2 text-xs font-heading font-bold">
+                {(["Efectivo", "Transferencia SPEI"] as MetodoPago[]).map((metodo) => {
                   const selected = metodoPagoSeleccionado === metodo;
-                  const label = metodo === "Transferencia SPEI" ? "📱 SPEI" : metodo === "Tarjeta / Terminal" ? "💳 Terminal" : "💵 Efectivo";
+                  const label = metodo === "Transferencia SPEI" ? "📱 Transferencia SPEI" : "💵 Efectivo";
                   return (
                     <button
                       key={metodo}
                       type="button"
-                      onClick={() => setMetodoPagoSeleccionado(metodo)}
-                      className={`py-2.5 rounded-xl transition font-heading font-bold text-xs ${
+                      disabled={citaActual.estatus === "Completada"}
+                      onClick={async () => {
+                        setMetodoPagoSeleccionado(metodo);
+                        try {
+                          await fetch("/api/tecnico", {
+                            method: "PATCH",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                              citaId: citaActual.id,
+                              metodo_pago: metodo,
+                            }),
+                          });
+                        } catch {}
+                      }}
+                      className={`py-3 rounded-xl transition font-heading font-bold text-xs ${
                         selected
-                          ? "border border-[#1D71B5] bg-[#1D71B5]/10 text-[#1D71B5]"
+                          ? "border-2 border-[#1D71B5] bg-[#1D71B5]/10 text-[#1D71B5] shadow-xs"
                           : "border border-slate-200 bg-[#F4F7F9] text-slate-600 hover:bg-slate-100"
-                      }`}
+                      } ${citaActual.estatus === "Completada" ? "opacity-75 cursor-not-allowed" : ""}`}
                     >
                       {label}
                     </button>
@@ -1014,6 +1107,7 @@ export default function TecnicoPage() {
             </div>
           )}
         </div>
+        )}
 
         {/* PIE DISCRETO */}
         <div className="p-3 bg-white border-t border-slate-200 text-center">

@@ -123,11 +123,13 @@ async function startWhatsApp() {
     auth: state,
     printQRInTerminal: false,
     logger: pino({ level: 'silent' }),
-    browser: ['Kanan Limpieza CRM', 'Chrome', '1.0.0'],
-    keepAliveIntervalMs: 25000,
+    browser: ['Ubuntu', 'Chrome', '120.0.6099.109'],
+    keepAliveIntervalMs: 30000,
     connectTimeoutMs: 60000,
     defaultQueryTimeoutMs: 60000,
     syncFullHistory: false,
+    markOnlineOnConnect: true,
+    generateHighQualityLinkPreview: false,
     getMessage: async (key) => {
       // Si Baileys o el destinatario solicita re-entrega de llaves E2EE
       if (key && key.id && messageStore.has(key.id)) {
@@ -439,7 +441,10 @@ app.post('/api/send-sticker', authMiddleware, async (req, res) => {
     }
 
     if (stickerBuffer && stickerBuffer.length > 0) {
-      await sock.sendMessage(jid, { sticker: stickerBuffer });
+      const sentSticker = await sock.sendMessage(jid, { sticker: stickerBuffer });
+      if (sentSticker?.key?.id && sentSticker?.message) {
+        saveToMessageStore(sentSticker.key, sentSticker.message);
+      }
       console.log(`👾 [Kanan Chat] Sticker (${stickerBuffer.length} bytes) enviado con éxito a ${jid}`);
       return res.json({ ok: true, to: jid });
     } else {

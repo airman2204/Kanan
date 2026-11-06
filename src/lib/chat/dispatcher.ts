@@ -134,8 +134,8 @@ export async function despacharEventoEnCamino(
   ].join("\n");
 
   await enviarMensajeChat(cleanPhone, mensaje);
-  // Intentar enviar el sticker oficial
-  await enviarStickerChat(cleanPhone, "assets/stickers/kanan-sticker-en-camino.jpg");
+  // Intentar enviar el sticker oficial en webp
+  await enviarStickerChat(cleanPhone, "assets/stickers/kanan-sticker-en-camino.webp");
 }
 
 /**
@@ -147,26 +147,26 @@ function resolverStickerPorCategoria(cita: ServicioCita, tipo: "proceso" | "conc
 
   if (categorias.some((cat) => cat.includes("colchon"))) {
     return tipo === "proceso"
-      ? "assets/stickers/kanan-proceso-colchones.jpg"
-      : "assets/stickers/kanan-concluido-colchones.jpg";
+      ? "assets/stickers/kanan-proceso-colchones.webp"
+      : "assets/stickers/kanan-concluido-colchones.webp";
   }
 
   if (categorias.some((cat) => cat.includes("auto") || cat.includes("vestidura"))) {
     return tipo === "proceso"
-      ? "assets/stickers/kanan-proceso-vestiduras.jpg"
-      : "assets/stickers/kanan-concluido-vestiduras.jpg";
+      ? "assets/stickers/kanan-proceso-vestiduras.webp"
+      : "assets/stickers/kanan-concluido-vestiduras.webp";
   }
 
   if (categorias.some((cat) => cat.includes("tapete") || cat.includes("alfombra"))) {
     return tipo === "proceso"
-      ? "assets/stickers/kanan-proceso-tapetes.jpg"
-      : "assets/stickers/kanan-concluido-tapetes.jpg";
+      ? "assets/stickers/kanan-proceso-tapetes.webp"
+      : "assets/stickers/kanan-concluido-tapetes.webp";
   }
 
   // Por defecto: Salas y Sillas
   return tipo === "proceso"
-    ? "assets/stickers/kanan-sticker-en-proceso.jpg"
-    : "assets/stickers/kanan-sticker-concluido.jpg";
+    ? "assets/stickers/kanan-proceso-salas.webp"
+    : "assets/stickers/kanan-concluido-salas.webp";
 }
 
 /**
@@ -219,16 +219,21 @@ export async function despacharEventoFinServicio(
   const stickerPath = resolverStickerPorCategoria(cita, "concluido");
   await enviarStickerChat(cleanPhone, stickerPath);
 
-  // 2. Tarjeta Digital de Lealtad (Si es cliente nuevo)
-  if (esClienteNuevo) {
-    const captionTarjeta = [
-      `🎁 *¡Bienvenido(a) a la Familia Kanan!*`,
-      `Te obsequiamos tu *Tarjeta Digital Kanan* con Folio *#${cliente.id}*.`,
-      `Consérvala para obtener un *15% de descuento* en tu próximo servicio semestral o en la limpieza de colchones y autos.`,
-    ].join("\n");
+  // 2. Tarjeta Digital de Lealtad y Garantía Personalizada
+  const urlTarjeta = `https://kananlimpieza.mx/api/garantia/${cita.id}`;
+  const mensajeTarjeta = [
+    `🎁 *¡Tu Tarjeta de Garantía y Beneficios Kanan está lista!*`,
+    `Nombre: *${cliente.nombre}*`,
+    `Folio: *${cita.id}*`,
+    `Próximo servicio sugerido: *${cliente.mascotas ? "3 meses (Mascotas 🐾)" : "6 meses (Semestral ✨)"}*`,
+    ``,
+    `Puedes consultar, descargar y agregar tu tarjeta a tu Wallet en este enlace exclusivo:`,
+    `👉 ${urlTarjeta}`,
+    ``,
+    `Presentando este folio obtienes *15% de descuento directo* en tu próxima solicitud.`
+  ].join("\n");
 
-    await enviarMediaChat(cleanPhone, "/assets/brand/tarjeta-garantia-digital.png", captionTarjeta);
-  }
+  await enviarMensajeChat(cleanPhone, mensajeTarjeta);
 
   // 3. Encuesta de Satisfacción Interactiva
   const encuesta = [

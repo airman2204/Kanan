@@ -84,6 +84,8 @@ export function KanbanBoard({
   const [filtroMunicipio, setFiltroMunicipio] = useState<string>("todos");
   const [busqueda, setBusqueda] = useState<string>("");
   const [actualizandoId, setActualizandoId] = useState<string | null>(null);
+  const [draggedCitaId, setDraggedCitaId] = useState<string | null>(null);
+  const [dragOverColId, setDragOverColId] = useState<EstatusCita | null>(null);
 
   // Auto-refresco cada 12 segundos para mantener sincronía con el técnico
   useEffect(() => {
@@ -172,11 +174,34 @@ export function KanbanBoard({
       <div className="flex md:grid md:grid-cols-3 lg:grid-cols-5 gap-3.5 items-start overflow-x-auto pb-4 pt-1 snap-x no-scrollbar -mx-2 px-2 sm:mx-0 sm:px-0">
         {COLUMNAS.map((col) => {
           const citasColumna = citasFiltradas.filter((c) => c.estatus === col.id);
+          const isOver = dragOverColId === col.id;
 
           return (
             <div
               key={col.id}
-              className={`rounded-3xl border ${col.colorBorde} ${col.colorBg} p-3.5 flex flex-col min-h-[460px] sm:min-h-[480px] w-[280px] sm:w-[300px] md:w-auto shrink-0 snap-start space-y-3 transition shadow-xs`}
+              onDragOver={(e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = "move";
+                if (dragOverColId !== col.id) setDragOverColId(col.id);
+              }}
+              onDragLeave={() => {
+                if (dragOverColId === col.id) setDragOverColId(null);
+              }}
+              onDrop={async (e) => {
+                e.preventDefault();
+                setDragOverColId(null);
+                const citaId = e.dataTransfer.getData("text/plain") || draggedCitaId;
+                if (citaId) {
+                  const targetCita = citas.find((c) => c.id === citaId);
+                  if (targetCita && targetCita.estatus !== col.id) {
+                    await cambiarEstadoCita(citaId, col.id);
+                  }
+                }
+                setDraggedCitaId(null);
+              }}
+              className={`rounded-3xl border ${
+                isOver ? "border-[#1D71B5] bg-blue-50/70 ring-2 ring-[#1D71B5]/30 shadow-md" : `${col.colorBorde} ${col.colorBg}`
+              } p-3.5 flex flex-col min-h-[460px] sm:min-h-[480px] w-[280px] sm:w-[300px] md:w-auto shrink-0 snap-start space-y-3 transition shadow-xs`}
             >
               {/* Encabezado de Columna */}
               <div className="flex items-center justify-between pb-2 border-b border-slate-200/80">
@@ -199,13 +224,24 @@ export function KanbanBoard({
                   citasColumna.map((cita) => {
                     const cliente = clientes.find((cl) => cl.id === cita.cliente_id);
                     const estaActualizando = actualizandoId === cita.id;
+                    const isDraggingThis = draggedCitaId === cita.id;
 
                     return (
                       <div
                         key={cita.id}
-                        className={`bg-white rounded-2xl p-3.5 border border-slate-200/90 shadow-xs space-y-2.5 transition hover:shadow-md ${
+                        draggable={!estaActualizando}
+                        onDragStart={(e) => {
+                          setDraggedCitaId(cita.id);
+                          e.dataTransfer.setData("text/plain", cita.id);
+                          e.dataTransfer.effectAllowed = "move";
+                        }}
+                        onDragEnd={() => {
+                          setDraggedCitaId(null);
+                          setDragOverColId(null);
+                        }}
+                        className={`bg-white rounded-2xl p-3.5 border border-slate-200/90 shadow-xs space-y-2.5 transition hover:shadow-md cursor-grab active:cursor-grabbing ${
                           estaActualizando ? "opacity-50 pointer-events-none" : ""
-                        }`}
+                        } ${isDraggingThis ? "opacity-40 scale-95 border-dashed border-[#1D71B5]" : ""}`}
                       >
                         {/* Cabecera de la tarjeta */}
                         <div className="flex items-start justify-between gap-1">

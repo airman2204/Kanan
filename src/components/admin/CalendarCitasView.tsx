@@ -129,7 +129,6 @@ const MANCHAS_COMUNES = [
 const METODOS_PAGO: MetodoPago[] = [
   "Efectivo",
   "Transferencia SPEI",
-  "Tarjeta / Terminal",
   "Pendiente",
 ];
 
@@ -943,159 +942,169 @@ export function CalendarCitasView({
               </div>
 
               <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
-                <span className="text-slate-400 block font-bold text-[10px] uppercase">Definir Cotización y Cobro</span>
-                <div className="flex items-center gap-2">
-                  <div className="relative flex-1">
-                    <span className="absolute left-3 top-2.5 font-bold text-slate-400">$</span>
-                    <input
-                      type="number"
-                      placeholder="Monto a cotizar"
-                      value={montoCotizadoInput}
-                      onChange={(e) => setMontoCotizadoInput(e.target.value === "" ? "" : Number(e.target.value))}
-                      className="w-full bg-white border border-slate-300 rounded-xl pl-7 pr-3 py-2 font-bold text-base text-slate-800 focus:ring-2 focus:ring-[#1D71B5]"
-                    />
+                <span className="text-slate-400 block font-bold text-[10px] uppercase">Cotización y Cobro</span>
+                
+                {/* Si la cita ya está confirmada o en etapas posteriores, se bloquea la edición del precio y cotización */}
+                {selectedCitaDetalle.estatus !== "Por Confirmar" ? (
+                  <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200 flex items-center justify-between">
+                    <div>
+                      <span className="text-xs font-bold text-emerald-800 block">Servicio {selectedCitaDetalle.estatus}</span>
+                      <span className="text-[11px] text-emerald-600">Precio pactado fijado</span>
+                    </div>
+                    <span className="font-heading font-black text-emerald-700 text-base">
+                      ${selectedCitaDetalle.monto_total ? selectedCitaDetalle.monto_total.toLocaleString("es-MX") : "0"} MXN
+                    </span>
                   </div>
-                  <button
-                    type="button"
-                    disabled={guardandoCotizacion || montoCotizadoInput === ""}
-                    onClick={async () => {
-                      if (montoCotizadoInput === "") return;
-                      setGuardandoCotizacion(true);
-                      try {
-                        await onUpdateCita(selectedCitaDetalle.id, { monto_total: Number(montoCotizadoInput) });
-                        setSelectedCitaDetalle({ ...selectedCitaDetalle, monto_total: Number(montoCotizadoInput) });
-                      } finally {
-                        setGuardandoCotizacion(false);
-                      }
-                    }}
-                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold rounded-xl text-xs transition"
-                  >
-                    {guardandoCotizacion ? "Guardando..." : "Fijar Precio"}
-                  </button>
-                </div>
-
-                {(() => {
-                  const cli = clientes.find((c) => c.id === selectedCitaDetalle.cliente_id);
-                  const piezasStr = (selectedCitaDetalle.items_contratados || []).map((it) => `${it.cantidad}x ${it.piezaNombre}`).join(", ");
-                  const precioFinal = montoCotizadoInput !== "" ? montoCotizadoInput : (selectedCitaDetalle.monto_total || 0);
-
-                  // Formateo elegante de fecha en español (ej. Jueves 5 de Noviembre)
-                  const formatearFechaAmigable = (f: string) => {
-                    if (!f) return "";
-                    const parts = f.split("-");
-                    if (parts.length === 3) {
-                      const d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
-                      const dias = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
-                      const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-                      return `${dias[d.getDay()]} ${Number(parts[2])} de ${meses[Number(parts[1]) - 1]}`;
-                    }
-                    return f;
-                  };
-                  const fechaBonita = formatearFechaAmigable(selectedCitaDetalle.fecha);
-                  
-                  // Limpieza profesional del horario (ej. "09:00 a 16:00 hrs")
-                  let horarioLimpio = "09:00 a 16:00 hrs";
-                  if (selectedCitaDetalle.hora_especifica) {
-                    horarioLimpio = `${selectedCitaDetalle.hora_especifica} hrs`;
-                  } else if (selectedCitaDetalle.turno) {
-                    const match = selectedCitaDetalle.turno.match(/\((.*?)\)/);
-                    if (match && match[1]) {
-                      horarioLimpio = `${match[1].replace("-", "a")} hrs`;
-                    } else if (selectedCitaDetalle.turno.includes("Matutino")) {
-                      horarioLimpio = "09:00 a 13:00 hrs (Turno Mañana)";
-                    } else if (selectedCitaDetalle.turno.includes("Vespertino")) {
-                      horarioLimpio = "14:00 a 18:00 hrs (Turno Tarde)";
-                    }
-                  }
-
-                  const defaultMsg = [
-                    `¡Hola ${cli?.nombre || "Cliente"}! 👋`,
-                    ``,
-                    `En *Kanan Servicios de Limpieza* revisamos tu solicitud:`,
-                    `🛋️ *Servicio:* ${piezasStr || "Limpieza y desinfección profunda"}`,
-                    `📅 *Fecha:* ${fechaBonita}`,
-                    `⏰ *Horario estimado:* ${horarioLimpio}`,
-                    `💰 *Total de tu cotización:* $${precioFinal} MXN`,
-                    ``,
-                    `¿Deseas confirmar tu servicio? Responde a este mensaje con un *"Sí"* para apartar tu turno o *"No"* si prefieres cancelarlo. 🐾✨`
-                  ].join("\n");
-
-                  // Obtenemos la plantilla configurada en el Editor de Flujos (o fallback profesional)
-                  const msgWhats = getMensajeDesdeFlujo(
-                    "nodo_cotizacion_formal",
-                    {
-                      nombre: cli?.nombre || "Cliente",
-                      folio: selectedCitaDetalle.id,
-                      piezas: piezasStr || "Limpieza y desinfección profunda",
-                      fecha: fechaBonita,
-                      turno: horarioLimpio,
-                      precio: `$${precioFinal} MXN`
-                    },
-                    defaultMsg
-                  );
-
-                  return (
-                    <div className="pt-2 border-t border-slate-200 space-y-2">
+                ) : (
+                  <>
+                    <div className="flex items-center gap-2">
+                      <div className="relative flex-1">
+                        <span className="absolute left-3 top-2.5 font-bold text-slate-400">$</span>
+                        <input
+                          type="number"
+                          placeholder="Monto a cotizar"
+                          value={montoCotizadoInput}
+                          onChange={(e) => setMontoCotizadoInput(e.target.value === "" ? "" : Number(e.target.value))}
+                          className="w-full bg-white border border-slate-300 rounded-xl pl-7 pr-3 py-2 font-bold text-base text-slate-800 focus:ring-2 focus:ring-[#1D71B5]"
+                        />
+                      </div>
                       <button
                         type="button"
-                        disabled={enviandoCotizacionChat || !cli}
+                        disabled={guardandoCotizacion || montoCotizadoInput === ""}
                         onClick={async () => {
-                          if (!cli) return;
-                          setEnviandoCotizacionChat(true);
+                          if (montoCotizadoInput === "") return;
+                          setGuardandoCotizacion(true);
                           try {
-                            // 1. Guardar precio en la cita
-                            if (montoCotizadoInput !== "") {
-                              await onUpdateCita(selectedCitaDetalle.id, { monto_total: Number(montoCotizadoInput) });
-                            }
-                            // 2. Enviar mensaje por el bridge interno
-                            await fetch("/api/chat/send", {
-                              method: "POST",
-                              headers: { "Content-Type": "application/json" },
-                              body: JSON.stringify({
-                                to: cli.whatsapp,
-                                message: msgWhats,
-                                cliente_id: cli.id,
-                              }),
-                            });
-                            // 3. Cerrar ficha y navegar directamente al chat integrado
-                            setSelectedCitaDetalle(null);
-                            if (onNavigateToChat) {
-                              onNavigateToChat(cli.id);
-                            }
+                            await onUpdateCita(selectedCitaDetalle.id, { monto_total: Number(montoCotizadoInput) });
+                            setSelectedCitaDetalle({ ...selectedCitaDetalle, monto_total: Number(montoCotizadoInput) });
                           } finally {
-                            setEnviandoCotizacionChat(false);
+                            setGuardandoCotizacion(false);
                           }
                         }}
-                        className="inline-flex items-center justify-center gap-2 w-full py-2.5 px-3 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold text-xs shadow-sm transition active:scale-[0.98]"
+                        className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold rounded-xl text-xs transition"
                       >
-                        <Phone className="w-4 h-4" />
-                        <span>
-                          {enviandoCotizacionChat ? "Enviando al Chat..." : "Enviar Cotización y Abrir Chat"}
-                        </span>
+                        {guardandoCotizacion ? "Guardando..." : "Fijar Precio"}
                       </button>
-
-                      {selectedCitaDetalle.estatus === "Por Confirmar" && (
-                        <button
-                          type="button"
-                          onClick={async () => {
-                            await onUpdateCita(selectedCitaDetalle.id, {
-                              estatus: "Confirmada",
-                              monto_total: montoCotizadoInput !== "" ? Number(montoCotizadoInput) : selectedCitaDetalle.monto_total
-                            });
-                            setSelectedCitaDetalle({
-                              ...selectedCitaDetalle,
-                              estatus: "Confirmada",
-                              monto_total: montoCotizadoInput !== "" ? Number(montoCotizadoInput) : selectedCitaDetalle.monto_total
-                            });
-                          }}
-                          className="w-full py-2 px-3 rounded-xl bg-[#1D71B5] hover:bg-blue-600 text-white font-bold text-xs transition"
-                        >
-                          ✓ El cliente dijo que SÍ (Pasar a Confirmada)
-                        </button>
-                      )}
                     </div>
-                  );
-                })()}
+
+                    {(() => {
+                      const cli = clientes.find((c) => c.id === selectedCitaDetalle.cliente_id);
+                      const piezasStr = (selectedCitaDetalle.items_contratados || []).map((it) => `${it.cantidad}x ${it.piezaNombre}`).join(", ");
+                      const precioFinal = montoCotizadoInput !== "" ? montoCotizadoInput : (selectedCitaDetalle.monto_total || 0);
+
+                      // Formateo elegante de fecha en español (ej. Jueves 5 de Noviembre)
+                      const formatearFechaAmigable = (f: string) => {
+                        if (!f) return "";
+                        const parts = f.split("-");
+                        if (parts.length === 3) {
+                          const d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+                          const dias = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+                          const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+                          return `${dias[d.getDay()]} ${Number(parts[2])} de ${meses[Number(parts[1]) - 1]}`;
+                        }
+                        return f;
+                      };
+                      const fechaBonita = formatearFechaAmigable(selectedCitaDetalle.fecha);
+                      
+                      // Limpieza profesional del horario (ej. "09:00 a 16:00 hrs")
+                      let horarioLimpio = "09:00 a 16:00 hrs";
+                      if (selectedCitaDetalle.hora_especifica) {
+                        horarioLimpio = `${selectedCitaDetalle.hora_especifica} hrs`;
+                      } else if (selectedCitaDetalle.turno) {
+                        const match = selectedCitaDetalle.turno.match(/\((.*?)\)/);
+                        if (match && match[1]) {
+                          horarioLimpio = `${match[1].replace("-", "a")} hrs`;
+                        } else if (selectedCitaDetalle.turno.includes("Matutino")) {
+                          horarioLimpio = "09:00 a 13:00 hrs (Turno Mañana)";
+                        } else if (selectedCitaDetalle.turno.includes("Vespertino")) {
+                          horarioLimpio = "14:00 a 18:00 hrs (Turno Tarde)";
+                        }
+                      }
+
+                      const defaultMsg = [
+                        `¡Hola ${cli?.nombre || "Cliente"}! 👋`,
+                        ``,
+                        `En *Kanan Servicios de Limpieza* revisamos tu solicitud:`,
+                        `🛋️ *Servicio:* ${piezasStr || "Limpieza y desinfección profunda"}`,
+                        `📅 *Fecha:* ${fechaBonita}`,
+                        `⏰ *Horario estimado:* ${horarioLimpio}`,
+                        `💰 *Total de tu cotización:* $${precioFinal} MXN`,
+                        ``,
+                        `¿Deseas confirmar tu servicio? Responde a este mensaje con un *"Sí"* para apartar tu turno o *"No"* si prefieres cancelarlo. 🐾✨`
+                      ].join("\n");
+
+                      const msgWhats = getMensajeDesdeFlujo(
+                        "nodo_cotizacion_formal",
+                        {
+                          nombre: cli?.nombre || "Cliente",
+                          folio: selectedCitaDetalle.id,
+                          piezas: piezasStr || "Limpieza y desinfección profunda",
+                          fecha: fechaBonita,
+                          turno: horarioLimpio,
+                          precio: `$${precioFinal} MXN`
+                        },
+                        defaultMsg
+                      );
+
+                      return (
+                        <div className="pt-2 border-t border-slate-200 space-y-2">
+                          <button
+                            type="button"
+                            disabled={enviandoCotizacionChat || !cli}
+                            onClick={async () => {
+                              if (!cli) return;
+                              setEnviandoCotizacionChat(true);
+                              try {
+                                if (montoCotizadoInput !== "") {
+                                  await onUpdateCita(selectedCitaDetalle.id, { monto_total: Number(montoCotizadoInput) });
+                                }
+                                await fetch("/api/chat/send", {
+                                  method: "POST",
+                                  headers: { "Content-Type": "application/json" },
+                                  body: JSON.stringify({
+                                    to: cli.whatsapp,
+                                    message: msgWhats,
+                                    cliente_id: cli.id,
+                                  }),
+                                });
+                                setSelectedCitaDetalle(null);
+                                if (onNavigateToChat) {
+                                  onNavigateToChat(cli.id);
+                                }
+                              } finally {
+                                setEnviandoCotizacionChat(false);
+                              }
+                            }}
+                            className="inline-flex items-center justify-center gap-2 w-full py-2.5 px-3 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold text-xs shadow-sm transition active:scale-[0.98]"
+                          >
+                            <Phone className="w-4 h-4" />
+                            <span>
+                              {enviandoCotizacionChat ? "Enviando al Chat..." : "Enviar Cotización y Abrir Chat"}
+                            </span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              await onUpdateCita(selectedCitaDetalle.id, {
+                                estatus: "Confirmada",
+                                monto_total: montoCotizadoInput !== "" ? Number(montoCotizadoInput) : selectedCitaDetalle.monto_total
+                              });
+                              setSelectedCitaDetalle({
+                                ...selectedCitaDetalle,
+                                estatus: "Confirmada",
+                                monto_total: montoCotizadoInput !== "" ? Number(montoCotizadoInput) : selectedCitaDetalle.monto_total
+                              });
+                            }}
+                            className="w-full py-2 px-3 rounded-xl bg-[#1D71B5] hover:bg-blue-600 text-white font-bold text-xs transition"
+                          >
+                            ✓ Confirmar Cita (El cliente aceptó)
+                          </button>
+                        </div>
+                      );
+                    })()}
+                  </>
+                )}
 
                 <div className="flex items-center gap-2 pt-1 border-t border-slate-200">
                   <span className="text-slate-500">Método de pago:</span>
