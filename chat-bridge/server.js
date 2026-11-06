@@ -26,6 +26,19 @@ let connectionStatus = 'connecting'; // 'connecting', 'qr_ready', 'connected', '
 let sock = null;
 let connectedPhone = null;
 
+// Cache en memoria de mensajes recientes para atender retry keys instantáneamente
+// Evita el infame "Esperando este mensaje... esto puede tomar tiempo" de WhatsApp Multi-Device
+const messageStore = new Map();
+function saveToMessageStore(key, msg) {
+  if (!key || !key.id) return;
+  messageStore.set(key.id, msg);
+  // Mantener tamaño de caché controlado
+  if (messageStore.size > 2000) {
+    const firstKey = messageStore.keys().next().value;
+    messageStore.delete(firstKey);
+  }
+}
+
 // Carpeta de persistencia para la sesión de Baileys
 const authDir = path.join(__dirname, 'auth_info_baileys');
 if (!fs.existsSync(authDir)) {
@@ -115,6 +128,13 @@ async function startWhatsApp() {
     connectTimeoutMs: 60000,
     defaultQueryTimeoutMs: 60000,
     syncFullHistory: false,
+    getMessage: async (key) => {
+      // Si Baileys o el destinatario solicita re-entrega de llaves E2EE
+      if (key && key.id && messageStore.has(key.id)) {
+        return messageStore.get(key.id);
+      }
+      return undefined;
+    },
   });
 
   sock.ev.on('creds.update', async () => {
@@ -172,6 +192,12 @@ async function startWhatsApp() {
   // Mensajes entrantes del cliente
   sock.ev.on('messages.upsert', async ({ messages, type }) => {
     try {
+      for (const m of messages) {
+        if (m.key?.id && m.message) {
+          saveToMessageStore(m.key, m.message);
+        }
+      }
+
       if (type !== 'notify' && type !== 'append') return;
 
       for (const msg of messages) {
@@ -343,7 +369,10 @@ app.post('/api/send-message', authMiddleware, async (req, res) => {
     }
 
     const jid = await getVerifiedJid(to);
-    await sock.sendMessage(jid, { text: message });
+    const sentMsg = await sock.sendMessage(jid, { text: message });
+    if (sentMsg?.key?.id && sentMsg?.message) {
+      saveToMessageStore(sentMsg.key, sentMsg.message);
+    }
     console.log(`📤 [Kanan Chat] Mensaje enviado con éxito a ${jid}`);
     res.json({ ok: true, to: jid });
   } catch (err) {
