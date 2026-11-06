@@ -131,7 +131,26 @@ export function ChatInbox({
     return () => clearInterval(interval);
   }, [onRefresh]);
 
-  const clientesFiltrados = contactosLocales.filter((c) => {
+  // Deduplicar contactos para la lista de chats: agrupar clientes que tengan el mismo número a 10 dígitos
+  const contactosDeduplicados = React.useMemo(() => {
+    const map = new Map<string, Cliente>();
+    for (const c of contactosLocales) {
+      const raw = c.whatsapp.replace(/\D/g, "");
+      const key = raw.length >= 10 ? raw.slice(-10) : raw;
+      if (!map.has(key)) {
+        map.set(key, c);
+      } else {
+        // Si ya existe, conservar el que tenga el nombre más completo o más citas
+        const existing = map.get(key)!;
+        if (c.nombre && c.nombre.length > existing.nombre.length) {
+          map.set(key, { ...existing, nombre: c.nombre, direccion: c.direccion || existing.direccion });
+        }
+      }
+    }
+    return Array.from(map.values());
+  }, [contactosLocales]);
+
+  const clientesFiltrados = contactosDeduplicados.filter((c) => {
     if (!busqueda.trim()) return true;
     const q = busqueda.toLowerCase();
     return (
@@ -141,13 +160,23 @@ export function ChatInbox({
     );
   });
 
-  const activeCliente = contactosLocales.find((c) => c.id === selectedClienteId) || contactosLocales[0];
-  const activeCitas = citas.filter((c) => c.cliente_id === activeCliente?.id);
+  const activeCliente = contactosDeduplicados.find((c) => c.id === selectedClienteId) || contactosDeduplicados[0];
+
+  // IDs de todos los clientes vinculados a este mismo número a 10 dígitos (para unificar historial de mensajes y citas)
+  const activeCliente10Digits = activeCliente?.whatsapp.replace(/\D/g, "").slice(-10) || "";
+  const linkedClienteIds = React.useMemo(() => {
+    if (!activeCliente10Digits) return [activeCliente?.id || ""];
+    return contactosLocales
+      .filter((c) => c.whatsapp.replace(/\D/g, "").slice(-10) === activeCliente10Digits)
+      .map((c) => c.id);
+  }, [contactosLocales, activeCliente10Digits, activeCliente?.id]);
+
+  const activeCitas = citas.filter((c) => linkedClienteIds.includes(c.cliente_id));
 
   // ORDEN CRONOLÓGICO NATURAL (WhatsApp Style):
-  // Mensajes más viejos arriba -> Mensajes más nuevos abajo
+  // Mensajes de todos los IDs asociados a este número a 10 dígitos unificados en un solo hilo
   const activeMensajes = mensajesLocales
-    .filter((m) => m.cliente_id === activeCliente?.id)
+    .filter((m) => linkedClienteIds.includes(m.cliente_id))
     .sort((a, b) => new Date(a.fecha_programada).getTime() - new Date(b.fecha_programada).getTime());
 
   // Auto-scroll al fondo

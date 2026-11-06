@@ -15,11 +15,12 @@ export async function POST(req: NextRequest) {
     const cleanPhone = phone.replace(/\D/g, "");
     const db = await getDatabaseAsync();
 
-    // 1. Buscar el cliente por su teléfono (probando con 10 dígitos o con prefijo 52)
-    const targetDigits = cleanPhone.slice(-10);
+    // 1. Buscar el cliente por su teléfono normalizado a 10 dígitos (elimina prefijos 52, 521, etc.)
+    const targetDigits = cleanPhone.length >= 10 ? cleanPhone.slice(-10) : cleanPhone;
     let cliente = db.clientes.find((cl) => {
       const p = cl.whatsapp.replace(/\D/g, "");
-      return p.endsWith(targetDigits) || cleanPhone.endsWith(p) || p.endsWith(cleanPhone);
+      const p10 = p.length >= 10 ? p.slice(-10) : p;
+      return p10 === targetDigits || p.endsWith(targetDigits) || cleanPhone.endsWith(p);
     });
 
     // Heurística de vinculación inteligente tipo FoxDrop:
