@@ -15,29 +15,24 @@ export async function POST(req: NextRequest) {
     const cleanPhone = phone.replace(/\D/g, "");
     const db = await getDatabaseAsync();
 
-    // 1. Buscar el cliente por su teléfono normalizado a 10 dígitos (elimina prefijos 52, 521, etc.)
+    // 1. Identificación ESTRICTA Y EXCLUSIVA por número de teléfono
+    // Solo vincula si el número telefónico coincide exactamente (mismos 10 dígitos o mismo identificador WhatsApp)
     const targetDigits = cleanPhone.length >= 10 ? cleanPhone.slice(-10) : cleanPhone;
     let cliente = db.clientes.find((cl) => {
       const p = cl.whatsapp.replace(/\D/g, "");
       const p10 = p.length >= 10 ? p.slice(-10) : p;
-      return p === cleanPhone || p10 === targetDigits || p.endsWith(targetDigits) || cleanPhone.endsWith(p);
+      return p === cleanPhone || (targetDigits.length === 10 && p10 === targetDigits);
     });
 
-    // 2. Si no encontró por teléfono exacto o viene con nombre explícito del perfil de WhatsApp
-    if (!cliente && clientName && clientName !== "Cliente" && clientName !== "Cliente WhatsApp") {
-      const firstName = clientName.split(" ")[0].trim().toLowerCase();
-      cliente = db.clientes.find((cl) =>
-        cl.nombre.toLowerCase().includes(firstName) || firstName.includes(cl.nombre.toLowerCase().split(" ")[0])
-      );
-    }
-
-    // 3. Si NO coincide con ningún cliente existente, CREAR UN NUEVO CONTACTO DE INMEDIATO
-    // (Jamás asociar a la fuerza al primer cliente de la lista para evitar mezclar conversaciones)
+    // 2. Si el número NO existe en la base de datos, ES UN CLIENTE NUEVO GARANTIZADO
+    // Bajo NINGUNA circunstancia se busca por nombre similar ni se vincula con clientes previos
     if (!cliente) {
-      console.log(`🆕 [Kanan Webhook] Nuevo contacto entrante por WhatsApp: ${cleanPhone} (${clientName})`);
+      console.log(`🆕 [Kanan Webhook] Contacto 100% aislado creado para: ${cleanPhone} (${clientName})`);
       const nuevoCliente = {
         id: `cli-${Date.now()}`,
-        nombre: clientName && clientName !== "Cliente" ? clientName : `Contacto ${cleanPhone.slice(-4)}`,
+        nombre: clientName && clientName !== "Cliente" && clientName !== "Cliente WhatsApp"
+          ? clientName
+          : `Contacto ${cleanPhone.slice(-4)}`,
         whatsapp: cleanPhone,
         direccion: "Contacto vía WhatsApp",
         municipio: "Guadalajara" as const,
@@ -46,6 +41,14 @@ export async function POST(req: NextRequest) {
         historico_gasto: 0,
         fecha_registro: new Date().toISOString(),
       };
+      db.clientes.unshift(nuevoCliente as any);
+      cliente = nuevoCliente as any;
+      try {
+        await supabase.from("clientes").insert(nuevoCliente);
+      } catch (e) {
+        console.warn("Error guardando nuevo cliente en Supabase:", e);
+      }
+    }
       db.clientes.unshift(nuevoCliente as any);
       cliente = nuevoCliente as any;
       try {
