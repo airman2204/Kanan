@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef, Suspense } from "react";
-import { Canvas } from "@react-three/fiber";
+import { Canvas, useFrame } from "@react-three/fiber";
 import {
   OrbitControls,
   useGLTF,
@@ -16,8 +16,40 @@ interface ModelProps {
   selectedRoom: string | null;
 }
 
+// Subcomponente reutilizable del perrito Kanan 3D en cada habitación
+function KananPupCharacter({
+  position,
+  rotation = [0, 0, 0],
+  scale = 0.55,
+}: {
+  position: [number, number, number];
+  rotation?: [number, number, number];
+  scale?: number;
+}) {
+  const { scene } = useGLTF(
+    "/models/kanan-dog-opt.glb",
+    "https://www.gstatic.com/draco/versioned/decoders/1.5.7/"
+  );
+  // Clonar la escena para poder colocarlo en múltiples habitaciones independientemente
+  const clonedScene = React.useMemo(() => scene.clone(), [scene]);
+  const pupGroupRef = useRef<THREE.Group>(null);
+
+  useFrame((state) => {
+    if (pupGroupRef.current) {
+      // Movimiento suave de respiración / flotación sutil
+      pupGroupRef.current.position.y =
+        position[1] + Math.sin(state.clock.elapsedTime * 2.5 + position[0]) * 0.03;
+    }
+  });
+
+  return (
+    <group ref={pupGroupRef} position={position} rotation={rotation} scale={scale}>
+      <primitive object={clonedScene} />
+    </group>
+  );
+}
+
 function KananGlbHouseModel({ onHotspotClick, selectedRoom }: ModelProps) {
-  // Cargar modelo optimizado con fallback seguro de Draco
   const { scene } = useGLTF(
     "/models/kanan-house-opt.glb",
     "https://www.gstatic.com/draco/versioned/decoders/1.5.7/"
@@ -41,15 +73,49 @@ function KananGlbHouseModel({ onHotspotClick, selectedRoom }: ModelProps) {
 
   return (
     <group ref={modelRef} dispose={null}>
+      {/* 1. La Casa Cozy Blue */}
       <Center top>
         <primitive object={scene} scale={2.5} />
       </Center>
+
+      {/* 2. El Perrito Kanan colocado en las habitaciones */}
+      {/* En la Sala de Estar (Planta baja junto al sofá) */}
+      <KananPupCharacter
+        position={[-0.6, 0.35, 0.8]}
+        rotation={[0, 0.4, 0]}
+        scale={0.5}
+      />
+
+      {/* En la Recámara (Planta alta sobre la cama examinando el colchón) */}
+      <KananPupCharacter
+        position={[-0.8, 2.2, 0.3]}
+        rotation={[0, 0.6, 0]}
+        scale={0.48}
+      />
+
+      {/* En el Comedor (Planta baja cepillando el tapete) */}
+      <KananPupCharacter
+        position={[0.7, 0.35, 0.8]}
+        rotation={[0, -0.5, 0]}
+        scale={0.48}
+      />
+
+      {/* En la Cochera (Al lado del automóvil) */}
+      <KananPupCharacter
+        position={[1.8, 0.35, 1.2]}
+        rotation={[0, -0.8, 0]}
+        scale={0.5}
+      />
     </group>
   );
 }
 
 useGLTF.preload(
   "/models/kanan-house-opt.glb",
+  "https://www.gstatic.com/draco/versioned/decoders/1.5.7/"
+);
+useGLTF.preload(
+  "/models/kanan-dog-opt.glb",
   "https://www.gstatic.com/draco/versioned/decoders/1.5.7/"
 );
 
@@ -74,13 +140,13 @@ export function RealGlbViewer({
         gl={{
           antialias: true,
           toneMapping: THREE.ACESFilmicToneMapping,
-          toneMappingExposure: 1.1,
+          toneMappingExposure: 1.15,
         }}
         className="w-full h-full cursor-grab active:cursor-grabbing"
       >
-        <ambientLight intensity={1.2} color="#FFFBF5" />
-        <directionalLight position={[15, 25, 15]} intensity={2.0} castShadow />
-        <directionalLight position={[-15, 12, -10]} intensity={0.8} color="#D7E8F7" />
+        <ambientLight intensity={1.25} color="#FFFBF5" />
+        <directionalLight position={[15, 25, 15]} intensity={2.2} castShadow />
+        <directionalLight position={[-15, 12, -10]} intensity={0.9} color="#D7E8F7" />
 
         <Suspense fallback={null}>
           <KananGlbHouseModel
@@ -89,7 +155,7 @@ export function RealGlbViewer({
           />
           <ContactShadows
             position={[0, -0.05, 0]}
-            opacity={0.6}
+            opacity={0.65}
             scale={12}
             blur={2.0}
             far={6}
@@ -107,11 +173,10 @@ export function RealGlbViewer({
         />
       </Canvas>
 
-      {/* OVERLAY HTML ESTABLE DE HOTSPOTS (100% libre de errores DOM removeChild) */}
+      {/* OVERLAY HTML DE HOTSPOTS */}
       <div className="absolute inset-0 pointer-events-none z-10 flex items-center justify-center">
-        {/* Contenedor relativo centrado sobre la maqueta */}
         <div className="relative w-[340px] sm:w-[460px] md:w-[540px] aspect-square">
-          {/* 1. Hotspot: La Recámara (Arriba Izquierda) */}
+          {/* 1. Hotspot: La Recámara */}
           <div className="absolute top-[28%] left-[28%] -translate-x-1/2 -translate-y-1/2 pointer-events-auto">
             <button
               type="button"
@@ -127,7 +192,7 @@ export function RealGlbViewer({
             </button>
           </div>
 
-          {/* 2. Hotspot: La Sala (Abajo Izquierda) */}
+          {/* 2. Hotspot: La Sala */}
           <div className="absolute top-[64%] left-[26%] -translate-x-1/2 -translate-y-1/2 pointer-events-auto">
             <button
               type="button"
@@ -143,7 +208,7 @@ export function RealGlbViewer({
             </button>
           </div>
 
-          {/* 3. Hotspot: Comedor y Tapete (Centro) */}
+          {/* 3. Hotspot: Comedor y Tapete */}
           <div className="absolute top-[66%] left-[54%] -translate-x-1/2 -translate-y-1/2 pointer-events-auto">
             <button
               type="button"
@@ -159,7 +224,7 @@ export function RealGlbViewer({
             </button>
           </div>
 
-          {/* 4. Hotspot: Vestiduras Auto (Derecha) */}
+          {/* 4. Hotspot: Vestiduras Auto */}
           <div className="absolute top-[58%] left-[78%] -translate-x-1/2 -translate-y-1/2 pointer-events-auto">
             <button
               type="button"
