@@ -270,12 +270,13 @@ export function ServicesSection({ onSelectCategoryForWizard }: ServicesSectionPr
                   </div>
                 </div>
 
-                <div className="p-5 sm:p-7 flex-1 flex flex-col justify-between space-y-5">
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-3 gap-2 bg-kanan-ice rounded-2xl p-3 border border-slate-200/70">
+                <div className="p-6 sm:p-8 flex-1 flex flex-col justify-between space-y-6">
+                  <div className="space-y-5">
+                    {/* Tarjetas métricas con gradiente sutil */}
+                    <div className="grid grid-cols-3 gap-3 bg-gradient-to-r from-blue-50/60 via-slate-50 to-blue-50/40 rounded-2xl p-3.5 border border-slate-200/80">
                       {srv.metrics.map((m, idx) => (
                         <div key={idx} className="text-center">
-                          <p className="font-heading font-extrabold text-xs sm:text-sm text-kanan-deep">
+                          <p className="font-heading font-extrabold text-xs sm:text-sm text-[#1D71B5]">
                             {m.value}
                           </p>
                           <p className="text-[10px] text-slate-500 mt-0.5">{m.label}</p>
@@ -287,13 +288,13 @@ export function ServicesSection({ onSelectCategoryForWizard }: ServicesSectionPr
                       {srv.description}
                     </p>
 
-                    <div className="flex flex-wrap gap-1.5">
+                    <div className="flex flex-wrap gap-2">
                       {srv.chips.map((chip) => (
                         <span
                           key={chip}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-kanan-ice text-kanan-navy text-xs font-semibold border border-slate-200/80"
+                          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-50 text-slate-700 text-xs font-semibold border border-slate-200/90 hover:border-[#1D71B5] transition-colors"
                         >
-                          <CheckCircle2 className="w-3 h-3 text-kanan-cyan" />
+                          <CheckCircle2 className="w-3.5 h-3.5 text-[#36A6DE]" />
                           {chip}
                         </span>
                       ))}
@@ -303,10 +304,10 @@ export function ServicesSection({ onSelectCategoryForWizard }: ServicesSectionPr
                   <button
                     type="button"
                     onClick={() => onSelectCategoryForWizard(srv.id)}
-                    className="w-full py-3.5 px-5 rounded-2xl bg-kanan-ice group-hover:bg-kanan-cyan text-kanan-deep group-hover:text-white font-heading font-bold text-sm flex items-center justify-center gap-2 transition-all border border-slate-200 group-hover:border-kanan-cyan group-hover:shadow-cyan-glow active:scale-[0.99]"
+                    className="w-full py-4 px-6 rounded-2xl bg-[#F4F7F9] group-hover:bg-[#1D71B5] text-[#355581] group-hover:text-white font-heading font-extrabold text-sm flex items-center justify-center gap-2 transition-all duration-300 border border-slate-200 group-hover:border-[#1D71B5] group-hover:shadow-lg group-hover:shadow-blue-500/20 active:scale-[0.99]"
                   >
-                    <span>Elegir en el Cotizador</span>
-                    <ArrowRight className="w-4 h-4" />
+                    <span>Cotizar {srv.title.split(",")[0]}</span>
+                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                   </button>
                 </div>
               </div>
