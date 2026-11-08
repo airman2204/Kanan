@@ -21,12 +21,14 @@ function SpecificPup({
   modelUrl,
   position,
   rotation = [0, 0, 0],
-  scale = 0.52,
+  scale = 0.28,
+  onClick,
 }: {
   modelUrl: string;
   position: [number, number, number];
   rotation?: [number, number, number];
   scale?: number;
+  onClick?: () => void;
 }) {
   const { scene } = useGLTF(
     modelUrl,
@@ -34,15 +36,29 @@ function SpecificPup({
   );
   const pupRef = useRef<THREE.Group>(null);
 
-  useFrame((state) => {
-    if (pupRef.current) {
-      pupRef.current.position.y =
-        position[1] + Math.sin(state.clock.elapsedTime * 2.5 + position[0]) * 0.025;
-    }
-  });
+  // Asegurar que reciba y emita sombras
+  React.useEffect(() => {
+    scene.traverse((child) => {
+      if ((child as THREE.Mesh).isMesh) {
+        child.castShadow = true;
+        child.receiveShadow = true;
+      }
+    });
+  }, [scene]);
 
   return (
-    <group ref={pupRef} position={position} rotation={rotation} scale={scale}>
+    <group
+      ref={pupRef}
+      position={position}
+      rotation={rotation}
+      scale={scale}
+      onClick={(e) => {
+        if (onClick) {
+          e.stopPropagation();
+          onClick();
+        }
+      }}
+    >
       <primitive object={scene} />
     </group>
   );
@@ -77,37 +93,41 @@ function KananGlbHouseModel({ onHotspotClick, selectedRoom }: ModelProps) {
         <primitive object={scene} scale={2.5} />
       </Center>
 
-      {/* 2. LOS 4 PERRITOS CON SUS POSES REALES EXACTAS */}
-      {/* A) En la Sala: Perrito con la Máquina de Inyección-Succión Kärcher */}
+      {/* 2. LOS 4 PERRITOS DIRECTAMENTE EN EL SUELO DE CADA HABITACIÓN */}
+      {/* A) En la Sala (planta baja izquierda, junto a los sillones azules) */}
       <SpecificPup
         modelUrl="/models/pup-vacuum-opt.glb"
-        position={[-0.6, 0.35, 0.8]}
+        position={[-0.45, 0.1, 0.45]}
         rotation={[0, 0.4, 0]}
-        scale={0.52}
+        scale={0.24}
+        onClick={() => onHotspotClick("salas")}
       />
 
-      {/* B) En la Recámara: Perrito con la Lupa UV examinando el colchón */}
+      {/* B) En la Recámara (planta alta, al lado de la cama matrimonial) */}
       <SpecificPup
         modelUrl="/models/pup-magnifier-opt.glb"
-        position={[-0.8, 2.2, 0.3]}
-        rotation={[0, 0.6, 0]}
-        scale={0.48}
+        position={[-0.45, 1.35, -0.1]}
+        rotation={[0, 0.5, 0]}
+        scale={0.22}
+        onClick={() => onHotspotClick("colchones")}
       />
 
-      {/* C) En el Comedor: Perrito cepillando y restaurando el tapete */}
+      {/* C) En el Comedor (planta baja centro-derecha, junto a la mesa y sillas de madera) */}
       <SpecificPup
         modelUrl="/models/pup-carpet-opt.glb"
-        position={[0.7, 0.35, 0.8]}
-        rotation={[0, -0.5, 0]}
-        scale={0.5}
+        position={[0.35, 0.1, 0.45]}
+        rotation={[0, -0.3, 0]}
+        scale={0.23}
+        onClick={() => onHotspotClick("tapetes")}
       />
 
-      {/* D) En la Cochera / Auto: Perrito con atomizador spray y microfibra */}
+      {/* D) En la Cochera / Auto (planta baja extrema derecha, junto a la puerta del coche) */}
       <SpecificPup
         modelUrl="/models/pup-spray-opt.glb"
-        position={[1.8, 0.35, 1.2]}
-        rotation={[0, -0.8, 0]}
-        scale={0.52}
+        position={[1.15, 0.1, 0.85]}
+        rotation={[0, -0.6, 0]}
+        scale={0.24}
+        onClick={() => onHotspotClick("autos")}
       />
     </group>
   );
@@ -189,74 +209,7 @@ export function RealGlbViewer({
         />
       </Canvas>
 
-      {/* OVERLAY HTML DE HOTSPOTS */}
-      <div className="absolute inset-0 pointer-events-none z-10 flex items-center justify-center">
-        <div className="relative w-[340px] sm:w-[460px] md:w-[540px] aspect-square">
-          {/* 1. Hotspot: La Recámara */}
-          <div className="absolute top-[28%] left-[28%] -translate-x-1/2 -translate-y-1/2 pointer-events-auto">
-            <button
-              type="button"
-              onClick={() => onSelectRoom("colchones")}
-              className={`px-3 py-1.5 rounded-full font-heading font-extrabold text-xs shadow-2xl flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap border ${
-                selectedRoom === "colchones"
-                  ? "bg-[#1D71B5] text-white border-white ring-4 ring-cyan-300 scale-110"
-                  : "bg-white/95 text-[#0F2438] border-[#36A6DE] hover:scale-105"
-              }`}
-            >
-              <span className="w-2.5 h-2.5 rounded-full bg-[#36A6DE] animate-ping" />
-              <span>La Recámara</span>
-            </button>
-          </div>
-
-          {/* 2. Hotspot: La Sala */}
-          <div className="absolute top-[64%] left-[26%] -translate-x-1/2 -translate-y-1/2 pointer-events-auto">
-            <button
-              type="button"
-              onClick={() => onSelectRoom("salas")}
-              className={`px-3 py-1.5 rounded-full font-heading font-extrabold text-xs shadow-2xl flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap border ${
-                selectedRoom === "salas"
-                  ? "bg-[#1D71B5] text-white border-white ring-4 ring-cyan-300 scale-110"
-                  : "bg-white/95 text-[#0F2438] border-[#36A6DE] hover:scale-105"
-              }`}
-            >
-              <span className="w-2.5 h-2.5 rounded-full bg-[#36A6DE] animate-ping" />
-              <span>La Sala</span>
-            </button>
-          </div>
-
-          {/* 3. Hotspot: Comedor y Tapete */}
-          <div className="absolute top-[66%] left-[54%] -translate-x-1/2 -translate-y-1/2 pointer-events-auto">
-            <button
-              type="button"
-              onClick={() => onSelectRoom("tapetes")}
-              className={`px-3 py-1.5 rounded-full font-heading font-extrabold text-xs shadow-2xl flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap border ${
-                selectedRoom === "tapetes"
-                  ? "bg-[#1D71B5] text-white border-white ring-4 ring-cyan-300 scale-110"
-                  : "bg-white/95 text-[#0F2438] border-[#36A6DE] hover:scale-105"
-              }`}
-            >
-              <span className="w-2.5 h-2.5 rounded-full bg-[#36A6DE] animate-ping" />
-              <span>Comedor y Tapete</span>
-            </button>
-          </div>
-
-          {/* 4. Hotspot: Vestiduras Auto */}
-          <div className="absolute top-[58%] left-[78%] -translate-x-1/2 -translate-y-1/2 pointer-events-auto">
-            <button
-              type="button"
-              onClick={() => onSelectRoom("autos")}
-              className={`px-3 py-1.5 rounded-full font-heading font-extrabold text-xs shadow-2xl flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap border ${
-                selectedRoom === "autos"
-                  ? "bg-[#1D71B5] text-white border-white ring-4 ring-cyan-300 scale-110"
-                  : "bg-white/95 text-[#0F2438] border-[#36A6DE] hover:scale-105"
-              }`}
-            >
-              <span className="w-2.5 h-2.5 rounded-full bg-[#36A6DE] animate-ping" />
-              <span>Vestiduras Auto</span>
-            </button>
-          </div>
-        </div>
-      </div>
+      {/* Hotspots temporales desactivados según solicitud */}
     </div>
   );
 }
