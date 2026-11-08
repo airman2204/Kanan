@@ -16,35 +16,34 @@ interface ModelProps {
   selectedRoom: string | null;
 }
 
-// Subcomponente reutilizable del perrito Kanan 3D en cada habitación
-function KananPupCharacter({
+// Subcomponente individual para cada perrito con su pose y herramienta específica
+function SpecificPup({
+  modelUrl,
   position,
   rotation = [0, 0, 0],
-  scale = 0.55,
+  scale = 0.52,
 }: {
+  modelUrl: string;
   position: [number, number, number];
   rotation?: [number, number, number];
   scale?: number;
 }) {
   const { scene } = useGLTF(
-    "/models/kanan-dog-opt.glb",
+    modelUrl,
     "https://www.gstatic.com/draco/versioned/decoders/1.5.7/"
   );
-  // Clonar la escena para poder colocarlo en múltiples habitaciones independientemente
-  const clonedScene = React.useMemo(() => scene.clone(), [scene]);
-  const pupGroupRef = useRef<THREE.Group>(null);
+  const pupRef = useRef<THREE.Group>(null);
 
   useFrame((state) => {
-    if (pupGroupRef.current) {
-      // Movimiento suave de respiración / flotación sutil
-      pupGroupRef.current.position.y =
-        position[1] + Math.sin(state.clock.elapsedTime * 2.5 + position[0]) * 0.03;
+    if (pupRef.current) {
+      pupRef.current.position.y =
+        position[1] + Math.sin(state.clock.elapsedTime * 2.5 + position[0]) * 0.025;
     }
   });
 
   return (
-    <group ref={pupGroupRef} position={position} rotation={rotation} scale={scale}>
-      <primitive object={clonedScene} />
+    <group ref={pupRef} position={position} rotation={rotation} scale={scale}>
+      <primitive object={scene} />
     </group>
   );
 }
@@ -73,49 +72,66 @@ function KananGlbHouseModel({ onHotspotClick, selectedRoom }: ModelProps) {
 
   return (
     <group ref={modelRef} dispose={null}>
-      {/* 1. La Casa Cozy Blue */}
+      {/* 1. Casa Cozy Blue Isométrica */}
       <Center top>
         <primitive object={scene} scale={2.5} />
       </Center>
 
-      {/* 2. El Perrito Kanan colocado en las habitaciones */}
-      {/* En la Sala de Estar (Planta baja junto al sofá) */}
-      <KananPupCharacter
+      {/* 2. LOS 4 PERRITOS CON SUS POSES REALES EXACTAS */}
+      {/* A) En la Sala: Perrito con la Máquina de Inyección-Succión Kärcher */}
+      <SpecificPup
+        modelUrl="/models/pup-vacuum-opt.glb"
         position={[-0.6, 0.35, 0.8]}
         rotation={[0, 0.4, 0]}
-        scale={0.5}
+        scale={0.52}
       />
 
-      {/* En la Recámara (Planta alta sobre la cama examinando el colchón) */}
-      <KananPupCharacter
+      {/* B) En la Recámara: Perrito con la Lupa UV examinando el colchón */}
+      <SpecificPup
+        modelUrl="/models/pup-magnifier-opt.glb"
         position={[-0.8, 2.2, 0.3]}
         rotation={[0, 0.6, 0]}
         scale={0.48}
       />
 
-      {/* En el Comedor (Planta baja cepillando el tapete) */}
-      <KananPupCharacter
+      {/* C) En el Comedor: Perrito cepillando y restaurando el tapete */}
+      <SpecificPup
+        modelUrl="/models/pup-carpet-opt.glb"
         position={[0.7, 0.35, 0.8]}
         rotation={[0, -0.5, 0]}
-        scale={0.48}
+        scale={0.5}
       />
 
-      {/* En la Cochera (Al lado del automóvil) */}
-      <KananPupCharacter
+      {/* D) En la Cochera / Auto: Perrito con atomizador spray y microfibra */}
+      <SpecificPup
+        modelUrl="/models/pup-spray-opt.glb"
         position={[1.8, 0.35, 1.2]}
         rotation={[0, -0.8, 0]}
-        scale={0.5}
+        scale={0.52}
       />
     </group>
   );
 }
 
+// Pre-cargar todos los modelos optimizados
 useGLTF.preload(
   "/models/kanan-house-opt.glb",
   "https://www.gstatic.com/draco/versioned/decoders/1.5.7/"
 );
 useGLTF.preload(
-  "/models/kanan-dog-opt.glb",
+  "/models/pup-vacuum-opt.glb",
+  "https://www.gstatic.com/draco/versioned/decoders/1.5.7/"
+);
+useGLTF.preload(
+  "/models/pup-magnifier-opt.glb",
+  "https://www.gstatic.com/draco/versioned/decoders/1.5.7/"
+);
+useGLTF.preload(
+  "/models/pup-carpet-opt.glb",
+  "https://www.gstatic.com/draco/versioned/decoders/1.5.7/"
+);
+useGLTF.preload(
+  "/models/pup-spray-opt.glb",
   "https://www.gstatic.com/draco/versioned/decoders/1.5.7/"
 );
 
