@@ -1,7 +1,7 @@
 {
-  "name": "Kanan Admin",
-  "short_name": "Kanan",
-  "description": "Panel de Administración Operativo y Chat en Vivo Kanan Limpieza ZMG",
+  "name": "Kanan CRM Admin",
+  "short_name": "Kanan CRM",
+  "description": "Sistema de Gestión y Operaciones para Kanan Servicios de Limpieza ZMG",
   "start_url": "/admin",
   "display": "standalone",
   "background_color": "#355581",
@@ -9,14 +9,16 @@
   "orientation": "any",
   "icons": [
     {
-      "src": "/assets/brand/kanan-logo-fullcolor.jpg",
+      "src": "/assets/brand/kanan-avatar.png",
       "sizes": "192x192",
-      "type": "image/jpeg"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
-      "src": "/assets/brand/kanan-logo-fullcolor.jpg",
+      "src": "/assets/brand/kanan-avatar.png",
       "sizes": "512x512",
-      "type": "image/jpeg"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }

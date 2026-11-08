@@ -181,16 +181,15 @@ export function ChatInbox({
     return () => clearInterval(interval);
   }, [onRefresh]);
 
-  // Deduplicar contactos para la lista de chats: agrupar clientes que tengan el mismo número a 10 dígitos
+  // Deduplicar contactos para la lista de chats: agrupar clientes por número a 10 dígitos o por ID si es contacto LID
   const contactosDeduplicados = React.useMemo(() => {
     const map = new Map<string, Cliente>();
     for (const c of contactosLocales) {
       const raw = c.whatsapp.replace(/\D/g, "");
-      const key = raw.length >= 10 ? raw.slice(-10) : raw;
+      const key = raw.length >= 10 ? raw.slice(-10) : (c.whatsapp || c.id);
       if (!map.has(key)) {
         map.set(key, c);
       } else {
-        // Si ya existe, conservar el que tenga el nombre más completo o más citas
         const existing = map.get(key)!;
         if (c.nombre && c.nombre.length > existing.nombre.length) {
           map.set(key, { ...existing, nombre: c.nombre, direccion: c.direccion || existing.direccion });
@@ -212,22 +211,24 @@ export function ChatInbox({
 
   const activeCliente = contactosDeduplicados.find((c) => c.id === selectedClienteId) || contactosDeduplicados[0];
 
-  // IDs de todos los clientes vinculados a este mismo número a 10 dígitos (para unificar historial de mensajes y citas)
-  const activeCliente10Digits = activeCliente?.whatsapp.replace(/\D/g, "").slice(-10) || "";
+  // IDs de todos los clientes vinculados a este contacto (por teléfono a 10 dígitos o por su propio ID)
+  const activeCliente10Digits = activeCliente?.whatsapp ? activeCliente.whatsapp.replace(/\D/g, "").slice(-10) : "";
   const linkedClienteIds = React.useMemo(() => {
-    if (!activeCliente10Digits) return [activeCliente?.id || ""];
+    if (!activeCliente) return [];
+    if (!activeCliente10Digits || activeCliente10Digits.length < 10) {
+      return [activeCliente.id];
+    }
     return contactosLocales
-      .filter((c) => c.whatsapp.replace(/\D/g, "").slice(-10) === activeCliente10Digits)
+      .filter((c) => c.whatsapp && c.whatsapp.replace(/\D/g, "").slice(-10) === activeCliente10Digits)
       .map((c) => c.id);
-  }, [contactosLocales, activeCliente10Digits, activeCliente?.id]);
+  }, [contactosLocales, activeCliente10Digits, activeCliente]);
 
   const activeCitas = citas.filter((c) => linkedClienteIds.includes(c.cliente_id));
 
   // ORDEN CRONOLÓGICO NATURAL (WhatsApp Style):
-  // Mensajes de todos los IDs asociados a este número a 10 dígitos unificados en un solo hilo
   const activeMensajes = mensajesLocales
-    .filter((m) => linkedClienteIds.includes(m.cliente_id))
-    .sort((a, b) => new Date(a.fecha_programada).getTime() - new Date(b.fecha_programada).getTime());
+    .filter((m) => linkedClienteIds.includes(m.cliente_id) || (activeCliente && m.destinatario_whatsapp === activeCliente.whatsapp))
+    .sort((a, b) => new Date(a.fecha_programada || (a as any).created_at || Date.now()).getTime() - new Date(b.fecha_programada || (b as any).created_at || Date.now()).getTime());
 
   // Auto-scroll al fondo
   useEffect(() => {
@@ -555,11 +556,16 @@ export function ChatInbox({
                       {activeCliente.nombre.slice(0, 2).toUpperCase()}
                     </div>
                     <div className="min-w-0">
-                      <h3 className="font-bold text-xs text-slate-900 truncate">
-                        {activeCliente.nombre}
+                      <h3 className="font-bold text-xs text-slate-900 truncate flex items-center gap-1.5">
+                        <span>{activeCliente.nombre}</span>
+                        {(!activeCliente.whatsapp || activeCliente.whatsapp.startsWith("wa-") || activeCliente.whatsapp.length > 13) && (
+                          <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                            WhatsApp LID
+                          </span>
+                        )}
                       </h3>
                       <p className="text-[11px] text-slate-500 truncate">
-                        {activeCliente.whatsapp}
+                        {activeCliente.whatsapp.startsWith("wa-") ? "Contacto WhatsApp" : activeCliente.whatsapp}
                       </p>
                     </div>
                   </div>

@@ -11,6 +11,7 @@ import { SocialProofAndFAQ } from "@/components/landing/SocialProofAndFAQ";
 import { Footer } from "@/components/landing/Footer";
 import { HalloweenBats } from "@/components/landing/HalloweenBats";
 import { PapelPicado } from "@/components/landing/PapelPicado";
+import { MobileBottomBar } from "@/components/landing/MobileBottomBar";
 
 export default function HomePage() {
   const [selectedMunicipio, setSelectedMunicipio] = useState<MunicipioZMG>("Guadalajara");
@@ -85,6 +86,7 @@ export default function HomePage() {
       </main>
 
       <Footer onOpenWizard={() => scrollToWizard()} />
+      <MobileBottomBar onOpenWizard={() => scrollToWizard()} />
     </div>
   );
 }

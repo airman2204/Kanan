@@ -119,6 +119,7 @@ const COMPARISONS: ComparisonItem[] = [
 export function BeforeAfterGallery({ onOpenWizard }: { onOpenWizard: () => void }) {
   const [selectedCase, setSelectedCase] = useState<ComparisonItem>(COMPARISONS[0]);
   const [sliderPos, setSliderPos] = useState<number>(50);
+  const [mostrarTodosMovil, setMostrarTodosMovil] = useState(false);
 
   return (
     <section
@@ -304,7 +305,7 @@ export function BeforeAfterGallery({ onOpenWizard }: { onOpenWizard: () => void 
                 </span>
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 gap-2.5">
-                  {COMPARISONS.map((item, idx) => {
+                  {(mostrarTodosMovil ? COMPARISONS : COMPARISONS.slice(0, 4)).map((item, idx) => {
                     const active = selectedCase.id === item.id;
                     return (
                       <button
@@ -341,6 +342,16 @@ export function BeforeAfterGallery({ onOpenWizard }: { onOpenWizard: () => void 
                     );
                   })}
                 </div>
+
+                {!mostrarTodosMovil && COMPARISONS.length > 4 && (
+                  <button
+                    type="button"
+                    onClick={() => setMostrarTodosMovil(true)}
+                    className="w-full py-2 text-xs font-heading font-bold text-[#1D71B5] hover:text-[#355581] border border-blue-200 rounded-xl bg-blue-50/50 hover:bg-blue-50 transition-colors"
+                  >
+                    Ver los {COMPARISONS.length} casos completos
+                  </button>
+                )}
               </div>
 
               <button

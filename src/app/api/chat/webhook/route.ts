@@ -6,45 +6,45 @@ import { supabase } from "@/lib/supabase";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { phone, text, clientName, timestamp } = body;
+    const { phone, lid, text, clientName, timestamp } = body;
 
-    if (!phone || !text) {
+    if (!text || (!phone && !lid)) {
       return NextResponse.json({ ok: false, error: "Datos incompletos" }, { status: 400 });
     }
 
-    const cleanPhone = phone.replace(/\D/g, "");
+    // Identificador oficial: si viene número limpio o LID
+    const cleanPhone = phone ? phone.replace(/\D/g, "") : (lid ? String(lid).replace(/\D/g, "") : "");
+    const fallbackIdPhone = cleanPhone || (lid ? String(lid) : `wa-${Date.now()}`);
     const db = await getDatabaseAsync();
 
-    // 1. Identificación ESTRICTA Y EXCLUSIVA por número de teléfono
-    // Solo vincula si el número telefónico coincide exactamente (mismos 10 dígitos o mismo identificador WhatsApp)
+    // 1. Identificación ESTRICTA por número de teléfono o LID único
     const targetDigits = cleanPhone.length >= 10 ? cleanPhone.slice(-10) : cleanPhone;
     let cliente = db.clientes.find((cl) => {
       const p = cl.whatsapp.replace(/\D/g, "");
       const p10 = p.length >= 10 ? p.slice(-10) : p;
-      return p === cleanPhone || (targetDigits.length === 10 && p10 === targetDigits);
+      return (
+        (cleanPhone && p === cleanPhone) ||
+        (targetDigits && targetDigits.length === 10 && p10 === targetDigits) ||
+        (lid && cl.whatsapp === String(lid)) ||
+        (clientName && clientName !== "Cliente" && clientName !== "Cliente WhatsApp" && cl.nombre.toLowerCase() === clientName.toLowerCase())
+      );
     });
 
-    // 2. Si el número NO existe en la base de datos, ES UN CLIENTE NUEVO GARANTIZADO
-    // Bajo NINGUNA circunstancia se busca por nombre similar ni se vincula con clientes previos
+    // 2. Si el número/LID NO existe en la base de datos, ES UN CLIENTE NUEVO GARANTIZADO
     if (!cliente) {
-      console.log(`🆕 [Kanan Webhook] Contacto 100% aislado creado para: ${cleanPhone} (${clientName})`);
-      // Usar exactamente el identificador o número que envía WhatsApp sin alterar ni inventar prefijos +52
+      console.log(`🆕 [Kanan Webhook] Contacto 100% aislado creado para: ${fallbackIdPhone} (${clientName})`);
       let nombreAMostrar = clientName && clientName !== "Cliente" && clientName !== "Cliente WhatsApp"
         ? clientName
-        : cleanPhone;
-
-      if (!clientName && cleanPhone.length === 10) {
-        nombreAMostrar = `${cleanPhone.slice(0, 3)} ${cleanPhone.slice(3, 6)} ${cleanPhone.slice(6)}`;
-      }
+        : (cleanPhone.length === 10 ? `${cleanPhone.slice(0, 3)} ${cleanPhone.slice(3, 6)} ${cleanPhone.slice(6)}` : `Contacto ${fallbackIdPhone.slice(-4)}`);
 
       const nuevoCliente = {
         id: `cli-${Date.now()}`,
         nombre: nombreAMostrar,
-        whatsapp: cleanPhone,
+        whatsapp: fallbackIdPhone,
         direccion: "Contacto vía WhatsApp",
         municipio: "Guadalajara" as const,
         mascotas: false,
-        notas_especiales: `Registrado automáticamente desde WhatsApp`,
+        notas_especiales: `Registrado automáticamente desde WhatsApp ${lid ? '(Vía LID)' : ''}`,
         historico_gasto: 0,
         fecha_registro: new Date().toISOString(),
       };

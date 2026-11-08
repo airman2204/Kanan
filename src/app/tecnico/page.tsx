@@ -48,6 +48,10 @@ export default function TecnicoPage() {
   const [tiempoEstimadoLlegada, setTiempoEstimadoLlegada] = useState("20 a 25 minutos");
   const [segundosCronometro, setSegundosCronometro] = useState(0);
 
+  // Estados de diagnóstico de tapicería y programación de próxima cita
+  const [mesesProximoServicio, setMesesProximoServicio] = useState<string>("6");
+  const [fechaCustomProximo, setFechaCustomProximo] = useState<string>("");
+
   // Canvas de firma táctil
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);
@@ -372,6 +376,7 @@ export default function TecnicoPage() {
           firma_conformidad: firmaDataUrl,
           fotos_antes_despues: fotosActualizadas.length > 0 ? fotosActualizadas : undefined,
           duracion_minutos: duracionFinalMin,
+          mesesProximoServicio: mesesProximoServicio === "custom" && fechaCustomProximo ? fechaCustomProximo : mesesProximoServicio,
         }),
       });
 
@@ -1069,6 +1074,57 @@ export default function TecnicoPage() {
                   </div>
                 )}
               </div>
+
+              {/* Diagnóstico Textil y Selección de Próximo Servicio */}
+              {citaActual.estatus !== "Completada" && (
+                <div className="space-y-3 pt-2 border-t border-slate-100">
+                  <div className="space-y-0.5">
+                    <span className="text-xs font-heading font-extrabold text-slate-800 flex items-center gap-1.5">
+                      <span>🔄</span>
+                      <span>Diagnóstico Textil: ¿Cuándo le toca su próximo servicio?</span>
+                    </span>
+                    <p className="text-[11px] text-slate-500">
+                      El sistema le enviará un WhatsApp 1 semana antes y alertará al administrador.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { id: "3", label: "🐾 3 Meses", desc: "Mascotas / Uso Rudo" },
+                      { id: "6", label: "🛋️ 6 Meses", desc: "Semestral Estándar" },
+                      { id: "12", label: "📅 12 Meses", desc: "Anual Preventivo" },
+                      { id: "custom", label: "✏️ Libre", desc: "Fecha Específica" },
+                    ].map((opt) => (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() => setMesesProximoServicio(opt.id)}
+                        className={`p-2.5 rounded-2xl border text-left transition ${
+                          mesesProximoServicio === opt.id
+                            ? "bg-[#1D71B5] text-white border-[#1D71B5] shadow-xs"
+                            : "bg-[#F4F7F9] text-slate-700 border-slate-200 hover:bg-slate-100"
+                        }`}
+                      >
+                        <p className="font-heading font-bold text-xs leading-none">{opt.label}</p>
+                        <p className={`text-[10px] mt-1 ${mesesProximoServicio === opt.id ? "text-cyan-100" : "text-slate-400"}`}>
+                          {opt.desc}
+                        </p>
+                      </button>
+                    ))}
+                  </div>
+
+                  {mesesProximoServicio === "custom" && (
+                    <div className="pt-1">
+                      <input
+                        type="date"
+                        value={fechaCustomProximo}
+                        onChange={(e) => setFechaCustomProximo(e.target.value)}
+                        className="w-full p-2.5 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-800"
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Botón Gigante de Finalizar con ✅ */}
               {citaActual.estatus !== "Completada" ? (

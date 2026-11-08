@@ -157,8 +157,76 @@ export function ServicesSection({ onSelectCategoryForWizard }: ServicesSectionPr
           </div>
         </div>
 
-        {/* Grid de Servicios con Fotografía y Orden Oficial (1.Salas, 2.Tapetes, 3.Colchones, 4.Vestiduras) */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Carrusel Horizontal Snap en Móvil (sm:hidden) */}
+        <div className="sm:hidden -mx-4 px-4 overflow-x-auto flex gap-4 snap-x snap-mandatory pb-4 no-scrollbar">
+          {SERVICES.map((srv) => {
+            const IconComponent = srv.icon;
+            const BadgeIcon = srv.badgeIcon;
+            return (
+              <div
+                key={srv.id}
+                className="snap-center shrink-0 w-[84vw] rounded-3xl overflow-hidden border border-slate-200/90 shadow-kanan bg-white flex flex-col"
+              >
+                <div className="relative h-48 overflow-hidden bg-kanan-ice">
+                  <img
+                    src={srv.image}
+                    alt={srv.title}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-kanan-deep/80 via-kanan-deep/20 to-transparent" />
+                  <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-md text-kanan-deep px-2.5 py-1 rounded-full text-[10px] font-heading font-bold flex items-center gap-1 shadow-sm">
+                    <BadgeIcon className="w-3 h-3 text-kanan-cyan" />
+                    <span>{srv.badge}</span>
+                  </div>
+                  <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between gap-2">
+                    <div>
+                      <span className="text-[10px] font-heading font-bold uppercase tracking-wider text-kanan-cyan">
+                        {srv.tag}
+                      </span>
+                      <h3 className="font-heading text-lg font-extrabold text-white leading-tight mt-0.5">
+                        {srv.title}
+                      </h3>
+                    </div>
+                    <div className="w-9 h-9 rounded-xl bg-white/95 text-kanan-navy flex items-center justify-center shadow shrink-0">
+                      <IconComponent className="w-4 h-4 text-kanan-cyan" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-3 gap-1.5 bg-kanan-ice rounded-xl p-2 border border-slate-200/70 text-center">
+                      {srv.metrics.map((m, idx) => (
+                        <div key={idx}>
+                          <p className="font-heading font-extrabold text-[11px] text-kanan-deep">
+                            {m.value}
+                          </p>
+                          <p className="text-[9px] text-slate-500">{m.label}</p>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-slate-600 text-xs leading-relaxed line-clamp-2">
+                      {srv.description}
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => onSelectCategoryForWizard(srv.id)}
+                    className="w-full py-2.5 px-4 rounded-xl bg-[#1D71B5] text-white font-heading font-bold text-xs flex items-center justify-center gap-2 shadow-sm"
+                  >
+                    <span>Cotizar este Servicio</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Grid de Servicios en Pantallas Tablet y Escritorio (hidden sm:grid) */}
+        <div className="hidden sm:grid grid-cols-1 lg:grid-cols-2 gap-6">
           {SERVICES.map((srv) => {
             const IconComponent = srv.icon;
             const BadgeIcon = srv.badgeIcon;

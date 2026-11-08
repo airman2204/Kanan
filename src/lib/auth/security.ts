@@ -146,7 +146,8 @@ export interface SessionPayload {
 }
 
 export function createSessionToken(payload: Omit<SessionPayload, "exp">, rememberMe: boolean): string {
-  const durationMs = rememberMe ? 30 * 24 * 60 * 60 * 1000 : 8 * 60 * 60 * 1000; // 30 días o 8 horas
+  // 365 días por defecto para evitar cierres de sesión intempestivos en el CRM
+  const durationMs = rememberMe ? 365 * 24 * 60 * 60 * 1000 : 30 * 24 * 60 * 60 * 1000;
   const fullPayload: SessionPayload = {
     ...payload,
     rememberMe,

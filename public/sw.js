@@ -9,14 +9,15 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(self.clients.claim());
 });
 
-// Escuchar peticiones de notificación en segundo plano
+// Escuchar peticiones de notificación en segundo plano con sonido y vibración nativa
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SHOW_NOTIFICATION') {
     const { title, options } = event.data;
     self.registration.showNotification(title, {
-      icon: '/assets/brand/kanan-icon.png',
-      badge: '/assets/brand/kanan-icon.png',
-      vibrate: [200, 100, 200],
+      icon: '/assets/brand/kanan-avatar.png',
+      badge: '/assets/brand/kanan-avatar.png',
+      vibrate: [300, 100, 300, 100, 500],
+      requireInteraction: true,
       ...options,
     });
   }

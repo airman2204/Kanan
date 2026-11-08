@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { Cliente, ServicioCita, MunicipioZMG } from "@/types/crm";
 import { lookupPostalCode } from "@/lib/utils/postalCode";
+import { ClienteExpedienteModal } from "./ClienteExpedienteModal";
 
 interface ClientesTableProps {
   clientes: Cliente[];
@@ -52,6 +53,7 @@ export function ClientesTable({
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedMunicipio, setSelectedMunicipio] = useState<string>("todos");
   const [expandedClientId, setExpandedClientId] = useState<string | null>(null);
+  const [expedienteCliente, setExpedienteCliente] = useState<Cliente | null>(null);
 
   // Modal Crear
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -367,6 +369,17 @@ export function ClientesTable({
                         {/* Acciones y Dropdown */}
                         <td className="py-3.5 px-5 text-right">
                           <div className="flex items-center justify-end gap-1.5">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setExpedienteCliente(cli);
+                              }}
+                              className="px-2 py-1 bg-blue-50 text-[#1D71B5] hover:bg-[#1D71B5] hover:text-white rounded-lg text-[11px] font-heading font-bold transition-all border border-blue-200"
+                              title="Ver Expediente 360°"
+                            >
+                              Expediente
+                            </button>
                             <button
                               type="button"
                               onClick={(e) => handleOpenEdit(cli, e)}
@@ -838,6 +851,16 @@ export function ClientesTable({
             </div>
           </div>
         </div>
+      )}
+
+      {/* MODAL: EXPEDIENTE 360° DEL CLIENTE */}
+      {expedienteCliente && (
+        <ClienteExpedienteModal
+          cliente={expedienteCliente}
+          citas={citas}
+          isOpen={Boolean(expedienteCliente)}
+          onClose={() => setExpedienteCliente(null)}
+        />
       )}
     </div>
   );

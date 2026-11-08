@@ -26,8 +26,12 @@ import {
   TrendingUp,
   SlidersHorizontal,
   ChevronDown,
-  Layers
+  Layers,
+  Sparkles,
+  FolderOpen
 } from "lucide-react";
+import { AiMarketingAgentView } from "./marketing/AiMarketingAgentView";
+import { BrandHubView } from "./marketing/BrandHubView";
 import { 
   MarketingMetrics, 
   MetaConnection, 
@@ -45,7 +49,7 @@ export function MarketingAnalyticsView({
   metrics,
   onRefresh,
 }: MarketingAnalyticsViewProps) {
-  const [activeTab, setActiveTab] = useState<"overview" | "meta" | "google_ads" | "seo">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "ai_agent" | "brand_hub" | "meta" | "google_ads" | "seo">("overview");
   const [reelsSortBy, setReelsSortBy] = useState<"plays" | "saved" | "watch_time" | "reach">("plays");
 
   // Meta connection state
@@ -221,6 +225,28 @@ export function MarketingAnalyticsView({
             Vista Ejecutiva
           </button>
           <button
+            onClick={() => setActiveTab("ai_agent")}
+            className={`px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 transition ${
+              activeTab === "ai_agent"
+                ? "bg-gradient-to-r from-[#1D71B5] to-[#36A6DE] text-white shadow-md shadow-blue-500/20"
+                : "bg-white text-slate-600 hover:text-slate-900 border border-slate-200"
+            }`}
+          >
+            <Sparkles className="w-4 h-4 text-[#36A6DE]" />
+            Agente IA Marketing (FLUX.1)
+          </button>
+          <button
+            onClick={() => setActiveTab("brand_hub")}
+            className={`px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 transition ${
+              activeTab === "brand_hub"
+                ? "bg-[#355581] text-white shadow-md shadow-[#355581]/20"
+                : "bg-white text-slate-600 hover:text-slate-900 border border-slate-200"
+            }`}
+          >
+            <FolderOpen className="w-4 h-4" />
+            Brand Hub & Credenciales
+          </button>
+          <button
             onClick={() => setActiveTab("meta")}
             className={`px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 transition ${
               activeTab === "meta"
@@ -263,6 +289,12 @@ export function MarketingAnalyticsView({
           Actualizar
         </button>
       </div>
+
+      {/* PESTAÑA: AGENTE IA MARKETING (FLUX.1 + GEMINI) */}
+      {activeTab === "ai_agent" && <AiMarketingAgentView />}
+
+      {/* PESTAÑA: BRAND HUB Y CREDENCIALES AISLADAS */}
+      {activeTab === "brand_hub" && <BrandHubView />}
 
       {/* PESTAÑA 1: VISTA EJECUTIVA */}
       {activeTab === "overview" && (

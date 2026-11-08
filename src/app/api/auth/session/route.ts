@@ -16,11 +16,22 @@ export async function GET(req: NextRequest) {
 
     const admin = await getAdminUser();
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       authenticated: true,
       email: admin.email,
       mustChangePassword: admin.mustChangePassword,
     });
+
+    // Auto-renovación de la cookie de sesión para mantenerla viva 365 días en segundo plano
+    response.cookies.set("kanan_admin_session", sessionCookie, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 365 * 24 * 60 * 60,
+      path: "/",
+    });
+
+    return response;
   } catch {
     return NextResponse.json({ authenticated: false });
   }

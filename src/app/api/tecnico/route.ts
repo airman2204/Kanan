@@ -112,6 +112,7 @@ export async function PATCH(req: NextRequest) {
       monto_total,
       duracion_minutos,
       rango_tiempo,
+      mesesProximoServicio,
     } = body;
     if (!citaId) {
       return NextResponse.json({ ok: false, error: "Falta citaId." }, { status: 400 });
@@ -150,10 +151,67 @@ export async function PATCH(req: NextRequest) {
       nuevoEstatus = "Completada";
       updatePayload.estatus = "Completada";
       updatePayload.hora_fin = nowIso;
-      if (citaActual && cliente) {
+
+      // Calcular próxima fecha de servicio según elección del técnico
+      let proximaFechaStr = "";
+      const baseDate = new Date();
+      if (mesesProximoServicio && /^\d{4}-\d{2}-\d{2}$/.test(mesesProximoServicio)) {
+        proximaFechaStr = mesesProximoServicio;
+      } else {
+        const mesesNum = parseInt(mesesProximoServicio || "6", 10) || 6;
+        baseDate.setMonth(baseDate.getMonth() + mesesNum);
+        proximaFechaStr = baseDate.toISOString().split("T")[0];
+      }
+
+      // Recordatorio al cliente y dueño 7 días antes de la próxima fecha
+      const fechaRecordatorio = new Date(proximaFechaStr + "T09:00:00Z");
+      fechaRecordatorio.setDate(fechaRecordatorio.getDate() - 7);
+      const fechaRecordatorioStr = fechaRecordatorio.toISOString().split("T")[0];
+
+      if (cliente) {
+        // Registrar o actualizar recurrencia en DB
+        const recurrenciaExistente = db.recurrencia.find((r) => r.cliente_id === cliente.id);
+        const disparadorTexto = mesesProximoServicio === "3" 
+          ? "3 Meses (Mascotas)" 
+          : mesesProximoServicio === "12" 
+          ? "12 Meses (Anual)" 
+          : "6 Meses (Semestral)";
+
+        if (recurrenciaExistente) {
+          recurrenciaExistente.ultimo_servicio = citaActual?.fecha || new Date().toISOString().split("T")[0];
+          recurrenciaExistente.proxima_fecha_contacto = fechaRecordatorioStr;
+          recurrenciaExistente.disparador = disparadorTexto as any;
+          recurrenciaExistente.estatus_contacto = "Programado";
+        } else {
+          db.recurrencia.unshift({
+            id: `rec-${Date.now()}`,
+            cliente_id: cliente.id,
+            cita_id: citaId,
+            ultimo_servicio: citaActual?.fecha || new Date().toISOString().split("T")[0],
+            disparador: disparadorTexto as any,
+            proxima_fecha_contacto: fechaRecordatorioStr,
+            estatus_contacto: "Programado",
+          });
+        }
+
+        // Programar mensaje de WhatsApp de reactivación futura
+        db.mensajes_automatizacion.unshift({
+          id: `msg-rec-${citaId}-${Date.now()}`,
+          cita_id: citaId,
+          cliente_id: cliente.id,
+          etapa: "6_reactivacion_mes_6_semestral",
+          etapa_titulo: `Recordatorio de Mantenimiento Preventivo (${disparadorTexto})`,
+          destinatario_whatsapp: cliente.whatsapp,
+          contenido_mensaje: `¡Hola ${cliente.nombre.split(" ")[0]}! 🐾 Ya casi es momento de tu mantenimiento programado en Kanan Limpieza para proteger tus telas. ¿Deseas que reservemos tu fecha de una vez con tu 15% de beneficio?`,
+          estatus_envio: "Programado",
+          fecha_programada: `${fechaRecordatorioStr}T10:00:00.000Z`,
+        });
+
         const citasPrevias = db.servicios_citas.filter((c) => c.cliente_id === cliente.id && c.estatus === "Completada");
         const esClienteNuevo = citasPrevias.length <= 1;
-        despacharEventoFinServicio(citaActual, cliente, duracion_minutos || 90, esClienteNuevo).catch(console.warn);
+        if (citaActual) {
+          despacharEventoFinServicio(citaActual, cliente, duracion_minutos || 90, esClienteNuevo).catch(console.warn);
+        }
       }
     }
 
