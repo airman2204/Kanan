@@ -18,7 +18,7 @@ interface ModelProps {
 }
 
 function KananGlbHouseModel({ onHotspotClick, selectedRoom }: ModelProps) {
-  const { scene } = useGLTF("/models/kanan-house.glb");
+  const { scene } = useGLTF("/models/kanan-house-opt.glb", "/draco/");
   const modelRef = useRef<THREE.Group>(null);
 
   // Optimizar materiales del modelo para que reaccionen con iluminación fotorrealista de estudio
@@ -111,7 +111,7 @@ function KananGlbHouseModel({ onHotspotClick, selectedRoom }: ModelProps) {
   );
 }
 
-useGLTF.preload("/models/kanan-house.glb");
+useGLTF.preload("/models/kanan-house-opt.glb", "/draco/");
 
 export function RealGlbViewer({
   onSelectRoom,
