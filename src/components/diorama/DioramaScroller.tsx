@@ -160,7 +160,7 @@ function SpecificPup({
   );
 }
 
-// Modelo 3D Condicional (Desktop Completa con 4 Perritos O Modelo Especializado Móvil)
+// Modelo 3D Principal (Carga directa de tu nuevo modelo diorama_perros_limpie)
 function ScrollyDioramaScene({
   isMobile,
   onSelectRoom,
@@ -168,9 +168,8 @@ function ScrollyDioramaScene({
   isMobile: boolean;
   onSelectRoom: (roomId: string) => void;
 }) {
-  const modelUrl = isMobile
-    ? "/models/kanan-mobile-opt.glb"
-    : "/models/kanan-house-opt.glb";
+  // Cargamos el nuevo modelo en todas las vistas
+  const modelUrl = "/models/kanan-mobile-opt.glb";
 
   const { scene } = useGLTF(
     modelUrl,
@@ -195,48 +194,10 @@ function ScrollyDioramaScene({
 
   return (
     <group ref={houseRef} dispose={null}>
-      {/* 1. Casa Base */}
+      {/* 1. Casa Diorama Nueva Completa */}
       <Center top>
-        <primitive object={scene} scale={isMobile ? 4.2 : 4.5} />
+        <primitive object={scene} scale={4.6} />
       </Center>
-
-      {/* 2. Perritos Especializados (En Desktop, o si el modelo móvil es modular) */}
-      {!isMobile && (
-        <>
-          {/* Sala */}
-          <SpecificPup
-            modelUrl="/models/pup-vacuum-opt.glb"
-            position={[-1.25, 0.1, 0.65]}
-            rotation={[0, 0.5, 0]}
-            scale={0.34}
-            onClick={() => onSelectRoom("salas")}
-          />
-          {/* Recámara */}
-          <SpecificPup
-            modelUrl="/models/pup-magnifier-opt.glb"
-            position={[-1.0, 1.88, -0.4]}
-            rotation={[0, 0.6, 0]}
-            scale={0.32}
-            onClick={() => onSelectRoom("colchones")}
-          />
-          {/* Comedor */}
-          <SpecificPup
-            modelUrl="/models/pup-carpet-opt.glb"
-            position={[-0.15, 0.1, 0.5]}
-            rotation={[0, -0.2, 0]}
-            scale={0.32}
-            onClick={() => onSelectRoom("tapetes")}
-          />
-          {/* Cochera */}
-          <SpecificPup
-            modelUrl="/models/pup-spray-opt.glb"
-            position={[1.85, 0.1, 0.85]}
-            rotation={[0, -0.65, 0]}
-            scale={0.34}
-            onClick={() => onSelectRoom("autos")}
-          />
-        </>
-      )}
     </group>
   );
 }
