@@ -90,43 +90,43 @@ function KananGlbHouseModel({ onHotspotClick, selectedRoom }: ModelProps) {
     <group ref={modelRef} dispose={null}>
       {/* 1. Casa Cozy Blue Isométrica */}
       <Center top>
-        <primitive object={scene} scale={2.5} />
+        <primitive object={scene} scale={3.6} />
       </Center>
 
       {/* 2. LOS 4 PERRITOS DIRECTAMENTE EN EL SUELO DE CADA HABITACIÓN */}
-      {/* A) En la Sala (planta baja izquierda, junto a los sillones azules) */}
+      {/* A) En la Sala (planta baja frontal-izquierda) */}
       <SpecificPup
         modelUrl="/models/pup-vacuum-opt.glb"
-        position={[-0.45, 0.1, 0.45]}
+        position={[-0.85, 0.15, 0.7]}
         rotation={[0, 0.4, 0]}
-        scale={0.24}
+        scale={0.32}
         onClick={() => onHotspotClick("salas")}
       />
 
-      {/* B) En la Recámara (planta alta, al lado de la cama matrimonial) */}
+      {/* B) En la Recámara (planta alta) */}
       <SpecificPup
         modelUrl="/models/pup-magnifier-opt.glb"
-        position={[-0.45, 1.35, -0.1]}
+        position={[-0.7, 1.85, -0.15]}
         rotation={[0, 0.5, 0]}
-        scale={0.22}
+        scale={0.3}
         onClick={() => onHotspotClick("colchones")}
       />
 
-      {/* C) En el Comedor (planta baja centro-derecha, junto a la mesa y sillas de madera) */}
+      {/* C) En el Comedor / Estancia (planta baja centro-derecha) */}
       <SpecificPup
         modelUrl="/models/pup-carpet-opt.glb"
-        position={[0.35, 0.1, 0.45]}
+        position={[0.5, 0.15, 0.65]}
         rotation={[0, -0.3, 0]}
-        scale={0.23}
+        scale={0.3}
         onClick={() => onHotspotClick("tapetes")}
       />
 
-      {/* D) En la Cochera / Auto (planta baja extrema derecha, junto a la puerta del coche) */}
+      {/* D) En la Cochera / Auto (planta baja exterior derecha) */}
       <SpecificPup
         modelUrl="/models/pup-spray-opt.glb"
-        position={[1.15, 0.1, 0.85]}
+        position={[1.65, 0.15, 1.1]}
         rotation={[0, -0.6, 0]}
-        scale={0.24}
+        scale={0.32}
         onClick={() => onHotspotClick("autos")}
       />
     </group>
@@ -169,7 +169,7 @@ export function RealGlbViewer({
         orthographic
         camera={{
           position: [25, 25, 25],
-          zoom: 70,
+          zoom: 95,
           near: 0.1,
           far: 1000,
         }}
