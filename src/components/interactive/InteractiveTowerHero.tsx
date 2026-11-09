@@ -185,15 +185,36 @@ export function InteractiveTowerHero({
                 }}
               >
                 <div className="relative group flex items-center justify-center">
-                  {/* Destello y pulso expansivo: SOLO activo cuando está seleccionado */}
-                  {isSelected && (
-                    <motion.span
-                      initial={{ scale: 0.8, opacity: 0.9 }}
-                      animate={{ scale: 1.8, opacity: 0 }}
-                      transition={{ repeat: Infinity, duration: 1.4, ease: "easeOut" }}
-                      className="absolute w-8 h-8 rounded-full bg-cyan-400 pointer-events-none"
-                    />
-                  )}
+                  {/* Animación efervescente de espuma / burbujas al hacer clic */}
+                  <AnimatePresence>
+                    {isSelected && (
+                      <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+                        {/* 5 burbujas de espuma efervescente */}
+                        {[
+                          { x: -14, y: -20, delay: 0, size: 10 },
+                          { x: 16, y: -22, delay: 0.1, size: 12 },
+                          { x: -22, y: -8, delay: 0.15, size: 8 },
+                          { x: 20, y: -6, delay: 0.05, size: 9 },
+                          { x: 0, y: -28, delay: 0.2, size: 14 },
+                        ].map((b, i) => (
+                          <motion.span
+                            key={i}
+                            initial={{ scale: 0, opacity: 0.9, x: 0, y: 0 }}
+                            animate={{
+                              scale: [0, 1.2, 0.9],
+                              opacity: [0.9, 0.8, 0],
+                              x: b.x,
+                              y: b.y,
+                            }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.8, delay: b.delay, ease: "easeOut" }}
+                            style={{ width: b.size, height: b.size }}
+                            className="absolute rounded-full bg-white/90 border border-cyan-300 shadow-[0_0_8px_rgba(54,166,222,0.8)]"
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </AnimatePresence>
 
                   {/* Píldora del Servicio */}
                   <div

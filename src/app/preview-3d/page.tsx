@@ -27,8 +27,8 @@ import confetti from "canvas-confetti";
 export default function Preview3DPage() {
   const [selectedMunicipio, setSelectedMunicipio] = useState<MunicipioZMG>("Guadalajara");
   const [preselectedCategory, setPreselectedCategory] = useState<string | null>(null);
-  const [selectedSpotId, setSelectedSpotId] = useState<string | null>(null); // Inicia limpio sin tarjetas
-  const [cartItems, setCartItems] = useState<string[]>(["salas"]);
+  const [selectedSpotId, setSelectedSpotId] = useState<string | null>(null);
+  const [cartItems, setCartItems] = useState<string[]>([]); // Inicia sin nada seleccionado (sin botones verdes por defecto)
 
   const toggleCart = (id: string) => {
     setCartItems((prev) => {
@@ -141,24 +141,18 @@ export default function Preview3DPage() {
                   </p>
                 </div>
 
-                {/* Caja de Conversión Rápida */}
+                {/* Caja de Conversión Rápida - Limpia, directa y sin botones redundantes */}
                 <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-5 sm:p-6 border border-slate-200/90 shadow-[0_12px_40px_-10px_rgba(29,113,181,0.12)] space-y-4">
                   <div className="flex flex-col sm:flex-row gap-3">
                     <button
                       type="button"
                       onClick={() => scrollToWizard()}
-                      className="flex-1 inline-flex items-center justify-center gap-2.5 bg-gradient-to-r from-[#1D71B5] to-[#36A6DE] hover:from-[#355581] hover:to-[#1D71B5] text-white font-heading font-extrabold text-sm sm:text-base px-7 py-4 rounded-2xl shadow-lg shadow-blue-500/25 transition-all active:scale-[0.98] cursor-pointer"
+                      className="w-full inline-flex items-center justify-center gap-2.5 bg-gradient-to-r from-[#1D71B5] to-[#36A6DE] hover:from-[#355581] hover:to-[#1D71B5] text-white font-heading font-extrabold text-sm sm:text-base px-7 py-4 rounded-2xl shadow-lg shadow-blue-500/25 transition-all active:scale-[0.98] cursor-pointer"
                     >
                       <CalendarCheck className="w-5 h-5 shrink-0" />
-                      <span>Cotizar y Agendar en Línea</span>
+                      <span>{cartItems.length > 0 ? `Cotizar mi Selección (${cartItems.length} ${cartItems.length === 1 ? "área" : "áreas"})` : "Cotizar y Agendar en Línea"}</span>
                       <ArrowRight className="w-4 h-4 shrink-0" />
                     </button>
-                    <a
-                      href="#servicios"
-                      className="inline-flex items-center justify-center gap-2 bg-[#F4F7F9] hover:bg-slate-200/80 text-[#355581] font-heading font-bold text-sm px-6 py-4 rounded-2xl border border-slate-200 transition-all text-center"
-                    >
-                      <span>Ver Precios y Catálogo</span>
-                    </a>
                   </div>
 
                   <div className="flex flex-wrap items-center justify-between gap-3 pt-1 border-t border-slate-100 text-xs text-slate-500">
