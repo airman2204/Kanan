@@ -2,16 +2,16 @@
 
 import React, { useState } from "react";
 import {
-  Sparkles,
-  CalendarCheck,
-  Lock,
-  MessageSquare,
-  ShieldCheck,
   Timer,
+  CalendarCheck,
+  MapPin,
   ArrowRight,
+  ShieldCheck,
+  Star,
   CheckCircle2,
   Award,
   Zap,
+  Lock,
 } from "lucide-react";
 import { StickyHeader } from "@/components/landing/StickyHeader";
 import { ServicesSection } from "@/components/landing/ServicesSection";
@@ -21,13 +21,32 @@ import { SocialProofAndFAQ } from "@/components/landing/SocialProofAndFAQ";
 import { Footer } from "@/components/landing/Footer";
 import { MobileBottomBar } from "@/components/landing/MobileBottomBar";
 import { MunicipioZMG } from "@/types/crm";
-import { CleanScanUVSection } from "@/components/interactive/CleanScanUVSection";
-import { SatisfyingWashingSection } from "@/components/interactive/SatisfyingWashingSection";
-import { HealthCheckupCalculator } from "@/components/interactive/HealthCheckupCalculator";
+import { InteractiveTowerHero } from "@/components/interactive/InteractiveTowerHero";
+import confetti from "canvas-confetti";
 
 export default function Preview3DPage() {
   const [selectedMunicipio, setSelectedMunicipio] = useState<MunicipioZMG>("Guadalajara");
   const [preselectedCategory, setPreselectedCategory] = useState<string | null>(null);
+  const [selectedSpotId, setSelectedSpotId] = useState<string | null>("salas");
+  const [cartItems, setCartItems] = useState<string[]>(["salas"]);
+
+  const toggleCart = (id: string) => {
+    setCartItems((prev) => {
+      const exists = prev.includes(id);
+      const next = exists ? prev.filter((item) => item !== id) : [...prev, id];
+      if (!exists) {
+        try {
+          confetti({
+            particleCount: 25,
+            spread: 55,
+            origin: { y: 0.7 },
+            colors: ["#36A6DE", "#1D71B5", "#25D366"],
+          });
+        } catch {}
+      }
+      return next;
+    });
+  };
 
   const scrollToWizard = (categoryId?: string) => {
     if (categoryId) {
@@ -47,7 +66,7 @@ export default function Preview3DPage() {
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping inline-block" />
           <Lock className="w-3.5 h-3.5 text-cyan-400" />
           <span className="font-bold">
-            Versión Premium & Clean: Escáner UV + Simulador Succión + Checkup Salud (Sin Ilustraciones de Perritos)
+            Propuesta Visual 1 Gemini: Hero Principal de Kanan con Torre Vertical Interactiva
           </span>
         </div>
         <div className="flex items-center gap-3">
@@ -70,108 +89,151 @@ export default function Preview3DPage() {
 
       <main className="flex-1">
         {/* ============================================================== */}
-        {/* HERO LIMPIO, PROFESIONAL Y ELEGANTE (SIN DIBUJOS)              */}
+        {/* HERO OFICIAL DE KANAN CON LA TORRE VERTICAL A LA DERECHA       */}
         {/* ============================================================== */}
-        <section className="relative overflow-hidden bg-gradient-to-b from-[#0A1828] via-[#0E243B] to-[#07111D] text-white pt-12 pb-20 sm:pt-16 sm:pb-28">
-          <div className="absolute top-0 right-1/4 w-[500px] h-[500px] rounded-full bg-[#36A6DE]/15 blur-[140px] pointer-events-none" />
-          <div className="absolute bottom-10 left-10 w-[420px] h-[420px] rounded-full bg-[#1D71B5]/20 blur-[130px] pointer-events-none" />
+        <section
+          id="inicio"
+          className="relative overflow-hidden bg-gradient-to-b from-[#F0F5FA] via-white to-[#F4F7F9] pt-8 pb-16 sm:pt-14 sm:pb-24 lg:pt-16 lg:pb-28"
+        >
+          {/* Luces difusas de fondo (Glow Glassmorphism original de Kanan) */}
+          <div className="absolute top-0 right-1/4 w-[500px] h-[500px] rounded-full bg-gradient-to-br from-[#36A6DE]/20 to-[#1D71B5]/10 blur-3xl pointer-events-none -z-0" />
+          <div className="absolute bottom-10 left-10 w-[420px] h-[420px] rounded-full bg-gradient-to-tr from-[#355581]/15 to-[#36A6DE]/10 blur-3xl pointer-events-none -z-0" />
 
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10">
-            <div className="text-center max-w-3xl mx-auto space-y-6">
-              {/* Badge */}
-              <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-4 py-1.5 shadow-sm text-xs font-heading font-bold text-cyan-300">
-                <Sparkles className="w-3.5 h-3.5 text-cyan-300" />
-                <span>Tecnología Alemana de Inyección-Succión a Domicilio</span>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
+              {/* COLUMNA IZQUIERDA: COPYWRITING & CONVERSIÓN OFICIAL DE KANAN */}
+              <div className="lg:col-span-7 space-y-6">
+                {/* Badges de Cobertura y Actividad en Vivo */}
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <div className="inline-flex items-center gap-1.5 bg-white/90 backdrop-blur-md border border-[#36A6DE]/40 rounded-full px-3.5 py-1.5 shadow-sm text-xs font-heading font-bold text-[#1D71B5]">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping inline-block" />
+                    <MapPin className="w-3.5 h-3.5 text-[#36A6DE]" />
+                    <span>Rutas activas hoy en {selectedMunicipio}</span>
+                  </div>
+
+                  <a
+                    href="#opiniones"
+                    className="inline-flex items-center gap-1.5 bg-white/90 backdrop-blur-md border border-amber-200/80 rounded-full px-3.5 py-1.5 shadow-sm text-xs font-semibold text-amber-700 hover:bg-amber-50/50 transition-colors"
+                  >
+                    <div className="flex items-center text-amber-400">
+                      <Star className="w-3.5 h-3.5 fill-amber-400" />
+                      <Star className="w-3.5 h-3.5 fill-amber-400" />
+                      <Star className="w-3.5 h-3.5 fill-amber-400" />
+                      <Star className="w-3.5 h-3.5 fill-amber-400" />
+                      <Star className="w-3.5 h-3.5 fill-amber-400" />
+                    </div>
+                    <span>4.9 / 5 en Google Maps</span>
+                  </a>
+                </div>
+
+                {/* Titular Principal de Alto Impacto */}
+                <div className="space-y-4">
+                  <h1 className="font-heading text-4xl sm:text-5xl lg:text-[54px] font-extrabold text-[#355581] tracking-tight leading-[1.08]">
+                    Protegemos lo que más tocas.{" "}
+                    <span className="block mt-1 bg-gradient-to-r from-[#1D71B5] via-[#36A6DE] to-[#355581] bg-clip-text text-transparent">
+                      Limpieza y desinfección profunda a domicilio.
+                    </span>
+                  </h1>
+                  <p className="text-slate-600 text-base sm:text-lg leading-relaxed max-w-2xl">
+                    Renovamos tus salas, colchones y vestiduras con tecnología alemana de{" "}
+                    <strong className="text-[#355581] font-bold">inyección-succión industrial</strong>.
+                    Eliminamos el 90% de la humedad, manchas profundas y ácaros en minutos.
+                  </p>
+                </div>
+
+                {/* Caja de Conversión Rápida */}
+                <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-5 sm:p-6 border border-slate-200/90 shadow-[0_12px_40px_-10px_rgba(29,113,181,0.12)] space-y-4">
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <button
+                      type="button"
+                      onClick={() => scrollToWizard()}
+                      className="flex-1 inline-flex items-center justify-center gap-2.5 bg-gradient-to-r from-[#1D71B5] to-[#36A6DE] hover:from-[#355581] hover:to-[#1D71B5] text-white font-heading font-extrabold text-sm sm:text-base px-7 py-4 rounded-2xl shadow-lg shadow-blue-500/25 transition-all active:scale-[0.98] cursor-pointer"
+                    >
+                      <CalendarCheck className="w-5 h-5 shrink-0" />
+                      <span>Cotizar y Agendar en Línea</span>
+                      <ArrowRight className="w-4 h-4 shrink-0" />
+                    </button>
+                    <a
+                      href="#servicios"
+                      className="inline-flex items-center justify-center gap-2 bg-[#F4F7F9] hover:bg-slate-200/80 text-[#355581] font-heading font-bold text-sm px-6 py-4 rounded-2xl border border-slate-200 transition-all text-center"
+                    >
+                      <span>Ver Precios y Catálogo</span>
+                    </a>
+                  </div>
+
+                  <div className="flex flex-wrap items-center justify-between gap-3 pt-1 border-t border-slate-100 text-xs text-slate-500">
+                    <span className="flex items-center gap-1.5 font-medium">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                      Cotización al instante sin llamadas forzadas
+                    </span>
+                    <span className="flex items-center gap-1.5 font-medium">
+                      <ShieldCheck className="w-4 h-4 text-[#1D71B5] shrink-0" />
+                      Garantía de satisfacción por escrito
+                    </span>
+                  </div>
+                </div>
+
+                {/* 3 Pilares de Confianza */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 pt-2">
+                  <div className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm hover:border-[#36A6DE] transition-colors">
+                    <div className="w-10 h-10 rounded-xl bg-blue-50 text-[#1D71B5] flex items-center justify-center mb-2.5">
+                      <Timer className="w-5 h-5 text-[#36A6DE]" />
+                    </div>
+                    <h3 className="font-heading font-bold text-sm text-[#355581]">
+                      Secado en 3-4 horas*
+                    </h3>
+                    <p className="text-[11px] text-slate-500 leading-snug mt-1">
+                      Usa tus muebles el mismo día con alto poder de extracción de vacío.
+                    </p>
+                  </div>
+
+                  <div className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm hover:border-emerald-400 transition-colors">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-2.5">
+                      <Award className="w-5 h-5 text-emerald-600" />
+                    </div>
+                    <h3 className="font-heading font-bold text-sm text-[#355581]">
+                      Desinfección Hospitalaria
+                    </h3>
+                    <p className="text-[11px] text-slate-500 leading-snug mt-1">
+                      Fórmulas biodegradables sin residuos químicos tóxicos ni cloro.
+                    </p>
+                  </div>
+
+                  <div className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm hover:border-purple-400 transition-colors">
+                    <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center mb-2.5">
+                      <Zap className="w-5 h-5 text-purple-600" />
+                    </div>
+                    <h3 className="font-heading font-bold text-sm text-[#355581]">
+                      Luz UV Antiácaros
+                    </h3>
+                    <p className="text-[11px] text-slate-500 leading-snug mt-1">
+                      Sanitización germicida para personas con alergias y asma.
+                    </p>
+                  </div>
+                </div>
               </div>
 
-              {/* Titular */}
-              <h1 className="font-heading text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.08]">
-                Protegemos lo que más tocas.{" "}
-                <span className="block mt-2 bg-gradient-to-r from-cyan-300 via-sky-200 to-white bg-clip-text text-transparent">
-                  Limpieza y desinfección profunda con secado express.
-                </span>
-              </h1>
-
-              {/* Descripción */}
-              <p className="text-slate-300 text-base sm:text-lg leading-relaxed max-w-2xl mx-auto">
-                Renovamos tus salas, colchones y vestiduras extrayendo el <strong className="text-white font-bold">90% de la humedad</strong> y eliminando ácaros, bacterias y manchas profundas en minutos.
-              </p>
-
-              {/* Botones de Conversión */}
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => scrollToWizard()}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 bg-gradient-to-r from-[#1D71B5] to-[#36A6DE] hover:from-[#355581] hover:to-[#1D71B5] text-white font-heading font-extrabold text-sm sm:text-base px-8 py-4 rounded-2xl shadow-xl shadow-cyan-500/20 active:scale-[0.98] transition-all cursor-pointer"
-                >
-                  <CalendarCheck className="w-5 h-5 shrink-0" />
-                  <span>Cotizar y Agendar en Línea</span>
-                  <ArrowRight className="w-4 h-4 shrink-0" />
-                </button>
-
-                <a
-                  href="#servicios"
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white font-heading font-bold text-sm sm:text-base px-6 py-4 rounded-2xl border border-white/20 transition-all text-center"
-                >
-                  <span>Ver Precios y Catálogo</span>
-                </a>
-              </div>
-
-              {/* 3 Pilares Clínicos */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 pt-6 text-left max-w-3xl mx-auto">
-                <div className="bg-white/5 backdrop-blur-md rounded-2xl p-4 border border-white/10 shadow-sm">
-                  <div className="w-9 h-9 rounded-xl bg-cyan-500/20 text-cyan-300 flex items-center justify-center mb-2">
-                    <Timer className="w-5 h-5 text-cyan-300" />
-                  </div>
-                  <h3 className="font-heading font-bold text-sm text-white">Secado en 3 a 4 hrs*</h3>
-                  <p className="text-[11px] text-slate-400 mt-0.5">Usa tus muebles el mismo día sin olor a humedad.</p>
-                </div>
-
-                <div className="bg-white/5 backdrop-blur-md rounded-2xl p-4 border border-white/10 shadow-sm">
-                  <div className="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-300 flex items-center justify-center mb-2">
-                    <Award className="w-5 h-5 text-emerald-300" />
-                  </div>
-                  <h3 className="font-heading font-bold text-sm text-white">Grado Hospitalario</h3>
-                  <p className="text-[11px] text-slate-400 mt-0.5">Fórmulas biodegradables sin cloro ni tóxicos.</p>
-                </div>
-
-                <div className="bg-white/5 backdrop-blur-md rounded-2xl p-4 border border-white/10 shadow-sm">
-                  <div className="w-9 h-9 rounded-xl bg-purple-500/20 text-purple-300 flex items-center justify-center mb-2">
-                    <Zap className="w-5 h-5 text-purple-300" />
-                  </div>
-                  <h3 className="font-heading font-bold text-sm text-white">Luz UV Antiácaros</h3>
-                  <p className="text-[11px] text-slate-400 mt-0.5">Especial para alergias, asma y hogares con bebés.</p>
-                </div>
+              {/* COLUMNA DERECHA: LA TORRE VERTICAL INTERACTIVA (PROPUESTA 1 GEMINI) */}
+              <div className="lg:col-span-5 flex justify-center">
+                <InteractiveTowerHero
+                  selectedSpotId={selectedSpotId}
+                  onSelectSpot={setSelectedSpotId}
+                  cartItems={cartItems}
+                  onToggleCart={toggleCart}
+                  onOpenWizard={scrollToWizard}
+                />
               </div>
             </div>
           </div>
         </section>
 
-        {/* ============================================================== */}
-        {/* 1. THE CLEAN SCAN™: ESCÁNER DE LUZ UV / RAYOS X                */}
-        {/* ============================================================== */}
-        <CleanScanUVSection />
-
-        {/* ============================================================== */}
-        {/* 2. SIMULADOR SATISFACTORIO DE SUCCIÓN ALEMANA                  */}
-        {/* ============================================================== */}
-        <SatisfyingWashingSection />
-
-        {/* ============================================================== */}
-        {/* 3. CALCULADORA DIAGNÓSTICA DE SALUD TEXTIL                     */}
-        {/* ============================================================== */}
-        <HealthCheckupCalculator onOpenWizard={(catId) => scrollToWizard(catId)} />
-
-        {/* ============================================================== */}
-        {/* 4. CATÁLOGO DE SERVICIOS Y GALERÍA ANTES/DESPUÉS REAL         */}
-        {/* ============================================================== */}
+        {/* RESTO DE LA PÁGINA OFICIAL DE KANAN */}
         <ServicesSection
           onSelectCategoryForWizard={(catId) => scrollToWizard(catId)}
         />
 
         <BeforeAfterGallery onOpenWizard={() => scrollToWizard()} />
 
-        {/* 5. AGENTE CONCIERGE WIZARD DE AGENDADO */}
         <KananConciergeAgent
           selectedMunicipio={selectedMunicipio}
           onSelectMunicipio={setSelectedMunicipio}
