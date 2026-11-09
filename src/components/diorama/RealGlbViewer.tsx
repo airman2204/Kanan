@@ -86,47 +86,55 @@ function KananGlbHouseModel({ onHotspotClick, selectedRoom }: ModelProps) {
     });
   }, [scene]);
 
+  // Rotación suave inicial o ambient
+  useFrame((_, delta) => {
+    if (modelRef.current) {
+      // Rotación muy sutil para dar vida
+      // modelRef.current.rotation.y += delta * 0.02;
+    }
+  });
+
   return (
     <group ref={modelRef} dispose={null}>
-      {/* 1. Casa Cozy Blue Isométrica */}
+      {/* 1. Casa Moderna Isométrica a Escala Completa */}
       <Center top>
-        <primitive object={scene} scale={3.6} />
+        <primitive object={scene} scale={4.5} />
       </Center>
 
-      {/* 2. LOS 4 PERRITOS DIRECTAMENTE EN EL SUELO DE CADA HABITACIÓN */}
-      {/* A) En la Sala (planta baja frontal-izquierda) */}
+      {/* 2. LOS 4 PERRITOS CALIBRADOS EN SUS HABITACIONES */}
+      {/* A) Sala (Planta baja izquierda, frente al sillón azul L) */}
       <SpecificPup
         modelUrl="/models/pup-vacuum-opt.glb"
-        position={[-0.85, 0.15, 0.7]}
-        rotation={[0, 0.4, 0]}
-        scale={0.32}
+        position={[-1.25, 0.1, 0.65]}
+        rotation={[0, 0.5, 0]}
+        scale={0.34}
         onClick={() => onHotspotClick("salas")}
       />
 
-      {/* B) En la Recámara (planta alta) */}
+      {/* B) Recámara (Planta alta izquierda, al lado de la cama king) */}
       <SpecificPup
         modelUrl="/models/pup-magnifier-opt.glb"
-        position={[-0.7, 1.85, -0.15]}
-        rotation={[0, 0.5, 0]}
-        scale={0.3}
+        position={[-1.0, 1.88, -0.4]}
+        rotation={[0, 0.6, 0]}
+        scale={0.32}
         onClick={() => onHotspotClick("colchones")}
       />
 
-      {/* C) En el Comedor / Estancia (planta baja centro-derecha) */}
+      {/* C) Comedor (Planta baja centro, frente a la mesa) */}
       <SpecificPup
         modelUrl="/models/pup-carpet-opt.glb"
-        position={[0.5, 0.15, 0.65]}
-        rotation={[0, -0.3, 0]}
-        scale={0.3}
+        position={[-0.15, 0.1, 0.5]}
+        rotation={[0, -0.2, 0]}
+        scale={0.32}
         onClick={() => onHotspotClick("tapetes")}
       />
 
-      {/* D) En la Cochera / Auto (planta baja exterior derecha) */}
+      {/* D) Cochera / Auto (Planta baja derecha, junto a la puerta del auto blanco) */}
       <SpecificPup
         modelUrl="/models/pup-spray-opt.glb"
-        position={[1.65, 0.15, 1.1]}
-        rotation={[0, -0.6, 0]}
-        scale={0.32}
+        position={[1.85, 0.1, 0.85]}
+        rotation={[0, -0.65, 0]}
+        scale={0.34}
         onClick={() => onHotspotClick("autos")}
       />
     </group>
@@ -168,8 +176,8 @@ export function RealGlbViewer({
         shadows
         orthographic
         camera={{
-          position: [25, 25, 25],
-          zoom: 95,
+          position: [25, 23, 25],
+          zoom: 175,
           near: 0.1,
           far: 1000,
         }}
