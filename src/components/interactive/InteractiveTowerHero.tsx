@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useRef } from "react";
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, useMotionValue, useSpring, useTransform, AnimatePresence } from "framer-motion";
 import {
   Sparkles,
   ShieldCheck,
@@ -15,7 +15,7 @@ import {
 
 interface TowerHotspot {
   id: string;
-  name: string; // Nombre amigable y profesional
+  name: string;
   badge: string;
   servicio: string;
   tiempoSecado: string;
@@ -91,27 +91,82 @@ export function InteractiveTowerHero({
   onToggleCart,
   onOpenWizard,
 }: InteractiveTowerHeroProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const currentSpot = selectedSpotId ? TOWER_SPOTS[selectedSpotId] : null;
 
-  return (
-    <div className="relative w-full max-w-xl mx-auto select-none flex items-center justify-center">
-      {/* MAQUETA TOTALMENTE LIBRE SIN CUADRO GRIS Y MÁS GRANDE (CON TRANSPARENCIA NATIVA) */}
-      <div className="relative w-full aspect-[9/16] min-h-[560px] sm:min-h-[680px] lg:min-h-[740px] flex items-center justify-center">
-        {/* Sombra de contacto suave en el suelo */}
-        <div className="absolute bottom-2 inset-x-12 h-10 bg-black/15 blur-2xl rounded-full pointer-events-none -z-10" />
+  // Física de Tilt 2.5D reactiva al cursor
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
 
-        {/* Imagen de la Torre en PNG Transparente Flotante */}
-        <div className="relative w-full h-full">
+  const springConfig = { damping: 25, stiffness: 100, mass: 0.6 };
+  const smoothMouseX = useSpring(mouseX, springConfig);
+  const smoothMouseY = useSpring(mouseY, springConfig);
+
+  // Inclinación suave (máximo 4 grados para no deformar)
+  const rotateX = useTransform(smoothMouseY, [-0.5, 0.5], [4, -4]);
+  const rotateY = useTransform(smoothMouseX, [-0.5, 0.5], [-5, 5]);
+  const shadowX = useTransform(smoothMouseX, [-0.5, 0.5], [18, -18]);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    mouseX.set(x);
+    mouseY.set(y);
+  };
+
+  const handleMouseLeave = () => {
+    mouseX.set(0);
+    mouseY.set(0);
+  };
+
+  return (
+    <div
+      ref={containerRef}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      className="relative w-full max-w-xl mx-auto select-none flex items-center justify-center py-2"
+      style={{ perspective: 1200 }}
+    >
+      {/* CONTENEDOR 2.5D CON TILT E INCLINACIÓN SUAVE */}
+      <motion.div
+        style={{
+          rotateX,
+          rotateY,
+          transformStyle: "preserve-3d",
+        }}
+        className="relative w-full aspect-[9/16] min-h-[560px] sm:min-h-[680px] lg:min-h-[740px] flex items-center justify-center"
+      >
+        {/* Sombra de contacto suave en el suelo con movimiento sutil */}
+        <motion.div
+          style={{ x: shadowX }}
+          className="absolute -bottom-2 inset-x-12 h-8 bg-[#1D71B5]/12 blur-2xl rounded-full pointer-events-none -z-10"
+        />
+
+        {/* CONTENEDOR DE LEVITACIÓN / RESPIRACIÓN ORGÁNICA */}
+        <motion.div
+          animate={{
+            y: [-4, 4, -4],
+          }}
+          transition={{
+            repeat: Infinity,
+            duration: 5,
+            ease: "easeInOut",
+          }}
+          className="relative w-full h-full"
+        >
+          {/* Imagen de la Torre en PNG Transparente Flotante */}
           <Image
             src="/assets/diorama/kanan-torre-transparent.png"
             alt="Maqueta Kanan Limpieza"
             fill
             priority
             sizes="(max-width: 768px) 100vw, 650px"
-            className="object-contain drop-shadow-[0_20px_35px_rgba(29,113,181,0.18)] transition-transform duration-300"
+            className="object-contain drop-shadow-[0_20px_35px_rgba(29,113,181,0.16)] transition-all duration-300"
           />
 
-          {/* PINES FLOTANTES CON NOMBRES DE SERVICIOS */}
+          {/* PINES INTERACTIVOS (SIN DESTELLO PERMANENTE, SOLO AL DAR CLIC) */}
           {Object.values(TOWER_SPOTS).map((spot) => {
             const isSelected = selectedSpotId === spot.id;
             const isCarted = cartItems.includes(spot.id);
@@ -124,49 +179,63 @@ export function InteractiveTowerHero({
                   top: `${spot.pinY}%`,
                 }}
                 className="absolute -translate-x-1/2 -translate-y-1/2 z-20 cursor-pointer"
-                onClick={() => onSelectSpot(isSelected ? null : spot.id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSelectSpot(isSelected ? null : spot.id);
+                }}
               >
                 <div className="relative group flex items-center justify-center">
-                  {/* Pulso animado */}
-                  <span
-                    className={`absolute w-8 h-8 rounded-full animate-ping opacity-75 ${
-                      isSelected ? "bg-cyan-300" : isCarted ? "bg-emerald-400" : "bg-[#36A6DE]"
-                    }`}
-                  />
+                  {/* Destello y pulso expansivo: SOLO activo cuando está seleccionado */}
+                  {isSelected && (
+                    <motion.span
+                      initial={{ scale: 0.8, opacity: 0.9 }}
+                      animate={{ scale: 1.8, opacity: 0 }}
+                      transition={{ repeat: Infinity, duration: 1.4, ease: "easeOut" }}
+                      className="absolute w-8 h-8 rounded-full bg-cyan-400 pointer-events-none"
+                    />
+                  )}
 
                   {/* Píldora del Servicio */}
                   <div
-                    className={`px-3 py-1.5 rounded-full font-heading font-extrabold text-xs shadow-xl border flex items-center gap-1.5 transition-all group-hover:scale-110 whitespace-nowrap ${
+                    className={`px-3 py-1.5 rounded-full font-heading font-extrabold text-xs shadow-xl border flex items-center gap-1.5 transition-all group-hover:scale-105 whitespace-nowrap ${
                       isSelected
-                        ? "bg-[#1D71B5] text-white border-white ring-4 ring-cyan-200 scale-105"
+                        ? "bg-[#1D71B5] text-white border-white ring-4 ring-cyan-200/90 scale-105 shadow-cyan-500/25"
                         : isCarted
                         ? "bg-emerald-600 text-white border-emerald-400"
-                        : "bg-white/95 text-[#0F2438] border-[#36A6DE]/50 hover:bg-[#1D71B5] hover:text-white hover:border-[#1D71B5]"
+                        : "bg-white/95 text-[#0F2438] border-slate-200/90 hover:border-[#1D71B5] hover:text-[#1D71B5]"
                     }`}
                   >
-                    <span className="w-2 h-2 rounded-full bg-cyan-400" />
+                    <span
+                      className={`w-2 h-2 rounded-full transition-colors ${
+                        isSelected
+                          ? "bg-cyan-300 animate-pulse"
+                          : isCarted
+                          ? "bg-white"
+                          : "bg-[#36A6DE]"
+                      }`}
+                    />
                     <span>{spot.name}</span>
                     {isCarted ? (
-                      <Check className="w-3.5 h-3.5 stroke-[3]" />
-                    ) : (
-                      <Sparkles className="w-3 h-3 text-[#36A6DE] group-hover:text-white" />
-                    )}
+                      <Check className="w-3.5 h-3.5 stroke-[3] text-white" />
+                    ) : isSelected ? (
+                      <Sparkles className="w-3 h-3 text-cyan-200" />
+                    ) : null}
                   </div>
                 </div>
               </div>
             );
           })}
-        </div>
+        </motion.div>
 
-        {/* TARJETA GLASSMORPHISM AL SELECCIONAR UNA HABITACIÓN */}
+        {/* TARJETA GLASSMORPHISM: SOLO APARECE AL DAR CLIC */}
         <AnimatePresence>
           {currentSpot && (
             <motion.div
               key={currentSpot.id}
-              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              initial={{ opacity: 0, y: 25, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 20, scale: 0.95 }}
-              transition={{ duration: 0.2 }}
+              transition={{ duration: 0.22, ease: "easeOut" }}
               className="absolute inset-x-2 sm:inset-x-6 bottom-2 z-30 bg-white/95 backdrop-blur-xl text-slate-800 p-4 sm:p-5 rounded-3xl shadow-[0_20px_45px_rgba(29,113,181,0.22)] border border-white space-y-2.5"
             >
               <div className="flex items-start justify-between border-b border-slate-100 pb-2">
@@ -180,7 +249,10 @@ export function InteractiveTowerHero({
                 </div>
                 <button
                   type="button"
-                  onClick={() => onSelectSpot(null)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onSelectSpot(null);
+                  }}
                   className="p-1 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
                 >
                   <X className="w-4 h-4" />
@@ -198,7 +270,10 @@ export function InteractiveTowerHero({
               <div className="flex items-center gap-2 pt-1">
                 <button
                   type="button"
-                  onClick={() => onToggleCart(currentSpot.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onToggleCart(currentSpot.id);
+                  }}
                   className={`flex-1 py-2.5 px-3 rounded-xl font-heading font-extrabold text-xs flex items-center justify-center gap-1.5 transition-all shadow-md active:scale-95 cursor-pointer ${
                     cartItems.includes(currentSpot.id)
                       ? "bg-emerald-600 hover:bg-emerald-700 text-white"
@@ -220,7 +295,10 @@ export function InteractiveTowerHero({
 
                 <button
                   type="button"
-                  onClick={() => onOpenWizard(currentSpot.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onOpenWizard(currentSpot.id);
+                  }}
                   className="py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-heading font-bold text-xs flex items-center gap-1 cursor-pointer transition-colors"
                 >
                   <span>Agendar</span>
@@ -230,7 +308,7 @@ export function InteractiveTowerHero({
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
+      </motion.div>
     </div>
   );
 }

@@ -27,7 +27,7 @@ import confetti from "canvas-confetti";
 export default function Preview3DPage() {
   const [selectedMunicipio, setSelectedMunicipio] = useState<MunicipioZMG>("Guadalajara");
   const [preselectedCategory, setPreselectedCategory] = useState<string | null>(null);
-  const [selectedSpotId, setSelectedSpotId] = useState<string | null>("salas");
+  const [selectedSpotId, setSelectedSpotId] = useState<string | null>(null); // Inicia limpio sin tarjetas
   const [cartItems, setCartItems] = useState<string[]>(["salas"]);
 
   const toggleCart = (id: string) => {
