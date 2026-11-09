@@ -29,6 +29,7 @@ export default function Preview3DPage() {
   const [preselectedCategory, setPreselectedCategory] = useState<string | null>(null);
   const [selectedSpotId, setSelectedSpotId] = useState<string | null>(null);
   const [cartItems, setCartItems] = useState<string[]>([]); // Inicia sin nada seleccionado (sin botones verdes por defecto)
+  const [isChatOpen, setIsChatOpen] = useState<boolean>(false);
 
   const toggleCart = (id: string) => {
     setCartItems((prev) => {
@@ -48,14 +49,11 @@ export default function Preview3DPage() {
     });
   };
 
-  const scrollToWizard = (categoryId?: string) => {
+  const handleOpenChat = (categoryId?: string) => {
     if (categoryId) {
       setPreselectedCategory(categoryId);
     }
-    const el = document.getElementById("agendar");
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth" });
-    }
+    setIsChatOpen(true);
   };
 
   return (
@@ -83,7 +81,7 @@ export default function Preview3DPage() {
       <StickyHeader
         selectedMunicipio={selectedMunicipio}
         onSelectMunicipio={setSelectedMunicipio}
-        onOpenWizard={() => scrollToWizard()}
+        onOpenWizard={() => handleOpenChat()}
         isHalloweenMode={false}
       />
 
@@ -146,7 +144,7 @@ export default function Preview3DPage() {
                   <div className="flex flex-col sm:flex-row gap-3">
                     <button
                       type="button"
-                      onClick={() => scrollToWizard()}
+                      onClick={() => handleOpenChat()}
                       className="w-full inline-flex items-center justify-center gap-2.5 bg-gradient-to-r from-[#1D71B5] to-[#36A6DE] hover:from-[#355581] hover:to-[#1D71B5] text-white font-heading font-extrabold text-sm sm:text-base px-7 py-4 rounded-2xl shadow-lg shadow-blue-500/25 transition-all active:scale-[0.98] cursor-pointer"
                     >
                       <CalendarCheck className="w-5 h-5 shrink-0" />
@@ -214,28 +212,65 @@ export default function Preview3DPage() {
                   onSelectSpot={setSelectedSpotId}
                   cartItems={cartItems}
                   onToggleCart={toggleCart}
-                  onOpenWizard={scrollToWizard}
+                  onOpenWizard={handleOpenChat}
                 />
               </div>
             </div>
           </div>
         </section>
 
-        {/* PASO DIRECTO A RESULTADOS REALES Y PRUEBA SOCIAL (SIN REPETIR SERVICIOS) */}
-        <BeforeAfterGallery onOpenWizard={() => scrollToWizard()} />
+        {/* PASO DIRECTO A RESULTADOS REALES Y PRUEBA SOCIAL */}
+        <BeforeAfterGallery onOpenWizard={() => handleOpenChat()} />
 
+        <SocialProofAndFAQ />
+
+        {/* AGENTE FLOTANTE TIPO CHAT DE WHATSAPP / MODAL FLOTANTE */}
         <KananConciergeAgent
           selectedMunicipio={selectedMunicipio}
           onSelectMunicipio={setSelectedMunicipio}
           preselectedCategory={preselectedCategory}
           preselectedCategories={cartItems}
+          isFloating={true}
+          isOpen={isChatOpen}
+          onClose={() => setIsChatOpen(false)}
         />
-
-        <SocialProofAndFAQ />
       </main>
 
-      <Footer onOpenWizard={() => scrollToWizard()} />
-      <MobileBottomBar onOpenWizard={() => scrollToWizard()} />
+      <Footer onOpenWizard={() => handleOpenChat()} />
+      <MobileBottomBar onOpenWizard={() => handleOpenChat()} />
+
+      {/* BURBUJA FLOTANTE EN DESKTOP (ESQUINA INFERIOR DERECHA) */}
+      {!isChatOpen && (
+        <aside
+          aria-label="Asistente de cotización flotante"
+          className="fixed bottom-6 right-6 z-40 hidden sm:flex items-center gap-3 animate-in fade-in slide-in-from-bottom-4"
+        >
+          <div className="bg-white/95 backdrop-blur-md px-3.5 py-2 rounded-2xl shadow-lg border border-slate-200/80 text-xs font-medium text-slate-700 flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span>¿Cotizamos tus muebles? 🐾</span>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setIsChatOpen(true)}
+            aria-label="Abrir chat con Kanan asistente"
+            className="w-14 h-14 rounded-full bg-gradient-to-tr from-[#1D71B5] via-[#36A6DE] to-[#25D366] p-0.5 shadow-xl shadow-blue-500/30 hover:scale-105 active:scale-95 transition-transform flex items-center justify-center relative cursor-pointer"
+          >
+            <div className="w-full h-full bg-white rounded-full p-1 flex items-center justify-center overflow-hidden">
+              <img
+                src="/assets/brand/kanan-dog.png"
+                alt="Kanan Asistente"
+                className="w-full h-full object-cover rounded-full"
+              />
+            </div>
+            {cartItems.length > 0 && (
+              <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500 text-white text-[11px] font-bold flex items-center justify-center shadow-md animate-bounce">
+                {cartItems.length}
+              </span>
+            )}
+          </button>
+        </aside>
+      )}
     </div>
   );
 }
