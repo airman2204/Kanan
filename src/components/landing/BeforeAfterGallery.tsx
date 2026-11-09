@@ -196,8 +196,8 @@ export function BeforeAfterGallery({ onOpenWizard }: { onOpenWizard: () => void 
               />
             </div>
 
-            {/* Tira Horizontal de Miniaturas Rápidas para Móvil y Desktop */}
-            <div className="pt-1">
+            {/* Tira Horizontal de Miniaturas Rápidas ÚNICAMENTE para Móvil */}
+            <div className="pt-1 lg:hidden">
               <span className="text-[11px] font-heading font-bold text-slate-400 block mb-2 px-1">
                 Toca cualquier foto para comparar:
               </span>
