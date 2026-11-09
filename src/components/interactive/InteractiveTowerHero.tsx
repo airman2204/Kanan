@@ -10,20 +10,17 @@ import {
   Check,
   Plus,
   X,
-  MessageSquare,
   ArrowRight,
 } from "lucide-react";
-import confetti from "canvas-confetti";
 
 interface TowerHotspot {
   id: string;
-  name: string;
-  piso: string;
+  name: string; // Nombre amigable y profesional
+  badge: string;
   servicio: string;
   tiempoSecado: string;
   tecnologia: string;
   descripcion: string;
-  // Coordenadas porcentuales sobre la torre vertical (ancho 864 x alto 1536)
   pinX: number;
   pinY: number;
 }
@@ -31,9 +28,9 @@ interface TowerHotspot {
 const TOWER_SPOTS: Record<string, TowerHotspot> = {
   colchones: {
     id: "colchones",
-    name: "La Recámara",
-    piso: "PISO 3 (SUPERIOR)",
-    servicio: "Sanitización Antiácaros de Colchón",
+    name: "Colchones & Cunas",
+    badge: "Sanitización Antiácaros UV",
+    servicio: "Desinfección Profunda de Colchón",
     tiempoSecado: "Listo para dormir el mismo día",
     tecnologia: "Luz UV Germicida 254nm + Succión HEPA",
     descripcion:
@@ -43,11 +40,11 @@ const TOWER_SPOTS: Record<string, TowerHotspot> = {
   },
   salas: {
     id: "salas",
-    name: "La Sala",
-    piso: "PISO 2 (MEDIO IZQ)",
-    servicio: "Limpieza Profunda de Salas y Sillones",
+    name: "Salas & Sillones",
+    badge: "Inyección-Succión Alemana",
+    servicio: "Lavado de Salas y Tapicería",
     tiempoSecado: "3 a 4 horas* (90% humedad extraída)",
-    tecnologia: "Inyección-Succión Alemana Kärcher",
+    tecnologia: "Kärcher Industrial de Doble Turbina",
     descripcion:
       "Desincrustamos suciedad acumulada y manchas de alimentos extrayendo el agua sucia en tiempo real.",
     pinX: 30,
@@ -55,25 +52,25 @@ const TOWER_SPOTS: Record<string, TowerHotspot> = {
   },
   comedor: {
     id: "comedor",
-    name: "El Comedor",
-    piso: "PISO 2 (MEDIO DER)",
-    servicio: "Lavado de Sillas y Tapicería Fina",
+    name: "Sillas de Comedor",
+    badge: "Cuidado Fino de Fibras",
+    servicio: "Lavado Artesanal de Sillas",
     tiempoSecado: "2 a 3 horas*",
     tecnologia: "Fórmulas biodegradables de pH neutro",
     descripcion:
-      "Cuidado artesanal para sillas de comedor de tela, terciopelo o vinipiel sin decoloración.",
+      "Cuidado artesanal para sillas de tela, terciopelo o vinipiel sin decolorar las fibras.",
     pinX: 72,
     pinY: 53,
   },
   autos: {
     id: "autos",
-    name: "La Cochera",
-    piso: "PISO 1 (PLANTA BAJA)",
-    servicio: "Detallado de Vestiduras Automotrices",
+    name: "Vestiduras de Auto",
+    badge: "Unidad Móvil a Domicilio",
+    servicio: "Detallado de Interiores de Auto",
     tiempoSecado: "2 a 3 horas*",
-    tecnologia: "Unidad Móvil en tu Domicilio",
+    tecnologia: "Extracción industrial en tu cochera",
     descripcion:
-      "Limpieza de asientos, alfombra y cajuela sin mover tu auto de casa. Restauramos aroma a nuevo.",
+      "Limpieza de asientos, alfombra y cajuela sin mover tu auto de casa. Frescura y aroma a nuevo.",
     pinX: 52,
     pinY: 82,
   },
@@ -97,21 +94,24 @@ export function InteractiveTowerHero({
   const currentSpot = selectedSpotId ? TOWER_SPOTS[selectedSpotId] : null;
 
   return (
-    <div className="relative w-full max-w-lg mx-auto select-none">
-      {/* TARJETA CONTENEDORA DE LA TORRE (ESTILO MOCKUP GEMINI) */}
-      <div className="relative w-full aspect-[9/16] max-h-[640px] rounded-3xl overflow-hidden shadow-[0_20px_50px_-10px_rgba(29,113,181,0.2)] border border-slate-200/90 bg-gradient-to-b from-[#F5F9FD] via-white to-[#EEF5FB] flex items-center justify-center p-2 sm:p-4">
-        {/* Imagen de la Torre Vertical HD */}
+    <div className="relative w-full max-w-xl mx-auto select-none flex items-center justify-center">
+      {/* MAQUETA TOTALMENTE LIBRE SIN CUADRO GRIS Y MÁS GRANDE (CON TRANSPARENCIA NATIVA) */}
+      <div className="relative w-full aspect-[9/16] min-h-[560px] sm:min-h-[680px] lg:min-h-[740px] flex items-center justify-center">
+        {/* Sombra de contacto suave en el suelo */}
+        <div className="absolute bottom-2 inset-x-12 h-10 bg-black/15 blur-2xl rounded-full pointer-events-none -z-10" />
+
+        {/* Imagen de la Torre en PNG Transparente Flotante */}
         <div className="relative w-full h-full">
           <Image
-            src="/assets/diorama/kanan-torre-vertical.png"
-            alt="Torre Diorama Kanan Limpieza"
+            src="/assets/diorama/kanan-torre-transparent.png"
+            alt="Maqueta Kanan Limpieza"
             fill
             priority
-            sizes="(max-width: 768px) 100vw, 500px"
-            className="object-contain drop-shadow-[0_15px_30px_rgba(0,0,0,0.12)]"
+            sizes="(max-width: 768px) 100vw, 650px"
+            className="object-contain drop-shadow-[0_20px_35px_rgba(29,113,181,0.18)] transition-transform duration-300"
           />
 
-          {/* PINES INTERACTIVOS CON PRECIO (IDÉNTICOS AL MOCKUP DE GEMINI) */}
+          {/* PINES FLOTANTES CON NOMBRES DE SERVICIOS */}
           {Object.values(TOWER_SPOTS).map((spot) => {
             const isSelected = selectedSpotId === spot.id;
             const isCarted = cartItems.includes(spot.id);
@@ -130,18 +130,18 @@ export function InteractiveTowerHero({
                   {/* Pulso animado */}
                   <span
                     className={`absolute w-8 h-8 rounded-full animate-ping opacity-75 ${
-                      isSelected ? "bg-amber-400" : isCarted ? "bg-emerald-400" : "bg-[#36A6DE]"
+                      isSelected ? "bg-cyan-300" : isCarted ? "bg-emerald-400" : "bg-[#36A6DE]"
                     }`}
                   />
 
-                  {/* Píldora de servicio / Pin flotante sin precios */}
+                  {/* Píldora del Servicio */}
                   <div
-                    className={`px-3 py-1.5 rounded-full font-heading font-extrabold text-xs shadow-xl border flex items-center gap-1.5 transition-all group-hover:scale-110 ${
+                    className={`px-3 py-1.5 rounded-full font-heading font-extrabold text-xs shadow-xl border flex items-center gap-1.5 transition-all group-hover:scale-110 whitespace-nowrap ${
                       isSelected
                         ? "bg-[#1D71B5] text-white border-white ring-4 ring-cyan-200 scale-105"
                         : isCarted
                         ? "bg-emerald-600 text-white border-emerald-400"
-                        : "bg-white/95 text-[#0F2438] border-[#36A6DE]/60 hover:bg-[#36A6DE] hover:text-white"
+                        : "bg-white/95 text-[#0F2438] border-[#36A6DE]/50 hover:bg-[#1D71B5] hover:text-white hover:border-[#1D71B5]"
                     }`}
                   >
                     <span className="w-2 h-2 rounded-full bg-cyan-400" />
@@ -158,7 +158,7 @@ export function InteractiveTowerHero({
           })}
         </div>
 
-        {/* TARJETA GLASSMORPHISM LATERAL AL TOCAR UN SERVICIO */}
+        {/* TARJETA GLASSMORPHISM AL SELECCIONAR UNA HABITACIÓN */}
         <AnimatePresence>
           {currentSpot && (
             <motion.div
@@ -167,14 +167,14 @@ export function InteractiveTowerHero({
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 20, scale: 0.95 }}
               transition={{ duration: 0.2 }}
-              className="absolute inset-x-3 bottom-3 z-30 bg-white/95 backdrop-blur-xl text-slate-800 p-4 rounded-2xl shadow-[0_20px_40px_rgba(0,0,0,0.18)] border border-slate-200 space-y-2.5"
+              className="absolute inset-x-2 sm:inset-x-6 bottom-2 z-30 bg-white/95 backdrop-blur-xl text-slate-800 p-4 sm:p-5 rounded-3xl shadow-[0_20px_45px_rgba(29,113,181,0.22)] border border-white space-y-2.5"
             >
               <div className="flex items-start justify-between border-b border-slate-100 pb-2">
                 <div>
                   <span className="text-[10px] font-heading font-extrabold uppercase tracking-wider text-[#1D71B5] block">
-                    {currentSpot.piso}
+                    {currentSpot.badge}
                   </span>
-                  <h4 className="font-heading text-sm font-extrabold text-[#0F2438] leading-tight">
+                  <h4 className="font-heading text-sm sm:text-base font-extrabold text-[#0F2438] leading-tight">
                     {currentSpot.servicio}
                   </h4>
                 </div>
@@ -221,21 +221,16 @@ export function InteractiveTowerHero({
                 <button
                   type="button"
                   onClick={() => onOpenWizard(currentSpot.id)}
-                  className="py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-heading font-bold text-xs flex items-center gap-1 cursor-pointer transition-colors"
+                  className="py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-heading font-bold text-xs flex items-center gap-1 cursor-pointer transition-colors"
                 >
                   <span>Agendar</span>
-                  <ArrowRight className="w-3 h-3" />
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
-
-      {/* Leyenda de interacción inferior */}
-      <p className="text-center text-[11px] text-slate-400 mt-2 font-medium">
-        Toca las habitaciones en la maqueta para ver la tecnología y añadir a tu cotización.
-      </p>
     </div>
   );
 }
