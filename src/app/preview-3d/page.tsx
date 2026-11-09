@@ -228,6 +228,7 @@ export default function Preview3DPage() {
           selectedMunicipio={selectedMunicipio}
           onSelectMunicipio={setSelectedMunicipio}
           preselectedCategory={preselectedCategory}
+          preselectedCategories={cartItems}
         />
 
         <SocialProofAndFAQ />

@@ -101,16 +101,21 @@ interface KananConciergeAgentProps {
   selectedMunicipio: MunicipioZMG;
   onSelectMunicipio: (m: MunicipioZMG) => void;
   preselectedCategory?: string | null;
+  preselectedCategories?: string[];
 }
 
 export function KananConciergeAgent({
   selectedMunicipio,
   onSelectMunicipio,
   preselectedCategory,
+  preselectedCategories = [],
 }: KananConciergeAgentProps) {
   const [messages, setMessages] = useState<MessageItem[]>([]);
   const [isTyping, setIsTyping] = useState<boolean>(false);
   const [step, setStep] = useState<StepId>("ask_category");
+
+  // Multi-áreas seleccionadas de la casita / diorama
+  const [selectedSpots, setSelectedSpots] = useState<string[]>([]);
 
   // Estado estructurado del cliente
   const [selectedCat, setSelectedCat] = useState<string>("salas");
@@ -194,10 +199,7 @@ export function KananConciergeAgent({
     return dias;
   };
 
-  // Generador inteligente de horas con semáforo y regla de ruta:
-  // - Ventana operativa de 09:00 a 16:00 (Tlajomulco o fin de semana hasta 13:00 / entre semana hasta 16:00-18:00)
-  // - Cada cita dura mín. 2 horas de servicio + 2 horas de traslado técnico.
-  // - Conflicto si abs(hora - cita.hora) < 4 horas para el mismo técnico/zona o cita a la misma hora.
+  // Generador inteligente de horas con semáforo y regla de ruta
   const obtenerHorasDisponiblesPorDia = (fechaStr: string) => {
     if (!fechaStr) return [];
     const parts = fechaStr.split("-");
@@ -206,9 +208,8 @@ export function KananConciergeAgent({
     const esFin = diaNum === 0 || diaNum === 6;
     const muniLower = (municipioDetectado || selectedMunicipio).toLowerCase();
 
-    // Rango de inicio según día y municipio
     let horaInicio = 9;
-    let horaFin = 16; // 16:00 última hora de inicio estándar para terminar ~18:00
+    let horaFin = 16;
 
     if (esFin && !muniLower.includes("tlajomulco")) {
       horaInicio = 8;
@@ -229,15 +230,12 @@ export function KananConciergeAgent({
       return hr;
     };
 
-    // Citas existentes en esa fecha
     const citasDelDia = slotsOcupados.filter((s) => s.fecha === fechaStr);
 
     for (let h = horaInicio; h <= horaFin; h++) {
       const horaFormato24 = `${h.toString().padStart(2, "0")}:00`;
       const horaFormatoAmPm = `${h > 12 ? h - 12 : h === 0 ? 12 : h}:00 ${h >= 12 ? "PM" : "AM"}`;
 
-      // Verificar si hay conflicto con otra cita registrada
-      // Regla: 2 hrs servicio + 2 hrs traslado = 4 hrs de ventana de separación
       let ocupado = false;
       let razonOcupado = "";
 
@@ -257,7 +255,6 @@ export function KananConciergeAgent({
         }
       }
 
-      // Si ya son más de 3 citas en el día, el día está saturado
       if (citasDelDia.length >= 3) {
         ocupado = true;
         razonOcupado = "Agenda llena";
@@ -275,39 +272,66 @@ export function KananConciergeAgent({
     return slotsHora;
   };
 
-  // Verificar si un día completo ya no tiene ninguna hora disponible
-  const isDiaSinHorasDisponibles = (fechaStr: string) => {
-    const horas = obtenerHorasDisponiblesPorDia(fechaStr);
-    return horas.length > 0 && horas.every((h) => h.ocupado);
+  // Mapeo amigable de IDs de torre a nombres legibles
+  const spotNameMap: Record<string, string> = {
+    colchones: "Colchones & Cunas",
+    salas: "Salas & Sillones",
+    comedor: "Sillas de Comedor",
+    autos: "Vestiduras de Auto",
   };
 
-  // Inicializar conversación natural
+  // Inicializar conversación natural reconociendo si el cliente seleccionó áreas en la casita
   useEffect(() => {
     setIsTyping(true);
-    const timer = setTimeout(() => {
-      setMessages([
-        {
-          id: "m-1",
-          sender: "agent",
-          text: "¡Hola! 👋 Soy Kanan asistente.",
-          time: getCurrentTime(),
-        },
-        {
-          id: "m-2",
-          sender: "agent",
-          text: "¿Qué muebles o piezas te gustaría que consintamos hoy?",
-          time: getCurrentTime(),
-        },
-      ]);
-      setIsTyping(false);
 
-      if (preselectedCategory) {
-        setSelectedCat(preselectedCategory);
+    const areas = preselectedCategories && preselectedCategories.length > 0
+      ? preselectedCategories
+      : preselectedCategory
+      ? [preselectedCategory]
+      : [];
+
+    setSelectedSpots(areas);
+
+    const timer = setTimeout(() => {
+      if (areas.length > 0) {
+        const nombresAreas = areas.map((id) => spotNameMap[id] || id).join(" + ");
+        setMessages([
+          {
+            id: "m-1",
+            sender: "agent",
+            text: "¡Hola! 👋 Soy Kanan asistente.",
+            time: getCurrentTime(),
+          },
+          {
+            id: "m-2",
+            sender: "agent",
+            text: `¡Excelente elección! Veo que seleccionaste: 🐾\n📍 **${nombresAreas}**\n\nVamos a preparar tu cotización personalizada con inspección de manchas. Para validar cobertura en Jalisco, ¿cuál es tu Código Postal (5 dígitos)?`,
+            time: getCurrentTime(),
+          },
+        ]);
+        setStep("ask_cp");
+      } else {
+        setMessages([
+          {
+            id: "m-1",
+            sender: "agent",
+            text: "¡Hola! 👋 Soy Kanan asistente.",
+            time: getCurrentTime(),
+          },
+          {
+            id: "m-2",
+            sender: "agent",
+            text: "¿Qué muebles o piezas te gustaría que consintamos hoy?",
+            time: getCurrentTime(),
+          },
+        ]);
+        setStep("ask_category");
       }
+      setIsTyping(false);
     }, 400);
 
     return () => clearTimeout(timer);
-  }, [preselectedCategory]);
+  }, [preselectedCategory, preselectedCategories]);
 
   useEffect(() => {
     // Desplazar suavemente SOLO dentro del contenedor interno del chat sin mover la ventana del navegador
@@ -783,15 +807,23 @@ export function KananConciergeAgent({
     setIsTyping(true);
     setSubmitting(true);
 
-    const items: ItemContratado[] = [
-      {
-        categoriaId: selectedPiece?.categoriaId || "salas",
-        categoriaNombre: selectedPiece?.categoriaNombre || "Salas y Sillas",
-        piezaId: selectedPiece?.id || "pieza_manual",
-        piezaNombre: selectedPiece?.nombre || "Servicio Kanan",
-        cantidad: cantidad || 1,
-      },
-    ];
+    const items: ItemContratado[] = selectedSpots.length > 0
+      ? selectedSpots.map((spotId) => ({
+          categoriaId: spotId,
+          categoriaNombre: spotNameMap[spotId] || spotId,
+          piezaId: spotId,
+          piezaNombre: spotNameMap[spotId] || spotId,
+          cantidad: 1,
+        }))
+      : [
+          {
+            categoriaId: selectedPiece?.categoriaId || "salas",
+            categoriaNombre: selectedPiece?.categoriaNombre || "Salas y Sillas",
+            piezaId: selectedPiece?.id || "pieza_manual",
+            piezaNombre: selectedPiece?.nombre || "Servicio Kanan",
+            cantidad: cantidad || 1,
+          },
+        ];
 
     const direccionCompleta = `${calle} ${numExt}${colonia ? `, Col. ${colonia}` : ""}, CP ${codigoPostal}, ${municipioDetectado}`;
 
@@ -832,12 +864,14 @@ export function KananConciergeAgent({
       setIsTyping(false);
       setStep("finished");
 
+      const piezasResumen = items.map((it) => `${it.cantidad}x ${it.piezaNombre}`).join(", ");
+
       setMessages((prev) => [
         ...prev,
         {
           id: `agent-done-${Date.now()}`,
           sender: "agent",
-          text: `🎉 ¡Excelente, ${nombre.split(" ")[0]}! Tu solicitud ha sido registrada con éxito.\n\n📋 *Folio de Servicio:* **${folio}**\n🛋️ *Pieza:* ${items[0].cantidad}x ${items[0].piezaNombre}\n📍 *Ubicación:* ${municipioDetectado} (CP ${codigoPostal})\n📸 *Fotos recibidas:* ${fotosPreview.length} foto(s)\n📅 *Fecha y Horario:* ${fecha} a las ${horaEspecifica || turno}\n\nEn breve recibirás la cotización y confirmación de tu cita vía WhatsApp. ✨`,
+          text: `🎉 ¡Excelente, ${nombre.split(" ")[0]}! Tu solicitud ha sido registrada con éxito.\n\n📋 *Folio de Servicio:* **${folio}**\n🛋️ *Áreas/Piezas:* ${piezasResumen}\n📍 *Ubicación:* ${municipioDetectado} (CP ${codigoPostal})\n📸 *Fotos recibidas:* ${fotosPreview.length} foto(s)\n📅 *Fecha y Horario:* ${fecha} a las ${horaEspecifica || turno}\n\nEn breve recibirás la cotización y confirmación de tu cita vía WhatsApp. ✨`,
           time: getCurrentTime(),
         },
       ]);
