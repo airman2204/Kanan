@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import {
   Sparkles,
   ShieldCheck,
@@ -11,10 +11,7 @@ import {
   ArrowRight,
   CheckCircle2,
   MapPin,
-  Star,
-  Award,
   Lock,
-  RotateCcw,
   MessageSquare,
   BedDouble,
   Sofa,
@@ -22,7 +19,7 @@ import {
   Check,
   Plus,
   X,
-  PhoneCall,
+  ChevronDown,
 } from "lucide-react";
 import { StickyHeader } from "@/components/landing/StickyHeader";
 import { ServicesSection } from "@/components/landing/ServicesSection";
@@ -34,16 +31,16 @@ import { MobileBottomBar } from "@/components/landing/MobileBottomBar";
 import { MunicipioZMG } from "@/types/crm";
 import confetti from "canvas-confetti";
 
-// Cargar el visor WebGL 3D sin SSR
-const RealGlbViewer = dynamic(
-  () => import("@/components/diorama/RealGlbViewer").then((mod) => mod.RealGlbViewer),
+// Cargar el visor WebGL Scrollytelling
+const DioramaScroller = dynamic(
+  () => import("@/components/diorama/DioramaScroller").then((mod) => mod.DioramaScroller),
   {
     ssr: false,
     loading: () => (
       <div className="w-full h-full flex flex-col items-center justify-center text-cyan-300 gap-3">
         <div className="w-12 h-12 rounded-2xl border-4 border-[#36A6DE] border-t-transparent animate-spin" />
         <span className="text-xs font-heading font-extrabold uppercase tracking-wider text-slate-300">
-          Cargando Casa 3D Kanan...
+          Cargando Experiencia 3D...
         </span>
       </div>
     ),
@@ -52,6 +49,7 @@ const RealGlbViewer = dynamic(
 
 interface RoomDetails {
   id: string;
+  stepIndex: number;
   label: string;
   nombreServicio: string;
   tiempoSecado: string;
@@ -60,54 +58,101 @@ interface RoomDetails {
   icono: any;
 }
 
-const ROOMS_INFO: Record<string, RoomDetails> = {
-  salas: {
+const ROOMS_STORY: RoomDetails[] = [
+  {
     id: "salas",
-    label: "LA SALA DE ESTAR",
+    stepIndex: 1,
+    label: "1. LA SALA DE ESTAR",
     nombreServicio: "Limpieza Profunda de Salas y Sillones",
     tiempoSecado: "3 a 4 horas* (90% de humedad extraída)",
     tecnologia: "Inyección-Succión Alemana Kärcher",
     descripcion:
-      "Desincrusta polvo acumulado, manchas de alimentos y olores orgánicos sin dañar el tejido.",
+      "Desincrustamos polvo acumulado, manchas de alimentos y olores orgánicos sin maltratar las fibras ni alterar los colores originales.",
     icono: Sofa,
   },
-  colchones: {
+  {
     id: "colchones",
-    label: "LA RECÁMARA PRINCIPAL",
+    stepIndex: 2,
+    label: "2. LA RECÁMARA PRINCIPAL",
     nombreServicio: "Sanitización Antiácaros de Colchones",
     tiempoSecado: "Listo para dormir el mismo día",
-    tecnologia: "Luz UV Germicida + Extracción Profunda",
+    tecnologia: "Luz UV Germicida + Extracción de Alto Vacío",
     descripcion:
-      "Eliminación de ácaros, bacterias y células muertas. Esencial para alergias y salud respiratoria.",
+      "Eliminación profunda de ácaros, bacterias y alérgenos invisibles. Indispensable para personas con alergias y salud infantil.",
     icono: BedDouble,
   },
-  tapetes: {
+  {
     id: "tapetes",
-    label: "EL COMEDOR Y PASILLOS",
-    nombreServicio: "Lavado de Sillas y Tapetes Decorativos",
-    tiempoSecado: "Recolección a taller (3 días)",
+    stepIndex: 3,
+    label: "3. EL COMEDOR Y ÁREAS COMUNES",
+    nombreServicio: "Lavado de Sillas y Tapetes Finos",
+    tiempoSecado: "Taller especializado (3 días con recolección)",
     tecnologia: "Inmersión controlada y centrifugado",
     descripcion:
-      "Cuidado delicado para fibras finas, desmanchado profundo y perfumado textil.",
+      "Tratamiento exclusivo para lana, seda y fibras sintéticas. Lavado con agua desmineralizada y perfumado textil duradero.",
     icono: Sparkles,
   },
-  autos: {
+  {
     id: "autos",
-    label: "LA COCHERA / EXTERIOR",
-    nombreServicio: "Detallado de Vestiduras Automotrices",
+    stepIndex: 4,
+    label: "4. LA COCHERA Y VESTIDURAS",
+    nombreServicio: "Detallado de Interiores de Autos y SUVs",
     tiempoSecado: "2 a 3 horas*",
-    tecnologia: "Unidad Móvil a Domicilio en tu cochera",
+    tecnologia: "Unidad Móvil Autónoma directo en tu cochera",
     descripcion:
-      "Limpieza de asientos, cielo y alfombra de autos y camionetas directo en tu domicilio.",
+      "Asientos de tela y piel, alfombra, cajuela y cielo. Restauramos la frescura y aroma de tu vehículo sin moverlo de casa.",
     icono: CarFront,
   },
-};
+];
 
-export default function Preview3DPage() {
+export default function Preview3DScrollyPage() {
   const [selectedMunicipio, setSelectedMunicipio] = useState<MunicipioZMG>("Guadalajara");
   const [preselectedCategory, setPreselectedCategory] = useState<string | null>(null);
-  const [selectedRoomId, setSelectedRoomId] = useState<string | null>("salas");
+  const [isMobile, setIsMobile] = useState(false);
   const [cartItems, setCartItems] = useState<string[]>(["salas"]);
+  const [activeStoryIndex, setActiveStoryIndex] = useState<number>(0); // 0 = Intro, 1 = Sala, 2 = Cama, 3 = Comedor, 4 = Auto, 5 = Outro
+
+  // Detección responsive para usar el modelo móvil especializado
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  // Referencia al contenedor de scroll del Scrollytelling (400vh de altura para viaje suave)
+  const scrollyContainerRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: scrollyContainerRef,
+    offset: ["start start", "end end"],
+  });
+
+  const [progressVal, setProgressVal] = useState(0);
+
+  useEffect(() => {
+    const unsubscribe = scrollYProgress.on("change", (latest) => {
+      setProgressVal(latest);
+
+      // Calcular la sección activa según el progreso
+      if (latest < 0.15) {
+        setActiveStoryIndex(0); // Intro
+      } else if (latest < 0.35) {
+        setActiveStoryIndex(1); // Sala
+      } else if (latest < 0.55) {
+        setActiveStoryIndex(2); // Recámara
+      } else if (latest < 0.75) {
+        setActiveStoryIndex(3); // Comedor
+      } else if (latest < 0.92) {
+        setActiveStoryIndex(4); // Auto
+      } else {
+        setActiveStoryIndex(5); // Outro -> Listo para el Wizard
+      }
+    });
+
+    return () => unsubscribe();
+  }, [scrollYProgress]);
 
   const toggleCart = (id: string) => {
     setCartItems((prev) => {
@@ -137,25 +182,37 @@ export default function Preview3DPage() {
     }
   };
 
-  const currentRoom = selectedRoomId ? ROOMS_INFO[selectedRoomId] : null;
-
   const generateWhatsAppUrl = () => {
-    const items = cartItems.map((id) => ROOMS_INFO[id]?.nombreServicio).filter(Boolean).join(", ");
-    const text = `¡Hola Kanan Limpieza! 🐾 Estuve en la casa 3D interactiva y deseo cotizar: ${items}`;
+    const names = cartItems.map((id) => {
+      const found = ROOMS_STORY.find((r) => r.id === id);
+      return found ? found.nombreServicio : id;
+    });
+    const text = `¡Hola Kanan Limpieza! 🐾 Estuve en la experiencia interactiva 3D y deseo agendar: ${names.join(", ")}`;
     return `https://wa.me/523326154699?text=${encodeURIComponent(text)}`;
   };
 
+  // Fondos dinámicos suaves: desde un amanecer premium hasta un azul clínico fresco
+  const bgGradients = [
+    "from-[#0B1B2F] via-[#0E243D] to-[#0A1626]", // Intro
+    "from-[#0A1B2A] via-[#102B45] to-[#0D2135]", // Sala
+    "from-[#0F1E33] via-[#173553] to-[#0C1A2B]", // Recámara
+    "from-[#0D2133] via-[#12314E] to-[#0A1A28]", // Comedor
+    "from-[#091C2D] via-[#14324E] to-[#0A1724]", // Auto
+    "from-[#0B1E32] via-[#0D263F] to-white",     // Transición final hacia el sitio
+  ];
+
   return (
     <div className="min-h-screen flex flex-col bg-white relative">
-      {/* BANNER INDICADOR DE PRUEBA PRIVADA */}
-      <div className="bg-[#0A1626] text-white px-4 py-2 border-b border-white/10 flex items-center justify-between text-xs font-heading">
+      {/* 1. BADGE FLOTANTE DE ENTORNO PRIVADO */}
+      <div className="bg-[#07111D] text-white px-4 py-2 border-b border-white/10 flex items-center justify-between text-xs font-heading sticky top-0 z-50">
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping inline-block" />
           <Lock className="w-3.5 h-3.5 text-cyan-400" />
-          <span className="font-bold">Vista Previa Privada: Casa 3D Inmersiva con Diseño Original Kanan</span>
+          <span className="font-bold">
+            Scrollytelling 3D Kanan (Estilo Apple) • {isMobile ? "Modelo Móvil Activo" : "Modelo Desktop Activo"}
+          </span>
         </div>
         <div className="flex items-center gap-3">
-          <span className="hidden md:inline text-slate-400">Sitio oficial intacto</span>
           <a
             href="/"
             className="px-2.5 py-1 bg-white/10 hover:bg-white/20 rounded-lg text-cyan-300 font-bold transition-colors"
@@ -165,7 +222,7 @@ export default function Preview3DPage() {
         </div>
       </div>
 
-      {/* HEADER OFICIAL DE KANAN */}
+      {/* 2. HEADER OFICIAL DE KANAN */}
       <StickyHeader
         selectedMunicipio={selectedMunicipio}
         onSelectMunicipio={setSelectedMunicipio}
@@ -175,201 +232,268 @@ export default function Preview3DPage() {
 
       <main className="flex-1">
         {/* ============================================================== */}
-        {/* HERO MONUMENTAL CON CASA 3D A PANTALLA COMPLETA                */}
+        {/* SECCIÓN SCROLLYTELLING 3D INTERACTIVA (350vh DE PROFUNDIDAD)   */}
         {/* ============================================================== */}
-        <section className="relative w-full h-[88vh] min-h-[640px] max-h-[920px] overflow-hidden bg-gradient-to-b from-[#0B1B2F] via-[#0E243D] to-[#0A1626]">
-          {/* 1. VISOR 3D COMO FONDO TOTAL INTERACTIVO */}
-          <div className="absolute inset-0 z-0">
-            <RealGlbViewer
-              onSelectRoom={(id) => setSelectedRoomId(id)}
-              selectedRoom={selectedRoomId}
+        <section
+          ref={scrollyContainerRef}
+          className="relative h-[380vh] w-full"
+        >
+          {/* VISOR 3D STICKY FIJO EN PANTALLA MIENTRAS HACES SCROLL */}
+          <div className="sticky top-0 h-screen w-full overflow-hidden flex flex-col justify-between transition-colors duration-700">
+            {/* Fondo con gradiente dinámico sincronizado */}
+            <div
+              className={`absolute inset-0 bg-gradient-to-b ${bgGradients[activeStoryIndex]} transition-all duration-1000 -z-10`}
             />
-          </div>
 
-          {/* Sutil viñeta para asegurar legibilidad */}
-          <div className="absolute inset-0 pointer-events-none bg-gradient-to-r from-[#0B1B2F]/90 via-[#0B1B2F]/30 to-transparent z-10 w-full lg:w-3/5" />
-          <div className="absolute inset-x-0 bottom-0 h-32 pointer-events-none bg-gradient-to-t from-[#0A1626] to-transparent z-10" />
-
-          {/* 2. OVERLAY SUPERIOR: BADGE Y TIP 3D */}
-          <div className="absolute top-4 left-4 sm:left-8 z-20 pointer-events-none flex flex-wrap items-center gap-2">
-            <div className="flex items-center gap-2 bg-black/60 backdrop-blur-md text-white text-xs px-3.5 py-1.5 rounded-full border border-white/15">
-              <RotateCcw className="w-3.5 h-3.5 text-[#36A6DE] animate-spin" style={{ animationDuration: "10s" }} />
-              <span>Gira la casa en 360° o toca a cada perrito</span>
+            {/* VISOR 3D WEBGL A PANTALLA COMPLETA */}
+            <div className="absolute inset-0 z-0">
+              <DioramaScroller
+                progress={progressVal}
+                isMobile={isMobile}
+                onSelectRoom={(id) => {
+                  const item = ROOMS_STORY.find((r) => r.id === id);
+                  if (item) setActiveStoryIndex(item.stepIndex);
+                  toggleCart(id);
+                }}
+                selectedRoom={ROOMS_STORY[activeStoryIndex - 1]?.id || null}
+              />
             </div>
-            <div className="hidden sm:inline-flex items-center gap-1.5 bg-emerald-500/20 text-emerald-300 text-xs px-3 py-1.5 rounded-full border border-emerald-400/30">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-              <span>Rutas activas hoy en {selectedMunicipio}</span>
-            </div>
-          </div>
 
-          {/* 3. COLUMNA IZQUIERDA: COPYWRITING ORIGINAL DE KANAN */}
-          <div className="relative z-20 h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center pointer-events-none">
-            <div className="max-w-xl space-y-5 pointer-events-auto">
-              <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-3.5 py-1 shadow-sm text-xs font-heading font-bold text-cyan-300">
-                <Sparkles className="w-3.5 h-3.5 text-cyan-300" />
-                <span>Hogar Limpio e Interactivo Kanan</span>
+            {/* Viñeta sutil de legibilidad izquierda */}
+            <div className="absolute inset-0 pointer-events-none bg-gradient-to-r from-black/60 via-black/20 to-transparent z-10 w-full lg:w-1/2" />
+
+            {/* BARRA SUPERIOR: INDICADOR DE PROGRESO DE HABITACIONES */}
+            <div className="relative z-20 max-w-7xl mx-auto w-full px-4 sm:px-6 pt-4 flex items-center justify-between pointer-events-none">
+              <div className="pointer-events-auto flex items-center gap-2 bg-black/60 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/15 text-xs text-white">
+                <span className="w-2 h-2 rounded-full bg-cyan-400" />
+                <span className="font-heading font-bold">
+                  {activeStoryIndex === 0
+                    ? "Vista General del Hogar"
+                    : activeStoryIndex === 5
+                    ? "¡Hogar Completamente Renovado!"
+                    : ROOMS_STORY[activeStoryIndex - 1]?.label}
+                </span>
               </div>
 
-              <h1 className="font-heading text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-[1.1] drop-shadow-md">
-                Protegemos lo que más tocas.{" "}
-                <span className="block mt-1 bg-gradient-to-r from-cyan-300 via-sky-200 to-white bg-clip-text text-transparent">
-                  Limpieza y desinfección profunda a domicilio.
-                </span>
-              </h1>
-
-              <p className="text-slate-200 text-sm sm:text-base leading-relaxed drop-shadow">
-                Renovamos tus salas, colchones y vestiduras con tecnología alemana de{" "}
-                <strong className="text-white font-bold">inyección-succión industrial</strong>.
-                Eliminamos el 90% de la humedad, manchas profundas y ácaros en minutos.
-              </p>
-
-              {/* Botonera de Acción Rápida */}
-              <div className="flex flex-col sm:flex-row gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => scrollToWizard()}
-                  className="inline-flex items-center justify-center gap-2.5 bg-gradient-to-r from-[#1D71B5] to-[#36A6DE] hover:from-[#355581] hover:to-[#1D71B5] text-white font-heading font-extrabold text-sm px-6 py-3.5 rounded-2xl shadow-xl shadow-cyan-500/20 transition-all active:scale-[0.98] cursor-pointer"
-                >
-                  <CalendarCheck className="w-5 h-5 shrink-0" />
-                  <span>Cotizar y Agendar en Línea</span>
-                  <ArrowRight className="w-4 h-4 shrink-0" />
-                </button>
-
-                <a
-                  href="#servicios"
-                  className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white font-heading font-bold text-sm px-5 py-3.5 rounded-2xl border border-white/20 transition-all text-center"
-                >
-                  <span>Ver Precios y Catálogo</span>
-                </a>
-              </div>
-
-              {/* Mini garantías */}
-              <div className="flex flex-wrap items-center gap-4 pt-1 text-xs text-slate-300">
-                <span className="flex items-center gap-1.5 font-medium">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                  Secado express 3 a 4 hrs*
-                </span>
-                <span className="flex items-center gap-1.5 font-medium">
-                  <ShieldCheck className="w-4 h-4 text-cyan-300 shrink-0" />
-                  Garantía de satisfacción
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* 4. TARJETA FLOTANTE GLASSMORPHISM CUANDO SE TOCA UN PERRITO */}
-          <AnimatePresence>
-            {currentRoom && (
-              <motion.div
-                key={currentRoom.id}
-                initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 20, scale: 0.95 }}
-                className="absolute top-20 right-4 sm:right-8 z-30 max-w-xs w-[85vw] sm:w-auto bg-white/95 backdrop-blur-xl text-slate-800 p-4 rounded-3xl shadow-2xl border border-white/80 space-y-2.5 pointer-events-auto"
-              >
-                <div className="flex items-start justify-between border-b border-slate-100 pb-2">
-                  <div>
-                    <span className="text-[10px] font-heading font-extrabold uppercase tracking-wider text-[#1D71B5] block">
-                      {currentRoom.label}
-                    </span>
-                    <h3 className="font-heading text-sm font-extrabold text-[#0F2438] leading-tight">
-                      {currentRoom.nombreServicio}
-                    </h3>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedRoomId(null)}
-                    className="p-1 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-
-                <div className="space-y-1 text-xs text-slate-600">
-                  <p className="flex items-center gap-1">
-                    <Timer className="w-3.5 h-3.5 text-[#36A6DE]" />
-                    <span className="font-bold text-slate-800">Secado:</span> {currentRoom.tiempoSecado}
-                  </p>
-                  <p className="text-[11px] text-slate-500 leading-snug">{currentRoom.descripcion}</p>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => toggleCart(currentRoom.id)}
-                  className={`w-full py-2 px-3 rounded-xl font-heading font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow ${
-                    cartItems.includes(currentRoom.id)
-                      ? "bg-emerald-600 hover:bg-emerald-700 text-white"
-                      : "bg-[#1D71B5] hover:bg-[#355581] text-white"
-                  }`}
-                >
-                  {cartItems.includes(currentRoom.id) ? (
-                    <>
-                      <Check className="w-3.5 h-3.5" />
-                      <span>Agregado a selección</span>
-                    </>
-                  ) : (
-                    <>
-                      <Plus className="w-3.5 h-3.5" />
-                      <span>Agregar servicio</span>
-                    </>
-                  )}
-                </button>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* 5. BARRA HUD INFERIOR DEL HERO: SELECCIÓN RÁPIDA + WHATSAPP */}
-          <div className="absolute bottom-4 inset-x-4 sm:inset-x-8 z-30 pointer-events-none flex justify-center">
-            <div className="pointer-events-auto bg-white/95 backdrop-blur-xl text-slate-800 rounded-2xl p-2.5 sm:p-3 shadow-2xl border border-white/80 flex flex-wrap items-center justify-between gap-3 max-w-3xl w-full">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs font-heading font-extrabold text-[#0F2438] pr-2 hidden sm:inline-block border-r border-slate-200">
-                  Habitaciones:
-                </span>
-                {Object.values(ROOMS_INFO).map((room) => {
-                  const active = cartItems.includes(room.id);
-                  const IconComp = room.icono;
+              {/* Steps pills */}
+              <div className="pointer-events-auto hidden sm:flex items-center gap-1.5 bg-black/50 backdrop-blur-md p-1 rounded-full border border-white/10 text-xs">
+                {ROOMS_STORY.map((room) => {
+                  const isActive = activeStoryIndex === room.stepIndex;
+                  const isChecked = cartItems.includes(room.id);
                   return (
                     <button
                       key={room.id}
                       type="button"
-                      onClick={() => {
-                        setSelectedRoomId(room.id);
-                        toggleCart(room.id);
-                      }}
-                      className={`px-2.5 py-1.5 rounded-xl text-xs font-heading font-bold flex items-center gap-1.5 transition-all border ${
-                        active
-                          ? "bg-[#1D71B5] text-white border-[#1D71B5] ring-2 ring-cyan-300"
-                          : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
+                      onClick={() => toggleCart(room.id)}
+                      className={`px-3 py-1 rounded-full font-heading text-xs font-bold transition-all ${
+                        isActive
+                          ? "bg-[#36A6DE] text-white shadow-lg"
+                          : isChecked
+                          ? "bg-emerald-500/20 text-emerald-300 border border-emerald-400/30"
+                          : "text-slate-300 hover:text-white"
                       }`}
                     >
-                      <IconComp className="w-3.5 h-3.5" />
-                      <span>{room.label.replace("LA ", "").replace("EL ", "").split(" ")[0]}</span>
-                      {active ? <span>✓</span> : <span>+</span>}
+                      {isChecked && "✓ "}
+                      {room.label.replace(/^\d+\.\s*/, "").split(" ")[1]}
                     </button>
                   );
                 })}
               </div>
+            </div>
 
-              <a
-                href={generateWhatsAppUrl()}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="py-2 px-4 rounded-xl bg-gradient-to-r from-[#25D366] to-[#128C7E] hover:from-[#20ba59] hover:to-[#0f7569] text-white font-heading font-extrabold text-xs flex items-center gap-1.5 shadow-md shadow-emerald-500/25 active:scale-95 transition-all ml-auto"
-              >
-                <MessageSquare className="w-3.5 h-3.5 fill-white" />
-                <span>Cotizar Selección ({cartItems.length})</span>
-              </a>
+            {/* CONTENIDO CENTRAL: TARJETAS SEGÚN EL SCROLL (Framer Motion) */}
+            <div className="relative z-20 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 flex-1 flex items-center pointer-events-none">
+              <div className="w-full max-w-lg pointer-events-auto">
+                <AnimatePresence mode="wait">
+                  {/* FASE 0: HERO INICIAL */}
+                  {activeStoryIndex === 0 && (
+                    <motion.div
+                      key="step-0"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      transition={{ duration: 0.35 }}
+                      className="space-y-4"
+                    >
+                      <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-3.5 py-1 text-xs font-heading font-bold text-cyan-300">
+                        <Sparkles className="w-3.5 h-3.5 text-cyan-300" />
+                        <span>Recorrido 3D Interactivo • Desliza hacia abajo</span>
+                      </div>
+
+                      <h1 className="font-heading text-4xl sm:text-5xl font-extrabold text-white tracking-tight leading-[1.08] drop-shadow-md">
+                        Protegemos lo que más tocas.{" "}
+                        <span className="block mt-1 bg-gradient-to-r from-cyan-300 via-sky-200 to-white bg-clip-text text-transparent">
+                          Limpieza y desinfección profunda a domicilio.
+                        </span>
+                      </h1>
+
+                      <p className="text-slate-200 text-sm sm:text-base leading-relaxed">
+                        Acompaña a nuestro equipo en un viaje por cada rincón de la casa y descubre cómo restauramos la pureza de tus muebles.
+                      </p>
+
+                      <div className="pt-2 flex items-center gap-3 text-cyan-300 font-heading font-bold text-xs animate-bounce">
+                        <ChevronDown className="w-4 h-4" />
+                        <span>Desliza para comenzar el recorrido por las habitaciones</span>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {/* FASES 1 A 4: CADA HABITACIÓN */}
+                  {activeStoryIndex >= 1 && activeStoryIndex <= 4 && (
+                    <motion.div
+                      key={`step-${activeStoryIndex}`}
+                      initial={{ opacity: 0, x: -30 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 30 }}
+                      transition={{ duration: 0.35 }}
+                      className="bg-white/95 backdrop-blur-xl text-slate-800 p-6 rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.45)] border border-white/80 space-y-4"
+                    >
+                      {(() => {
+                        const room = ROOMS_STORY[activeStoryIndex - 1];
+                        const Icon = room.icono;
+                        const isAdded = cartItems.includes(room.id);
+
+                        return (
+                          <>
+                            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                              <div className="flex items-center gap-2.5">
+                                <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#1D71B5] to-[#36A6DE] text-white flex items-center justify-center shadow-md">
+                                  <Icon className="w-5 h-5" />
+                                </div>
+                                <div>
+                                  <span className="text-[10px] font-heading font-extrabold uppercase tracking-wider text-[#1D71B5] block">
+                                    {room.label}
+                                  </span>
+                                  <h2 className="font-heading text-lg font-extrabold text-[#0F2438] leading-tight">
+                                    {room.nombreServicio}
+                                  </h2>
+                                </div>
+                              </div>
+                            </div>
+
+                            <p className="text-xs text-slate-600 leading-relaxed">
+                              {room.descripcion}
+                            </p>
+
+                            <div className="grid grid-cols-2 gap-2 text-xs">
+                              <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                                <span className="text-[10px] uppercase font-bold text-slate-400 block">Tiempo de Secado</span>
+                                <span className="font-heading font-bold text-[#1D71B5]">{room.tiempoSecado}</span>
+                              </div>
+                              <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                                <span className="text-[10px] uppercase font-bold text-slate-400 block">Tecnología</span>
+                                <span className="font-heading font-bold text-emerald-600 truncate block">{room.tecnologia.split(" ")[0]} Profunda</span>
+                              </div>
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={() => toggleCart(room.id)}
+                              className={`w-full py-3 px-4 rounded-2xl font-heading font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 cursor-pointer ${
+                                isAdded
+                                  ? "bg-emerald-600 hover:bg-emerald-700 text-white"
+                                  : "bg-gradient-to-r from-[#1D71B5] to-[#36A6DE] text-white"
+                              }`}
+                            >
+                              {isAdded ? (
+                                <>
+                                  <Check className="w-4 h-4" />
+                                  <span>¡Agregado a tu Cotización!</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Plus className="w-4 h-4" />
+                                  <span>Agregar {room.label.replace(/^\d+\.\s*/, "").split(" ")[1]} al Servicio</span>
+                                </>
+                              )}
+                            </button>
+                          </>
+                        );
+                      })()}
+                    </motion.div>
+                  )}
+
+                  {/* FASE 5: OUTRO -> HOGAR LIMPIO Y LLAMADO AL WIZARD */}
+                  {activeStoryIndex === 5 && (
+                    <motion.div
+                      key="step-5"
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ duration: 0.35 }}
+                      className="bg-white/95 backdrop-blur-xl text-slate-800 p-6 rounded-3xl shadow-2xl border border-white/80 space-y-4"
+                    >
+                      <div className="flex items-center gap-2 text-emerald-600 font-heading font-bold text-xs">
+                        <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                        <span>¡Recorrido 3D Completado con Éxito!</span>
+                      </div>
+
+                      <h2 className="font-heading text-2xl font-extrabold text-[#0F2438] leading-tight">
+                        Tu casa merece sentirse como nueva hoy mismo.
+                      </h2>
+
+                      <p className="text-xs text-slate-600 leading-relaxed">
+                        Tienes <strong>{cartItems.length} {cartItems.length === 1 ? "servicio seleccionado" : "servicios seleccionados"}</strong>. Agenda la fecha y hora de tu cita con confirmación inmediata:
+                      </p>
+
+                      <div className="flex flex-col sm:flex-row gap-2.5">
+                        <button
+                          type="button"
+                          onClick={() => scrollToWizard()}
+                          className="flex-1 py-3 px-5 rounded-2xl bg-gradient-to-r from-[#1D71B5] to-[#36A6DE] text-white font-heading font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-500/25 active:scale-95 cursor-pointer"
+                        >
+                          <CalendarCheck className="w-4 h-4" />
+                          <span>Agendar en Línea Ahora</span>
+                          <ArrowRight className="w-4 h-4" />
+                        </button>
+
+                        <a
+                          href={generateWhatsAppUrl()}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="py-3 px-5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-heading font-extrabold text-sm flex items-center justify-center gap-2 shadow-md active:scale-95"
+                        >
+                          <MessageSquare className="w-4 h-4 fill-white" />
+                          <span>WhatsApp</span>
+                        </a>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </div>
+
+            {/* BARRA HUD INFERIOR */}
+            <div className="relative z-20 max-w-7xl mx-auto w-full px-4 sm:px-6 pb-4 flex items-center justify-between pointer-events-none">
+              <div className="pointer-events-auto flex items-center gap-3 bg-black/60 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/10 text-xs text-slate-200">
+                <span>Tu selección: <strong className="text-cyan-300 font-bold">{cartItems.length} {cartItems.length === 1 ? "servicio" : "servicios"}</strong></span>
+                <button
+                  type="button"
+                  onClick={() => scrollToWizard()}
+                  className="font-heading font-bold text-cyan-300 hover:text-white underline cursor-pointer"
+                >
+                  Continuar al Wizard ↓
+                </button>
+              </div>
+
+              <div className="pointer-events-auto hidden sm:flex items-center gap-2 text-xs text-slate-300 bg-black/50 backdrop-blur-md px-3.5 py-1.5 rounded-xl border border-white/10">
+                <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                <span>Garantía de Satisfacción 100% Kanan</span>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* RESTO DEL DISEÑO COMPLETO ORIGINAL DE KANAN */}
+        {/* ============================================================== */}
+        {/* RESTO DE LA LANDING OFICIAL DE KANAN                           */}
+        {/* ============================================================== */}
         <ServicesSection
           onSelectCategoryForWizard={(catId) => scrollToWizard(catId)}
         />
 
         <BeforeAfterGallery onOpenWizard={() => scrollToWizard()} />
 
+        {/* AGENTE WIZARD CONCIERGE DE RESERVAS */}
         <KananConciergeAgent
           selectedMunicipio={selectedMunicipio}
           onSelectMunicipio={setSelectedMunicipio}
