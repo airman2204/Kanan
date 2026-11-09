@@ -227,11 +227,7 @@ export default function Preview3DPage() {
           </div>
         </section>
 
-        {/* RESTO DE LA PÁGINA OFICIAL DE KANAN */}
-        <ServicesSection
-          onSelectCategoryForWizard={(catId) => scrollToWizard(catId)}
-        />
-
+        {/* PASO DIRECTO A RESULTADOS REALES Y PRUEBA SOCIAL (SIN REPETIR SERVICIOS) */}
         <BeforeAfterGallery onOpenWizard={() => scrollToWizard()} />
 
         <KananConciergeAgent
