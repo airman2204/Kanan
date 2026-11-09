@@ -1,22 +1,36 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { MunicipioZMG } from "@/types/crm";
+import {
+  Timer,
+  CalendarCheck,
+  MapPin,
+  ArrowRight,
+  ShieldCheck,
+  Star,
+  CheckCircle2,
+  Award,
+  Zap,
+} from "lucide-react";
 import { StickyHeader } from "@/components/landing/StickyHeader";
-import { HeroSection } from "@/components/landing/HeroSection";
-import { ServicesSection } from "@/components/landing/ServicesSection";
 import { BeforeAfterGallery } from "@/components/landing/BeforeAfterGallery";
 import { KananConciergeAgent } from "@/components/landing/KananConciergeAgent";
 import { SocialProofAndFAQ } from "@/components/landing/SocialProofAndFAQ";
 import { Footer } from "@/components/landing/Footer";
+import { MobileBottomBar } from "@/components/landing/MobileBottomBar";
 import { HalloweenBats } from "@/components/landing/HalloweenBats";
 import { PapelPicado } from "@/components/landing/PapelPicado";
-import { MobileBottomBar } from "@/components/landing/MobileBottomBar";
+import { MunicipioZMG } from "@/types/crm";
+import { InteractiveTowerHero } from "@/components/interactive/InteractiveTowerHero";
+import confetti from "canvas-confetti";
 
 export default function HomePage() {
   const [selectedMunicipio, setSelectedMunicipio] = useState<MunicipioZMG>("Guadalajara");
   const [preselectedCategory, setPreselectedCategory] = useState<string | null>(null);
   const [modoHalloween, setModoHalloween] = useState<boolean>(false);
+  const [selectedSpotId, setSelectedSpotId] = useState<string | null>(null);
+  const [cartItems, setCartItems] = useState<string[]>([]);
+  const [isChatOpen, setIsChatOpen] = useState<boolean>(false);
 
   useEffect(() => {
     // 1. Desactivar restauración automática de scroll del navegador para que siempre inicie arriba al recargar
@@ -25,14 +39,13 @@ export default function HomePage() {
         window.history.scrollRestoration = "manual";
       }
 
-      // Si la URL traía hash a agendar, limpiarlo y asegurar scroll arriba
       if (window.location.hash) {
         window.history.replaceState(null, "", window.location.pathname);
       }
       window.scrollTo({ top: 0, left: 0, behavior: "instant" });
     }
 
-    // Consultar el estado del modo Halloween público sin requerir autenticación
+    // Consultar el estado del modo Halloween público
     fetch("/api/config")
       .then((res) => res.json())
       .then((data) => {
@@ -43,14 +56,29 @@ export default function HomePage() {
       .catch(() => {});
   }, []);
 
-  const scrollToWizard = (categoryId?: string) => {
+  const toggleCart = (id: string) => {
+    setCartItems((prev) => {
+      const exists = prev.includes(id);
+      const next = exists ? prev.filter((item) => item !== id) : [...prev, id];
+      if (!exists) {
+        try {
+          confetti({
+            particleCount: 25,
+            spread: 55,
+            origin: { y: 0.7 },
+            colors: ["#36A6DE", "#1D71B5", "#25D366"],
+          });
+        } catch {}
+      }
+      return next;
+    });
+  };
+
+  const handleOpenChat = (categoryId?: string) => {
     if (categoryId) {
       setPreselectedCategory(categoryId);
     }
-    const el = document.getElementById("agendar");
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth" });
-    }
+    setIsChatOpen(true);
   };
 
   return (
@@ -59,34 +87,197 @@ export default function HomePage() {
       <StickyHeader
         selectedMunicipio={selectedMunicipio}
         onSelectMunicipio={setSelectedMunicipio}
-        onOpenWizard={() => scrollToWizard()}
+        onOpenWizard={() => handleOpenChat()}
         isHalloweenMode={modoHalloween}
       />
       {modoHalloween && <PapelPicado />}
 
       <main className="flex-1">
-        <HeroSection
-          selectedMunicipio={selectedMunicipio}
-          onOpenWizard={() => scrollToWizard()}
-        />
+        {/* ============================================================== */}
+        {/* HERO OFICIAL DE KANAN CON LA TORRE VERTICAL INTERACTIVA        */}
+        {/* ============================================================== */}
+        <section
+          id="inicio"
+          className="relative overflow-hidden bg-gradient-to-b from-[#F0F5FA] via-white to-[#F4F7F9] pt-8 pb-16 sm:pt-14 sm:pb-24 lg:pt-16 lg:pb-28"
+        >
+          {/* Luces difusas de fondo (Glow Glassmorphism original de Kanan) */}
+          <div className="absolute top-0 right-1/4 w-[500px] h-[500px] rounded-full bg-gradient-to-br from-[#36A6DE]/20 to-[#1D71B5]/10 blur-3xl pointer-events-none -z-0" />
+          <div className="absolute bottom-10 left-10 w-[420px] h-[420px] rounded-full bg-gradient-to-tr from-[#355581]/15 to-[#36A6DE]/10 blur-3xl pointer-events-none -z-0" />
 
-        <ServicesSection
-          onSelectCategoryForWizard={(catId) => scrollToWizard(catId)}
-        />
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
+              {/* COLUMNA IZQUIERDA: COPYWRITING & CONVERSIÓN OFICIAL DE KANAN */}
+              <div className="lg:col-span-7 space-y-6">
+                {/* Badges de Cobertura y Actividad en Vivo */}
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <div className="inline-flex items-center gap-1.5 bg-white/90 backdrop-blur-md border border-[#36A6DE]/40 rounded-full px-3.5 py-1.5 shadow-sm text-xs font-heading font-bold text-[#1D71B5]">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping inline-block" />
+                    <MapPin className="w-3.5 h-3.5 text-[#36A6DE]" />
+                    <span>Rutas activas hoy en {selectedMunicipio}</span>
+                  </div>
 
-        <BeforeAfterGallery onOpenWizard={() => scrollToWizard()} />
+                  <a
+                    href="#opiniones"
+                    className="inline-flex items-center gap-1.5 bg-white/90 backdrop-blur-md border border-amber-200/80 rounded-full px-3.5 py-1.5 shadow-sm text-xs font-semibold text-amber-700 hover:bg-amber-50/50 transition-colors"
+                  >
+                    <div className="flex items-center text-amber-400">
+                      <Star className="w-3.5 h-3.5 fill-amber-400" />
+                      <Star className="w-3.5 h-3.5 fill-amber-400" />
+                      <Star className="w-3.5 h-3.5 fill-amber-400" />
+                      <Star className="w-3.5 h-3.5 fill-amber-400" />
+                      <Star className="w-3.5 h-3.5 fill-amber-400" />
+                    </div>
+                    <span>4.9 / 5 en Google Maps</span>
+                  </a>
+                </div>
 
+                {/* Titular Principal de Alto Impacto */}
+                <div className="space-y-4">
+                  <h1 className="font-heading text-4xl sm:text-5xl lg:text-[54px] font-extrabold text-[#355581] tracking-tight leading-[1.08]">
+                    Protegemos lo que más tocas.{" "}
+                    <span className="block mt-1 bg-gradient-to-r from-[#1D71B5] via-[#36A6DE] to-[#355581] bg-clip-text text-transparent">
+                      Limpieza y desinfección profunda a domicilio.
+                    </span>
+                  </h1>
+                  <p className="text-slate-600 text-base sm:text-lg leading-relaxed max-w-2xl">
+                    Renovamos tus salas, colchones y vestiduras con tecnología alemana de{" "}
+                    <strong className="text-[#355581] font-bold">inyección-succión industrial</strong>.
+                    Eliminamos el 90% de la humedad, manchas profundas y ácaros en minutos.
+                  </p>
+                </div>
+
+                {/* Caja de Conversión Rápida - Limpia, directa y sin botones redundantes */}
+                <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-5 sm:p-6 border border-slate-200/90 shadow-[0_12px_40px_-10px_rgba(29,113,181,0.12)] space-y-4">
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <button
+                      type="button"
+                      onClick={() => handleOpenChat()}
+                      className="w-full inline-flex items-center justify-center gap-2.5 bg-gradient-to-r from-[#1D71B5] to-[#36A6DE] hover:from-[#355581] hover:to-[#1D71B5] text-white font-heading font-extrabold text-sm sm:text-base px-7 py-4 rounded-2xl shadow-lg shadow-blue-500/25 transition-all active:scale-[0.98] cursor-pointer"
+                    >
+                      <CalendarCheck className="w-5 h-5 shrink-0" />
+                      <span>{cartItems.length > 0 ? `Cotizar mi Selección (${cartItems.length} ${cartItems.length === 1 ? "área" : "áreas"})` : "Cotizar y Agendar en Línea"}</span>
+                      <ArrowRight className="w-4 h-4 shrink-0" />
+                    </button>
+                  </div>
+
+                  <div className="flex flex-wrap items-center justify-between gap-3 pt-1 border-t border-slate-100 text-xs text-slate-500">
+                    <span className="flex items-center gap-1.5 font-medium">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                      Cotización al instante sin llamadas forzadas
+                    </span>
+                    <span className="flex items-center gap-1.5 font-medium">
+                      <ShieldCheck className="w-4 h-4 text-[#1D71B5] shrink-0" />
+                      Garantía de satisfacción por escrito
+                    </span>
+                  </div>
+                </div>
+
+                {/* 3 Pilares de Confianza */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 pt-2">
+                  <div className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm hover:border-[#36A6DE] transition-colors">
+                    <div className="w-10 h-10 rounded-xl bg-blue-50 text-[#1D71B5] flex items-center justify-center mb-2.5">
+                      <Timer className="w-5 h-5 text-[#36A6DE]" />
+                    </div>
+                    <h3 className="font-heading font-bold text-sm text-[#355581]">
+                      Secado en 3-4 horas*
+                    </h3>
+                    <p className="text-[11px] text-slate-500 leading-snug mt-1">
+                      Usa tus muebles el mismo día con alto poder de extracción de vacío.
+                    </p>
+                  </div>
+
+                  <div className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm hover:border-emerald-400 transition-colors">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-2.5">
+                      <Award className="w-5 h-5 text-emerald-600" />
+                    </div>
+                    <h3 className="font-heading font-bold text-sm text-[#355581]">
+                      Desinfección Hospitalaria
+                    </h3>
+                    <p className="text-[11px] text-slate-500 leading-snug mt-1">
+                      Fórmulas biodegradables sin residuos químicos tóxicos ni cloro.
+                    </p>
+                  </div>
+
+                  <div className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm hover:border-purple-400 transition-colors">
+                    <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center mb-2.5">
+                      <Zap className="w-5 h-5 text-purple-600" />
+                    </div>
+                    <h3 className="font-heading font-bold text-sm text-[#355581]">
+                      Luz UV Antiácaros
+                    </h3>
+                    <p className="text-[11px] text-slate-500 leading-snug mt-1">
+                      Sanitización germicida para personas con alergias y asma.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* COLUMNA DERECHA: LA TORRE VERTICAL INTERACTIVA */}
+              <div className="lg:col-span-5 flex justify-center">
+                <InteractiveTowerHero
+                  selectedSpotId={selectedSpotId}
+                  onSelectSpot={setSelectedSpotId}
+                  cartItems={cartItems}
+                  onToggleCart={toggleCart}
+                  onOpenWizard={handleOpenChat}
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* RESULTADOS REALES Y PRUEBA SOCIAL */}
+        <BeforeAfterGallery onOpenWizard={() => handleOpenChat()} />
+
+        <SocialProofAndFAQ />
+
+        {/* AGENTE FLOTANTE TIPO CHAT DE WHATSAPP / MODAL FLOTANTE */}
         <KananConciergeAgent
           selectedMunicipio={selectedMunicipio}
           onSelectMunicipio={setSelectedMunicipio}
           preselectedCategory={preselectedCategory}
+          preselectedCategories={cartItems}
+          isFloating={true}
+          isOpen={isChatOpen}
+          onClose={() => setIsChatOpen(false)}
         />
-
-        <SocialProofAndFAQ />
       </main>
 
-      <Footer onOpenWizard={() => scrollToWizard()} />
-      <MobileBottomBar onOpenWizard={() => scrollToWizard()} />
+      <Footer onOpenWizard={() => handleOpenChat()} />
+      <MobileBottomBar onOpenWizard={() => handleOpenChat()} />
+
+      {/* BURBUJA FLOTANTE EN DESKTOP (ESQUINA INFERIOR DERECHA) */}
+      {!isChatOpen && (
+        <aside
+          aria-label="Asistente de cotización flotante"
+          className="fixed bottom-6 right-6 z-40 hidden sm:flex items-center gap-3 animate-in fade-in slide-in-from-bottom-4"
+        >
+          <div className="bg-white/95 backdrop-blur-md px-3.5 py-2 rounded-2xl shadow-lg border border-slate-200/80 text-xs font-medium text-slate-700 flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span>¿Cotizamos tus muebles? 🐾</span>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setIsChatOpen(true)}
+            aria-label="Abrir chat con Kanan asistente"
+            className="w-14 h-14 rounded-full bg-gradient-to-tr from-[#1D71B5] via-[#36A6DE] to-[#25D366] p-0.5 shadow-xl shadow-blue-500/30 hover:scale-105 active:scale-95 transition-transform flex items-center justify-center relative cursor-pointer"
+          >
+            <div className="w-full h-full bg-white rounded-full p-1 flex items-center justify-center overflow-hidden">
+              <img
+                src="/assets/brand/kanan-dog.png"
+                alt="Kanan Asistente"
+                className="w-full h-full object-cover rounded-full"
+              />
+            </div>
+            {cartItems.length > 0 && (
+              <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500 text-white text-[11px] font-bold flex items-center justify-center shadow-md animate-bounce">
+                {cartItems.length}
+              </span>
+            )}
+          </button>
+        </aside>
+      )}
     </div>
   );
 }
