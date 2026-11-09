@@ -20,7 +20,6 @@ interface TowerHotspot {
   name: string;
   piso: string;
   servicio: string;
-  precioDesde: string;
   tiempoSecado: string;
   tecnologia: string;
   descripcion: string;
@@ -35,7 +34,6 @@ const TOWER_SPOTS: Record<string, TowerHotspot> = {
     name: "La Recámara",
     piso: "PISO 3 (SUPERIOR)",
     servicio: "Sanitización Antiácaros de Colchón",
-    precioDesde: "$450",
     tiempoSecado: "Listo para dormir el mismo día",
     tecnologia: "Luz UV Germicida 254nm + Succión HEPA",
     descripcion:
@@ -48,7 +46,6 @@ const TOWER_SPOTS: Record<string, TowerHotspot> = {
     name: "La Sala",
     piso: "PISO 2 (MEDIO IZQ)",
     servicio: "Limpieza Profunda de Salas y Sillones",
-    precioDesde: "$599",
     tiempoSecado: "3 a 4 horas* (90% humedad extraída)",
     tecnologia: "Inyección-Succión Alemana Kärcher",
     descripcion:
@@ -61,7 +58,6 @@ const TOWER_SPOTS: Record<string, TowerHotspot> = {
     name: "El Comedor",
     piso: "PISO 2 (MEDIO DER)",
     servicio: "Lavado de Sillas y Tapicería Fina",
-    precioDesde: "$90 / silla",
     tiempoSecado: "2 a 3 horas*",
     tecnologia: "Fórmulas biodegradables de pH neutro",
     descripcion:
@@ -74,7 +70,6 @@ const TOWER_SPOTS: Record<string, TowerHotspot> = {
     name: "La Cochera",
     piso: "PISO 1 (PLANTA BAJA)",
     servicio: "Detallado de Vestiduras Automotrices",
-    precioDesde: "$890",
     tiempoSecado: "2 a 3 horas*",
     tecnologia: "Unidad Móvil en tu Domicilio",
     descripcion:
@@ -139,7 +134,7 @@ export function InteractiveTowerHero({
                     }`}
                   />
 
-                  {/* Píldora de precio / Pin flotante */}
+                  {/* Píldora de servicio / Pin flotante sin precios */}
                   <div
                     className={`px-3 py-1.5 rounded-full font-heading font-extrabold text-xs shadow-xl border flex items-center gap-1.5 transition-all group-hover:scale-110 ${
                       isSelected
@@ -150,10 +145,12 @@ export function InteractiveTowerHero({
                     }`}
                   >
                     <span className="w-2 h-2 rounded-full bg-cyan-400" />
-                    <span>{spot.name}:</span>
-                    <strong className={isCarted ? "text-white" : "text-[#1D71B5] group-hover:text-white"}>
-                      {spot.precioDesde}
-                    </strong>
+                    <span>{spot.name}</span>
+                    {isCarted ? (
+                      <Check className="w-3.5 h-3.5 stroke-[3]" />
+                    ) : (
+                      <Sparkles className="w-3 h-3 text-[#36A6DE] group-hover:text-white" />
+                    )}
                   </div>
                 </div>
               </div>
@@ -202,7 +199,7 @@ export function InteractiveTowerHero({
                 <button
                   type="button"
                   onClick={() => onToggleCart(currentSpot.id)}
-                  className={`flex-1 py-2 px-3 rounded-xl font-heading font-extrabold text-xs flex items-center justify-center gap-1.5 transition-all shadow-md active:scale-95 cursor-pointer ${
+                  className={`flex-1 py-2.5 px-3 rounded-xl font-heading font-extrabold text-xs flex items-center justify-center gap-1.5 transition-all shadow-md active:scale-95 cursor-pointer ${
                     cartItems.includes(currentSpot.id)
                       ? "bg-emerald-600 hover:bg-emerald-700 text-white"
                       : "bg-[#1D71B5] hover:bg-[#355581] text-white"
@@ -216,7 +213,7 @@ export function InteractiveTowerHero({
                   ) : (
                     <>
                       <Plus className="w-3.5 h-3.5" />
-                      <span>Añadir servicio ({currentSpot.precioDesde})</span>
+                      <span>Añadir a mi cotización</span>
                     </>
                   )}
                 </button>
@@ -237,7 +234,7 @@ export function InteractiveTowerHero({
 
       {/* Leyenda de interacción inferior */}
       <p className="text-center text-[11px] text-slate-400 mt-2 font-medium">
-        Toca los botones de precio en la maqueta para ver especificaciones y cotizar.
+        Toca las habitaciones en la maqueta para ver la tecnología y añadir a tu cotización.
       </p>
     </div>
   );
