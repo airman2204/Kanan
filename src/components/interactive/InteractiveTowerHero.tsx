@@ -18,6 +18,7 @@ interface TowerHotspot {
   name: string;
   badge: string;
   servicio: string;
+  precioDesde: string;
   tiempoSecado: string;
   tecnologia: string;
   descripcion: string;
@@ -31,6 +32,7 @@ const TOWER_SPOTS: Record<string, TowerHotspot> = {
     name: "Colchones & Cunas",
     badge: "Sanitización Antiácaros UV",
     servicio: "Desinfección Profunda de Colchón",
+    precioDesde: "Desde $450",
     tiempoSecado: "Listo para dormir el mismo día",
     tecnologia: "Luz UV Germicida 254nm + Succión HEPA",
     descripcion:
@@ -43,6 +45,7 @@ const TOWER_SPOTS: Record<string, TowerHotspot> = {
     name: "Salas & Sillones",
     badge: "Inyección-Succión Alemana",
     servicio: "Lavado de Salas y Tapicería",
+    precioDesde: "Desde $599",
     tiempoSecado: "3 a 4 horas* (90% humedad extraída)",
     tecnologia: "Kärcher Industrial de Doble Turbina",
     descripcion:
@@ -55,6 +58,7 @@ const TOWER_SPOTS: Record<string, TowerHotspot> = {
     name: "Sillas de Comedor",
     badge: "Cuidado Fino de Fibras",
     servicio: "Lavado Artesanal de Sillas",
+    precioDesde: "Desde $90 / silla",
     tiempoSecado: "2 a 3 horas*",
     tecnologia: "Fórmulas biodegradables de pH neutro",
     descripcion:
@@ -67,6 +71,7 @@ const TOWER_SPOTS: Record<string, TowerHotspot> = {
     name: "Vestiduras de Auto",
     badge: "Unidad Móvil a Domicilio",
     servicio: "Detallado de Interiores de Auto",
+    precioDesde: "Desde $890",
     tiempoSecado: "2 a 3 horas*",
     tecnologia: "Extracción industrial en tu cochera",
     descripcion:
@@ -181,11 +186,8 @@ export function InteractiveTowerHero({
                 className="absolute -translate-x-1/2 -translate-y-1/2 z-20 cursor-pointer"
                 onClick={(e) => {
                   e.stopPropagation();
-                  onSelectSpot(spot.id);
-                  // 1 SOLO CLIC: Añadir inmediatamente a la cotización si no estaba agregado
-                  if (!cartItems.includes(spot.id)) {
-                    onToggleCart(spot.id);
-                  }
+                  // Abrir o cerrar la ficha técnica sin forzar el agregado automático
+                  onSelectSpot(isSelected ? null : spot.id);
                 }}
               >
                 <div className="relative group flex items-center justify-center">
@@ -252,7 +254,7 @@ export function InteractiveTowerHero({
           })}
         </motion.div>
 
-        {/* TARJETA GLASSMORPHISM: SOLO APARECE AL DAR CLIC */}
+        {/* TARJETA GLASSMORPHISM: DETALLES COMPLETOS + BOTÓN AÑADIR/QUITAR Y AGENDAR */}
         <AnimatePresence>
           {currentSpot && (
             <motion.div
@@ -261,14 +263,20 @@ export function InteractiveTowerHero({
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 20, scale: 0.95 }}
               transition={{ duration: 0.22, ease: "easeOut" }}
-              className="absolute inset-x-2 sm:inset-x-6 bottom-2 z-30 bg-white/95 backdrop-blur-xl text-slate-800 p-4 sm:p-5 rounded-3xl shadow-[0_20px_45px_rgba(29,113,181,0.22)] border border-white space-y-2.5"
+              className="absolute inset-x-2 sm:inset-x-6 bottom-2 z-30 bg-white/95 backdrop-blur-xl text-slate-800 p-4 sm:p-5 rounded-3xl shadow-[0_20px_45px_rgba(29,113,181,0.22)] border border-white space-y-3"
             >
+              {/* Encabezado con Badge, Título, Precio y Cerrar */}
               <div className="flex items-start justify-between border-b border-slate-100 pb-2">
                 <div>
-                  <span className="text-[10px] font-heading font-extrabold uppercase tracking-wider text-[#1D71B5] block">
-                    {currentSpot.badge}
-                  </span>
-                  <h4 className="font-heading text-sm sm:text-base font-extrabold text-[#0F2438] leading-tight">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-heading font-extrabold uppercase tracking-wider text-[#1D71B5]">
+                      {currentSpot.badge}
+                    </span>
+                    <span className="text-[10px] font-extrabold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                      {currentSpot.precioDesde}
+                    </span>
+                  </div>
+                  <h4 className="font-heading text-sm sm:text-base font-extrabold text-[#0F2438] leading-tight mt-0.5">
                     {currentSpot.servicio}
                   </h4>
                 </div>
@@ -279,50 +287,66 @@ export function InteractiveTowerHero({
                     onSelectSpot(null);
                   }}
                   className="p-1 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+                  title="Cerrar detalle"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
-              <div className="space-y-1 text-xs text-slate-600">
+              {/* Ficha Técnica: Tecnología, Secado y Descripción */}
+              <div className="space-y-1.5 text-xs text-slate-600">
+                <p className="flex items-center gap-1.5 font-medium">
+                  <ShieldCheck className="w-3.5 h-3.5 text-cyan-600 shrink-0" />
+                  <span className="font-bold text-slate-800">Tecnología:</span> {currentSpot.tecnologia}
+                </p>
                 <p className="flex items-center gap-1.5 font-medium">
                   <Timer className="w-3.5 h-3.5 text-[#36A6DE] shrink-0" />
                   <span className="font-bold text-slate-800">Secado:</span> {currentSpot.tiempoSecado}
                 </p>
-                <p className="text-[11px] text-slate-500 leading-snug">{currentSpot.descripcion}</p>
+                <p className="text-[11px] text-slate-500 leading-snug pt-0.5">{currentSpot.descripcion}</p>
               </div>
 
-              <div className="pt-1">
+              {/* Botones de Acción: Toggle Carrito y Cotizar Directo */}
+              <div className="flex items-center gap-2 pt-1">
                 <button
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
-                    const isAlreadyCarted = cartItems.includes(currentSpot.id);
-                    if (isAlreadyCarted) {
-                      // Si ya está agregado, al tocarlo abre directo el chat de cotización
-                      onOpenWizard(currentSpot.id);
-                    } else {
-                      // Si no está agregado, lo añade a la selección
-                      onToggleCart(currentSpot.id);
-                    }
+                    onToggleCart(currentSpot.id);
                   }}
-                  className={`w-full py-3 px-4 rounded-2xl font-heading font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 cursor-pointer ${
+                  className={`flex-1 py-2.5 px-3 rounded-2xl font-heading font-extrabold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all shadow-md active:scale-95 cursor-pointer ${
                     cartItems.includes(currentSpot.id)
-                      ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/25"
-                      : "bg-gradient-to-r from-[#1D71B5] to-[#36A6DE] hover:from-[#355581] hover:to-[#1D71B5] text-white shadow-blue-500/25"
+                      ? "bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 shadow-rose-200/50"
+                      : "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/25"
                   }`}
                 >
                   {cartItems.includes(currentSpot.id) ? (
                     <>
-                      <Check className="w-4 h-4 stroke-[3]" />
-                      <span>✓ Agregado (Cotizar ahora →)</span>
+                      <X className="w-3.5 h-3.5 stroke-[3] text-rose-600" />
+                      <span>Quitar de mi cotización</span>
                     </>
                   ) : (
                     <>
-                      <Plus className="w-4 h-4 stroke-[3]" />
-                      <span>+ Añadir a mi cotización</span>
+                      <Plus className="w-3.5 h-3.5 stroke-[3]" />
+                      <span>+ Añadir ({currentSpot.precioDesde})</span>
                     </>
                   )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // Si aún no estaba en el carrito, sumarlo al agendar
+                    if (!cartItems.includes(currentSpot.id)) {
+                      onToggleCart(currentSpot.id);
+                    }
+                    onOpenWizard(currentSpot.id);
+                  }}
+                  className="py-2.5 px-4 rounded-2xl bg-gradient-to-r from-[#1D71B5] to-[#36A6DE] hover:from-[#165a91] hover:to-[#1D71B5] text-white font-heading font-extrabold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all shadow-md shadow-blue-500/25 active:scale-95 cursor-pointer whitespace-nowrap"
+                >
+                  <span>Cotizar ahora</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>
             </motion.div>
