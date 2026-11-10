@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import Image from "next/image";
 import { motion, useMotionValue, useSpring, useTransform, AnimatePresence } from "framer-motion";
 import {
@@ -106,6 +106,41 @@ export function InteractiveTowerHero({
 }: InteractiveTowerHeroProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const currentSpot = selectedSpotId ? TOWER_SPOTS[selectedSpotId] : null;
+
+  const [boardMousePos, setBoardMousePos] = useState<{ x: number; y: number; activeZone: "top" | "left" | "right" | "tail" | "idle" }>({
+    x: 0.5,
+    y: 0.5,
+    activeZone: "idle",
+  });
+  const boardRef = useRef<HTMLDivElement>(null);
+
+  const handleBoardMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!boardRef.current) return;
+    const rect = boardRef.current.getBoundingClientRect();
+    const nx = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    const ny = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
+
+    let activeZone: "top" | "left" | "right" | "tail" | "idle" = "idle";
+    
+    // Determinar de dónde se asoma el perro según el cuadrante del cursor
+    if (ny < 0.28) {
+      activeZone = "top";
+    } else if (nx < 0.35) {
+      activeZone = "left";
+    } else if (nx > 0.65) {
+      activeZone = "right";
+    } else if (ny > 0.72) {
+      activeZone = "tail";
+    } else {
+      activeZone = "idle";
+    }
+
+    setBoardMousePos({ x: nx, y: ny, activeZone });
+  };
+
+  const handleBoardMouseLeave = () => {
+    setBoardMousePos((prev) => ({ ...prev, activeZone: "idle" }));
+  };
 
   // EFECTO TILT 3D PARALELO Y PROFUNDIDAD MULTICAPA
   const mouseX = useMotionValue(0);
@@ -334,24 +369,114 @@ export function InteractiveTowerHero({
           </div>
         </div>
 
-        {/* MITAD DERECHA: TABLERO DE DIAGNÓSTICO TÉCNICO KANAN (PROPUESTA B) */}
-        <div className="lg:col-span-6 flex items-center justify-center min-h-[580px] lg:min-h-[660px]">
-          <div className="w-full relative bg-gradient-to-b from-white via-slate-50/90 to-blue-50/30 rounded-3xl p-6 sm:p-7 border-t-2 border-l-2 border-white/90 border-r border-b border-slate-200/80 shadow-[0_30px_70px_-15px_rgba(29,113,181,0.2),0_15px_30px_-10px_rgba(0,0,0,0.06),inset_0_1px_2px_rgba(255,255,255,1)] flex flex-col justify-between overflow-hidden">
+        {/* MITAD DERECHA: TABLERO DE DIAGNÓSTICO TÉCNICO KANAN (PROPUESTA B CON PERRITO ASOMADO QUE SIGUE AL CURSOR) */}
+        <div
+          ref={boardRef}
+          onMouseMove={handleBoardMouseMove}
+          onMouseLeave={handleBoardMouseLeave}
+          className="lg:col-span-6 relative flex items-center justify-center min-h-[580px] lg:min-h-[660px]"
+        >
+          {/* PERRITO ASOMADO INTERACTIVO DETRÁS DE LA TARJETA (Z-INDEX 0) */}
+          
+          {/* 1. ASOMADO POR ARRIBA (cuando el mouse está en la parte superior) */}
+          <motion.div
+            initial={false}
+            animate={{
+              y: boardMousePos.activeZone === "top" ? -68 : 20,
+              opacity: boardMousePos.activeZone === "top" ? 1 : 0,
+              scale: boardMousePos.activeZone === "top" ? 1 : 0.9,
+            }}
+            transition={{ type: "spring", stiffness: 220, damping: 20 }}
+            style={{
+              left: `${Math.max(22, Math.min(68, boardMousePos.x * 100))}%`,
+              transform: "translateX(-50%)",
+            }}
+            className="absolute top-0 z-0 pointer-events-none w-36 sm:w-44 select-none drop-shadow-[0_12px_24px_rgba(0,0,0,0.18)]"
+          >
+            <img
+              src="/images/mascot-peek-top.png"
+              alt="Kanan asomándose arriba"
+              className="w-full h-auto object-contain"
+            />
+          </motion.div>
+
+          {/* 2. ASOMADO POR LA IZQUIERDA (cuando el mouse va al lateral izquierdo) */}
+          <motion.div
+            initial={false}
+            animate={{
+              x: boardMousePos.activeZone === "left" ? -65 : 20,
+              opacity: boardMousePos.activeZone === "left" ? 1 : 0,
+              scale: boardMousePos.activeZone === "left" ? 1 : 0.9,
+            }}
+            transition={{ type: "spring", stiffness: 220, damping: 20 }}
+            style={{
+              top: `${Math.max(18, Math.min(65, boardMousePos.y * 100))}%`,
+              transform: "translateY(-50%)",
+            }}
+            className="absolute left-0 z-0 pointer-events-none w-32 sm:w-40 select-none drop-shadow-[0_12px_24px_rgba(0,0,0,0.18)]"
+          >
+            <img
+              src="/images/mascot-peek-left.png"
+              alt="Kanan asomándose izquierda"
+              className="w-full h-auto object-contain"
+            />
+          </motion.div>
+
+          {/* 3. ASOMADO POR LA DERECHA (cuando el mouse va al lateral derecho) */}
+          <motion.div
+            initial={false}
+            animate={{
+              x: boardMousePos.activeZone === "right" ? 65 : -20,
+              opacity: boardMousePos.activeZone === "right" ? 1 : 0,
+              scale: boardMousePos.activeZone === "right" ? 1 : 0.9,
+            }}
+            transition={{ type: "spring", stiffness: 220, damping: 20 }}
+            style={{
+              top: `${Math.max(20, Math.min(65, boardMousePos.y * 100))}%`,
+              transform: "translateY(-50%)",
+            }}
+            className="absolute right-0 z-0 pointer-events-none w-32 sm:w-40 select-none drop-shadow-[0_12px_24px_rgba(0,0,0,0.18)]"
+          >
+            <img
+              src="/images/mascot-peek-right.png"
+              alt="Kanan asomándose derecha"
+              className="w-full h-auto object-contain"
+            />
+          </motion.div>
+
+          {/* 4. COLA ASOMADA Y MOVIÉNDOSE (cuando el cursor está abajo o en reposo) */}
+          <motion.div
+            initial={false}
+            animate={{
+              x: boardMousePos.activeZone === "tail" ? 35 : boardMousePos.activeZone === "idle" ? 30 : 0,
+              opacity: boardMousePos.activeZone === "tail" || boardMousePos.activeZone === "idle" ? 0.9 : 0,
+              scale: boardMousePos.activeZone === "tail" ? 1.05 : 0.95,
+              rotate: [0, 8, -6, 8, 0],
+            }}
+            transition={{
+              rotate: { repeat: Infinity, duration: 1.6, ease: "easeInOut" },
+              default: { type: "spring", stiffness: 200, damping: 20 },
+            }}
+            className="absolute right-1 bottom-10 z-0 pointer-events-none w-16 sm:w-20 select-none drop-shadow-md origin-bottom-left"
+          >
+            <img
+              src="/images/mascot-peek-tail.png"
+              alt="Cola de Kanan"
+              className="w-full h-auto object-contain"
+            />
+          </motion.div>
+
+          {/* TARJETA PRINCIPAL DEL EXPEDIENTE (Z-INDEX 10 PARA QUE TAPE EL CUERPO DEL PERRITO) */}
+          <div className="w-full relative z-10 bg-gradient-to-b from-white via-slate-50/90 to-blue-50/30 rounded-3xl p-6 sm:p-7 border-t-2 border-l-2 border-white/90 border-r border-b border-slate-200/80 shadow-[0_30px_70px_-15px_rgba(29,113,181,0.2),0_15px_30px_-10px_rgba(0,0,0,0.06),inset_0_1px_2px_rgba(255,255,255,1)] flex flex-col justify-between overflow-hidden">
             
             {/* Resplandor biselado superior */}
             <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-cyan-400/60 to-transparent pointer-events-none" />
 
-            {/* CABECERA COMPACTA CON EL PERRITO TÉCNICO ASOMADO */}
+            {/* CABECERA COMPACTA */}
             <div className="flex items-center justify-between pb-4 border-b border-slate-200/80 bg-white/60 -mx-6 -mt-6 px-6 pt-5 rounded-t-3xl backdrop-blur-md">
               <div className="flex items-center gap-3.5">
-                {/* Avatar oficial del perrito técnico con cola animada en miniatura */}
-                <div className="relative w-14 h-14 rounded-2xl bg-gradient-to-tr from-cyan-50 to-blue-50 p-1 border border-cyan-200 shadow-md shrink-0 overflow-hidden">
-                  <Image
-                    src="/assets/brand/kanan-mascota-tecnico.png"
-                    alt="Técnico Kanan"
-                    fill
-                    className="object-contain object-top"
-                  />
+                <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-50 to-blue-50 p-1 border border-cyan-200 shadow-xs shrink-0 overflow-hidden flex items-center justify-center">
+                  <Sparkles className="w-6 h-6 text-[#1D71B5]" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
