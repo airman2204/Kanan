@@ -179,48 +179,26 @@ export default function AdminPage() {
     }
   };
 
-  // Comprobar autenticación segura con reintentos para tolerar micro-cortes sin cerrar sesión
-  const checkAuth = useCallback(async (retryCount = 0) => {
+  // Comprobar autenticación segura
+  const checkAuth = useCallback(async () => {
     try {
       const res = await fetch("/api/auth/session");
-      if (!res.ok && res.status !== 401) {
-        // Error de red temporal o servidor 5xx: no expulsar al usuario
-        if (retryCount < 2) {
-          setTimeout(() => checkAuth(retryCount + 1), 2000);
-          return;
-        }
-      }
       const data = await res.json();
       if (!data.authenticated || data.mustChangePassword) {
-        if (retryCount < 1) {
-          setTimeout(() => checkAuth(retryCount + 1), 1000);
-          return;
-        }
-        if (typeof window !== "undefined" && window.location.host.startsWith("admin.")) {
-          router.push("/");
-        } else {
-          router.push("/admin/login");
-        }
+        window.location.href = "/admin/login";
         return;
       }
       setAuthChecking(false);
     } catch {
-      // Fallo de red local (offline): mantener la pantalla abierta sin cerrar sesión abruptamente
-      if (retryCount < 2) {
-        setTimeout(() => checkAuth(retryCount + 1), 3000);
-      }
+      window.location.href = "/admin/login";
     }
-  }, [router]);
+  }, []);
 
   const fetchCrmData = useCallback(async () => {
     try {
       const res = await fetch("/api/crm");
       if (res.status === 401) {
-        if (typeof window !== "undefined" && window.location.host.startsWith("admin.")) {
-          router.push("/");
-        } else {
-          router.push("/admin/login");
-        }
+        window.location.href = "/admin/login";
         return;
       }
       if (res.ok) {
