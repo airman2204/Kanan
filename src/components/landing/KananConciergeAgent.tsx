@@ -864,32 +864,73 @@ export function KananConciergeAgent({
     );
   };
 
-  // 8. Carga de Fotos
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Función de compresión en cliente para no exceder límites de payload (4.5MB en Vercel)
+  const compressImage = (dataUrl: string, maxWidth = 1200, quality = 0.7): Promise<string> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxWidth || height > maxWidth) {
+          if (width > height) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          } else {
+            width = Math.round((width * maxWidth) / height);
+            height = maxWidth;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          resolve(dataUrl);
+          return;
+        }
+
+        ctx.drawImage(img, 0, 0, width, height);
+        const compressed = canvas.toDataURL("image/jpeg", quality);
+        resolve(compressed);
+      };
+      img.onerror = () => resolve(dataUrl);
+      img.src = dataUrl;
+    });
+  };
+
+  // 8. Carga de Fotos con compresión automática
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
     setErrorActivo(null);
 
     const fileList = Array.from(files).slice(0, 3);
     for (const file of fileList) {
-      if (file.size > 5 * 1024 * 1024) {
-        setErrorActivo("Cada foto debe pesar menos de 5MB.");
+      if (file.size > 15 * 1024 * 1024) {
+        setErrorActivo("Cada foto debe pesar menos de 15MB.");
         return;
       }
     }
 
-    fileList.forEach((file) => {
+    for (const file of fileList) {
       const reader = new FileReader();
-      reader.onload = () => {
+      reader.onload = async () => {
         if (typeof reader.result === "string") {
-          setFotosPreview((prev) => {
-            const next = [...prev, reader.result as string].slice(0, 3);
-            return next;
-          });
+          try {
+            const compressed = await compressImage(reader.result, 1200, 0.7);
+            setFotosPreview((prev) => {
+              const next = [...prev, compressed].slice(0, 3);
+              return next;
+            });
+          } catch {
+            setFotosPreview((prev) => [...prev, reader.result as string].slice(0, 3));
+          }
         }
       };
       reader.readAsDataURL(file);
-    });
+    }
   };
 
   const handleRemovePhoto = (idx: number) => {
@@ -1070,6 +1111,11 @@ export function KananConciergeAgent({
     const direccionCompleta = `${calle} ${numExt}${colonia ? `, Col. ${colonia}` : ""}, CP ${codigoPostal}, ${municipioDetectado}`;
 
     try {
+      // Aseguramos que las fotos enviadas no excedan tamaño incluso si vinieron de un estado previo
+      const fotosOptimizadas = await Promise.all(
+        fotosPreview.slice(0, 3).map((f) => (f.length > 500000 ? compressImage(f, 1000, 0.6) : Promise.resolve(f)))
+      );
+
       const res = await fetch("/api/crm", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -1090,11 +1136,21 @@ export function KananConciergeAgent({
           hora_especifica: horaEspecifica || undefined,
           items_contratados: items,
           notas_servicio: sanitizeInput(notasLibres || "Solicitud vía Kanan asistente"),
-          fotos_estado_actual: fotosPreview,
+          fotos_estado_actual: fotosOptimizadas,
         }),
       });
 
-      const data = await res.json();
+      const resText = await res.text();
+      let data: any = {};
+      try {
+        data = JSON.parse(resText);
+      } catch {
+        if (res.status === 413) {
+          throw new Error("Las fotos adjuntadas son muy pesadas. Por favor sube fotos más ligeras o contáctanos por WhatsApp.");
+        }
+        throw new Error(`Error en el servidor (${res.status}). Por favor contáctanos por WhatsApp.`);
+      }
+
       if (!res.ok || !data.ok) {
         throw new Error(data.error || "No se pudo registrar la solicitud");
       }
