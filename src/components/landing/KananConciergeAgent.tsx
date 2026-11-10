@@ -370,29 +370,35 @@ export function KananConciergeAgent({
       if (addedAreas.length > 0) {
         setSelectedSpots(areas);
 
-        const primeraNueva = addedAreas[0];
-        const restantesNuevas = addedAreas.slice(1);
-        const nombrePrimera = spotNameMap[primeraNueva] || primeraNueva;
+        // Identificar todas las áreas que el usuario aún NO ha especificado con una pieza elegida
+        const categoriasConPieza = piezasSeleccionadasMultiples.map((p) => p.categoriaId);
+        const areasSinPieza = areas.filter((a) => !categoriasConPieza.includes(a));
 
-        setSelectedCat(primeraNueva);
-        setPendingCategoriesToSpecify((prev) => [...prev, ...restantesNuevas]);
-        setStep("ask_piece");
-        setIsTyping(true);
+        if (areasSinPieza.length > 0) {
+          const siguienteArea = areasSinPieza[0];
+          const siguientesRestantes = areasSinPieza.slice(1);
+          const nombreSiguiente = spotNameMap[siguienteArea] || siguienteArea;
 
-        const timer = setTimeout(() => {
-          setMessages((prev) => [
-            ...prev,
-            {
-              id: `m-add-${Date.now()}`,
-              sender: "agent",
-              text: `¡Excelente! Añadiste también **${nombrePrimera}** a tu cotización 🐾.\n\n¿Qué modelo o tipo es tu **${nombrePrimera}**?`,
-              time: getCurrentTime(),
-            },
-          ]);
-          setIsTyping(false);
-        }, 300);
+          setSelectedCat(siguienteArea);
+          setPendingCategoriesToSpecify(siguientesRestantes);
+          setStep("ask_piece");
+          setIsTyping(true);
 
-        return () => clearTimeout(timer);
+          const timer = setTimeout(() => {
+            setMessages((prev) => [
+              ...prev,
+              {
+                id: `m-add-${Date.now()}`,
+                sender: "agent",
+                text: `¡Excelente! Añadiste también **${nombreSiguiente}** a tu cotización 🐾.\n\n¿Qué modelo o tipo es tu **${nombreSiguiente}**?`,
+                time: getCurrentTime(),
+              },
+            ]);
+            setIsTyping(false);
+          }, 300);
+
+          return () => clearTimeout(timer);
+        }
       }
       return;
     }
@@ -572,10 +578,14 @@ export function KananConciergeAgent({
       },
     ]);
 
-    // Si todavía quedan categorías pendientes de especificar (ej. falta el Carro o el Colchón)
-    if (pendingCategoriesToSpecify.length > 0) {
-      const siguienteCat = pendingCategoriesToSpecify[0];
-      const restantes = pendingCategoriesToSpecify.slice(1);
+    // Calcular qué áreas del carrito global todavía NO tienen una pieza elegida
+    const categoriasConPiezaActualizadas = [...piezasSeleccionadasMultiples, piece].map((p) => p.categoriaId);
+    const areasPendientesReales = selectedSpots.filter((s) => !categoriasConPiezaActualizadas.includes(s));
+
+    // Si todavía quedan categorías pendientes de especificar (ej. falta el Colchón o el Auto)
+    if (areasPendientesReales.length > 0) {
+      const siguienteCat = areasPendientesReales[0];
+      const restantes = areasPendientesReales.slice(1);
       setSelectedCat(siguienteCat);
       setPendingCategoriesToSpecify(restantes);
 
@@ -586,6 +596,9 @@ export function KananConciergeAgent({
       );
       return;
     }
+
+    // Limpiar cola de pendientes ya que todas quedaron cubiertas
+    setPendingCategoriesToSpecify([]);
 
     // Cuando ya se especificaron todas las áreas seleccionadas:
     const resumenPiezas = nuevasPiezas.map((p) => p.nombre).join(" + ");
