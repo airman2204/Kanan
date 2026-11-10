@@ -376,15 +376,60 @@ export function InteractiveTowerHero({
                 <div className="absolute -bottom-5 left-1/2 -translate-x-1/2 translate-y-0.5 w-2 h-2 bg-white border-r border-b border-cyan-200/90 rounded-full" />
               </motion.div>
 
-              {/* Mascota Kanan Técnico de Cuerpo Entero */}
-              <div className="relative w-60 sm:w-72 h-72 sm:h-80 mt-1">
-                <Image
-                  src="/assets/brand/kanan-mascota-tecnico.png"
-                  alt="Técnico Especialista Kanan"
-                  fill
-                  priority
-                  className="object-contain drop-shadow-[0_20px_35px_rgba(29,113,181,0.25)] hover:scale-105 transition-transform duration-300"
+              {/* Mascota Kanan Técnico con Cola Animada y Sombra Realista en el Suelo */}
+              <div className="relative w-64 sm:w-76 h-76 sm:h-88 mt-1 flex items-center justify-center">
+                {/* Sombra de contacto suave en el suelo bajo sus patas */}
+                <motion.div
+                  animate={{
+                    scaleX: [1, 1.05, 1],
+                    opacity: [0.35, 0.45, 0.35],
+                  }}
+                  transition={{
+                    repeat: Infinity,
+                    duration: 3,
+                    ease: "easeInOut",
+                  }}
+                  className="absolute -bottom-2 w-48 sm:w-56 h-7 bg-slate-900/40 blur-md rounded-[100%] pointer-events-none -z-10 shadow-[0_4px_12px_rgba(0,0,0,0.3)]"
                 />
+
+                {/* Contenedor relativo de las capas de la mascota */}
+                <div className="relative w-full h-full">
+                  {/* Capa de la Cola: Animada con movimiento orgánico de vaivén */}
+                  <motion.div
+                    animate={{
+                      rotate: [0, -14, 12, -10, 8, 0],
+                    }}
+                    transition={{
+                      repeat: Infinity,
+                      duration: 1.4,
+                      ease: "easeInOut",
+                    }}
+                    style={{
+                      transformOrigin: "75.9% 65.9%",
+                    }}
+                    className="absolute inset-0 w-full h-full pointer-events-none z-10 drop-shadow-[0_15px_25px_rgba(29,113,181,0.2)]"
+                  >
+                    <Image
+                      src="/assets/brand/kanan-mascota-cola.png"
+                      alt=""
+                      aria-hidden="true"
+                      fill
+                      priority
+                      className="object-contain"
+                    />
+                  </motion.div>
+
+                  {/* Capa del Cuerpo y Cabeza (Fija) */}
+                  <div className="absolute inset-0 w-full h-full z-20">
+                    <Image
+                      src="/assets/brand/kanan-mascota-cuerpo.png"
+                      alt="Técnico Especialista Kanan"
+                      fill
+                      priority
+                      className="object-contain drop-shadow-[0_22px_38px_rgba(29,113,181,0.26)] hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
 
