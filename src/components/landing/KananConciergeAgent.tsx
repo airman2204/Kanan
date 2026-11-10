@@ -388,6 +388,11 @@ export function KananConciergeAgent({
 
     const timer = setTimeout(() => {
       if (areas.length > 0) {
+        // Tomar la primera categoría seleccionada para desplegar sus piezas específicas
+        const primeraArea = areas[0];
+        const catNormalizada = primeraArea === "comedor" ? "salas" : primeraArea;
+        setSelectedCat(catNormalizada);
+
         const nombresAreas = areas.map((id) => spotNameMap[id] || id).join(" + ");
         setMessages([
           {
@@ -399,11 +404,11 @@ export function KananConciergeAgent({
           {
             id: "m-2",
             sender: "agent",
-            text: `¡Excelente elección! Veo que seleccionaste: 🐾\n📍 **${nombresAreas}**\n\nVamos a preparar tu cotización personalizada con inspección de manchas. Para validar cobertura en Jalisco, ¿cuál es tu Código Postal (5 dígitos)?`,
+            text: `¡Excelente elección! Veo que seleccionaste: 🐾\n📍 **${nombresAreas}**\n\n¿Cuál de estas opciones describe mejor tu pieza principal?`,
             time: getCurrentTime(),
           },
         ]);
-        setStep("ask_cp");
+        setStep("ask_piece");
       } else {
         setMessages([
           {
