@@ -30,6 +30,14 @@ import {
   sanitizeInput,
 } from "@/lib/utils/securityValidation";
 
+// Mapeo de spots de la torre hacia la categoría del catálogo
+const SPOT_TO_CAT_MAP: Record<string, string> = {
+  salas: "salas",
+  comedor: "comedor",
+  colchones: "colchones",
+  autos: "autos",
+};
+
 interface CatalogPiece {
   id: string;
   nombre: string;
@@ -44,6 +52,11 @@ const PIEZAS_CATALOGO: CatalogPiece[] = [
   { id: "loveseat-sofa", nombre: "Sofá 2 o 3 Plazas / Sofá Cama", categoriaId: "salas", categoriaNombre: "Salas y Sillas" },
   { id: "sillon-individual", nombre: "Sillón Individual / Reclinable", categoriaId: "salas", categoriaNombre: "Salas y Sillas" },
   { id: "silla-comedor", nombre: "Sillas de Comedor Tapizadas", categoriaId: "salas", categoriaNombre: "Salas y Sillas" },
+  // Comedor específico (para cuando se elige en la maqueta)
+  { id: "sillas-comedor-4", nombre: "Juego de 4 Sillas Tapizadas", categoriaId: "comedor", categoriaNombre: "Sillas de Comedor" },
+  { id: "sillas-comedor-6", nombre: "Juego de 6 Sillas Tapizadas", categoriaId: "comedor", categoriaNombre: "Sillas de Comedor" },
+  { id: "sillas-comedor-8", nombre: "Juego de 8 Sillas Tapizadas", categoriaId: "comedor", categoriaNombre: "Sillas de Comedor" },
+  { id: "sillas-comedor-ind", nombre: "Sillas de Comedor Sueltas / Por pieza", categoriaId: "comedor", categoriaNombre: "Sillas de Comedor" },
   // Tapetes
   { id: "tapete-chico", nombre: "Tapete Chico (hasta 1.5x1m)", categoriaId: "tapetes", categoriaNombre: "Tapetes" },
   { id: "tapete-mediano", nombre: "Tapete Mediano (hasta 2x1.5m)", categoriaId: "tapetes", categoriaNombre: "Tapetes" },
@@ -352,9 +365,8 @@ export function KananConciergeAgent({
     // Siempre le damos prioridad a lo que el usuario seleccionó en la maqueta
     if (areas.length > 0) {
       setSelectedSpots(areas);
-      const normalizadas = areas.map((a) => (a === "comedor" ? "salas" : a));
-      const primeraArea = normalizadas[0];
-      const restantes = normalizadas.slice(1);
+      const primeraArea = areas[0];
+      const restantes = areas.slice(1);
 
       setSelectedCat(primeraArea);
       setPendingCategoriesToSpecify(restantes);
