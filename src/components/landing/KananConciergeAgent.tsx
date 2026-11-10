@@ -342,6 +342,12 @@ export function KananConciergeAgent({
   useEffect(() => {
     setIsTyping(true);
 
+    const areas = preselectedCategories && preselectedCategories.length > 0
+      ? preselectedCategories
+      : preselectedCategory
+      ? [preselectedCategory]
+      : [];
+
     // Revisar si existe borrador guardado en localStorage con vigencia de 30 minutos
     let draft: any = null;
     if (typeof window !== "undefined") {
@@ -359,6 +365,52 @@ export function KananConciergeAgent({
       } catch {}
     }
 
+    // SI EL USUARIO ACABA DE MODIFICAR SU SELECCIÓN EN LA CASITA:
+    // Comparamos si las áreas que vienen de la casita cambiaron respecto a las del borrador.
+    // Si cambiaron (ej: agregó un carro o una sala nueva), priorizamos la nueva selección de la casita.
+    const areasCambiaron = draft && (
+      !draft.selectedSpots ||
+      draft.selectedSpots.length !== areas.length ||
+      areas.some((a) => !draft.selectedSpots.includes(a))
+    );
+
+    if (areas.length > 0 && (areasCambiaron || !draft)) {
+      // Prioridad a la nueva selección en la torre
+      setSelectedSpots(areas);
+      const normalizadas = areas.map((a) => (a === "comedor" ? "salas" : a));
+      const primeraArea = normalizadas[0];
+      const restantes = normalizadas.slice(1);
+
+      setSelectedCat(primeraArea);
+      setPendingCategoriesToSpecify(restantes);
+      setPiezasSeleccionadasMultiples([]);
+
+      const nombresAreas = areas.map((id) => spotNameMap[id] || id).join(" + ");
+      const nombrePrimera = spotNameMap[primeraArea] || primeraArea;
+
+      const timer = setTimeout(() => {
+        setMessages([
+          {
+            id: `m-init-${Date.now()}-1`,
+            sender: "agent",
+            text: "¡Hola! 👋 Soy Kanan asistente.",
+            time: getCurrentTime(),
+          },
+          {
+            id: `m-init-${Date.now()}-2`,
+            sender: "agent",
+            text: `¡Excelente elección! Veo que seleccionaste: 🐾\n📍 **${nombresAreas}**\n\nPrimero, ¿qué modelo o tipo es tu **${nombrePrimera}**?`,
+            time: getCurrentTime(),
+          },
+        ]);
+        setStep("ask_piece");
+        setIsTyping(false);
+      }, 350);
+
+      return () => clearTimeout(timer);
+    }
+
+    // Si NO cambió la selección de la casita y hay un borrador vigente, restaurarlo
     if (draft && draft.step && draft.step !== "ask_category") {
       if (draft.selectedSpots) setSelectedSpots(draft.selectedSpots);
       if (draft.codigoPostal) setCodigoPostal(draft.codigoPostal);
@@ -392,17 +444,10 @@ export function KananConciergeAgent({
       return;
     }
 
-    const areas = preselectedCategories && preselectedCategories.length > 0
-      ? preselectedCategories
-      : preselectedCategory
-      ? [preselectedCategory]
-      : [];
-
     setSelectedSpots(areas);
 
     const timer = setTimeout(() => {
       if (areas.length > 0) {
-        // Normalizar las áreas seleccionadas (salas, autos, colchones, etc.)
         const normalizadas = areas.map((a) => (a === "comedor" ? "salas" : a));
         const primeraArea = normalizadas[0];
         const restantes = normalizadas.slice(1);
