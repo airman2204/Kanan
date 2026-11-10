@@ -97,17 +97,24 @@ export function InteractiveTowerHero({
   const containerRef = useRef<HTMLDivElement>(null);
   const currentSpot = selectedSpotId ? TOWER_SPOTS[selectedSpotId] : null;
 
-  // EFECTO TILT 3D SUAVE AL MOVER EL MOUSE
+  // EFECTO TILT 3D PARALELO Y PROFUNDIDAD MULTICAPA
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
-  const springConfig = { damping: 25, stiffness: 120 };
+  const springConfig = { damping: 20, stiffness: 140 };
   const smoothX = useSpring(mouseX, springConfig);
   const smoothY = useSpring(mouseY, springConfig);
 
-  const rotateX = useTransform(smoothY, [-0.5, 0.5], [6, -6]);
-  const rotateY = useTransform(smoothX, [-0.5, 0.5], [-8, 8]);
-  const shadowX = useTransform(smoothX, [-0.5, 0.5], [-20, 20]);
+  // Rotaciones dinámicas
+  const rotateX = useTransform(smoothY, [-0.5, 0.5], [14, -14]);
+  const rotateY = useTransform(smoothX, [-0.5, 0.5], [-16, 16]);
+  
+  // Parallax multicapa en profundidad
+  const shadowX = useTransform(smoothX, [-0.5, 0.5], [-35, 35]);
+  const shadowY = useTransform(smoothY, [-0.5, 0.5], [15, -15]);
+  const pedestalX = useTransform(smoothX, [-0.5, 0.5], [-12, 12]);
+  const haloX = useTransform(smoothX, [-0.5, 0.5], [20, -20]);
+  const haloY = useTransform(smoothY, [-0.5, 0.5], [20, -20]);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!containerRef.current) return;
@@ -142,53 +149,89 @@ export function InteractiveTowerHero({
       {/* CONTENEDOR SPLIT EN 2 MITADES: IZQUIERDA TORRE GRANDE, DERECHA FICHA GIGANTE */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
         
-        {/* MITAD IZQUIERDA: LA TORRE VERTICAL EN FORMATO GRANDE (COLUMNA DE 6 O 7) */}
+        {/* MITAD IZQUIERDA: LA TORRE VERTICAL EN FORMATO GRANDE CON PROFUNDIDAD 3D */}
         <div className="lg:col-span-6 flex flex-col items-center justify-center">
           <div
             ref={containerRef}
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
-            className="relative w-full max-w-md select-none flex items-center justify-center py-2"
-            style={{ perspective: 1200 }}
+            className="relative w-full max-w-lg select-none flex items-center justify-center py-4"
+            style={{ perspective: 1400 }}
           >
-            {/* CONTENEDOR 2.5D CON TILT E INCLINACIÓN SUAVE */}
+            {/* Halo de luz volumétrica posterior en contra-movimiento (Backdrop Depth) */}
+            <motion.div
+              style={{ x: haloX, y: haloY }}
+              className="absolute w-72 h-72 sm:w-96 sm:h-96 rounded-full bg-gradient-to-tr from-[#36A6DE]/25 via-[#1D71B5]/20 to-emerald-400/15 blur-3xl pointer-events-none -z-20"
+            />
+
+            {/* CONTENEDOR 3D CON PERSPECTIVA Y TILT */}
             <motion.div
               style={{
                 rotateX,
                 rotateY,
                 transformStyle: "preserve-3d",
               }}
-              className="relative w-full aspect-[9/16] min-h-[520px] sm:min-h-[640px] lg:min-h-[700px] flex items-center justify-center"
+              className="relative w-full aspect-[9/16] min-h-[540px] sm:min-h-[660px] lg:min-h-[720px] flex items-center justify-center"
             >
+              {/* PEDESTAL / BASE ISOMÉTRICA ILUMINADA CON REFLEJO EN EL SUELO */}
+              <motion.div
+                style={{
+                  x: pedestalX,
+                  transform: "translateZ(-40px) rotateX(65deg)",
+                }}
+                className="absolute -bottom-6 inset-x-8 h-28 rounded-[100%] bg-gradient-to-b from-cyan-400/20 via-[#1D71B5]/20 to-transparent blur-md border-2 border-cyan-300/30 shadow-[0_20px_50px_rgba(29,113,181,0.35)] pointer-events-none -z-10"
+              />
+
               {/* Sombra de contacto suave en el suelo con movimiento sutil */}
               <motion.div
-                style={{ x: shadowX }}
-                className="absolute -bottom-2 inset-x-12 h-8 bg-[#1D71B5]/12 blur-2xl rounded-full pointer-events-none -z-10"
+                style={{ x: shadowX, y: shadowY }}
+                className="absolute -bottom-4 inset-x-12 h-10 bg-slate-900/30 blur-2xl rounded-full pointer-events-none -z-10"
               />
 
               {/* CONTENEDOR DE LEVITACIÓN / RESPIRACIÓN ORGÁNICA */}
               <motion.div
                 animate={{
-                  y: [-4, 4, -4],
+                  y: [-6, 6, -6],
                 }}
                 transition={{
                   repeat: Infinity,
-                  duration: 5,
+                  duration: 4.8,
                   ease: "easeInOut",
                 }}
+                style={{ transformStyle: "preserve-3d" }}
                 className="relative w-full h-full"
               >
-                {/* Imagen de la Torre en PNG Transparente Flotante */}
-                <Image
-                  src="/assets/diorama/kanan-torre-transparent.png"
-                  alt="Torre Vertical Kanan Limpieza 3D"
-                  fill
-                  priority
-                  sizes="(max-width: 768px) 100vw, 550px"
-                  className="object-contain drop-shadow-[0_25px_45px_rgba(29,113,181,0.22)]"
-                />
+                {/* 1. Capa Posterior de Oclusión / Sombra de Silueta proyectada */}
+                <div
+                  style={{ transform: "translateZ(-20px) scale(0.98)" }}
+                  className="absolute inset-0 pointer-events-none opacity-40 blur-sm brightness-50"
+                >
+                  <Image
+                    src="/assets/diorama/kanan-torre-transparent.png"
+                    alt=""
+                    fill
+                    aria-hidden="true"
+                    sizes="(max-width: 768px) 100vw, 550px"
+                    className="object-contain"
+                  />
+                </div>
 
-                {/* PINES INTERACTIVOS CON PÍLDORA ELEGANTE SOBRE CADA ÁREA */}
+                {/* 2. Capa Principal: Imagen de la Torre en PNG Transparente con Iluminación Especular */}
+                <div
+                  style={{ transform: "translateZ(10px)" }}
+                  className="relative w-full h-full"
+                >
+                  <Image
+                    src="/assets/diorama/kanan-torre-transparent.png"
+                    alt="Torre Vertical Kanan Limpieza 3D"
+                    fill
+                    priority
+                    sizes="(max-width: 768px) 100vw, 550px"
+                    className="object-contain drop-shadow-[0_30px_50px_rgba(29,113,181,0.28)] transition-all duration-300"
+                  />
+                </div>
+
+                {/* 3. PINES INTERACTIVOS FLOTANDO EN EL EJE Z (+35px de profundidad real) */}
                 {Object.values(TOWER_SPOTS).map((spot) => {
                   const isSelected = selectedSpotId === spot.id;
                   const isCarted = cartItems.includes(spot.id);
@@ -199,8 +242,9 @@ export function InteractiveTowerHero({
                       style={{
                         left: `${spot.pinX}%`,
                         top: `${spot.pinY}%`,
+                        transform: "translate(-50%, -50%) translateZ(40px)",
                       }}
-                      className="absolute -translate-x-1/2 -translate-y-1/2 z-20 cursor-pointer"
+                      className="absolute z-20 cursor-pointer"
                       onClick={(e) => {
                         e.stopPropagation();
                         // Abrir o cerrar la ficha técnica sin forzar el agregado automático
@@ -208,6 +252,17 @@ export function InteractiveTowerHero({
                       }}
                     >
                       <div className="relative group flex items-center justify-center">
+                        {/* Halo brillante en 3D bajo el pin */}
+                        <div
+                          className={`absolute -inset-1 rounded-full blur-xs transition-opacity duration-300 pointer-events-none ${
+                            isSelected
+                              ? "bg-cyan-400 opacity-90 scale-125"
+                              : isCarted
+                              ? "bg-emerald-400 opacity-80"
+                              : "bg-blue-400 opacity-40 group-hover:opacity-75"
+                          }`}
+                        />
+
                         {/* Animación efervescente de espuma / burbujas al hacer clic */}
                         <AnimatePresence>
                           {isSelected && (
@@ -238,14 +293,14 @@ export function InteractiveTowerHero({
                           )}
                         </AnimatePresence>
 
-                        {/* Píldora del Servicio */}
+                        {/* Píldora del Servicio con efecto flotante Glass 3D */}
                         <div
-                          className={`px-3.5 py-2 rounded-full font-heading font-extrabold text-xs shadow-xl border flex items-center gap-2 transition-all group-hover:scale-105 whitespace-nowrap ${
+                          className={`px-3.5 py-2 rounded-full font-heading font-extrabold text-xs shadow-2xl border flex items-center gap-2 transition-all duration-200 group-hover:scale-110 whitespace-nowrap backdrop-blur-md ${
                             isSelected
-                              ? "bg-[#1D71B5] text-white border-white ring-4 ring-cyan-200/90 scale-105 shadow-cyan-500/25"
+                              ? "bg-[#1D71B5] text-white border-white ring-4 ring-cyan-200/90 scale-105 shadow-cyan-500/35"
                               : isCarted
-                              ? "bg-emerald-600 text-white border-emerald-400"
-                              : "bg-white/95 text-[#0F2438] border-slate-200/90 hover:border-[#1D71B5] hover:text-[#1D71B5]"
+                              ? "bg-emerald-600 text-white border-emerald-300 shadow-emerald-600/30"
+                              : "bg-white/95 text-[#0F2438] border-slate-200/90 hover:border-[#1D71B5] hover:text-[#1D71B5] hover:shadow-blue-500/20"
                           }`}
                         >
                           <span
@@ -273,7 +328,7 @@ export function InteractiveTowerHero({
           </div>
           <p className="text-xs text-slate-400 font-medium text-center mt-2 flex items-center justify-center gap-1.5">
             <MousePointerClick className="w-4 h-4 text-[#36A6DE]" />
-            Toca los puntos en la torre para ver la ficha en pantalla completa
+            Mueve tu cursor para sentir la perspectiva 3D y toca cada piso
           </p>
         </div>
 
