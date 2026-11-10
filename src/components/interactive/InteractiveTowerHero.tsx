@@ -349,49 +349,42 @@ export function InteractiveTowerHero({
               {/* Resplandor suave posterior */}
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 rounded-full bg-cyan-400/15 blur-3xl pointer-events-none" />
 
-              {/* Globito Flotante Pensando Animado */}
+              {/* Globito Pensando Permanente (Flotación suave continua sin parpadeo) */}
               <motion.div
-                initial={{ opacity: 0, y: 10, scale: 0.9 }}
                 animate={{
-                  opacity: 1,
-                  y: [-3, 3, -3],
-                  scale: 1,
+                  y: [-4, 4, -4],
                 }}
                 transition={{
                   repeat: Infinity,
-                  duration: 3.5,
+                  duration: 4,
                   ease: "easeInOut",
                 }}
-                className="relative z-10 bg-white/95 backdrop-blur-md rounded-2xl px-5 py-3 shadow-[0_10px_30px_rgba(29,113,181,0.18)] border border-cyan-200/80 max-w-xs text-center mb-1"
+                className="relative z-10 bg-white/95 backdrop-blur-md rounded-2xl px-6 py-3.5 shadow-[0_12px_30px_rgba(29,113,181,0.18)] border border-cyan-200/90 text-center mb-2"
               >
-                <div className="flex items-center justify-center gap-1.5 text-xs sm:text-sm font-heading font-extrabold text-[#355581]">
+                <div className="flex items-center justify-center gap-2 text-sm sm:text-base font-heading font-extrabold text-[#355581]">
                   <span>¿Qué área de tu casa limpiamos hoy?</span>
-                  <span className="text-base animate-pulse">✨</span>
+                  {/* Animación continua de 3 puntos suspensivos pensando */}
+                  <span className="inline-flex items-center gap-0.5 ml-0.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-bounce" style={{ animationDelay: "0ms" }} />
+                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-bounce" style={{ animationDelay: "180ms" }} />
+                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-bounce" style={{ animationDelay: "360ms" }} />
+                  </span>
                 </div>
-                <p className="text-[11px] text-slate-500 mt-0.5 font-medium leading-snug">
-                  Toca las píldoras en la casa para ver el proceso y equipo.
-                </p>
 
-                {/* Burbujitas de pensamiento apuntando a la mascota */}
-                <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-3 h-3 bg-white border-r border-b border-cyan-200/80 rounded-full shadow-xs" />
-                <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 translate-y-0.5 w-1.5 h-1.5 bg-white border-r border-b border-cyan-200/80 rounded-full" />
+                {/* Burbujitas clásicas de pensamiento tipo cómic apuntando a la mascota */}
+                <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 w-3.5 h-3.5 bg-white border-r border-b border-cyan-200/90 rounded-full shadow-2xs" />
+                <div className="absolute -bottom-5 left-1/2 -translate-x-1/2 translate-y-0.5 w-2 h-2 bg-white border-r border-b border-cyan-200/90 rounded-full" />
               </motion.div>
 
               {/* Mascota Kanan Técnico de Cuerpo Entero */}
-              <div className="relative w-56 sm:w-64 h-64 sm:h-72 mt-2">
+              <div className="relative w-60 sm:w-72 h-72 sm:h-80 mt-1">
                 <Image
                   src="/assets/brand/kanan-mascota-tecnico.png"
                   alt="Técnico Especialista Kanan"
                   fill
                   priority
-                  className="object-contain drop-shadow-[0_15px_30px_rgba(29,113,181,0.22)] hover:scale-105 transition-transform duration-300"
+                  className="object-contain drop-shadow-[0_20px_35px_rgba(29,113,181,0.25)] hover:scale-105 transition-transform duration-300"
                 />
-              </div>
-
-              {/* Badge inferior de confianza */}
-              <div className="inline-flex items-center gap-2 mt-2 bg-white/90 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-slate-200/80 shadow-2xs text-[11px] font-bold text-slate-600">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-                <span>Técnicos certificados listos a domicilio</span>
               </div>
             </div>
 
