@@ -107,7 +107,7 @@ export function InteractiveTowerHero({
   const containerRef = useRef<HTMLDivElement>(null);
   const currentSpot = selectedSpotId ? TOWER_SPOTS[selectedSpotId] : null;
 
-  const [boardActiveZone, setBoardActiveZone] = useState<"top" | "left" | "right" | "bottom" | null>(null);
+  const [boardActiveZone, setBoardActiveZone] = useState<"top" | "left" | "right" | null>(null);
   const boardRef = useRef<HTMLDivElement>(null);
 
   const handleBoardMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -116,22 +116,19 @@ export function InteractiveTowerHero({
     const nx = (e.clientX - rect.left) / rect.width;
     const ny = (e.clientY - rect.top) / rect.height;
 
-    // Calcular distancias a los 4 bordes
+    // Distancias relativas a los 3 bordes donde se asoma el perro
     const distTop = ny;
-    const distBottom = 1 - ny;
     const distLeft = nx;
     const distRight = 1 - nx;
 
-    const minDist = Math.min(distTop, distBottom, distLeft, distRight);
+    const minDist = Math.min(distTop, distLeft, distRight);
 
     if (minDist === distTop) {
       setBoardActiveZone("top");
     } else if (minDist === distLeft) {
       setBoardActiveZone("left");
-    } else if (minDist === distRight) {
-      setBoardActiveZone("right");
     } else {
-      setBoardActiveZone("bottom");
+      setBoardActiveZone("right");
     }
   };
 
@@ -375,7 +372,7 @@ export function InteractiveTowerHero({
         >
           {/* PERRITO ASOMADO EN POSICIONES FIJAS SEGÚN EL BORDE MÁS CERCANO AL CURSOR (Z-INDEX 20 PARA QUE LAS PATITAS SEAN VISIBLES POR ENCIMA DEL BORDE) */}
           
-          {/* 1. ASOMADO POR ARRIBA: se asoma para que sus patas apoyen en el borde superior */}
+          {/* 1. ASOMADO POR ARRIBA: con su colita moviéndose al lado del lomo */}
           <motion.div
             initial={false}
             animate={{
@@ -385,6 +382,19 @@ export function InteractiveTowerHero({
             transition={{ type: "spring", stiffness: 260, damping: 22 }}
             className="absolute top-0 left-8 z-20 pointer-events-none w-48 sm:w-56 select-none drop-shadow-[0_16px_28px_rgba(0,0,0,0.22)]"
           >
+            {/* Colita del perrito superior asomándose detrás del hombro izquierdo */}
+            <motion.div
+              animate={{ rotate: [-8, 14, -8] }}
+              transition={{ repeat: Infinity, duration: 1.2, ease: "easeInOut" }}
+              className="absolute -left-6 top-10 w-16 sm:w-20 origin-bottom-right -z-10"
+            >
+              <img
+                src="/images/mascot-peek-tail.png"
+                alt="Cola alegre"
+                className="w-full h-auto object-contain"
+              />
+            </motion.div>
+
             <img
               src="/images/mascot-peek-top.png"
               alt="Kanan asomándose arriba"
@@ -392,7 +402,7 @@ export function InteractiveTowerHero({
             />
           </motion.div>
 
-          {/* 2. ASOMADO POR LA IZQUIERDA: sale lo suficiente para que sus dedos abracen la tarjeta */}
+          {/* 2. ASOMADO POR LA IZQUIERDA: sale abrazando el lateral */}
           <motion.div
             initial={false}
             animate={{
@@ -409,7 +419,7 @@ export function InteractiveTowerHero({
             />
           </motion.div>
 
-          {/* 3. ASOMADO POR LA DERECHA: sale con suficiente volumen para que el torso y mirada se vean naturales */}
+          {/* 3. ASOMADO POR LA DERECHA */}
           <motion.div
             initial={false}
             animate={{
@@ -424,28 +434,6 @@ export function InteractiveTowerHero({
               alt="Kanan asomándose derecha"
               className="w-full h-auto object-contain"
             />
-          </motion.div>
-
-          {/* 4. ASOMADO POR ABAJO (Cola emergiendo abajo) */}
-          <motion.div
-            initial={false}
-            animate={{
-              y: boardActiveZone === "bottom" ? 110 : 30,
-              opacity: boardActiveZone === "bottom" ? 1 : 0,
-            }}
-            transition={{ type: "spring", stiffness: 260, damping: 22 }}
-            className="absolute -bottom-2 right-12 z-20 pointer-events-none w-24 sm:w-28 select-none drop-shadow-md origin-top-left"
-          >
-            <motion.div
-              animate={{ rotate: [0, 12, -8, 12, 0] }}
-              transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
-            >
-              <img
-                src="/images/mascot-peek-tail.png"
-                alt="Cola de Kanan"
-                className="w-full h-auto object-contain"
-              />
-            </motion.div>
           </motion.div>
 
           {/* TARJETA PRINCIPAL DEL EXPEDIENTE (Z-INDEX 10 PARA QUE TAPE EL CUERPO DEL PERRITO) */}
