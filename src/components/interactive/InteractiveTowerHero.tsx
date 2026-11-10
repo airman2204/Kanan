@@ -326,29 +326,28 @@ export function InteractiveTowerHero({
               </motion.div>
             </motion.div>
           </div>
-          <p className="text-xs text-slate-400 font-medium text-center mt-2 flex items-center justify-center gap-1.5">
-            <MousePointerClick className="w-4 h-4 text-[#36A6DE]" />
-            Mueve tu cursor para sentir la perspectiva 3D y toca cada piso
-          </p>
         </div>
 
-        {/* MITAD DERECHA: FICHA EXPANDIDA GIGANTE EN LA OTRA MITAD DE LA PANTALLA */}
+        {/* MITAD DERECHA: FICHA EN VOLUMEN 3D CON ELEVACIÓN Y RELIEVE */}
         <div className="lg:col-span-6 flex items-center justify-center min-h-[460px]">
           <AnimatePresence mode="wait">
             {currentSpot ? (
               <motion.div
                 key={currentSpot.id}
-                initial={{ opacity: 0, x: 25, scale: 0.96 }}
-                animate={{ opacity: 1, x: 0, scale: 1 }}
-                exit={{ opacity: 0, x: -25, scale: 0.96 }}
-                transition={{ duration: 0.25, ease: "easeOut" }}
-                className="w-full bg-white/95 backdrop-blur-2xl rounded-3xl p-6 sm:p-8 lg:p-10 border border-slate-200/90 shadow-[0_25px_60px_-15px_rgba(29,113,181,0.18)] space-y-6"
+                initial={{ opacity: 0, x: 30, y: 15, scale: 0.94 }}
+                animate={{ opacity: 1, x: 0, y: 0, scale: 1 }}
+                exit={{ opacity: 0, x: -30, y: -15, scale: 0.94 }}
+                transition={{ duration: 0.28, ease: "easeOut" }}
+                className="w-full relative bg-gradient-to-b from-white via-white to-slate-50/90 rounded-3xl p-6 sm:p-8 lg:p-10 border-t-2 border-l-2 border-white/90 border-r border-b border-slate-200/80 shadow-[0_30px_70px_-15px_rgba(29,113,181,0.22),0_15px_30px_-10px_rgba(0,0,0,0.08),inset_0_1px_1px_rgba(255,255,255,0.9)] space-y-6 overflow-hidden"
               >
+                {/* Resplandor biselado 3D superior */}
+                <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent pointer-events-none" />
+
                 {/* Cabecera de la ficha */}
                 <div className="flex items-start justify-between border-b border-slate-100 pb-5">
                   <div className="space-y-1.5">
                     <div>
-                      <span className="text-xs font-heading font-extrabold uppercase tracking-wider text-[#1D71B5] bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
+                      <span className="text-xs font-heading font-extrabold uppercase tracking-wider text-[#1D71B5] bg-blue-50 px-3 py-1 rounded-full border border-blue-200 shadow-2xs">
                         {currentSpot.badge}
                       </span>
                     </div>
@@ -360,16 +359,16 @@ export function InteractiveTowerHero({
                   <button
                     type="button"
                     onClick={() => onSelectSpot(null)}
-                    className="p-2 rounded-2xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+                    className="p-2 rounded-2xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer shadow-2xs border border-slate-200/60"
                     title="Cerrar detalle"
                   >
                     <X className="w-5 h-5" />
                   </button>
                 </div>
 
-                {/* Especificaciones Técnicas Destacadas */}
+                {/* Especificaciones Técnicas Destacadas con Relieve 3D */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="bg-slate-50/80 rounded-2xl p-4 border border-slate-200/60">
+                  <div className="bg-white/90 rounded-2xl p-4 border border-slate-200/90 shadow-[0_4px_14px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,1)]">
                     <div className="flex items-center gap-2 text-cyan-700 font-bold text-xs uppercase tracking-wider mb-1">
                       <ShieldCheck className="w-4 h-4 text-cyan-600 shrink-0" />
                       <span>Tecnología Aplicada</span>
@@ -379,7 +378,7 @@ export function InteractiveTowerHero({
                     </p>
                   </div>
 
-                  <div className="bg-slate-50/80 rounded-2xl p-4 border border-slate-200/60">
+                  <div className="bg-white/90 rounded-2xl p-4 border border-slate-200/90 shadow-[0_4px_14px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,1)]">
                     <div className="flex items-center gap-2 text-cyan-700 font-bold text-xs uppercase tracking-wider mb-1">
                       <Timer className="w-4 h-4 text-[#36A6DE] shrink-0" />
                       <span>Tiempo de Secado</span>
@@ -400,15 +399,15 @@ export function InteractiveTowerHero({
                   </p>
                 </div>
 
-                {/* Acciones principales */}
+                {/* Acciones principales con Botones con Relieve Físico */}
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-3 border-t border-slate-100">
                   <button
                     type="button"
                     onClick={() => onToggleCart(currentSpot.id)}
-                    className={`flex-1 py-3.5 px-5 rounded-2xl font-heading font-extrabold text-sm flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 cursor-pointer ${
+                    className={`flex-1 py-3.5 px-5 rounded-2xl font-heading font-extrabold text-sm flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer ${
                       cartItems.includes(currentSpot.id)
-                        ? "bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 shadow-rose-200/50"
-                        : "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/25"
+                        ? "bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 shadow-[0_4px_14px_rgba(225,29,72,0.18)]"
+                        : "bg-emerald-600 hover:bg-emerald-700 text-white shadow-[0_8px_20px_-4px_rgba(16,185,129,0.45)]"
                     }`}
                   >
                     {cartItems.includes(currentSpot.id) ? (
@@ -432,7 +431,7 @@ export function InteractiveTowerHero({
                       }
                       onOpenWizard(currentSpot.id);
                     }}
-                    className="flex-1 py-3.5 px-6 rounded-2xl bg-gradient-to-r from-[#1D71B5] via-[#36A6DE] to-[#355581] hover:from-[#165a91] hover:to-[#1D71B5] text-white font-heading font-extrabold text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-500/25 active:scale-95 cursor-pointer whitespace-nowrap"
+                    className="flex-1 py-3.5 px-6 rounded-2xl bg-gradient-to-r from-[#1D71B5] via-[#36A6DE] to-[#355581] hover:from-[#165a91] hover:to-[#1D71B5] text-white font-heading font-extrabold text-sm flex items-center justify-center gap-2 transition-all shadow-[0_10px_25px_-5px_rgba(29,113,181,0.4)] active:scale-95 cursor-pointer whitespace-nowrap"
                   >
                     <CalendarCheck className="w-4 h-4" />
                     <span>Cotizar ahora</span>
@@ -441,25 +440,31 @@ export function InteractiveTowerHero({
                 </div>
               </motion.div>
             ) : (
-              /* TARJETA DE BIENVENIDA / PLACEHOLDER CUANDO NO HAY SERVICIO SELECCIONADO */
+              /* TARJETA INICIAL CON ENFOQUE AL CLIENTE Y VOLUMEN 3D */
               <motion.div
                 key="placeholder"
                 initial={{ opacity: 0, scale: 0.96 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.96 }}
                 transition={{ duration: 0.2 }}
-                className="w-full bg-gradient-to-br from-white/90 via-slate-50/60 to-cyan-50/30 backdrop-blur-xl rounded-3xl p-8 sm:p-12 border-2 border-dashed border-cyan-200/80 text-center space-y-6 flex flex-col items-center justify-center"
+                className="w-full relative bg-gradient-to-b from-white via-slate-50/70 to-blue-50/30 rounded-3xl p-8 sm:p-12 border-t-2 border-l-2 border-white border-r border-b border-slate-200/80 shadow-[0_25px_60px_-15px_rgba(29,113,181,0.16),0_10px_25px_-5px_rgba(0,0,0,0.06),inset_0_1px_2px_rgba(255,255,255,1)] text-center space-y-6 flex flex-col items-center justify-center overflow-hidden"
               >
-                <div className="w-16 h-16 rounded-3xl bg-cyan-50 text-[#1D71B5] border border-cyan-200 flex items-center justify-center shadow-inner">
+                {/* Resplandor suave */}
+                <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-cyan-400/15 blur-2xl pointer-events-none" />
+
+                <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-cyan-500/15 to-blue-500/10 text-[#1D71B5] border border-cyan-200/80 flex items-center justify-center shadow-[0_8px_16px_rgba(54,166,222,0.15)]">
                   <Sparkles className="w-8 h-8 text-[#36A6DE]" />
                 </div>
 
-                <div className="space-y-2 max-w-md">
-                  <h3 className="font-heading text-xl sm:text-2xl font-extrabold text-[#355581]">
-                    Selecciona un piso en la torre
+                <div className="space-y-3 max-w-md">
+                  <span className="text-[11px] font-heading font-extrabold uppercase tracking-widest text-[#1D71B5] bg-blue-50/80 px-3 py-1 rounded-full border border-blue-200/60">
+                    Tu hogar impecable
+                  </span>
+                  <h3 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#355581] leading-tight">
+                    ¿Qué área de tu casa deseas renovar hoy?
                   </h3>
-                  <p className="text-slate-500 text-sm leading-relaxed">
-                    Toca las píldoras de <strong>Colchones</strong>, <strong>Salas</strong>, <strong>Comedor</strong> o <strong>Autos</strong> en la maqueta 3D para inspeccionar la tecnología alemana, tiempos de secado y agregarlos a tu cotización.
+                  <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
+                    Toca en la maqueta el mueble o espacio que te gustaría limpiar para conocer nuestro proceso especializado y sumarlo a tu cotización a domicilio.
                   </p>
                 </div>
               </motion.div>
