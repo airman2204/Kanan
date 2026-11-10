@@ -23,6 +23,7 @@ import {
   Bell,
   BellOff,
   Volume2,
+  Workflow,
 } from "lucide-react";
 import { soundEngine } from "@/lib/audio/soundEffects";
 import { AdminToastContainer, AdminToast } from "@/components/admin/AdminToastContainer";
@@ -42,8 +43,9 @@ import { ClientesTable } from "@/components/admin/ClientesTable";
 import { CalendarCitasView } from "@/components/admin/CalendarCitasView";
 import { MarketingAnalyticsView } from "@/components/admin/MarketingAnalyticsView";
 import { ResumenDashboard } from "@/components/admin/ResumenDashboard";
+import { AgentFlowCanvas } from "@/components/admin/agent-flow/AgentFlowCanvas";
 
-type AdminSection = "resumen" | "kanban" | "calendario" | "clientes" | "chat" | "marketing" | "configuracion";
+type AdminSection = "resumen" | "kanban" | "calendario" | "clientes" | "chat" | "agente_flow" | "marketing" | "configuracion";
 
 export default function AdminPage() {
   const router = useRouter();
@@ -569,6 +571,13 @@ export default function AdminPage() {
       badge: null,
     },
     {
+      id: "agente_flow" as AdminSection,
+      label: "Flujo del Agente",
+      icon: Workflow,
+      badge: "IA",
+      badgeColor: "bg-cyan-600 text-white",
+    },
+    {
       id: "marketing" as AdminSection,
       label: "Métricas & Marketing",
       icon: BarChart3,
@@ -588,6 +597,7 @@ export default function AdminPage() {
     calendario: "Calendario de citas",
     clientes: "Clientes",
     chat: "Bandeja de Chat",
+    agente_flow: "Flujo del Agente (IA)",
     marketing: "Métricas & Marketing",
     configuracion: "Configuración",
   };
@@ -813,7 +823,14 @@ export default function AdminPage() {
         <AdminToastContainer toasts={toasts} onDismiss={dismissToast} />
 
         {/* CONTENEDOR DE PÁGINA */}
-        <main className="flex-1 p-3 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto space-y-4 sm:space-y-6 min-w-0 overflow-x-hidden">
+        {activeSection === "agente_flow" ? (
+          <main className="flex-1 w-full h-[calc(100vh-65px)] min-h-[600px] overflow-hidden flex flex-col p-2 sm:p-4">
+            <div className="flex-1 w-full h-full rounded-2xl overflow-hidden border border-slate-800 shadow-2xl bg-slate-950">
+              <AgentFlowCanvas onNotify={(msg, type) => addToast({ tipo: type === 'error' ? 'cita_cancelada' : 'cita_confirmada', titulo: 'Flujo del Agente', descripcion: msg })} />
+            </div>
+          </main>
+        ) : (
+          <main className="flex-1 p-3 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto space-y-4 sm:space-y-6 min-w-0 overflow-x-hidden">
           
           {/* SECCIÓN 1: RESUMEN */}
           {activeSection === "resumen" && (
@@ -989,8 +1006,8 @@ export default function AdminPage() {
               </div>
             </div>
           )}
-
         </main>
+        )}
       </div>
     </div>
   );

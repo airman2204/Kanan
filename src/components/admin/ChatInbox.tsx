@@ -322,37 +322,19 @@ export function ChatInbox({
   return (
     <div className="space-y-3 w-full max-w-full overflow-hidden">
       {/* Barra de Control Compacta y Limpia */}
-      <div className="bg-white p-2.5 sm:px-4 sm:py-2.5 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
-        {/* Selector de Pestañas */}
-        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl w-full sm:w-auto">
-          <button
-            type="button"
-            onClick={() => setActiveTab("conversaciones")}
-            className={`flex-1 sm:flex-initial px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center justify-center gap-2 ${
-              activeTab === "conversaciones"
-                ? "bg-[#1D71B5] text-white shadow-xs"
-                : "text-slate-600 hover:text-slate-900"
-            }`}
-          >
-            <MessagesSquare className="w-3.5 h-3.5" />
-            <span>Chat</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab("agente_flow")}
-            className={`flex-1 sm:flex-initial px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center justify-center gap-2 ${
-              activeTab === "agente_flow"
-                ? "bg-[#1D71B5] text-white shadow-xs"
-                : "text-slate-600 hover:text-slate-900"
-            }`}
-          >
-            <Workflow className="w-3.5 h-3.5" />
-            <span>Flujos del Agente</span>
-          </button>
+      <div className="bg-white p-2.5 sm:px-4 sm:py-2.5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between gap-2.5">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-xl bg-[#1D71B5]/10 text-[#1D71B5] flex items-center justify-center font-bold text-xs">
+            <MessagesSquare className="w-4 h-4" />
+          </div>
+          <div>
+            <h3 className="text-xs font-bold text-slate-800">Mensajería en Vivo</h3>
+            <p className="text-[10px] text-slate-400">Atención y seguimiento a prospectos</p>
+          </div>
         </div>
 
         {/* Acciones y Conexión en una sola línea */}
-        <div className="flex items-center justify-between sm:justify-end gap-2 flex-wrap">
+        <div className="flex items-center justify-end gap-2 flex-wrap">
           {/* Indicador de estado */}
           <div className="flex items-center gap-1.5 text-xs font-medium text-slate-600 px-2.5 py-1 bg-slate-50 border border-slate-200 rounded-xl">
             <span
@@ -465,14 +447,8 @@ export function ChatInbox({
         </div>
       )}
 
-      {/* Vista de Flujos o Vista de Conversaciones */}
-      {activeTab === "agente_flow" ? (
-        <div className="rounded-2xl overflow-hidden border border-slate-800 shadow-xl h-[720px] bg-slate-950">
-          <AgentFlowCanvas />
-        </div>
-      ) : (
-        /* Bandeja de Chat con Estilo Moderno Limpio (Sin fondo amarillento) y Responsivo Móvil */
-        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs h-[640px] sm:h-[680px] flex flex-col md:flex-row relative">
+      {/* Bandeja de Chat con Estilo Moderno Limpio (Sin fondo amarillento) y Responsivo Móvil */}
+      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs h-[640px] sm:h-[680px] flex flex-col md:flex-row relative">
           
           {/* Columna Izquierda: Lista de Contactos (Oculta en móvil si hay chat abierto) */}
           <div className={`w-full md:w-80 lg:w-88 border-r border-slate-200 flex flex-col bg-slate-50/70 h-full ${
@@ -1009,7 +985,6 @@ export function ChatInbox({
             )}
           </div>
         </div>
-      )}
     </div>
   );
 }
