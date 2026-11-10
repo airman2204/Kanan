@@ -24,6 +24,8 @@ interface TowerHotspot {
   tiempoSecado: string;
   tecnologia: string;
   descripcion: string;
+  extraccionHumedad: string;
+  esterilizacionAcaros: string;
   pinX: number;
   pinY: number;
 }
@@ -34,10 +36,12 @@ const TOWER_SPOTS: Record<string, TowerHotspot> = {
     name: "Colchones & Cunas",
     badge: "Sanitización Antiácaros UV",
     servicio: "Desinfección Profunda de Colchón",
-    tiempoSecado: "Listo para dormir el mismo día",
+    tiempoSecado: "Listo para dormir hoy",
     tecnologia: "Luz UV Germicida 254nm + Succión HEPA",
     descripcion:
       "Eliminación total de ácaros microscópicos, bacterias y alérgenos en colchón y almohadas sin químicos agresivos.",
+    extraccionHumedad: "92% succión en seco",
+    esterilizacionAcaros: "100% esterilizado UV",
     pinX: 48,
     pinY: 26,
   },
@@ -46,10 +50,12 @@ const TOWER_SPOTS: Record<string, TowerHotspot> = {
     name: "Salas & Sillones",
     badge: "Inyección-Succión Alemana",
     servicio: "Lavado de Salas y Tapicería",
-    tiempoSecado: "3 a 4 horas* (90% humedad extraída)",
+    tiempoSecado: "3 a 4 horas*",
     tecnologia: "Kärcher Industrial de Doble Turbina",
     descripcion:
       "Desincrustamos suciedad acumulada y manchas de alimentos extrayendo el agua sucia en tiempo real a alta presión.",
+    extraccionHumedad: "90% humedad extraída",
+    esterilizacionAcaros: "99.8% biocida neutro",
     pinX: 30,
     pinY: 54,
   },
@@ -62,6 +68,8 @@ const TOWER_SPOTS: Record<string, TowerHotspot> = {
     tecnologia: "Fórmulas biodegradables de pH neutro",
     descripcion:
       "Cuidado artesanal para sillas de tela, terciopelo o vinipiel sin decolorar las fibras ni dejar cercos de humedad.",
+    extraccionHumedad: "88% humedad extraída",
+    esterilizacionAcaros: "100% libre de residuos",
     pinX: 72,
     pinY: 53,
   },
@@ -74,6 +82,8 @@ const TOWER_SPOTS: Record<string, TowerHotspot> = {
     tecnologia: "Extracción industrial en tu cochera",
     descripcion:
       "Limpieza de asientos, alfombra y cajuela sin mover tu auto de casa. Restauramos la frescura y el aroma a nuevo.",
+    extraccionHumedad: "90% humedad extraída",
+    esterilizacionAcaros: "100% aroma a nuevo",
     pinX: 52,
     pinY: 82,
   },
@@ -324,199 +334,226 @@ export function InteractiveTowerHero({
           </div>
         </div>
 
-        {/* MITAD DERECHA: TARJETA 3D CON GIRO FLIP (FRENTE CON MASCOTA / VUELTA CON INFO) */}
-        <div
-          className="lg:col-span-6 flex items-center justify-center min-h-[500px]"
-          style={{ perspective: 1200 }}
-        >
-          <motion.div
-            animate={{ rotateY: currentSpot ? 180 : 0 }}
-            transition={{ duration: 0.65, ease: [0.23, 1, 0.32, 1] }}
-            style={{ transformStyle: "preserve-3d" }}
-            className="w-full relative min-h-[500px] flex items-center justify-center"
-          >
-            {/* ============================================================== */}
-            {/* LADO A (FRENTE): MASCOTA TÉCNICO CON GLOBITO PENSANDO           */}
-            {/* ============================================================== */}
-            <div
-              style={{
-                backfaceVisibility: "hidden",
-                WebkitBackfaceVisibility: "hidden",
-                transform: "rotateY(0deg)",
-              }}
-              className="absolute inset-0 w-full h-full bg-gradient-to-b from-white via-slate-50/80 to-blue-50/40 rounded-3xl p-6 sm:p-8 border-t-2 border-l-2 border-white border-r border-b border-slate-200/80 shadow-[0_25px_60px_-15px_rgba(29,113,181,0.18),0_10px_25px_-5px_rgba(0,0,0,0.06),inset_0_1px_2px_rgba(255,255,255,1)] flex flex-col items-center justify-center overflow-hidden"
-            >
-              {/* Resplandor suave posterior */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 rounded-full bg-cyan-400/15 blur-3xl pointer-events-none" />
+        {/* MITAD DERECHA: TABLERO DE DIAGNÓSTICO TÉCNICO KANAN (PROPUESTA B) */}
+        <div className="lg:col-span-6 flex items-center justify-center min-h-[580px] lg:min-h-[660px]">
+          <div className="w-full relative bg-gradient-to-b from-white via-slate-50/90 to-blue-50/30 rounded-3xl p-6 sm:p-7 border-t-2 border-l-2 border-white/90 border-r border-b border-slate-200/80 shadow-[0_30px_70px_-15px_rgba(29,113,181,0.2),0_15px_30px_-10px_rgba(0,0,0,0.06),inset_0_1px_2px_rgba(255,255,255,1)] flex flex-col justify-between overflow-hidden">
+            
+            {/* Resplandor biselado superior */}
+            <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-cyan-400/60 to-transparent pointer-events-none" />
 
-              {/* Globito Pensando Permanente (Flotación suave continua sin parpadeo) */}
-              <motion.div
-                animate={{
-                  y: [-4, 4, -4],
-                }}
-                transition={{
-                  repeat: Infinity,
-                  duration: 4,
-                  ease: "easeInOut",
-                }}
-                className="relative z-10 bg-white/95 backdrop-blur-md rounded-2xl px-6 py-3.5 shadow-[0_12px_30px_rgba(29,113,181,0.18)] border border-cyan-200/90 text-center mb-2"
-              >
-                <div className="flex items-center justify-center gap-2 text-sm sm:text-base font-heading font-extrabold text-[#355581]">
-                  <span>¿Qué área de tu casa limpiamos hoy?</span>
-                  {/* Animación continua de 3 puntos suspensivos pensando */}
-                  <span className="inline-flex items-center gap-0.5 ml-0.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-bounce" style={{ animationDelay: "0ms" }} />
-                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-bounce" style={{ animationDelay: "180ms" }} />
-                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-bounce" style={{ animationDelay: "360ms" }} />
-                  </span>
+            {/* CABECERA COMPACTA CON EL PERRITO TÉCNICO ASOMADO */}
+            <div className="flex items-center justify-between pb-4 border-b border-slate-200/80 bg-white/60 -mx-6 -mt-6 px-6 pt-5 rounded-t-3xl backdrop-blur-md">
+              <div className="flex items-center gap-3.5">
+                {/* Avatar oficial del perrito técnico con cola animada en miniatura */}
+                <div className="relative w-14 h-14 rounded-2xl bg-gradient-to-tr from-cyan-50 to-blue-50 p-1 border border-cyan-200 shadow-md shrink-0 overflow-hidden">
+                  <Image
+                    src="/assets/brand/kanan-mascota-tecnico.png"
+                    alt="Técnico Kanan"
+                    fill
+                    className="object-contain object-top"
+                  />
                 </div>
-
-                {/* Burbujitas clásicas de pensamiento tipo cómic apuntando a la mascota */}
-                <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 w-3.5 h-3.5 bg-white border-r border-b border-cyan-200/90 rounded-full shadow-2xs" />
-                <div className="absolute -bottom-5 left-1/2 -translate-x-1/2 translate-y-0.5 w-2 h-2 bg-white border-r border-b border-cyan-200/90 rounded-full" />
-              </motion.div>
-
-              {/* Mascota Kanan Técnico con Cola Animada y Sombra Realista en el Suelo */}
-              <div className="relative w-64 sm:w-76 h-76 sm:h-88 mt-1 flex items-center justify-center">
-                {/* Sombra de contacto suave en el suelo bajo sus patas */}
-                <motion.div
-                  animate={{
-                    scaleX: [1, 1.05, 1],
-                    opacity: [0.35, 0.45, 0.35],
-                  }}
-                  transition={{
-                    repeat: Infinity,
-                    duration: 3,
-                    ease: "easeInOut",
-                  }}
-                  className="absolute -bottom-2 w-48 sm:w-56 h-7 bg-slate-900/40 blur-md rounded-[100%] pointer-events-none -z-10 shadow-[0_4px_12px_rgba(0,0,0,0.3)]"
-                />
-
-                {/* Contenedor relativo de las capas de la mascota */}
-                <div className="relative w-full h-full">
-                  {/* Capa de la Cola: Animada con movimiento orgánico de vaivén */}
-                  <motion.div
-                    animate={{
-                      rotate: [0, -14, 12, -10, 8, 0],
-                    }}
-                    transition={{
-                      repeat: Infinity,
-                      duration: 1.4,
-                      ease: "easeInOut",
-                    }}
-                    style={{
-                      transformOrigin: "75.9% 65.9%",
-                    }}
-                    className="absolute inset-0 w-full h-full pointer-events-none z-10 drop-shadow-[0_15px_25px_rgba(29,113,181,0.2)]"
-                  >
-                    <Image
-                      src="/assets/brand/kanan-mascota-cola.png"
-                      alt=""
-                      aria-hidden="true"
-                      fill
-                      priority
-                      className="object-contain"
-                    />
-                  </motion.div>
-
-                  {/* Capa del Cuerpo y Cabeza (Fija) */}
-                  <div className="absolute inset-0 w-full h-full z-20">
-                    <Image
-                      src="/assets/brand/kanan-mascota-cuerpo.png"
-                      alt="Técnico Especialista Kanan"
-                      fill
-                      priority
-                      className="object-contain drop-shadow-[0_22px_38px_rgba(29,113,181,0.26)] hover:scale-105 transition-transform duration-300"
-                    />
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-heading font-extrabold uppercase tracking-widest text-[#1D71B5] bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200">
+                      Técnico Especialista Kanan
+                    </span>
+                    <span className="flex items-center gap-1 text-[11px] font-bold text-emerald-600">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping inline-block" />
+                      En Línea
+                    </span>
                   </div>
+                  <h4 className="font-heading text-sm sm:text-base font-extrabold text-[#0F2438] leading-tight mt-0.5">
+                    Expediente Técnico de Limpieza
+                  </h4>
                 </div>
               </div>
-            </div>
 
-            {/* ============================================================== */}
-            {/* LADO B (REVERSO): FICHA DE SERVICIO AL DARLE LA VUELTA           */}
-            {/* ============================================================== */}
-            <div
-              style={{
-                backfaceVisibility: "hidden",
-                WebkitBackfaceVisibility: "hidden",
-                transform: "rotateY(180deg)",
-              }}
-              className="absolute inset-0 w-full h-full bg-gradient-to-b from-white via-white to-slate-50/90 rounded-3xl p-6 sm:p-8 border-t-2 border-l-2 border-white/90 border-r border-b border-slate-200/80 shadow-[0_30px_70px_-15px_rgba(29,113,181,0.22),0_15px_30px_-10px_rgba(0,0,0,0.08),inset_0_1px_1px_rgba(255,255,255,0.9)] flex flex-col justify-between overflow-hidden"
-            >
-              {/* Resplandor biselado 3D superior */}
-              <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent pointer-events-none" />
-
-              {/* Cabecera de la ficha */}
-              <div className="flex items-start justify-between border-b border-slate-100 pb-4">
-                <div className="space-y-1">
-                  <span className="text-xs font-heading font-extrabold uppercase tracking-wider text-[#1D71B5] bg-blue-50 px-3 py-1 rounded-full border border-blue-200 shadow-2xs inline-block">
-                    {currentSpot?.badge || "Servicio Especializado"}
-                  </span>
-                  <h3 className="font-heading text-xl sm:text-2xl font-extrabold text-[#0F2438] leading-tight mt-1">
-                    {currentSpot?.servicio || "Detalles del Servicio"}
-                  </h3>
-                </div>
-
+              {currentSpot && (
                 <button
                   type="button"
                   onClick={() => onSelectSpot(null)}
-                  className="p-2 rounded-2xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer shadow-2xs border border-slate-200/60"
-                  title="Voltear / Cerrar"
+                  className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer border border-slate-200/60"
+                  title="Cerrar diagnóstico"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-4 h-4" />
                 </button>
-              </div>
+              )}
+            </div>
 
-              {/* Especificaciones Técnicas */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 my-2">
-                <div className="bg-white/90 rounded-2xl p-3.5 border border-slate-200/90 shadow-[0_4px_14px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,1)]">
-                  <div className="flex items-center gap-2 text-cyan-700 font-bold text-xs uppercase tracking-wider mb-1">
-                    <ShieldCheck className="w-4 h-4 text-cyan-600 shrink-0" />
-                    <span>Tecnología</span>
-                  </div>
-                  <p className="font-heading font-bold text-slate-900 text-xs sm:text-sm">
-                    {currentSpot?.tecnologia}
-                  </p>
-                </div>
+            {/* CONTENIDO INTERACTIVO: ESTADO VACÍO (INSPECCIÓN) VS DIAGNÓSTICO DEL ÁREA SELECCIONADA */}
+            <div className="my-4 flex-1 flex flex-col justify-center">
+              <AnimatePresence mode="wait">
+                {currentSpot ? (
+                  /* REPORTE TÉCNICO DEL SERVICIO TOCADO EN LA CASA */
+                  <motion.div
+                    key={currentSpot.id}
+                    initial={{ opacity: 0, y: 12, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -12, scale: 0.98 }}
+                    transition={{ duration: 0.22, ease: "easeOut" }}
+                    className="space-y-4"
+                  >
+                    {/* Título del servicio y badge */}
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="text-[11px] font-heading font-extrabold uppercase tracking-wider text-cyan-700 block">
+                          {currentSpot.badge}
+                        </span>
+                        <h3 className="font-heading text-xl sm:text-2xl font-extrabold text-[#0F2438] leading-tight mt-0.5">
+                          {currentSpot.servicio}
+                        </h3>
+                      </div>
+                      <span className="text-xs font-bold text-slate-600 bg-white px-3 py-1 rounded-full border border-slate-200 shadow-2xs">
+                        {currentSpot.name}
+                      </span>
+                    </div>
 
-                <div className="bg-white/90 rounded-2xl p-3.5 border border-slate-200/90 shadow-[0_4px_14px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,1)]">
-                  <div className="flex items-center gap-2 text-cyan-700 font-bold text-xs uppercase tracking-wider mb-1">
-                    <Timer className="w-4 h-4 text-[#36A6DE] shrink-0" />
-                    <span>Secado</span>
-                  </div>
-                  <p className="font-heading font-bold text-slate-900 text-xs sm:text-sm">
-                    {currentSpot?.tiempoSecado}
-                  </p>
-                </div>
-              </div>
+                    {/* METRICAS DE DIAGNÓSTICO (HUMEDAD + ÁCAROS) */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {/* Medidor 1: Extracción de Humedad */}
+                      <div className="bg-white rounded-2xl p-3.5 border border-slate-200/80 shadow-[0_2px_10px_rgba(0,0,0,0.03)] space-y-2">
+                        <div className="flex items-center justify-between text-xs font-bold text-slate-700">
+                          <span className="flex items-center gap-1.5 text-cyan-700">
+                            <ShieldCheck className="w-4 h-4 text-cyan-600" />
+                            Extracción de Humedad
+                          </span>
+                          <span className="text-cyan-600 font-extrabold font-mono">90%</span>
+                        </div>
+                        {/* Barra de progreso */}
+                        <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden p-0.5 border border-slate-200/50">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: "90%" }}
+                            transition={{ duration: 0.6, ease: "easeOut" }}
+                            className="h-full bg-gradient-to-r from-cyan-400 to-[#1D71B5] rounded-full"
+                          />
+                        </div>
+                        <p className="text-[11px] text-slate-500 font-medium">
+                          {currentSpot.extraccionHumedad}
+                        </p>
+                      </div>
 
-              {/* Descripción */}
-              <div className="space-y-1.5 my-1">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                  ¿Qué incluye este servicio?
-                </h4>
-                <p className="text-slate-600 text-xs sm:text-sm leading-relaxed">
-                  {currentSpot?.descripcion}
-                </p>
-              </div>
+                      {/* Medidor 2: Esterilización UV y Desinfección */}
+                      <div className="bg-white rounded-2xl p-3.5 border border-slate-200/80 shadow-[0_2px_10px_rgba(0,0,0,0.03)] space-y-2">
+                        <div className="flex items-center justify-between text-xs font-bold text-slate-700">
+                          <span className="flex items-center gap-1.5 text-purple-700">
+                            <Sparkles className="w-4 h-4 text-purple-600" />
+                            Esterilización y Alérgenos
+                          </span>
+                          <span className="text-purple-600 font-extrabold font-mono">100%</span>
+                        </div>
+                        {/* Barra de progreso */}
+                        <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden p-0.5 border border-slate-200/50">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: "100%" }}
+                            transition={{ duration: 0.7, ease: "easeOut" }}
+                            className="h-full bg-gradient-to-r from-purple-400 to-indigo-600 rounded-full"
+                          />
+                        </div>
+                        <p className="text-[11px] text-slate-500 font-medium">
+                          {currentSpot.esterilizacionAcaros}
+                        </p>
+                      </div>
+                    </div>
 
-              {/* Acciones principales */}
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-3 border-t border-slate-100">
-                {currentSpot && (
+                    {/* ESPECIFICACIONES TÉCNICAS */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="bg-slate-50/90 rounded-2xl p-3 border border-slate-200/70">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
+                          Maquinaria Certificada
+                        </span>
+                        <p className="font-heading font-bold text-slate-800 text-xs sm:text-sm mt-0.5">
+                          {currentSpot.tecnologia}
+                        </p>
+                      </div>
+
+                      <div className="bg-slate-50/90 rounded-2xl p-3 border border-slate-200/70">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
+                          Tiempo Estimado de Secado
+                        </span>
+                        <p className="font-heading font-bold text-slate-800 text-xs sm:text-sm mt-0.5 flex items-center gap-1">
+                          <Timer className="w-3.5 h-3.5 text-[#36A6DE]" />
+                          {currentSpot.tiempoSecado}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Descripción de proceso */}
+                    <div className="bg-white/90 rounded-2xl p-3.5 border border-slate-200/80 shadow-2xs">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
+                        Alcance del Tratamiento
+                      </span>
+                      <p className="text-slate-600 text-xs sm:text-sm leading-relaxed">
+                        {currentSpot.descripcion}
+                      </p>
+                    </div>
+                  </motion.div>
+                ) : (
+                  /* ESTADO INICIAL: CHECKLIST DE INSPECCIÓN DEL HOGAR */
+                  <motion.div
+                    key="checklist-placeholder"
+                    initial={{ opacity: 0, scale: 0.98 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.98 }}
+                    transition={{ duration: 0.2 }}
+                    className="space-y-4 py-2"
+                  >
+                    <div className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-xs space-y-1.5 text-center">
+                      <h4 className="font-heading text-base sm:text-lg font-extrabold text-[#355581]">
+                        ¿Qué área de tu casa deseas renovar hoy?
+                      </h4>
+                      <p className="text-slate-500 text-xs sm:text-sm leading-relaxed max-w-sm mx-auto">
+                        Toca las píldoras en la maqueta 3D para desplegar el diagnóstico de fibras, maquinaria alemana y nivel de extracción.
+                      </p>
+                    </div>
+
+                    {/* Checklist interactivo de áreas inspeccionables */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      {Object.values(TOWER_SPOTS).map((s) => (
+                        <button
+                          key={s.id}
+                          type="button"
+                          onClick={() => onSelectSpot(s.id)}
+                          className="p-3 rounded-2xl bg-white hover:bg-cyan-50/80 border border-slate-200/80 hover:border-cyan-300 text-left transition-all active:scale-[0.98] shadow-2xs cursor-pointer group flex items-start gap-2.5"
+                        >
+                          <div className="w-7 h-7 rounded-xl bg-cyan-50 group-hover:bg-[#1D71B5] group-hover:text-white text-[#1D71B5] flex items-center justify-center shrink-0 transition-colors text-xs font-bold">
+                            ✓
+                          </div>
+                          <div>
+                            <span className="font-heading font-extrabold text-xs block text-slate-800 group-hover:text-[#1D71B5]">
+                              {s.name}
+                            </span>
+                            <span className="text-[10px] text-slate-400 font-medium block">
+                              {s.badge}
+                            </span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* BOTONES DE ACCIÓN: SUMAR AL PEDIDO Y COTIZAR */}
+            <div className="pt-3 border-t border-slate-200/80 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              {currentSpot ? (
+                <>
                   <button
                     type="button"
                     onClick={() => onToggleCart(currentSpot.id)}
                     className={`flex-1 py-3 px-4 rounded-2xl font-heading font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer ${
                       cartItems.includes(currentSpot.id)
-                        ? "bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 shadow-[0_4px_14px_rgba(225,29,72,0.18)]"
-                        : "bg-emerald-600 hover:bg-emerald-700 text-white shadow-[0_8px_20px_-4px_rgba(16,185,129,0.45)]"
+                        ? "bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 shadow-sm"
+                        : "bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/30"
                     }`}
                   >
                     {cartItems.includes(currentSpot.id) ? (
                       <>
                         <X className="w-4 h-4 stroke-[3] text-rose-600" />
-                        <span>Quitar de mi pedido</span>
+                        <span>Quitar de mi cotización</span>
                       </>
                     ) : (
                       <>
@@ -525,9 +562,7 @@ export function InteractiveTowerHero({
                       </>
                     )}
                   </button>
-                )}
 
-                {currentSpot && (
                   <button
                     type="button"
                     onClick={() => {
@@ -536,16 +571,27 @@ export function InteractiveTowerHero({
                       }
                       onOpenWizard(currentSpot.id);
                     }}
-                    className="flex-1 py-3 px-5 rounded-2xl bg-gradient-to-r from-[#1D71B5] via-[#36A6DE] to-[#355581] hover:from-[#165a91] hover:to-[#1D71B5] text-white font-heading font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-[0_10px_25px_-5px_rgba(29,113,181,0.4)] active:scale-95 cursor-pointer whitespace-nowrap"
+                    className="flex-1 py-3 px-5 rounded-2xl bg-gradient-to-r from-[#1D71B5] via-[#36A6DE] to-[#355581] hover:from-[#165a91] hover:to-[#1D71B5] text-white font-heading font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-md shadow-blue-500/30 active:scale-95 cursor-pointer whitespace-nowrap"
                   >
                     <CalendarCheck className="w-4 h-4" />
                     <span>Cotizar ahora</span>
                     <ArrowRight className="w-4 h-4" />
                   </button>
-                )}
-              </div>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => onOpenWizard()}
+                  className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-[#1D71B5] to-[#36A6DE] hover:from-[#165a91] hover:to-[#1D71B5] text-white font-heading font-extrabold text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-500/25 active:scale-98 cursor-pointer"
+                >
+                  <CalendarCheck className="w-4 h-4" />
+                  <span>Cotizar mi casa completa en línea</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              )}
             </div>
-          </motion.div>
+
+          </div>
         </div>
 
       </div>
