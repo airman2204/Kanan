@@ -122,6 +122,9 @@ export function KananConciergeAgent({
 
   // Multi-áreas seleccionadas de la casita / diorama
   const [selectedSpots, setSelectedSpots] = useState<string[]>([]);
+  // Cola de áreas pendientes por especificar su pieza (ej: primero Sala, luego Auto)
+  const [pendingCategoriesToSpecify, setPendingCategoriesToSpecify] = useState<string[]>([]);
+  const [piezasSeleccionadasMultiples, setPiezasSeleccionadasMultiples] = useState<CatalogPiece[]>([]);
 
   // Estado estructurado del cliente
   const [selectedCat, setSelectedCat] = useState<string>("salas");
@@ -388,12 +391,18 @@ export function KananConciergeAgent({
 
     const timer = setTimeout(() => {
       if (areas.length > 0) {
-        // Tomar la primera categoría seleccionada para desplegar sus piezas específicas
-        const primeraArea = areas[0];
-        const catNormalizada = primeraArea === "comedor" ? "salas" : primeraArea;
-        setSelectedCat(catNormalizada);
+        // Normalizar las áreas seleccionadas (salas, autos, colchones, etc.)
+        const normalizadas = areas.map((a) => (a === "comedor" ? "salas" : a));
+        const primeraArea = normalizadas[0];
+        const restantes = normalizadas.slice(1);
+
+        setSelectedCat(primeraArea);
+        setPendingCategoriesToSpecify(restantes);
+        setPiezasSeleccionadasMultiples([]);
 
         const nombresAreas = areas.map((id) => spotNameMap[id] || id).join(" + ");
+        const nombrePrimera = spotNameMap[primeraArea] || primeraArea;
+
         setMessages([
           {
             id: "m-1",
@@ -404,7 +413,7 @@ export function KananConciergeAgent({
           {
             id: "m-2",
             sender: "agent",
-            text: `¡Excelente elección! Veo que seleccionaste: 🐾\n📍 **${nombresAreas}**\n\n¿Cuál de estas opciones describe mejor tu pieza principal?`,
+            text: `¡Excelente elección! Veo que seleccionaste: 🐾\n📍 **${nombresAreas}**\n\nPrimero, ¿qué modelo o tipo es tu **${nombrePrimera}**?`,
             time: getCurrentTime(),
           },
         ]);
@@ -478,9 +487,12 @@ export function KananConciergeAgent({
     appendAgentMessage(`¡Excelente! Para ${catName}, ¿cuál de estas opciones se adapta mejor a tu necesidad?`, "ask_piece");
   };
 
-  // 2. Pieza
+  // 2. Pieza (Soporta múltiples áreas en cadena)
   const handleSelectPiece = (piece: CatalogPiece) => {
     setSelectedPiece(piece);
+    const nuevasPiezas = [...piezasSeleccionadasMultiples, piece];
+    setPiezasSeleccionadasMultiples(nuevasPiezas);
+
     setMessages((prev) => [
       ...prev,
       {
@@ -491,8 +503,25 @@ export function KananConciergeAgent({
       },
     ]);
 
+    // Si todavía quedan categorías pendientes de especificar (ej. falta el Carro o el Colchón)
+    if (pendingCategoriesToSpecify.length > 0) {
+      const siguienteCat = pendingCategoriesToSpecify[0];
+      const restantes = pendingCategoriesToSpecify.slice(1);
+      setSelectedCat(siguienteCat);
+      setPendingCategoriesToSpecify(restantes);
+
+      const nombreSiguiente = spotNameMap[siguienteCat] || siguienteCat;
+      appendAgentMessage(
+        `¡Anotado! 🐶 ${piece.nombre}.\n\nAhora, para tu **${nombreSiguiente}**, ¿cuál de estas opciones se adapta mejor?`,
+        "ask_piece"
+      );
+      return;
+    }
+
+    // Cuando ya se especificaron todas las áreas seleccionadas en la casita:
+    const resumenPiezas = nuevasPiezas.map((p) => p.nombre).join(" + ");
     appendAgentMessage(
-      `¡Anotado! 🐶 ${piece.nombre}.\n\nPara validar cobertura oficial en Jalisco y calcular tu ruta, ¿cuál es tu Código Postal (5 dígitos)?`,
+      `¡Todo anotado! 🐶 ${resumenPiezas}.\n\nPara validar cobertura oficial en Jalisco y calcular tu ruta, ¿cuál es tu Código Postal (5 dígitos)?`,
       "ask_cp"
     );
   };
@@ -906,7 +935,15 @@ export function KananConciergeAgent({
     setIsTyping(true);
     setSubmitting(true);
 
-    const items: ItemContratado[] = selectedSpots.length > 0
+    const items: ItemContratado[] = piezasSeleccionadasMultiples.length > 0
+      ? piezasSeleccionadasMultiples.map((pz) => ({
+          categoriaId: pz.categoriaId,
+          categoriaNombre: pz.categoriaNombre,
+          piezaId: pz.id,
+          piezaNombre: pz.nombre,
+          cantidad: 1,
+        }))
+      : selectedSpots.length > 0
       ? selectedSpots.map((spotId) => ({
           categoriaId: spotId,
           categoriaNombre: spotNameMap[spotId] || spotId,
