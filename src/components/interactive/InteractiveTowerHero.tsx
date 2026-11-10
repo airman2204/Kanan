@@ -370,17 +370,17 @@ export function InteractiveTowerHero({
           onMouseLeave={handleBoardMouseLeave}
           className="lg:col-span-6 relative flex items-center justify-center min-h-[580px] lg:min-h-[660px]"
         >
-          {/* PERRITO ASOMADO EN POSICIONES FIJAS SEGÚN EL BORDE MÁS CERCANO AL CURSOR (Z-INDEX 20 PARA QUE LAS PATITAS SEAN VISIBLES POR ENCIMA DEL BORDE) */}
+          {/* PERRITO ASOMADO DETRÁS DE LA TARJETA (Z-INDEX 0) */}
           
-          {/* 1. ASOMADO POR ARRIBA: con su colita moviéndose al lado del lomo */}
+          {/* 1. ASOMADO POR ARRIBA */}
           <motion.div
             initial={false}
             animate={{
-              y: boardActiveZone === "top" ? -145 : -40,
+              y: boardActiveZone === "top" ? -145 : 40,
               opacity: boardActiveZone === "top" ? 1 : 0,
             }}
             transition={{ type: "spring", stiffness: 260, damping: 22 }}
-            className="absolute top-0 left-8 z-20 pointer-events-none w-48 sm:w-56 select-none drop-shadow-[0_16px_28px_rgba(0,0,0,0.22)]"
+            className="absolute top-0 left-8 z-0 pointer-events-none w-48 sm:w-56 select-none drop-shadow-[0_12px_24px_rgba(0,0,0,0.18)]"
           >
             {/* Colita del perrito superior asomándose detrás del hombro izquierdo */}
             <motion.div
@@ -402,37 +402,37 @@ export function InteractiveTowerHero({
             />
           </motion.div>
 
-          {/* 2. ASOMADO POR LA IZQUIERDA: sale abrazando el lateral */}
+          {/* 2. ASOMADO POR LA IZQUIERDA (Cuerpo detrás de la tarjeta, línea recta vertical alineada exactamente con el borde) */}
           <motion.div
             initial={false}
             animate={{
-              x: boardActiveZone === "left" ? -130 : -40,
+              x: boardActiveZone === "left" ? 0 : 70,
               opacity: boardActiveZone === "left" ? 1 : 0,
             }}
             transition={{ type: "spring", stiffness: 260, damping: 22 }}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-20 pointer-events-none w-44 sm:w-52 select-none drop-shadow-[0_16px_28px_rgba(0,0,0,0.22)]"
+            className="absolute right-full top-1/2 -translate-y-1/2 z-0 pointer-events-none w-44 sm:w-52 select-none drop-shadow-[0_12px_24px_rgba(0,0,0,0.18)] flex justify-end"
           >
             <img
               src="/images/mascot-peek-left.png"
               alt="Kanan asomándose izquierda"
-              className="w-full h-auto object-contain"
+              className="w-full h-auto object-contain translate-x-1"
             />
           </motion.div>
 
-          {/* 3. ASOMADO POR LA DERECHA */}
+          {/* 3. ASOMADO POR LA DERECHA (Cuerpo detrás de la tarjeta, línea recta vertical alineada exactamente con el borde) */}
           <motion.div
             initial={false}
             animate={{
-              x: boardActiveZone === "right" ? 120 : 40,
+              x: boardActiveZone === "right" ? 0 : -70,
               opacity: boardActiveZone === "right" ? 1 : 0,
             }}
             transition={{ type: "spring", stiffness: 260, damping: 22 }}
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-20 pointer-events-none w-44 sm:w-52 select-none drop-shadow-[0_16px_28px_rgba(0,0,0,0.22)]"
+            className="absolute left-full top-1/2 -translate-y-1/2 z-0 pointer-events-none w-44 sm:w-52 select-none drop-shadow-[0_12px_24px_rgba(0,0,0,0.18)] flex justify-start"
           >
             <img
               src="/images/mascot-peek-right.png"
               alt="Kanan asomándose derecha"
-              className="w-full h-auto object-contain"
+              className="w-full h-auto object-contain -translate-x-1"
             />
           </motion.div>
 
