@@ -196,7 +196,11 @@ export default function AdminPage() {
           setTimeout(() => checkAuth(retryCount + 1), 1000);
           return;
         }
-        router.push("/admin/login");
+        if (typeof window !== "undefined" && window.location.host.startsWith("admin.")) {
+          router.push("/");
+        } else {
+          router.push("/admin/login");
+        }
         return;
       }
       setAuthChecking(false);
@@ -211,6 +215,14 @@ export default function AdminPage() {
   const fetchCrmData = useCallback(async () => {
     try {
       const res = await fetch("/api/crm");
+      if (res.status === 401) {
+        if (typeof window !== "undefined" && window.location.host.startsWith("admin.")) {
+          router.push("/");
+        } else {
+          router.push("/admin/login");
+        }
+        return;
+      }
       if (res.ok) {
         const data = (await res.json()) as KananDatabase;
         
