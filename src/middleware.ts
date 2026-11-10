@@ -4,15 +4,15 @@ import type { NextRequest } from "next/server";
 export function middleware(request: NextRequest) {
   const host = request.headers.get("host") || "";
   const pathname = request.nextUrl.pathname;
-  const sessionCookie = request.cookies.get("kanan_admin_session");
+  const sessionCookie = request.cookies.get("kanan_admin_session")?.value;
 
-  // Si acceden a través de admin.kananlimpieza.mx
+  // En el subdominio admin.kananlimpieza.mx
   if (host.startsWith("admin.")) {
     // Si visita la raíz "/" en el subdominio
     if (pathname === "/") {
       const url = request.nextUrl.clone();
-      // Si ya tiene sesión activa va a /admin, si no, se muestra directamente el login en la misma URL limpia
-      if (sessionCookie && sessionCookie.value) {
+      // Solo consideramos que hay sesión si la cookie tiene formato de token válido (con punto intermedio)
+      if (sessionCookie && sessionCookie.includes(".") && sessionCookie.length > 30) {
         url.pathname = "/admin";
       } else {
         url.pathname = "/admin/login";
