@@ -373,17 +373,17 @@ export function InteractiveTowerHero({
           onMouseLeave={handleBoardMouseLeave}
           className="lg:col-span-6 relative flex items-center justify-center min-h-[580px] lg:min-h-[660px]"
         >
-          {/* PERRITO ASOMADO EN POSICIONES FIJAS SEGÚN EL BORDE MÁS CERCANO AL CURSOR (Z-INDEX 0) */}
+          {/* PERRITO ASOMADO EN POSICIONES FIJAS SEGÚN EL BORDE MÁS CERCANO AL CURSOR (Z-INDEX 20 PARA QUE LAS PATITAS SEAN VISIBLES POR ENCIMA DEL BORDE) */}
           
-          {/* 1. ASOMADO POR ARRIBA (Posición fija en la cabecera superior, solo emerge verticalmente) */}
+          {/* 1. ASOMADO POR ARRIBA: se asoma para que sus patas apoyen en el borde superior */}
           <motion.div
             initial={false}
             animate={{
-              y: boardActiveZone === "top" ? -82 : 25,
+              y: boardActiveZone === "top" ? -145 : -40,
               opacity: boardActiveZone === "top" ? 1 : 0,
             }}
             transition={{ type: "spring", stiffness: 260, damping: 22 }}
-            className="absolute -top-2 left-10 z-0 pointer-events-none w-36 sm:w-44 select-none drop-shadow-[0_12px_24px_rgba(0,0,0,0.18)]"
+            className="absolute top-0 left-8 z-20 pointer-events-none w-48 sm:w-56 select-none drop-shadow-[0_16px_28px_rgba(0,0,0,0.22)]"
           >
             <img
               src="/images/mascot-peek-top.png"
@@ -392,15 +392,15 @@ export function InteractiveTowerHero({
             />
           </motion.div>
 
-          {/* 2. ASOMADO POR LA IZQUIERDA (Posición fija en el lateral izquierdo, solo emerge horizontalmente) */}
+          {/* 2. ASOMADO POR LA IZQUIERDA: sale lo suficiente para que sus dedos abracen la tarjeta */}
           <motion.div
             initial={false}
             animate={{
-              x: boardActiveZone === "left" ? -85 : 25,
+              x: boardActiveZone === "left" ? -130 : -40,
               opacity: boardActiveZone === "left" ? 1 : 0,
             }}
             transition={{ type: "spring", stiffness: 260, damping: 22 }}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-0 pointer-events-none w-32 sm:w-42 select-none drop-shadow-[0_12px_24px_rgba(0,0,0,0.18)]"
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-20 pointer-events-none w-44 sm:w-52 select-none drop-shadow-[0_16px_28px_rgba(0,0,0,0.22)]"
           >
             <img
               src="/images/mascot-peek-left.png"
@@ -409,15 +409,15 @@ export function InteractiveTowerHero({
             />
           </motion.div>
 
-          {/* 3. ASOMADO POR LA DERECHA (Posición fija en el lateral derecho, solo emerge horizontalmente) */}
+          {/* 3. ASOMADO POR LA DERECHA: sale con suficiente volumen para que el torso y mirada se vean naturales */}
           <motion.div
             initial={false}
             animate={{
-              x: boardActiveZone === "right" ? 85 : -25,
+              x: boardActiveZone === "right" ? 120 : 40,
               opacity: boardActiveZone === "right" ? 1 : 0,
             }}
             transition={{ type: "spring", stiffness: 260, damping: 22 }}
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-0 pointer-events-none w-32 sm:w-42 select-none drop-shadow-[0_12px_24px_rgba(0,0,0,0.18)]"
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-20 pointer-events-none w-44 sm:w-52 select-none drop-shadow-[0_16px_28px_rgba(0,0,0,0.22)]"
           >
             <img
               src="/images/mascot-peek-right.png"
@@ -426,18 +426,18 @@ export function InteractiveTowerHero({
             />
           </motion.div>
 
-          {/* 4. ASOMADO POR ABAJO (Posición fija abajo, emerge verticalmente) */}
+          {/* 4. ASOMADO POR ABAJO (Cola emergiendo abajo) */}
           <motion.div
             initial={false}
             animate={{
-              y: boardActiveZone === "bottom" ? 82 : -25,
+              y: boardActiveZone === "bottom" ? 110 : 30,
               opacity: boardActiveZone === "bottom" ? 1 : 0,
             }}
             transition={{ type: "spring", stiffness: 260, damping: 22 }}
-            className="absolute -bottom-2 right-12 z-0 pointer-events-none w-20 sm:w-24 select-none drop-shadow-md origin-top-left"
+            className="absolute -bottom-2 right-12 z-20 pointer-events-none w-24 sm:w-28 select-none drop-shadow-md origin-top-left"
           >
             <motion.div
-              animate={{ rotate: [0, 10, -6, 10, 0] }}
+              animate={{ rotate: [0, 12, -8, 12, 0] }}
               transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
             >
               <img
