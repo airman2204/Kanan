@@ -2,7 +2,7 @@ import { AgentFlowConfig, FlowNode } from '@/types/agentFlow';
 
 export const DEFAULT_AGENT_FLOW_CONFIG: AgentFlowConfig = {
   id: 'kanan_default_flow',
-  version: 3,
+  version: 4,
   ultimaActualizacion: new Date().toISOString(),
   telefonoPruebas: '3326154699',
   nodos: {
@@ -16,8 +16,8 @@ export const DEFAULT_AGENT_FLOW_CONFIG: AgentFlowConfig = {
       subtitulo: 'Cliente elige áreas y sube fotos en kananlimpieza.mx',
       icono: 'Zap',
       enabled: true,
-      x: 40,
-      y: 200,
+      x: 50,
+      y: 180,
       siguienteNodoId: ['nodo_recepcion_cliente']
     },
 
@@ -31,8 +31,8 @@ export const DEFAULT_AGENT_FLOW_CONFIG: AgentFlowConfig = {
       subtitulo: 'Cliente escribe mensaje libre o "Hola" a la línea oficial',
       icono: 'MessageSquareText',
       enabled: true,
-      x: 40,
-      y: 450,
+      x: 50,
+      y: 420,
       siguienteNodoId: ['nodo_wa_pedir_cp']
     },
     'nodo_wa_pedir_cp': {
@@ -42,8 +42,8 @@ export const DEFAULT_AGENT_FLOW_CONFIG: AgentFlowConfig = {
       subtitulo: 'Valida cobertura ZMG y calcula ventana de ruta',
       icono: 'Clock',
       enabled: true,
-      x: 360,
-      y: 450,
+      x: 400,
+      y: 420,
       stickerPath: '/assets/stickers/kanan-mascota-agendado.png',
       delaySegundos: 2,
       mensajePlantilla: `¡Hola! 👋 Bienvenido a *Kanan Limpieza y Desinfección Profunda a Domicilio* 🐾✨
@@ -60,8 +60,8 @@ Para validar la cobertura en tu zona y verificar disponibilidad de técnicos en 
       subtitulo: 'Menú desplegable nativo de WhatsApp (Opción A)',
       icono: 'GitFork',
       enabled: true,
-      x: 680,
-      y: 450,
+      x: 750,
+      y: 420,
       delaySegundos: 2,
       mensajePlantilla: `📍 *Cobertura confirmada en Jalisco.*
 
@@ -77,8 +77,8 @@ Por favor toca el botón de abajo y selecciona tu colonia o fraccionamiento:
       subtitulo: 'Inspección de tejido y manchas antes de cotizar',
       icono: 'Sparkles',
       enabled: true,
-      x: 1000,
-      y: 450,
+      x: 1100,
+      y: 420,
       delaySegundos: 2,
       mensajePlantilla: `¡Colonia registrada! 🐶
 
@@ -94,8 +94,8 @@ Para que nuestro técnico especialista evalúe el tipo de tela y grado de mancha
       subtitulo: 'Lista interactiva de slots libres del calendario',
       icono: 'CalendarCheck',
       enabled: true,
-      x: 1320,
-      y: 450,
+      x: 1450,
+      y: 420,
       delaySegundos: 2,
       mensajePlantilla: `¡Fotos recibidas y cargadas a tu expediente! 📸
 
@@ -116,7 +116,7 @@ Toca el botón para elegir tu horario:
       subtitulo: 'Agendada desde Calendario / CRM con confirmación directa',
       icono: 'CalendarCheck',
       enabled: true,
-      x: 40,
+      x: 50,
       y: -60,
       siguienteNodoId: ['nodo_confirmacion_manual_admin']
     },
@@ -127,7 +127,7 @@ Toca el botón para elegir tu horario:
       subtitulo: 'Notificación directa con folio, fecha, horario y monto pactado',
       icono: 'CheckCircle2',
       enabled: true,
-      x: 360,
+      x: 400,
       y: -60,
       stickerPath: '/assets/stickers/kanan-sticker-listo.png',
       delaySegundos: 2,
@@ -163,8 +163,8 @@ Recuerda que cuentas con hasta *2 horas antes* del horario de tu servicio para a
       subtitulo: 'Aviso inmediato con folio e inspección de fotos en curso',
       icono: 'MessageSquareText',
       enabled: true,
-      x: 1640,
-      y: 200,
+      x: 1800,
+      y: 180,
       stickerPath: '/assets/stickers/kanan-mascota-agendado.png',
       delaySegundos: 2,
       mensajePlantilla: `👋 ¡Hola *{nombre}*! Recibimos con éxito tu solicitud y fotos en *Kanan Limpieza*.
@@ -186,8 +186,8 @@ Recuerda que cuentas con hasta *2 horas antes* del horario de tu servicio para a
       subtitulo: 'Técnico evalúa fotos de manchas y fija precio final',
       icono: 'UserCheck',
       enabled: true,
-      x: 1980,
-      y: 200,
+      x: 2150,
+      y: 180,
       siguienteNodoId: ['nodo_cotizacion_formal']
     },
     'nodo_cotizacion_formal': {
@@ -197,8 +197,8 @@ Recuerda que cuentas con hasta *2 horas antes* del horario de tu servicio para a
       subtitulo: 'Envío de cotización con precio exacto y solicitud de confirmación',
       icono: 'DollarSign',
       enabled: true,
-      x: 2300,
-      y: 200,
+      x: 2500,
+      y: 180,
       stickerPath: '/assets/stickers/kanan-sticker-cotizacion.png',
       delaySegundos: 3,
       mensajePlantilla: `¡Hola {nombre}! 👋
@@ -220,19 +220,19 @@ Ya revisamos las fotos de tus muebles en *Kanan Servicios de Limpieza*:
       subtitulo: 'Respuesta vía WhatsApp detectada por IA / Webhook',
       icono: 'GitFork',
       enabled: true,
-      x: 2640,
-      y: 200,
+      x: 2850,
+      y: 180,
       siguienteNodoId: ['nodo_cita_confirmada', 'nodo_cancelacion_cita']
     },
     'nodo_cita_confirmada': {
       id: 'nodo_cita_confirmada',
       tipo: 'whatsapp_message',
-      titulo: '6. Cita Confirmada',
+      titulo: '6. Cita Confirmada (Sí)',
       subtitulo: 'Disparado cuando el cliente responde "Sí"',
       icono: 'CheckCircle2',
       enabled: true,
-      x: 2980,
-      y: 60,
+      x: 3200,
+      y: 80,
       stickerPath: '/assets/stickers/kanan-sticker-listo.png',
       delaySegundos: 2,
       mensajePlantilla: `¡Excelente, {nombre}! 🎉
@@ -252,12 +252,12 @@ Recuerda que cuentas con hasta *2 horas antes* del horario de tu servicio para a
     'nodo_cancelacion_cita': {
       id: 'nodo_cancelacion_cita',
       tipo: 'whatsapp_message',
-      titulo: 'Cancelación Solicitud',
+      titulo: 'Cancelación Solicitud (No)',
       subtitulo: 'Disparado cuando el cliente responde "No" o cancela con >2h',
       icono: 'XCircle',
       enabled: true,
-      x: 2980,
-      y: 360,
+      x: 3200,
+      y: 340,
       delaySegundos: 2,
       mensajePlantilla: `Entendido, {nombre}. 🤝
 
@@ -280,8 +280,8 @@ Si en el futuro requieres de nuestros servicios de limpieza y desinfección prof
       subtitulo: 'Aviso un día antes para asegurar presencia del cliente',
       icono: 'Clock',
       enabled: true,
-      x: 3320,
-      y: 60,
+      x: 3550,
+      y: 80,
       stickerPath: '/assets/stickers/kanan-mascota-agendado.png',
       delaySegundos: 2,
       mensajePlantilla: `🐾 ¡Hola *{nombre}*! Te recordamos que *mañana* es tu servicio de limpieza con Kanan Limpieza.
@@ -301,8 +301,8 @@ Si en el futuro requieres de nuestros servicios de limpieza y desinfección prof
       subtitulo: 'Preparación del área: mascotas y tomas de agua/luz',
       icono: 'Sparkles',
       enabled: true,
-      x: 3660,
-      y: 60,
+      x: 3900,
+      y: 80,
       stickerPath: '/assets/stickers/kanan-sticker-garantia.png',
       delaySegundos: 2,
       mensajePlantilla: `💡 *Tips rápidos antes de que llegue el Kanan Móvil:*
@@ -322,8 +322,8 @@ Si en el futuro requieres de nuestros servicios de limpieza y desinfección prof
       subtitulo: 'Notificación con Kanan Móvil y bloqueo de cancelación',
       icono: 'Truck',
       enabled: true,
-      x: 4000,
-      y: 60,
+      x: 4250,
+      y: 80,
       stickerPath: '/assets/stickers/kanan-sticker-en-camino.png',
       delaySegundos: 2,
       mensajePlantilla: `🚗💨 ¡Hola *{nombre}*! Nuestro técnico *{tecnico}* va en camino a tu domicilio a bordo del *Kanan Móvil*.
@@ -342,8 +342,8 @@ Por favor asegúrate de estar disponible para recibir al equipo. ¡Ya casi llega
       subtitulo: 'Técnico inicia lavado con máquina de inyección-succión',
       icono: 'Sparkles',
       enabled: true,
-      x: 4340,
-      y: 60,
+      x: 4600,
+      y: 80,
       stickerCategoriaEspecifica: true,
       stickerPath: '/assets/stickers/kanan-sticker-en-proceso.png',
       delaySegundos: 2,
@@ -361,8 +361,8 @@ Nuestro especialista ha iniciado la limpieza profunda de tus muebles con tecnolo
       subtitulo: 'Póliza digital de 7 días y tiempo de secado',
       icono: 'CheckCircle2',
       enabled: true,
-      x: 4680,
-      y: 60,
+      x: 4950,
+      y: 80,
       stickerPath: '/assets/stickers/kanan-sticker-garantia.png',
       delaySegundos: 2,
       mensajePlantilla: `🎉 ¡Listo, *{nombre}*! Tu servicio ha concluido exitosamente.
@@ -383,8 +383,8 @@ Cuentas con 7 días naturales de respaldo ante cualquier detalle en el secado de
       subtitulo: 'Calificación 1-5 estrellas con stickers dinámicos',
       icono: 'Sparkles',
       enabled: true,
-      x: 5020,
-      y: 60,
+      x: 5300,
+      y: 80,
       delaySegundos: 10800, // 3 horas
       mensajePlantilla: `🐾 ¡Hola *{nombre}*!
 Tus muebles ya deben estar completamente secos y listos para disfrutarse.
@@ -407,8 +407,8 @@ Por favor califícanos respondiendo con un número del *1 al 5*:
       subtitulo: 'Bifurcación: 5 estrellas va a Google Maps, <4 a Soporte',
       icono: 'GitFork',
       enabled: true,
-      x: 5360,
-      y: 60,
+      x: 5650,
+      y: 80,
       siguienteNodoId: ['nodo_google_maps_review', 'nodo_alerta_soporte']
     },
     'nodo_google_maps_review': {
@@ -418,8 +418,8 @@ Por favor califícanos respondiendo con un número del *1 al 5*:
       subtitulo: 'Invitación a compartir experiencia pública',
       icono: 'Award',
       enabled: true,
-      x: 5700,
-      y: -40,
+      x: 6000,
+      y: -20,
       stickerPath: '/assets/stickers/kanan-sticker-excelente.png',
       delaySegundos: 2,
       mensajePlantilla: `🌟 ¡Muchísimas gracias por tu calificación de 5 estrellas, *{nombre}*! Nos alegra enorme haber dejado tus muebles impecables.
@@ -438,8 +438,8 @@ Por favor califícanos respondiendo con un número del *1 al 5*:
       subtitulo: 'Intervención inmediata de calidad',
       icono: 'XCircle',
       enabled: true,
-      x: 5700,
-      y: 160,
+      x: 6000,
+      y: 200,
       delaySegundos: 2,
       mensajePlantilla: `Lamentamos mucho que tu experiencia no haya sido perfecta, *{nombre}*. En Kanan nos tomamos muy en serio tu satisfacción.
 
@@ -450,7 +450,7 @@ Un supervisor de calidad se pondrá en contacto contigo de inmediato para revisa
   }
 };
 
-const STORAGE_KEY = 'kanan_agent_flow_config_v7';
+const STORAGE_KEY = 'kanan_agent_flow_config_v8';
 
 export function getAgentFlowConfig(): AgentFlowConfig {
   if (typeof window === 'undefined') {
@@ -478,7 +478,7 @@ export function saveAgentFlowConfig(config: AgentFlowConfig): void {
   try {
     const updated = {
       ...config,
-      version: (config.version || 3) + 1,
+      version: (config.version || 4) + 1,
       ultimaActualizacion: new Date().toISOString()
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
@@ -502,14 +502,16 @@ export function getMensajeDesdeFlujo(
   const config = getAgentFlowConfig();
   const nodo = config.nodos[nodoId];
 
-  let plantilla = nodo?.mensajePlantilla || fallbackMensaje || '';
-  if (!plantilla) return '';
-
-  for (const [key, val] of Object.entries(variables)) {
-    const token = `{${key}}`;
-    const valorReemplazo = val !== undefined && val !== null ? String(val) : '';
-    plantilla = plantilla.split(token).join(valorReemplazo);
+  if (!nodo || !nodo.enabled || !nodo.mensajePlantilla) {
+    return fallbackMensaje || '';
   }
 
-  return plantilla;
+  let finalMsg = nodo.mensajePlantilla;
+  Object.keys(variables).forEach((key) => {
+    const val = variables[key];
+    const valStr = val !== undefined && val !== null ? String(val) : '';
+    finalMsg = finalMsg.split(`{${key}}`).join(valStr);
+  });
+
+  return finalMsg;
 }
