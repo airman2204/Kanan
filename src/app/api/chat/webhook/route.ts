@@ -372,6 +372,126 @@ export async function POST(req: NextRequest) {
         await procesarRespuestaEncuesta(cliente, ultimaCita, rating);
       }
 
+      // E) FLUJO CONVERSACIONAL DEL AGENTE (RAMA B: INBOUND WHATSAPP -> COTIZACIÓN)
+      // Si la IA está habilitada y no fue aprobación de cita pendiente ni calificación de encuesta
+      if (iaHabilitadaParaCliente && !esAprobacion && !ratingMatch) {
+        const { getAgentFlowConfig, getMensajeDesdeFlujo } = await import("@/lib/chat/flowConfigStore");
+        const { enviarMensajeChat, enviarStickerChat } = await import("@/lib/chat/bridgeClient");
+        const { consultarCodigoPostal } = await import("@/lib/utils/postalCodes");
+
+        const flowConfig = getAgentFlowConfig();
+        const nodoWaPedirCp = flowConfig.nodos["nodo_wa_pedir_cp"];
+        const nodoWaColonias = flowConfig.nodos["nodo_wa_lista_colonias"];
+
+        // Comprobar si el mensaje es un Código Postal de 5 dígitos (ej. "45010", "44100", "45650")
+        const cpMatch = cleanText.match(/\b\d{5}\b/);
+
+        if (cpMatch) {
+          const cpCandidate = cpMatch[0];
+          const infoCp = consultarCodigoPostal(cpCandidate);
+
+          if (infoCp.valido) {
+            // Actualizar municipio del cliente si se detectó
+            if (infoCp.municipio && infoCp.municipio !== cliente.municipio) {
+              cliente.municipio = infoCp.municipio;
+              try {
+                await supabase.from("clientes").update({ municipio: infoCp.municipio }).eq("id", cliente.id);
+              } catch (_) {}
+            }
+
+            // Construir respuesta con colonias o confirmación de cobertura
+            let msgRespuestaCp = "";
+            if (infoCp.colonias && infoCp.colonias.length > 0) {
+              const coloniasTexto = infoCp.colonias.slice(0, 5).map((col, idx) => `  ${idx + 1}. *${col}*`).join("\n");
+              msgRespuestaCp = [
+                `📍 *¡Excelente! Cobertura 100% confirmada en ${infoCp.municipio || "Jalisco"} (CP ${cpCandidate})* 🐾✨`,
+                ``,
+                `Ubicamos tu zona en:`,
+                coloniasTexto,
+                ``,
+                `📸 *Paso 2:* Para que nuestro equipo evalúe el tipo de tela y las manchas a tratar, por favor envíanos aquí *1 o 2 fotos claras* de tus muebles o vestiduras.`
+              ].join("\n");
+            } else {
+              msgRespuestaCp = [
+                `📍 *¡Excelente! Cobertura confirmada en ${infoCp.municipio || "Jalisco"} (CP ${cpCandidate})* 🐾✨`,
+                ``,
+                `📸 *Paso 2:* Para que nuestro técnico evalúe el tipo de tela y grado de manchas, por favor envíanos aquí *1 o 2 fotos claras* de tus muebles o vestiduras.`
+              ].join("\n");
+            }
+
+            // Enviar respuesta
+            await enviarMensajeChat(phoneParaResponder, msgRespuestaCp);
+
+            const msgCpRegistro = {
+              id: `auto-${Date.now()}`,
+              cita_id: ultimaCita ? ultimaCita.id : "sin_cita",
+              cliente_id: cliente.id,
+              etapa: "1_confirmacion_inmediata",
+              etapa_titulo: "Confirmación Cobertura CP",
+              destinatario_whatsapp: phoneParaResponder,
+              contenido_mensaje: msgRespuestaCp,
+              estatus_envio: "Enviado",
+              fecha_programada: new Date().toISOString(),
+            };
+            db.mensajes_automatizacion.unshift(msgCpRegistro as any);
+            try {
+              await supabase.from("mensajes_automatizacion").insert(msgCpRegistro);
+            } catch (_) {}
+          } else {
+            // Código postal fuera de cobertura
+            const msgErrorCp = infoCp.mensajeError || `El código postal *${cpCandidate}* se encuentra actualmente fuera de nuestra zona de cobertura en Jalisco (Zapopan, Guadalajara, Tlajomulco y Tlaquepaque). 📍\n\n¿Tienes alguna otra ubicación o deseas consultar con un asesor?`;
+            await enviarMensajeChat(phoneParaResponder, msgErrorCp);
+          }
+        } else {
+          // Detectar si es saludo inicial, solicitud de cotización o mensaje libre de apertura
+          const esSaludoOContacto = /^(hola|buenas|buen d[ií]a|buenas tardes|buenas noches|cotiz|informes|informacion|servicio|que tal|saludos|ayuda|limpieza|cuanto|precios?)\b/i.test(cleanLower) ||
+            cleanLower.includes("cotizar") ||
+            cleanLower.includes("servicio") ||
+            cleanLower.includes("limpieza") ||
+            cleanLower.includes("presupuesto");
+
+          // Si el cliente no tiene cita activa por confirmar y el nodo de pedir CP está habilitado
+          if (esSaludoOContacto && nodoWaPedirCp && nodoWaPedirCp.enabled) {
+            const bienvenidaFallback = [
+              `¡Hola, ${primerNombre}! 👋 Bienvenido a *Kanan Limpieza y Desinfección Profunda a Domicilio* 🐾✨`,
+              ``,
+              `Para validar la cobertura en tu zona y verificar disponibilidad de técnicos en Jalisco:`,
+              `¿Cuál es tu *Código Postal (5 dígitos)*?`
+            ].join("\n");
+
+            const msgBienvenida = getMensajeDesdeFlujo(
+              "nodo_wa_pedir_cp",
+              { nombre: primerNombre },
+              bienvenidaFallback
+            );
+
+            // 1. Enviar mensaje de bienvenida / solicitud de CP
+            await enviarMensajeChat(phoneParaResponder, msgBienvenida);
+
+            // 2. Enviar sticker de bienvenida configurado en el flujo
+            if (nodoWaPedirCp.stickerPath) {
+              await enviarStickerChat(phoneParaResponder, nodoWaPedirCp.stickerPath);
+            }
+
+            const msgInboundRegistro = {
+              id: `auto-${Date.now()}`,
+              cita_id: ultimaCita ? ultimaCita.id : "sin_cita",
+              cliente_id: cliente.id,
+              etapa: "1_confirmacion_inmediata",
+              etapa_titulo: "Bienvenida y CP (Agente WhatsApp)",
+              destinatario_whatsapp: phoneParaResponder,
+              contenido_mensaje: msgBienvenida,
+              estatus_envio: "Enviado",
+              fecha_programada: new Date().toISOString(),
+            };
+            db.mensajes_automatizacion.unshift(msgInboundRegistro as any);
+            try {
+              await supabase.from("mensajes_automatizacion").insert(msgInboundRegistro);
+            } catch (_) {}
+          }
+        }
+      }
+
       // 6. Registrar el mensaje recibido en el historial de automatizaciones para visualización
       const nuevoMsg = {
         id: `in-${Date.now()}`,
