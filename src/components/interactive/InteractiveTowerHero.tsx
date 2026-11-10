@@ -21,7 +21,6 @@ interface TowerHotspot {
   name: string;
   badge: string;
   servicio: string;
-  precioDesde: string;
   tiempoSecado: string;
   tecnologia: string;
   descripcion: string;
@@ -35,7 +34,6 @@ const TOWER_SPOTS: Record<string, TowerHotspot> = {
     name: "Colchones & Cunas",
     badge: "Sanitización Antiácaros UV",
     servicio: "Desinfección Profunda de Colchón",
-    precioDesde: "Desde $450",
     tiempoSecado: "Listo para dormir el mismo día",
     tecnologia: "Luz UV Germicida 254nm + Succión HEPA",
     descripcion:
@@ -48,7 +46,6 @@ const TOWER_SPOTS: Record<string, TowerHotspot> = {
     name: "Salas & Sillones",
     badge: "Inyección-Succión Alemana",
     servicio: "Lavado de Salas y Tapicería",
-    precioDesde: "Desde $599",
     tiempoSecado: "3 a 4 horas* (90% humedad extraída)",
     tecnologia: "Kärcher Industrial de Doble Turbina",
     descripcion:
@@ -61,7 +58,6 @@ const TOWER_SPOTS: Record<string, TowerHotspot> = {
     name: "Sillas de Comedor",
     badge: "Cuidado Fino de Fibras",
     servicio: "Lavado Artesanal de Sillas",
-    precioDesde: "Desde $90 / silla",
     tiempoSecado: "2 a 3 horas*",
     tecnologia: "Fórmulas biodegradables de pH neutro",
     descripcion:
@@ -74,7 +70,6 @@ const TOWER_SPOTS: Record<string, TowerHotspot> = {
     name: "Vestiduras de Auto",
     badge: "Unidad Móvil a Domicilio",
     servicio: "Detallado de Interiores de Auto",
-    precioDesde: "Desde $890",
     tiempoSecado: "2 a 3 horas*",
     tecnologia: "Extracción industrial en tu cochera",
     descripcion:
@@ -297,15 +292,12 @@ export function InteractiveTowerHero({
                 {/* Cabecera de la ficha */}
                 <div className="flex items-start justify-between border-b border-slate-100 pb-5">
                   <div className="space-y-1.5">
-                    <div className="flex flex-wrap items-center gap-2">
+                    <div>
                       <span className="text-xs font-heading font-extrabold uppercase tracking-wider text-[#1D71B5] bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
                         {currentSpot.badge}
                       </span>
-                      <span className="text-xs font-extrabold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
-                        {currentSpot.precioDesde}
-                      </span>
                     </div>
-                    <h3 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#0F2438] leading-tight">
+                    <h3 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#0F2438] leading-tight mt-1">
                       {currentSpot.servicio}
                     </h3>
                   </div>
@@ -372,7 +364,7 @@ export function InteractiveTowerHero({
                     ) : (
                       <>
                         <Plus className="w-4 h-4 stroke-[3]" />
-                        <span>+ Añadir ({currentSpot.precioDesde})</span>
+                        <span>+ Añadir al pedido</span>
                       </>
                     )}
                   </button>
@@ -412,21 +404,8 @@ export function InteractiveTowerHero({
                     Selecciona un piso en la torre
                   </h3>
                   <p className="text-slate-500 text-sm leading-relaxed">
-                    Toca las píldoras de <strong>Colchones</strong>, <strong>Salas</strong>, <strong>Comedor</strong> o <strong>Autos</strong> para inspeccionar la tecnología alemana, tiempos de secado y agregarlos a tu cotización.
+                    Toca las píldoras de <strong>Colchones</strong>, <strong>Salas</strong>, <strong>Comedor</strong> o <strong>Autos</strong> en la maqueta 3D para inspeccionar la tecnología alemana, tiempos de secado y agregarlos a tu cotización.
                   </p>
-                </div>
-
-                <div className="flex flex-wrap justify-center gap-2 pt-2">
-                  {Object.values(TOWER_SPOTS).map((s) => (
-                    <button
-                      key={s.id}
-                      type="button"
-                      onClick={() => onSelectSpot(s.id)}
-                      className="px-3.5 py-1.5 rounded-full bg-white hover:bg-cyan-50 text-slate-700 hover:text-[#1D71B5] border border-slate-200 hover:border-cyan-300 text-xs font-heading font-bold transition shadow-2xs cursor-pointer"
-                    >
-                      {s.name} →
-                    </button>
-                  ))}
                 </div>
               </motion.div>
             )}
