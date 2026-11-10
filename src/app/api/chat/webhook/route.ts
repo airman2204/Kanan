@@ -14,7 +14,10 @@ export async function POST(req: NextRequest) {
 
     // Identificador oficial: si viene número limpio o LID
     const cleanPhone = phone ? phone.replace(/\D/g, "") : (lid ? String(lid).replace(/\D/g, "") : "");
-    const fallbackIdPhone = cleanPhone || (lid ? String(lid) : `wa-${Date.now()}`);
+    const fallbackIdPhone = cleanPhone || (lid ? String(lid) : "");
+    if (!fallbackIdPhone) {
+      return NextResponse.json({ ok: false, error: "No se identificó número ni LID válido" }, { status: 400 });
+    }
     const db = await getDatabaseAsync();
 
     // 1. Identificación ESTRICTA por número de teléfono o LID único
@@ -26,6 +29,7 @@ export async function POST(req: NextRequest) {
         (cleanPhone && p === cleanPhone) ||
         (targetDigits && targetDigits.length === 10 && p10 === targetDigits) ||
         (lid && cl.whatsapp === String(lid)) ||
+        (cleanPhone && cl.whatsapp === cleanPhone) ||
         (clientName && clientName !== "Cliente" && clientName !== "Cliente WhatsApp" && cl.nombre.toLowerCase() === clientName.toLowerCase())
       );
     });

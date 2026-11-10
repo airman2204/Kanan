@@ -520,7 +520,7 @@ export function KananConciergeAgent({
     }
   }, [messages, isTyping]);
 
-  const appendAgentMessage = (text: string, nextStep: StepId, delayMs = 500) => {
+  const appendAgentMessage = (text: string, nextStep: StepId, delayMs = 180) => {
     setIsTyping(true);
     setErrorActivo(null);
     setInputText("");

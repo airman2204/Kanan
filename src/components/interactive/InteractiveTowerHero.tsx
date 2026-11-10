@@ -181,7 +181,11 @@ export function InteractiveTowerHero({
                 className="absolute -translate-x-1/2 -translate-y-1/2 z-20 cursor-pointer"
                 onClick={(e) => {
                   e.stopPropagation();
-                  onSelectSpot(isSelected ? null : spot.id);
+                  onSelectSpot(spot.id);
+                  // 1 SOLO CLIC: Añadir inmediatamente a la cotización si no estaba agregado
+                  if (!cartItems.includes(spot.id)) {
+                    onToggleCart(spot.id);
+                  }
                 }}
               >
                 <div className="relative group flex items-center justify-center">

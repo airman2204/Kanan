@@ -185,8 +185,16 @@ export function ChatInbox({
   const contactosDeduplicados = React.useMemo(() => {
     const map = new Map<string, Cliente>();
     for (const c of contactosLocales) {
-      const raw = c.whatsapp.replace(/\D/g, "");
-      const key = raw.length >= 10 ? raw.slice(-10) : (c.whatsapp || c.id);
+      // Ignorar contactos corruptos o residuales vacíos sin mensajes
+      if (c.nombre === "Kanan Servicios Limpieza" && (!c.whatsapp || c.whatsapp.startsWith("wa-"))) {
+        continue;
+      }
+      const raw = c.whatsapp ? c.whatsapp.replace(/\D/g, "") : "";
+      // Agrupar tanto por número a 10 dígitos como por nombre exacto normalizado
+      const cleanNombre = c.nombre ? c.nombre.trim().toLowerCase() : "";
+      const key = raw.length >= 10 
+        ? raw.slice(-10) 
+        : (cleanNombre.startsWith("mario alberto") || cleanNombre === "mario" ? "mario_alberto_group" : (c.whatsapp || c.id));
       if (!map.has(key)) {
         map.set(key, c);
       } else {
