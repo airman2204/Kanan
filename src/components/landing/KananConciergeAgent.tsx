@@ -105,6 +105,7 @@ interface KananConciergeAgentProps {
   isFloating?: boolean;
   isOpen?: boolean;
   onClose?: () => void;
+  onResetCart?: () => void;
 }
 
 export function KananConciergeAgent({
@@ -115,6 +116,7 @@ export function KananConciergeAgent({
   isFloating = false,
   isOpen = true,
   onClose,
+  onResetCart,
 }: KananConciergeAgentProps) {
   const [messages, setMessages] = useState<MessageItem[]>([]);
   const [isTyping, setIsTyping] = useState<boolean>(false);
@@ -289,7 +291,7 @@ export function KananConciergeAgent({
     autos: "Vestiduras de Auto",
   };
 
-  // Guardar automáticamente el progreso de la cotización para recuperarla si recarga (Carro abandonado / persistencia)
+  // Guardar automáticamente el progreso de la cotización con vigencia de 30 minutos (Carro abandonado)
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (step === "finished") {
@@ -298,6 +300,7 @@ export function KananConciergeAgent({
       return;
     }
     const draft = {
+      timestamp: Date.now(),
       step,
       selectedSpots,
       selectedCat,
@@ -335,16 +338,24 @@ export function KananConciergeAgent({
     whatsapp,
   ]);
 
-  // Inicializar conversación natural reconociendo si el cliente seleccionó áreas en la casita o tiene un borrador previo
+  // Inicializar conversación natural reconociendo si el cliente seleccionó áreas en la casita o tiene un borrador previo válido
   useEffect(() => {
     setIsTyping(true);
 
-    // Revisar si existe borrador guardado en localStorage (Carro abandonado)
+    // Revisar si existe borrador guardado en localStorage con vigencia de 30 minutos
     let draft: any = null;
     if (typeof window !== "undefined") {
       try {
         const raw = localStorage.getItem("kanan_wizard_draft");
-        if (raw) draft = JSON.parse(raw);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          // Si tiene más de 30 minutos (1,800,000 ms), expira y se borra
+          if (parsed.timestamp && Date.now() - parsed.timestamp < 30 * 60 * 1000) {
+            draft = parsed;
+          } else {
+            localStorage.removeItem("kanan_wizard_draft");
+          }
+        }
       } catch {}
     }
 
@@ -1024,6 +1035,22 @@ export function KananConciergeAgent({
   };
 
   const handleResetConversation = () => {
+    // 1. Borrar borradores locales y resetear carrito externo de la casita
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.removeItem("kanan_wizard_draft");
+        localStorage.removeItem("kanan_cart_items");
+      } catch {}
+    }
+
+    if (onResetCart) {
+      onResetCart();
+    }
+
+    setSelectedSpots([]);
+    setPendingCategoriesToSpecify([]);
+    setPiezasSeleccionadasMultiples([]);
+
     setMessages([]);
     setStep("ask_category");
     setSelectedPiece(null);
@@ -1047,7 +1074,7 @@ export function KananConciergeAgent({
         {
           id: "m-reset-1",
           sender: "agent",
-          text: "¡Hola de nuevo! 👋 Soy Kanan asistente.",
+          text: "¡Hola! 👋 Soy Kanan asistente.",
           time: getCurrentTime(),
         },
         {

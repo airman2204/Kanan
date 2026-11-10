@@ -55,12 +55,20 @@ export default function HomePage() {
       })
       .catch(() => {});
 
-    // Restaurar carrito / áreas seleccionadas de la casita al recargar (Carrito persistente)
+    // Restaurar carrito / áreas seleccionadas de la casita al recargar (Carrito persistente con vigencia de 30 min)
     try {
       const savedCart = localStorage.getItem("kanan_cart_items");
       if (savedCart) {
         const parsed = JSON.parse(savedCart);
-        if (Array.isArray(parsed) && parsed.length > 0) {
+        // Si viene en formato con timestamp
+        if (parsed && parsed.timestamp && parsed.items) {
+          if (Date.now() - parsed.timestamp < 30 * 60 * 1000) {
+            setCartItems(parsed.items);
+          } else {
+            localStorage.removeItem("kanan_cart_items");
+          }
+        } else if (Array.isArray(parsed) && parsed.length > 0) {
+          // Retrocompatibilidad
           setCartItems(parsed);
         }
       }
@@ -82,10 +90,20 @@ export default function HomePage() {
         } catch {}
       }
       try {
-        localStorage.setItem("kanan_cart_items", JSON.stringify(next));
+        localStorage.setItem(
+          "kanan_cart_items",
+          JSON.stringify({ timestamp: Date.now(), items: next })
+        );
       } catch {}
       return next;
     });
+  };
+
+  const handleResetCart = () => {
+    setCartItems([]);
+    try {
+      localStorage.removeItem("kanan_cart_items");
+    } catch {}
   };
 
   const handleOpenChat = (categoryId?: string) => {
@@ -254,6 +272,7 @@ export default function HomePage() {
           isFloating={true}
           isOpen={isChatOpen}
           onClose={() => setIsChatOpen(false)}
+          onResetCart={handleResetCart}
         />
       </main>
 
