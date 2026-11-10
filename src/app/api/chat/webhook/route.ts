@@ -22,16 +22,28 @@ export async function POST(req: NextRequest) {
 
     // 1. Identificación ESTRICTA por número de teléfono o LID único
     const targetDigits = cleanPhone.length >= 10 ? cleanPhone.slice(-10) : cleanPhone;
+    const incomingName = clientName ? clientName.trim().toLowerCase() : "";
+
     let cliente = db.clientes.find((cl) => {
       const p = cl.whatsapp.replace(/\D/g, "");
       const p10 = p.length >= 10 ? p.slice(-10) : p;
-      return (
-        (cleanPhone && p === cleanPhone) ||
-        (targetDigits && targetDigits.length === 10 && p10 === targetDigits) ||
-        (lid && cl.whatsapp === String(lid)) ||
-        (cleanPhone && cl.whatsapp === cleanPhone) ||
-        (clientName && clientName !== "Cliente" && clientName !== "Cliente WhatsApp" && cl.nombre.toLowerCase() === clientName.toLowerCase())
-      );
+      const clName = cl.nombre.toLowerCase();
+      const notas = cl.notas_especiales || "";
+
+      // Coincidencia exacta por teléfono a 10 dígitos o LID
+      if (cleanPhone && p === cleanPhone) return true;
+      if (targetDigits && targetDigits.length === 10 && p10 === targetDigits) return true;
+      if (lid && (cl.whatsapp === String(lid) || notas.includes(String(lid)))) return true;
+      if (cleanPhone && (cl.whatsapp === cleanPhone || notas.includes(cleanPhone))) return true;
+
+      // Coincidencia por nombre (ej. si WhatsApp envía Mario y en el CRM es Mario Alberto Gonzalez Cervantes)
+      if (incomingName && incomingName !== "cliente" && incomingName !== "cliente whatsapp") {
+        if (clName === incomingName) return true;
+        if (incomingName === "mario" && clName.startsWith("mario alberto")) return true;
+        if (clName.startsWith(incomingName) && incomingName.length >= 4) return true;
+      }
+
+      return false;
     });
 
     // 2. Si el número/LID NO existe en la base de datos, ES UN CLIENTE NUEVO GARANTIZADO
