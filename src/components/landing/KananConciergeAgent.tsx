@@ -177,6 +177,8 @@ export function KananConciergeAgent({
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const chatContainerRef = useRef<HTMLDivElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const prevAreasRef = useRef<string[]>([]);
+  const hasInitializedRef = useRef<boolean>(false);
 
   const getCurrentTime = () => {
     return new Date().toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" });
@@ -351,18 +353,55 @@ export function KananConciergeAgent({
     whatsapp,
   ]);
 
-  // Inicializar conversación natural reconociendo si el cliente seleccionó áreas en la casita
+  // Inicializar o actualizar conversación natural reconociendo si el cliente seleccionó áreas en la casita
   useEffect(() => {
-    setIsTyping(true);
-
     const areas = preselectedCategories && preselectedCategories.length > 0
       ? preselectedCategories
       : preselectedCategory
       ? [preselectedCategory]
       : [];
 
+    const prevAreas = prevAreasRef.current;
+    prevAreasRef.current = areas;
+
+    // CASO A: Actualización dinámica (el chat ya fue iniciado y se añade una nueva área)
+    if (hasInitializedRef.current) {
+      const addedAreas = areas.filter((a) => !prevAreas.includes(a));
+      if (addedAreas.length > 0) {
+        setSelectedSpots(areas);
+
+        const primeraNueva = addedAreas[0];
+        const restantesNuevas = addedAreas.slice(1);
+        const nombrePrimera = spotNameMap[primeraNueva] || primeraNueva;
+
+        setSelectedCat(primeraNueva);
+        setPendingCategoriesToSpecify((prev) => [...prev, ...restantesNuevas]);
+        setStep("ask_piece");
+        setIsTyping(true);
+
+        const timer = setTimeout(() => {
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: `m-add-${Date.now()}`,
+              sender: "agent",
+              text: `¡Excelente! Añadiste también **${nombrePrimera}** a tu cotización 🐾.\n\n¿Qué modelo o tipo es tu **${nombrePrimera}**?`,
+              time: getCurrentTime(),
+            },
+          ]);
+          setIsTyping(false);
+        }, 300);
+
+        return () => clearTimeout(timer);
+      }
+      return;
+    }
+
+    // CASO B: Primera inicialización
+    hasInitializedRef.current = true;
+    setIsTyping(true);
+
     // SI HAY ÁREAS SELECCIONADAS EN LA CASITA:
-    // Siempre le damos prioridad a lo que el usuario seleccionó en la maqueta
     if (areas.length > 0) {
       setSelectedSpots(areas);
       const primeraArea = areas[0];
@@ -415,6 +454,7 @@ export function KananConciergeAgent({
 
     if (draft && draft.step && draft.step !== "ask_category") {
       if (draft.selectedSpots) setSelectedSpots(draft.selectedSpots);
+      if (draft.piezasSeleccionadasMultiples) setPiezasSeleccionadasMultiples(draft.piezasSeleccionadasMultiples);
       if (draft.codigoPostal) setCodigoPostal(draft.codigoPostal);
       if (draft.colonia) setColonia(draft.colonia);
       if (draft.calle) setCalle(draft.calle);
@@ -547,8 +587,32 @@ export function KananConciergeAgent({
       return;
     }
 
-    // Cuando ya se especificaron todas las áreas seleccionadas en la casita:
+    // Cuando ya se especificaron todas las áreas seleccionadas:
     const resumenPiezas = nuevasPiezas.map((p) => p.nombre).join(" + ");
+
+    // Si el usuario ya había ingresado y validado su Código Postal previamente, no lo obligamos a reescribirlo
+    if (codigoPostal && codigoPostal.length === 5) {
+      if (colonia && calle && numExt) {
+        appendAgentMessage(
+          `¡Servicio sumado con éxito! 🐶 Ahora tu cotización incluye: **${resumenPiezas}**.\n\nConservamos tu domicilio registrado en **${colonia}, ${municipioDetectado}** (CP ${codigoPostal}).\n\n¿Deseas agregar detalles de manchas para esta nueva pieza?`,
+          "ask_manchas"
+        );
+        return;
+      }
+      if (colonia) {
+        appendAgentMessage(
+          `¡Servicio sumado con éxito! 🐶 Ahora tu cotización incluye: **${resumenPiezas}**.\n\nContinuemos con tu dirección en **${colonia}**. ¿Cuál es tu calle o avenida?`,
+          "ask_calle"
+        );
+        return;
+      }
+      appendAgentMessage(
+        `¡Servicio sumado con éxito! 🐶 Ahora tu cotización incluye: **${resumenPiezas}**.\n\nContinuemos con tu Código Postal **${codigoPostal}**. ¿En qué colonia o fraccionamiento te ubicas?`,
+        "ask_colonia"
+      );
+      return;
+    }
+
     appendAgentMessage(
       `¡Todo anotado! 🐶 ${resumenPiezas}.\n\nPara validar cobertura oficial en Jalisco y calcular tu ruta, ¿cuál es tu Código Postal (5 dígitos)?`,
       "ask_cp"
@@ -1064,6 +1128,9 @@ export function KananConciergeAgent({
     if (onResetCart) {
       onResetCart();
     }
+
+    prevAreasRef.current = [];
+    hasInitializedRef.current = true;
 
     setSelectedSpots([]);
     setPendingCategoriesToSpecify([]);
