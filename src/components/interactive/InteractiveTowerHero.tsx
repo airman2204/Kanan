@@ -185,7 +185,7 @@ export function InteractiveTowerHero({
               >
                 {/* Imagen de la Torre en PNG Transparente Flotante */}
                 <Image
-                  src="/assets/diorama/kanan-torre-vertical.png"
+                  src="/assets/diorama/kanan-torre-transparent.png"
                   alt="Torre Vertical Kanan Limpieza 3D"
                   fill
                   priority
