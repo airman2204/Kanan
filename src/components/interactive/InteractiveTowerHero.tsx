@@ -107,39 +107,36 @@ export function InteractiveTowerHero({
   const containerRef = useRef<HTMLDivElement>(null);
   const currentSpot = selectedSpotId ? TOWER_SPOTS[selectedSpotId] : null;
 
-  const [boardMousePos, setBoardMousePos] = useState<{ x: number; y: number; activeZone: "top" | "left" | "right" | "tail" | "idle" }>({
-    x: 0.5,
-    y: 0.5,
-    activeZone: "idle",
-  });
+  const [boardActiveZone, setBoardActiveZone] = useState<"top" | "left" | "right" | "bottom" | null>(null);
   const boardRef = useRef<HTMLDivElement>(null);
 
   const handleBoardMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!boardRef.current) return;
     const rect = boardRef.current.getBoundingClientRect();
-    const nx = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-    const ny = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
+    const nx = (e.clientX - rect.left) / rect.width;
+    const ny = (e.clientY - rect.top) / rect.height;
 
-    let activeZone: "top" | "left" | "right" | "tail" | "idle" = "idle";
-    
-    // Determinar de dónde se asoma el perro según el cuadrante del cursor
-    if (ny < 0.28) {
-      activeZone = "top";
-    } else if (nx < 0.35) {
-      activeZone = "left";
-    } else if (nx > 0.65) {
-      activeZone = "right";
-    } else if (ny > 0.72) {
-      activeZone = "tail";
+    // Calcular distancias a los 4 bordes
+    const distTop = ny;
+    const distBottom = 1 - ny;
+    const distLeft = nx;
+    const distRight = 1 - nx;
+
+    const minDist = Math.min(distTop, distBottom, distLeft, distRight);
+
+    if (minDist === distTop) {
+      setBoardActiveZone("top");
+    } else if (minDist === distLeft) {
+      setBoardActiveZone("left");
+    } else if (minDist === distRight) {
+      setBoardActiveZone("right");
     } else {
-      activeZone = "idle";
+      setBoardActiveZone("bottom");
     }
-
-    setBoardMousePos({ x: nx, y: ny, activeZone });
   };
 
   const handleBoardMouseLeave = () => {
-    setBoardMousePos((prev) => ({ ...prev, activeZone: "idle" }));
+    setBoardActiveZone(null);
   };
 
   // EFECTO TILT 3D PARALELO Y PROFUNDIDAD MULTICAPA
@@ -376,22 +373,17 @@ export function InteractiveTowerHero({
           onMouseLeave={handleBoardMouseLeave}
           className="lg:col-span-6 relative flex items-center justify-center min-h-[580px] lg:min-h-[660px]"
         >
-          {/* PERRITO ASOMADO INTERACTIVO DETRÁS DE LA TARJETA (Z-INDEX 0) */}
+          {/* PERRITO ASOMADO EN POSICIONES FIJAS SEGÚN EL BORDE MÁS CERCANO AL CURSOR (Z-INDEX 0) */}
           
-          {/* 1. ASOMADO POR ARRIBA (cuando el mouse está en la parte superior) */}
+          {/* 1. ASOMADO POR ARRIBA (Posición fija en la cabecera superior, solo emerge verticalmente) */}
           <motion.div
             initial={false}
             animate={{
-              y: boardMousePos.activeZone === "top" ? -68 : 20,
-              opacity: boardMousePos.activeZone === "top" ? 1 : 0,
-              scale: boardMousePos.activeZone === "top" ? 1 : 0.9,
+              y: boardActiveZone === "top" ? -82 : 25,
+              opacity: boardActiveZone === "top" ? 1 : 0,
             }}
-            transition={{ type: "spring", stiffness: 220, damping: 20 }}
-            style={{
-              left: `${Math.max(22, Math.min(68, boardMousePos.x * 100))}%`,
-              transform: "translateX(-50%)",
-            }}
-            className="absolute top-0 z-0 pointer-events-none w-36 sm:w-44 select-none drop-shadow-[0_12px_24px_rgba(0,0,0,0.18)]"
+            transition={{ type: "spring", stiffness: 260, damping: 22 }}
+            className="absolute -top-2 left-10 z-0 pointer-events-none w-36 sm:w-44 select-none drop-shadow-[0_12px_24px_rgba(0,0,0,0.18)]"
           >
             <img
               src="/images/mascot-peek-top.png"
@@ -400,20 +392,15 @@ export function InteractiveTowerHero({
             />
           </motion.div>
 
-          {/* 2. ASOMADO POR LA IZQUIERDA (cuando el mouse va al lateral izquierdo) */}
+          {/* 2. ASOMADO POR LA IZQUIERDA (Posición fija en el lateral izquierdo, solo emerge horizontalmente) */}
           <motion.div
             initial={false}
             animate={{
-              x: boardMousePos.activeZone === "left" ? -65 : 20,
-              opacity: boardMousePos.activeZone === "left" ? 1 : 0,
-              scale: boardMousePos.activeZone === "left" ? 1 : 0.9,
+              x: boardActiveZone === "left" ? -85 : 25,
+              opacity: boardActiveZone === "left" ? 1 : 0,
             }}
-            transition={{ type: "spring", stiffness: 220, damping: 20 }}
-            style={{
-              top: `${Math.max(18, Math.min(65, boardMousePos.y * 100))}%`,
-              transform: "translateY(-50%)",
-            }}
-            className="absolute left-0 z-0 pointer-events-none w-32 sm:w-40 select-none drop-shadow-[0_12px_24px_rgba(0,0,0,0.18)]"
+            transition={{ type: "spring", stiffness: 260, damping: 22 }}
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-0 pointer-events-none w-32 sm:w-42 select-none drop-shadow-[0_12px_24px_rgba(0,0,0,0.18)]"
           >
             <img
               src="/images/mascot-peek-left.png"
@@ -422,20 +409,15 @@ export function InteractiveTowerHero({
             />
           </motion.div>
 
-          {/* 3. ASOMADO POR LA DERECHA (cuando el mouse va al lateral derecho) */}
+          {/* 3. ASOMADO POR LA DERECHA (Posición fija en el lateral derecho, solo emerge horizontalmente) */}
           <motion.div
             initial={false}
             animate={{
-              x: boardMousePos.activeZone === "right" ? 65 : -20,
-              opacity: boardMousePos.activeZone === "right" ? 1 : 0,
-              scale: boardMousePos.activeZone === "right" ? 1 : 0.9,
+              x: boardActiveZone === "right" ? 85 : -25,
+              opacity: boardActiveZone === "right" ? 1 : 0,
             }}
-            transition={{ type: "spring", stiffness: 220, damping: 20 }}
-            style={{
-              top: `${Math.max(20, Math.min(65, boardMousePos.y * 100))}%`,
-              transform: "translateY(-50%)",
-            }}
-            className="absolute right-0 z-0 pointer-events-none w-32 sm:w-40 select-none drop-shadow-[0_12px_24px_rgba(0,0,0,0.18)]"
+            transition={{ type: "spring", stiffness: 260, damping: 22 }}
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-0 pointer-events-none w-32 sm:w-42 select-none drop-shadow-[0_12px_24px_rgba(0,0,0,0.18)]"
           >
             <img
               src="/images/mascot-peek-right.png"
@@ -444,26 +426,26 @@ export function InteractiveTowerHero({
             />
           </motion.div>
 
-          {/* 4. COLA ASOMADA Y MOVIÉNDOSE (cuando el cursor está abajo o en reposo) */}
+          {/* 4. ASOMADO POR ABAJO (Posición fija abajo, emerge verticalmente) */}
           <motion.div
             initial={false}
             animate={{
-              x: boardMousePos.activeZone === "tail" ? 35 : boardMousePos.activeZone === "idle" ? 30 : 0,
-              opacity: boardMousePos.activeZone === "tail" || boardMousePos.activeZone === "idle" ? 0.9 : 0,
-              scale: boardMousePos.activeZone === "tail" ? 1.05 : 0.95,
-              rotate: [0, 8, -6, 8, 0],
+              y: boardActiveZone === "bottom" ? 82 : -25,
+              opacity: boardActiveZone === "bottom" ? 1 : 0,
             }}
-            transition={{
-              rotate: { repeat: Infinity, duration: 1.6, ease: "easeInOut" },
-              default: { type: "spring", stiffness: 200, damping: 20 },
-            }}
-            className="absolute right-1 bottom-10 z-0 pointer-events-none w-16 sm:w-20 select-none drop-shadow-md origin-bottom-left"
+            transition={{ type: "spring", stiffness: 260, damping: 22 }}
+            className="absolute -bottom-2 right-12 z-0 pointer-events-none w-20 sm:w-24 select-none drop-shadow-md origin-top-left"
           >
-            <img
-              src="/images/mascot-peek-tail.png"
-              alt="Cola de Kanan"
-              className="w-full h-auto object-contain"
-            />
+            <motion.div
+              animate={{ rotate: [0, 10, -6, 10, 0] }}
+              transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+            >
+              <img
+                src="/images/mascot-peek-tail.png"
+                alt="Cola de Kanan"
+                className="w-full h-auto object-contain"
+              />
+            </motion.div>
           </motion.div>
 
           {/* TARJETA PRINCIPAL DEL EXPEDIENTE (Z-INDEX 10 PARA QUE TAPE EL CUERPO DEL PERRITO) */}
