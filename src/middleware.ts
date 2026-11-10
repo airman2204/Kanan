@@ -11,8 +11,8 @@ export function middleware(request: NextRequest) {
     // Si visita la raíz "/" en el subdominio
     if (pathname === "/") {
       const url = request.nextUrl.clone();
-      // Solo consideramos que hay sesión si la cookie tiene formato de token válido (con punto intermedio)
-      if (sessionCookie && sessionCookie.includes(".") && sessionCookie.length > 30) {
+      // Si NO hay sesión válida o no existe cookie, mostrar directamente el login
+      if (sessionCookie && sessionCookie.includes(".") && sessionCookie.length > 50) {
         url.pathname = "/admin";
       } else {
         url.pathname = "/admin/login";
@@ -20,11 +20,21 @@ export function middleware(request: NextRequest) {
       return NextResponse.rewrite(url);
     }
 
-    // Si acceden escribiendo explícitamente /admin o /admin/login, redirigir a la raíz limpia "/" (preservando parámetros como ?tab=)
-    if (pathname === "/admin" || pathname === "/admin/login" || pathname === "/login") {
+    // Permitir /admin/login sin redirigir en bucle
+    if (pathname === "/admin/login" || pathname === "/login") {
       const url = request.nextUrl.clone();
-      url.pathname = "/";
-      return NextResponse.redirect(url);
+      url.pathname = "/admin/login";
+      return NextResponse.rewrite(url);
+    }
+
+    // Si acceden a /admin explícito
+    if (pathname === "/admin") {
+      const url = request.nextUrl.clone();
+      if (!sessionCookie || !sessionCookie.includes(".")) {
+        url.pathname = "/admin/login";
+        return NextResponse.redirect(url);
+      }
+      return NextResponse.next();
     }
   }
 
