@@ -286,9 +286,97 @@ export function KananConciergeAgent({
     autos: "Vestiduras de Auto",
   };
 
-  // Inicializar conversación natural reconociendo si el cliente seleccionó áreas en la casita
+  // Guardar automáticamente el progreso de la cotización para recuperarla si recarga (Carro abandonado / persistencia)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (step === "finished") {
+      // Si ya terminó con éxito, limpiar el borrador
+      localStorage.removeItem("kanan_wizard_draft");
+      return;
+    }
+    const draft = {
+      step,
+      selectedSpots,
+      selectedCat,
+      selectedPiece,
+      codigoPostal,
+      colonia,
+      calle,
+      numExt,
+      selectedManchas,
+      notasLibres,
+      fecha,
+      turno,
+      horaEspecifica,
+      nombre,
+      whatsapp,
+    };
+    try {
+      localStorage.setItem("kanan_wizard_draft", JSON.stringify(draft));
+    } catch {}
+  }, [
+    step,
+    selectedSpots,
+    selectedCat,
+    selectedPiece,
+    codigoPostal,
+    colonia,
+    calle,
+    numExt,
+    selectedManchas,
+    notasLibres,
+    fecha,
+    turno,
+    horaEspecifica,
+    nombre,
+    whatsapp,
+  ]);
+
+  // Inicializar conversación natural reconociendo si el cliente seleccionó áreas en la casita o tiene un borrador previo
   useEffect(() => {
     setIsTyping(true);
+
+    // Revisar si existe borrador guardado en localStorage (Carro abandonado)
+    let draft: any = null;
+    if (typeof window !== "undefined") {
+      try {
+        const raw = localStorage.getItem("kanan_wizard_draft");
+        if (raw) draft = JSON.parse(raw);
+      } catch {}
+    }
+
+    if (draft && draft.step && draft.step !== "ask_category") {
+      if (draft.selectedSpots) setSelectedSpots(draft.selectedSpots);
+      if (draft.codigoPostal) setCodigoPostal(draft.codigoPostal);
+      if (draft.colonia) setColonia(draft.colonia);
+      if (draft.calle) setCalle(draft.calle);
+      if (draft.numExt) setNumExt(draft.numExt);
+      if (draft.selectedManchas) setSelectedManchas(draft.selectedManchas);
+      if (draft.notasLibres) setNotasLibres(draft.notasLibres);
+      if (draft.fecha) setFecha(draft.fecha);
+      if (draft.turno) setTurno(draft.turno);
+      if (draft.horaEspecifica) setHoraEspecifica(draft.horaEspecifica);
+      if (draft.nombre) setNombre(draft.nombre);
+      if (draft.whatsapp) setWhatsapp(draft.whatsapp);
+
+      setStep(draft.step);
+      setMessages([
+        {
+          id: "m-recuperado-1",
+          sender: "agent",
+          text: "¡Hola de nuevo! 👋 Noté que tenías una cotización en curso.",
+          time: getCurrentTime(),
+        },
+        {
+          id: "m-recuperado-2",
+          sender: "agent",
+          text: `Recuperamos tus datos para no empezar de cero 🐾${draft.codigoPostal ? ` (CP: ${draft.codigoPostal}${draft.colonia ? `, Col. ${draft.colonia}` : ""})` : ""}.\n\nContinuemos donde te quedaste:`,
+          time: getCurrentTime(),
+        },
+      ]);
+      setIsTyping(false);
+      return;
+    }
 
     const areas = preselectedCategories && preselectedCategories.length > 0
       ? preselectedCategories

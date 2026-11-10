@@ -54,6 +54,17 @@ export default function HomePage() {
         }
       })
       .catch(() => {});
+
+    // Restaurar carrito / áreas seleccionadas de la casita al recargar (Carrito persistente)
+    try {
+      const savedCart = localStorage.getItem("kanan_cart_items");
+      if (savedCart) {
+        const parsed = JSON.parse(savedCart);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setCartItems(parsed);
+        }
+      }
+    } catch {}
   }, []);
 
   const toggleCart = (id: string) => {
@@ -70,6 +81,9 @@ export default function HomePage() {
           });
         } catch {}
       }
+      try {
+        localStorage.setItem("kanan_cart_items", JSON.stringify(next));
+      } catch {}
       return next;
     });
   };
