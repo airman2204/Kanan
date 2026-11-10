@@ -288,42 +288,37 @@ export function InteractiveTowerHero({
                 <p className="text-[11px] text-slate-500 leading-snug">{currentSpot.descripcion}</p>
               </div>
 
-              <div className="flex items-center gap-2 pt-1">
+              <div className="pt-1">
                 <button
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
-                    onToggleCart(currentSpot.id);
+                    const isAlreadyCarted = cartItems.includes(currentSpot.id);
+                    if (isAlreadyCarted) {
+                      // Si ya está agregado, al tocarlo abre directo el chat de cotización
+                      onOpenWizard(currentSpot.id);
+                    } else {
+                      // Si no está agregado, lo añade a la selección
+                      onToggleCart(currentSpot.id);
+                    }
                   }}
-                  className={`flex-1 py-2.5 px-3 rounded-xl font-heading font-extrabold text-xs flex items-center justify-center gap-1.5 transition-all shadow-md active:scale-95 cursor-pointer ${
+                  className={`w-full py-3 px-4 rounded-2xl font-heading font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 cursor-pointer ${
                     cartItems.includes(currentSpot.id)
-                      ? "bg-emerald-600 hover:bg-emerald-700 text-white"
-                      : "bg-[#1D71B5] hover:bg-[#355581] text-white"
+                      ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/25"
+                      : "bg-gradient-to-r from-[#1D71B5] to-[#36A6DE] hover:from-[#355581] hover:to-[#1D71B5] text-white shadow-blue-500/25"
                   }`}
                 >
                   {cartItems.includes(currentSpot.id) ? (
                     <>
-                      <Check className="w-3.5 h-3.5" />
-                      <span>Agregado a tu selección</span>
+                      <Check className="w-4 h-4 stroke-[3]" />
+                      <span>✓ Agregado (Cotizar ahora →)</span>
                     </>
                   ) : (
                     <>
-                      <Plus className="w-3.5 h-3.5" />
-                      <span>Añadir a mi cotización</span>
+                      <Plus className="w-4 h-4 stroke-[3]" />
+                      <span>+ Añadir a mi cotización</span>
                     </>
                   )}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onOpenWizard(currentSpot.id);
-                  }}
-                  className="py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-heading font-bold text-xs flex items-center gap-1 cursor-pointer transition-colors"
-                >
-                  <span>Agendar</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>
             </motion.div>

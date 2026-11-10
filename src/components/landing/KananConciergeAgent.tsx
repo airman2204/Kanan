@@ -338,7 +338,7 @@ export function KananConciergeAgent({
     whatsapp,
   ]);
 
-  // Inicializar conversación natural reconociendo si el cliente seleccionó áreas en la casita o tiene un borrador previo válido
+  // Inicializar conversación natural reconociendo si el cliente seleccionó áreas en la casita
   useEffect(() => {
     setIsTyping(true);
 
@@ -348,34 +348,9 @@ export function KananConciergeAgent({
       ? [preselectedCategory]
       : [];
 
-    // Revisar si existe borrador guardado en localStorage con vigencia de 30 minutos
-    let draft: any = null;
-    if (typeof window !== "undefined") {
-      try {
-        const raw = localStorage.getItem("kanan_wizard_draft");
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          // Si tiene más de 30 minutos (1,800,000 ms), expira y se borra
-          if (parsed.timestamp && Date.now() - parsed.timestamp < 30 * 60 * 1000) {
-            draft = parsed;
-          } else {
-            localStorage.removeItem("kanan_wizard_draft");
-          }
-        }
-      } catch {}
-    }
-
-    // SI EL USUARIO ACABA DE MODIFICAR SU SELECCIÓN EN LA CASITA:
-    // Comparamos si las áreas que vienen de la casita cambiaron respecto a las del borrador.
-    // Si cambiaron (ej: agregó un carro o una sala nueva), priorizamos la nueva selección de la casita.
-    const areasCambiaron = draft && (
-      !draft.selectedSpots ||
-      draft.selectedSpots.length !== areas.length ||
-      areas.some((a) => !draft.selectedSpots.includes(a))
-    );
-
-    if (areas.length > 0 && (areasCambiaron || !draft)) {
-      // Prioridad a la nueva selección en la torre
+    // SI HAY ÁREAS SELECCIONADAS EN LA CASITA:
+    // Siempre le damos prioridad a lo que el usuario seleccionó en la maqueta
+    if (areas.length > 0) {
       setSelectedSpots(areas);
       const normalizadas = areas.map((a) => (a === "comedor" ? "salas" : a));
       const primeraArea = normalizadas[0];
@@ -410,7 +385,22 @@ export function KananConciergeAgent({
       return () => clearTimeout(timer);
     }
 
-    // Si NO cambió la selección de la casita y hay un borrador vigente, restaurarlo
+    // SI NO HAY ÁREAS EN LA CASITA, REVISAR SI HAY BORRADOR DE CARRO ABANDONADO
+    let draft: any = null;
+    if (typeof window !== "undefined") {
+      try {
+        const raw = localStorage.getItem("kanan_wizard_draft");
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed.timestamp && Date.now() - parsed.timestamp < 30 * 60 * 1000) {
+            draft = parsed;
+          } else {
+            localStorage.removeItem("kanan_wizard_draft");
+          }
+        }
+      } catch {}
+    }
+
     if (draft && draft.step && draft.step !== "ask_category") {
       if (draft.selectedSpots) setSelectedSpots(draft.selectedSpots);
       if (draft.codigoPostal) setCodigoPostal(draft.codigoPostal);
@@ -444,53 +434,24 @@ export function KananConciergeAgent({
       return;
     }
 
-    setSelectedSpots(areas);
-
+    // CASO VACÍO: Saludo inicial general
+    setSelectedSpots([]);
     const timer = setTimeout(() => {
-      if (areas.length > 0) {
-        const normalizadas = areas.map((a) => (a === "comedor" ? "salas" : a));
-        const primeraArea = normalizadas[0];
-        const restantes = normalizadas.slice(1);
-
-        setSelectedCat(primeraArea);
-        setPendingCategoriesToSpecify(restantes);
-        setPiezasSeleccionadasMultiples([]);
-
-        const nombresAreas = areas.map((id) => spotNameMap[id] || id).join(" + ");
-        const nombrePrimera = spotNameMap[primeraArea] || primeraArea;
-
-        setMessages([
-          {
-            id: "m-1",
-            sender: "agent",
-            text: "¡Hola! 👋 Soy Kanan asistente.",
-            time: getCurrentTime(),
-          },
-          {
-            id: "m-2",
-            sender: "agent",
-            text: `¡Excelente elección! Veo que seleccionaste: 🐾\n📍 **${nombresAreas}**\n\nPrimero, ¿qué modelo o tipo es tu **${nombrePrimera}**?`,
-            time: getCurrentTime(),
-          },
-        ]);
-        setStep("ask_piece");
-      } else {
-        setMessages([
-          {
-            id: "m-1",
-            sender: "agent",
-            text: "¡Hola! 👋 Soy Kanan asistente.",
-            time: getCurrentTime(),
-          },
-          {
-            id: "m-2",
-            sender: "agent",
-            text: "¿Qué muebles o piezas te gustaría que consintamos hoy?",
-            time: getCurrentTime(),
-          },
-        ]);
-        setStep("ask_category");
-      }
+      setMessages([
+        {
+          id: "m-1",
+          sender: "agent",
+          text: "¡Hola! 👋 Soy Kanan asistente.",
+          time: getCurrentTime(),
+        },
+        {
+          id: "m-2",
+          sender: "agent",
+          text: "¿Qué muebles o piezas te gustaría que consintamos hoy?",
+          time: getCurrentTime(),
+        },
+      ]);
+      setStep("ask_category");
       setIsTyping(false);
     }, 400);
 
