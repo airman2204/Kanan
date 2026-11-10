@@ -132,21 +132,17 @@ export function InteractiveTowerHero({
 
   return (
     <div className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
-      {/* ENCABEZADO DE LA SECCIÓN DE LA MAQUETA */}
+      {/* ENCABEZADO DE LA SECCIÓN DE LA CASA */}
       <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-14 space-y-3">
-        <div className="inline-flex items-center gap-2 bg-gradient-to-r from-cyan-500/10 via-[#1D71B5]/10 to-blue-500/10 border border-[#36A6DE]/30 rounded-full px-4 py-1.5 shadow-xs text-xs font-heading font-extrabold text-[#1D71B5]">
-          <Sparkles className="w-4 h-4 text-[#36A6DE]" />
-          <span>Maqueta Interactiva de Limpieza a Domicilio</span>
-        </div>
         <h2 className="font-heading text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#355581] tracking-tight">
-          Explora cada área de tu hogar
+          Explora cada área de tu casa
         </h2>
         <p className="text-slate-600 text-sm sm:text-base max-w-2xl mx-auto">
-          Toca cualquier punto en la torre vertical para descubrir nuestra tecnología de inyección-succión, tiempos de secado y precios transparentes.
+          Toca cualquier punto en la casa para descubrir nuestra tecnología de inyección-succión y tiempos de secado sin complicaciones.
         </p>
       </div>
 
-      {/* CONTENEDOR SPLIT EN 2 MITADES: IZQUIERDA TORRE GRANDE, DERECHA FICHA GIGANTE */}
+      {/* CONTENEDOR SPLIT EN 2 MITADES: IZQUIERDA MAQUETA 3D, DERECHA FICHA INTERACTIVA */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
         
         {/* MITAD IZQUIERDA: LA TORRE VERTICAL EN FORMATO GRANDE CON PROFUNDIDAD 3D */}
@@ -328,83 +324,152 @@ export function InteractiveTowerHero({
           </div>
         </div>
 
-        {/* MITAD DERECHA: FICHA EN VOLUMEN 3D CON ELEVACIÓN Y RELIEVE */}
-        <div className="lg:col-span-6 flex items-center justify-center min-h-[460px]">
-          <AnimatePresence mode="wait">
-            {currentSpot ? (
+        {/* MITAD DERECHA: TARJETA 3D CON GIRO FLIP (FRENTE CON MASCOTA / VUELTA CON INFO) */}
+        <div
+          className="lg:col-span-6 flex items-center justify-center min-h-[500px]"
+          style={{ perspective: 1200 }}
+        >
+          <motion.div
+            animate={{ rotateY: currentSpot ? 180 : 0 }}
+            transition={{ duration: 0.65, ease: [0.23, 1, 0.32, 1] }}
+            style={{ transformStyle: "preserve-3d" }}
+            className="w-full relative min-h-[500px] flex items-center justify-center"
+          >
+            {/* ============================================================== */}
+            {/* LADO A (FRENTE): MASCOTA TÉCNICO CON GLOBITO PENSANDO           */}
+            {/* ============================================================== */}
+            <div
+              style={{
+                backfaceVisibility: "hidden",
+                WebkitBackfaceVisibility: "hidden",
+                transform: "rotateY(0deg)",
+              }}
+              className="absolute inset-0 w-full h-full bg-gradient-to-b from-white via-slate-50/80 to-blue-50/40 rounded-3xl p-6 sm:p-8 border-t-2 border-l-2 border-white border-r border-b border-slate-200/80 shadow-[0_25px_60px_-15px_rgba(29,113,181,0.18),0_10px_25px_-5px_rgba(0,0,0,0.06),inset_0_1px_2px_rgba(255,255,255,1)] flex flex-col items-center justify-center overflow-hidden"
+            >
+              {/* Resplandor suave posterior */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 rounded-full bg-cyan-400/15 blur-3xl pointer-events-none" />
+
+              {/* Globito Flotante Pensando Animado */}
               <motion.div
-                key={currentSpot.id}
-                initial={{ opacity: 0, x: 30, y: 15, scale: 0.94 }}
-                animate={{ opacity: 1, x: 0, y: 0, scale: 1 }}
-                exit={{ opacity: 0, x: -30, y: -15, scale: 0.94 }}
-                transition={{ duration: 0.28, ease: "easeOut" }}
-                className="w-full relative bg-gradient-to-b from-white via-white to-slate-50/90 rounded-3xl p-6 sm:p-8 lg:p-10 border-t-2 border-l-2 border-white/90 border-r border-b border-slate-200/80 shadow-[0_30px_70px_-15px_rgba(29,113,181,0.22),0_15px_30px_-10px_rgba(0,0,0,0.08),inset_0_1px_1px_rgba(255,255,255,0.9)] space-y-6 overflow-hidden"
+                initial={{ opacity: 0, y: 10, scale: 0.9 }}
+                animate={{
+                  opacity: 1,
+                  y: [-3, 3, -3],
+                  scale: 1,
+                }}
+                transition={{
+                  repeat: Infinity,
+                  duration: 3.5,
+                  ease: "easeInOut",
+                }}
+                className="relative z-10 bg-white/95 backdrop-blur-md rounded-2xl px-5 py-3 shadow-[0_10px_30px_rgba(29,113,181,0.18)] border border-cyan-200/80 max-w-xs text-center mb-1"
               >
-                {/* Resplandor biselado 3D superior */}
-                <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent pointer-events-none" />
+                <div className="flex items-center justify-center gap-1.5 text-xs sm:text-sm font-heading font-extrabold text-[#355581]">
+                  <span>¿Qué área de tu casa limpiamos hoy?</span>
+                  <span className="text-base animate-pulse">✨</span>
+                </div>
+                <p className="text-[11px] text-slate-500 mt-0.5 font-medium leading-snug">
+                  Toca las píldoras en la casa para ver el proceso y equipo.
+                </p>
 
-                {/* Cabecera de la ficha */}
-                <div className="flex items-start justify-between border-b border-slate-100 pb-5">
-                  <div className="space-y-1.5">
-                    <div>
-                      <span className="text-xs font-heading font-extrabold uppercase tracking-wider text-[#1D71B5] bg-blue-50 px-3 py-1 rounded-full border border-blue-200 shadow-2xs">
-                        {currentSpot.badge}
-                      </span>
-                    </div>
-                    <h3 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#0F2438] leading-tight mt-1">
-                      {currentSpot.servicio}
-                    </h3>
-                  </div>
+                {/* Burbujitas de pensamiento apuntando a la mascota */}
+                <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-3 h-3 bg-white border-r border-b border-cyan-200/80 rounded-full shadow-xs" />
+                <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 translate-y-0.5 w-1.5 h-1.5 bg-white border-r border-b border-cyan-200/80 rounded-full" />
+              </motion.div>
 
-                  <button
-                    type="button"
-                    onClick={() => onSelectSpot(null)}
-                    className="p-2 rounded-2xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer shadow-2xs border border-slate-200/60"
-                    title="Cerrar detalle"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
+              {/* Mascota Kanan Técnico de Cuerpo Entero */}
+              <div className="relative w-56 sm:w-64 h-64 sm:h-72 mt-2">
+                <Image
+                  src="/assets/brand/kanan-mascota-tecnico.png"
+                  alt="Técnico Especialista Kanan"
+                  fill
+                  priority
+                  className="object-contain drop-shadow-[0_15px_30px_rgba(29,113,181,0.22)] hover:scale-105 transition-transform duration-300"
+                />
+              </div>
+
+              {/* Badge inferior de confianza */}
+              <div className="inline-flex items-center gap-2 mt-2 bg-white/90 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-slate-200/80 shadow-2xs text-[11px] font-bold text-slate-600">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+                <span>Técnicos certificados listos a domicilio</span>
+              </div>
+            </div>
+
+            {/* ============================================================== */}
+            {/* LADO B (REVERSO): FICHA DE SERVICIO AL DARLE LA VUELTA           */}
+            {/* ============================================================== */}
+            <div
+              style={{
+                backfaceVisibility: "hidden",
+                WebkitBackfaceVisibility: "hidden",
+                transform: "rotateY(180deg)",
+              }}
+              className="absolute inset-0 w-full h-full bg-gradient-to-b from-white via-white to-slate-50/90 rounded-3xl p-6 sm:p-8 border-t-2 border-l-2 border-white/90 border-r border-b border-slate-200/80 shadow-[0_30px_70px_-15px_rgba(29,113,181,0.22),0_15px_30px_-10px_rgba(0,0,0,0.08),inset_0_1px_1px_rgba(255,255,255,0.9)] flex flex-col justify-between overflow-hidden"
+            >
+              {/* Resplandor biselado 3D superior */}
+              <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent pointer-events-none" />
+
+              {/* Cabecera de la ficha */}
+              <div className="flex items-start justify-between border-b border-slate-100 pb-4">
+                <div className="space-y-1">
+                  <span className="text-xs font-heading font-extrabold uppercase tracking-wider text-[#1D71B5] bg-blue-50 px-3 py-1 rounded-full border border-blue-200 shadow-2xs inline-block">
+                    {currentSpot?.badge || "Servicio Especializado"}
+                  </span>
+                  <h3 className="font-heading text-xl sm:text-2xl font-extrabold text-[#0F2438] leading-tight mt-1">
+                    {currentSpot?.servicio || "Detalles del Servicio"}
+                  </h3>
                 </div>
 
-                {/* Especificaciones Técnicas Destacadas con Relieve 3D */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="bg-white/90 rounded-2xl p-4 border border-slate-200/90 shadow-[0_4px_14px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,1)]">
-                    <div className="flex items-center gap-2 text-cyan-700 font-bold text-xs uppercase tracking-wider mb-1">
-                      <ShieldCheck className="w-4 h-4 text-cyan-600 shrink-0" />
-                      <span>Tecnología Aplicada</span>
-                    </div>
-                    <p className="font-heading font-bold text-slate-900 text-sm">
-                      {currentSpot.tecnologia}
-                    </p>
-                  </div>
+                <button
+                  type="button"
+                  onClick={() => onSelectSpot(null)}
+                  className="p-2 rounded-2xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer shadow-2xs border border-slate-200/60"
+                  title="Voltear / Cerrar"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
 
-                  <div className="bg-white/90 rounded-2xl p-4 border border-slate-200/90 shadow-[0_4px_14px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,1)]">
-                    <div className="flex items-center gap-2 text-cyan-700 font-bold text-xs uppercase tracking-wider mb-1">
-                      <Timer className="w-4 h-4 text-[#36A6DE] shrink-0" />
-                      <span>Tiempo de Secado</span>
-                    </div>
-                    <p className="font-heading font-bold text-slate-900 text-sm">
-                      {currentSpot.tiempoSecado}
-                    </p>
+              {/* Especificaciones Técnicas */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 my-2">
+                <div className="bg-white/90 rounded-2xl p-3.5 border border-slate-200/90 shadow-[0_4px_14px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,1)]">
+                  <div className="flex items-center gap-2 text-cyan-700 font-bold text-xs uppercase tracking-wider mb-1">
+                    <ShieldCheck className="w-4 h-4 text-cyan-600 shrink-0" />
+                    <span>Tecnología</span>
                   </div>
-                </div>
-
-                {/* Descripción Detallada */}
-                <div className="space-y-2">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                    ¿Qué incluye este servicio?
-                  </h4>
-                  <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
-                    {currentSpot.descripcion}
+                  <p className="font-heading font-bold text-slate-900 text-xs sm:text-sm">
+                    {currentSpot?.tecnologia}
                   </p>
                 </div>
 
-                {/* Acciones principales con Botones con Relieve Físico */}
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-3 border-t border-slate-100">
+                <div className="bg-white/90 rounded-2xl p-3.5 border border-slate-200/90 shadow-[0_4px_14px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,1)]">
+                  <div className="flex items-center gap-2 text-cyan-700 font-bold text-xs uppercase tracking-wider mb-1">
+                    <Timer className="w-4 h-4 text-[#36A6DE] shrink-0" />
+                    <span>Secado</span>
+                  </div>
+                  <p className="font-heading font-bold text-slate-900 text-xs sm:text-sm">
+                    {currentSpot?.tiempoSecado}
+                  </p>
+                </div>
+              </div>
+
+              {/* Descripción */}
+              <div className="space-y-1.5 my-1">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                  ¿Qué incluye este servicio?
+                </h4>
+                <p className="text-slate-600 text-xs sm:text-sm leading-relaxed">
+                  {currentSpot?.descripcion}
+                </p>
+              </div>
+
+              {/* Acciones principales */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-3 border-t border-slate-100">
+                {currentSpot && (
                   <button
                     type="button"
                     onClick={() => onToggleCart(currentSpot.id)}
-                    className={`flex-1 py-3.5 px-5 rounded-2xl font-heading font-extrabold text-sm flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer ${
+                    className={`flex-1 py-3 px-4 rounded-2xl font-heading font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer ${
                       cartItems.includes(currentSpot.id)
                         ? "bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 shadow-[0_4px_14px_rgba(225,29,72,0.18)]"
                         : "bg-emerald-600 hover:bg-emerald-700 text-white shadow-[0_8px_20px_-4px_rgba(16,185,129,0.45)]"
@@ -413,7 +478,7 @@ export function InteractiveTowerHero({
                     {cartItems.includes(currentSpot.id) ? (
                       <>
                         <X className="w-4 h-4 stroke-[3] text-rose-600" />
-                        <span>Quitar de mi cotización</span>
+                        <span>Quitar de mi pedido</span>
                       </>
                     ) : (
                       <>
@@ -422,7 +487,9 @@ export function InteractiveTowerHero({
                       </>
                     )}
                   </button>
+                )}
 
+                {currentSpot && (
                   <button
                     type="button"
                     onClick={() => {
@@ -431,45 +498,16 @@ export function InteractiveTowerHero({
                       }
                       onOpenWizard(currentSpot.id);
                     }}
-                    className="flex-1 py-3.5 px-6 rounded-2xl bg-gradient-to-r from-[#1D71B5] via-[#36A6DE] to-[#355581] hover:from-[#165a91] hover:to-[#1D71B5] text-white font-heading font-extrabold text-sm flex items-center justify-center gap-2 transition-all shadow-[0_10px_25px_-5px_rgba(29,113,181,0.4)] active:scale-95 cursor-pointer whitespace-nowrap"
+                    className="flex-1 py-3 px-5 rounded-2xl bg-gradient-to-r from-[#1D71B5] via-[#36A6DE] to-[#355581] hover:from-[#165a91] hover:to-[#1D71B5] text-white font-heading font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-[0_10px_25px_-5px_rgba(29,113,181,0.4)] active:scale-95 cursor-pointer whitespace-nowrap"
                   >
                     <CalendarCheck className="w-4 h-4" />
                     <span>Cotizar ahora</span>
                     <ArrowRight className="w-4 h-4" />
                   </button>
-                </div>
-              </motion.div>
-            ) : (
-              /* TARJETA INICIAL CON ENFOQUE AL CLIENTE Y VOLUMEN 3D */
-              <motion.div
-                key="placeholder"
-                initial={{ opacity: 0, scale: 0.96 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.96 }}
-                transition={{ duration: 0.2 }}
-                className="w-full relative bg-gradient-to-b from-white via-slate-50/70 to-blue-50/30 rounded-3xl p-8 sm:p-12 border-t-2 border-l-2 border-white border-r border-b border-slate-200/80 shadow-[0_25px_60px_-15px_rgba(29,113,181,0.16),0_10px_25px_-5px_rgba(0,0,0,0.06),inset_0_1px_2px_rgba(255,255,255,1)] text-center space-y-6 flex flex-col items-center justify-center overflow-hidden"
-              >
-                {/* Resplandor suave */}
-                <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-cyan-400/15 blur-2xl pointer-events-none" />
-
-                <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-cyan-500/15 to-blue-500/10 text-[#1D71B5] border border-cyan-200/80 flex items-center justify-center shadow-[0_8px_16px_rgba(54,166,222,0.15)]">
-                  <Sparkles className="w-8 h-8 text-[#36A6DE]" />
-                </div>
-
-                <div className="space-y-3 max-w-md">
-                  <span className="text-[11px] font-heading font-extrabold uppercase tracking-widest text-[#1D71B5] bg-blue-50/80 px-3 py-1 rounded-full border border-blue-200/60">
-                    Tu hogar impecable
-                  </span>
-                  <h3 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#355581] leading-tight">
-                    ¿Qué área de tu casa deseas renovar hoy?
-                  </h3>
-                  <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
-                    Toca en la maqueta el mueble o espacio que te gustaría limpiar para conocer nuestro proceso especializado y sumarlo a tu cotización a domicilio.
-                  </p>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                )}
+              </div>
+            </div>
+          </motion.div>
         </div>
 
       </div>
