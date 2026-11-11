@@ -320,9 +320,13 @@ export async function POST(req: NextRequest) {
     }
 
     // Envío automático al WhatsApp del cliente vía servicio de Chat
+    // Mandamos el mensaje formal de la reserva hacia el WhatsApp para que tanto tú como el cliente tengan el desglose completo en el chat
     let autoEnviado = false;
     try {
-      autoEnviado = await despacharConfirmacionReservaAutomatica(cita, cliente);
+      const { enviarMensajeChat } = await import("@/lib/chat/bridgeClient");
+      // Enviar el detalle formal de la solicitud generada en la web directamente al WhatsApp
+      await enviarMensajeChat(cliente.whatsapp, textoWhatsApp);
+      autoEnviado = true;
     } catch (chatErr) {
       console.error("No se pudo autodespachar el mensaje de reserva:", chatErr);
     }
