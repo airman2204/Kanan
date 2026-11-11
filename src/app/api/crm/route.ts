@@ -28,6 +28,7 @@ import {
   sanitizeInput,
 } from "@/lib/utils/securityValidation";
 import { consultarCodigoPostal } from "@/lib/utils/postalCodes";
+import { supabase } from "@/lib/supabase";
 
 function isAuthenticatedAdmin(req: NextRequest): boolean {
   const cookie = req.cookies.get("kanan_admin_session")?.value;
@@ -281,6 +282,41 @@ export async function POST(req: NextRequest) {
       await sincronizarCitaConSupabase(cita, cliente);
     } catch (syncErr) {
       console.error("Error al sincronizar con Supabase en POST /api/crm:", syncErr);
+    }
+
+    // Registrar explícitamente en el historial del chat la solicitud generada desde la WEB
+    const msgSolicitudWeb = {
+      id: `web-${Date.now()}`,
+      cita_id: cita.id,
+      cliente_id: cliente.id,
+      etapa: "1_confirmacion_inmediata",
+      etapa_titulo: "Cotización Web / Maqueta 3D",
+      destinatario_whatsapp: cliente.whatsapp,
+      contenido_mensaje: `[Cliente]: ${textoWhatsApp}`,
+      estatus_envio: "Enviado",
+      fecha_programada: new Date().toISOString(),
+    };
+    const dbInstancia = getDatabase();
+    dbInstancia.mensajes_automatizacion.unshift(msgSolicitudWeb as any);
+    try {
+      await supabase.from("mensajes_automatizacion").insert(msgSolicitudWeb);
+      
+      // Notificar al Inbox en tiempo real para que aparezca al instante en el CRM
+      const chInbox = supabase.channel("kanan_chat_inbox_channel", { config: { broadcast: { ack: false } } });
+      await chInbox.send({
+        type: "broadcast",
+        event: "nuevo_mensaje",
+        payload: {
+          mensaje: msgSolicitudWeb,
+          cliente: {
+            id: cliente.id,
+            nombre: cliente.nombre,
+            whatsapp: cliente.whatsapp,
+          },
+        },
+      });
+    } catch (errWebMsg) {
+      console.warn("Error registrando mensaje web en automatización:", errWebMsg);
     }
 
     // Envío automático al WhatsApp del cliente vía servicio de Chat

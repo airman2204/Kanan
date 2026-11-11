@@ -23,7 +23,9 @@ import {
   FileText,
   SlidersHorizontal,
   ChevronRight,
-  Plus
+  Plus,
+  Globe,
+  MessageSquare
 } from "lucide-react";
 import { Cliente, ServicioCita, MensajeAutomatizacion, EstatusCita } from "@/types/crm";
 import { AgentFlowCanvas } from "./agent-flow/AgentFlowCanvas";
@@ -472,10 +474,22 @@ export function ChatInbox({
             <div className="flex-1 overflow-y-auto divide-y divide-slate-100">
               {clientesFiltrados.map((cli) => {
                 const isSelected = cli.id === activeCliente?.id;
-                const cliCitas = citas.filter((c) => c.cliente_id === cli.id);
+                const cliDigits = cli.whatsapp ? cli.whatsapp.replace(/\D/g, "").slice(-10) : "";
+                const cliCitas = citas.filter((c) => {
+                  if (c.cliente_id === cli.id) return true;
+                  const linked = contactosLocales.find((lc) => lc.id === c.cliente_id);
+                  return linked && cliDigits && linked.whatsapp?.replace(/\D/g, "").slice(-10) === cliDigits;
+                });
                 const ultimaCita = cliCitas[0];
-                const ultimosMensajes = mensajesLocales.filter((m) => m.cliente_id === cli.id);
+                const ultimosMensajes = mensajesLocales.filter((m) => {
+                  if (m.cliente_id === cli.id) return true;
+                  const mDigits = m.destinatario_whatsapp ? m.destinatario_whatsapp.replace(/\D/g, "").slice(-10) : "";
+                  return cliDigits && mDigits === cliDigits;
+                });
                 const ultimoMsg = ultimosMensajes[ultimosMensajes.length - 1];
+
+                // Detectar si el último mensaje o cita vino de la web
+                const esOrigenWeb = ultimaCita?.origen === "web" || ultimosMensajes.some((m) => m.etapa_titulo?.includes("Web"));
 
                 return (
                   <button
@@ -491,8 +505,17 @@ export function ChatInbox({
                         : "hover:bg-slate-100/60"
                     }`}
                   >
-                    <div className="w-10 h-10 rounded-full bg-[#1D71B5]/10 text-[#1D71B5] flex items-center justify-center shrink-0 font-bold text-xs">
+                    <div className="relative w-10 h-10 rounded-full bg-[#1D71B5]/10 text-[#1D71B5] flex items-center justify-center shrink-0 font-bold text-xs">
                       {cli.nombre.slice(0, 2).toUpperCase()}
+                      {esOrigenWeb ? (
+                        <span className="absolute -bottom-0.5 -right-0.5 bg-blue-600 text-white rounded-full p-0.5 border border-white" title="Cotizó desde la Web / Maqueta">
+                          <Globe className="w-2.5 h-2.5" />
+                        </span>
+                      ) : (
+                        <span className="absolute -bottom-0.5 -right-0.5 bg-emerald-500 text-white rounded-full p-0.5 border border-white" title="Escribió directo a WhatsApp">
+                          <MessageSquare className="w-2.5 h-2.5" />
+                        </span>
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-0.5">
@@ -508,9 +531,16 @@ export function ChatInbox({
                           </span>
                         )}
                       </div>
-                      <p className="text-[11px] text-slate-500 truncate">
-                        {ultimoMsg ? ultimoMsg.contenido_mensaje.replace("[Cliente]:", "") : cli.whatsapp}
-                      </p>
+                      <div className="flex items-center gap-1.5">
+                        {esOrigenWeb && (
+                          <span className="text-[9px] font-extrabold px-1.5 py-0.2 bg-blue-100 text-blue-700 rounded-md shrink-0">
+                            WEB
+                          </span>
+                        )}
+                        <p className="text-[11px] text-slate-500 truncate flex-1">
+                          {ultimoMsg ? ultimoMsg.contenido_mensaje.replace("[Cliente]:", "").trim() : cli.whatsapp}
+                        </p>
+                      </div>
                     </div>
                   </button>
                 );
@@ -542,6 +572,12 @@ export function ChatInbox({
                     <div className="min-w-0">
                       <h3 className="font-bold text-xs text-slate-900 truncate flex items-center gap-1.5">
                         <span>{activeCliente.nombre}</span>
+                        {activeCitas.some((c) => c.origen === "web") && (
+                          <span className="px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-blue-100 text-blue-800 border border-blue-200 flex items-center gap-1">
+                            <Globe className="w-2.5 h-2.5" />
+                            Origen: Web / Maqueta
+                          </span>
+                        )}
                         {(!activeCliente.whatsapp || activeCliente.whatsapp.startsWith("wa-") || activeCliente.whatsapp.length > 13) && (
                           <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
                             WhatsApp LID
@@ -665,6 +701,13 @@ export function ChatInbox({
                                   : "bg-[#1D71B5] text-white rounded-tr-xs"
                               }`}
                             >
+                              {/* Badge de Origen para identificar si vino de la web o directo de WhatsApp */}
+                              {isClient && (m.etapa_titulo?.includes("Web") || m.etapa_titulo?.includes("Maqueta") || rawContent.includes("Acabo de registrar mi solicitud de cita en la web")) && (
+                                <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 font-extrabold text-[10px] mb-1">
+                                  <Globe className="w-3 h-3 text-blue-600" />
+                                  <span>Cotización generada desde la Web</span>
+                                </div>
+                              )}
                               <p className="whitespace-pre-line font-sans">{rawContent}</p>
                               <div className={`flex items-center justify-end gap-1 text-[9px] ${
                                 isClient ? "text-slate-400" : "text-blue-100"
