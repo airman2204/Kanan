@@ -81,7 +81,10 @@ export async function POST(req: NextRequest) {
     // Solo se ejecutan respuestas automáticas e inteligencia artificial si el número es tu teléfono de pruebas (2221817807)
     // Para cualquier otro cliente real (como Arfaxad), el bot JAMÁS interviene para no estropear conversaciones reales.
     const WHITELIST_TEST_PHONE = "2221817807";
-    const esNumeroPruebas = phoneParaResponder.slice(-10) === WHITELIST_TEST_PHONE;
+    const esNumeroPruebas =
+      (cliente?.whatsapp && cliente.whatsapp.replace(/\D/g, "").slice(-10) === WHITELIST_TEST_PHONE) ||
+      (cleanPhone && cleanPhone.slice(-10) === WHITELIST_TEST_PHONE) ||
+      (lid && String(lid) === "64312974520340");
 
     if (cliente) {
       // Si NO es tu teléfono de pruebas, forzar IA desactivada (Modo Manual obligatorio)
