@@ -373,7 +373,7 @@ export function InteractiveTowerHero({
           {/* CONTENEDOR ENVOLVENTE EXACTO A LA TARJETA PARA POSICIONAR LOS ASOMADOS AL BORDE REAL */}
           <div className="w-full relative">
             
-            {/* 1. ASOMADO POR ARRIBA: Perrito más chico, apoyando limpiamente las patitas en el borde superior (sin cola) */}
+            {/* 1. ASOMADO POR ARRIBA: Perrito apoyando limpiamente las patitas en el borde superior */}
             <motion.div
               initial={false}
               animate={{
@@ -381,7 +381,7 @@ export function InteractiveTowerHero({
                 opacity: boardActiveZone === "top" ? 1 : 0,
               }}
               transition={{ type: "spring", stiffness: 260, damping: 22 }}
-              className="absolute top-0 left-6 z-0 pointer-events-none w-36 sm:w-40 select-none drop-shadow-[0_10px_20px_rgba(0,0,0,0.16)]"
+              className="absolute top-0 left-6 z-0 pointer-events-none w-36 sm:w-42 select-none drop-shadow-[0_10px_20px_rgba(0,0,0,0.16)]"
             >
               <img
                 src="/images/mascot-peek-top.png"
@@ -394,11 +394,11 @@ export function InteractiveTowerHero({
             <motion.div
               initial={false}
               animate={{
-                x: boardActiveZone === "left" ? 0 : 40,
+                x: boardActiveZone === "left" ? 0 : 50,
                 opacity: boardActiveZone === "left" ? 1 : 0,
               }}
               transition={{ type: "spring", stiffness: 260, damping: 22 }}
-              className="absolute right-full top-8 sm:top-12 z-0 pointer-events-none w-26 sm:w-30 select-none drop-shadow-[0_10px_20px_rgba(0,0,0,0.16)] flex justify-end"
+              className="absolute right-full top-8 sm:top-12 z-0 pointer-events-none w-32 sm:w-36 select-none drop-shadow-[0_10px_20px_rgba(0,0,0,0.16)] flex justify-end"
             >
               <img
                 src="/images/mascot-peek-left.png"
@@ -411,11 +411,11 @@ export function InteractiveTowerHero({
             <motion.div
               initial={false}
               animate={{
-                x: boardActiveZone === "right" ? 0 : -40,
+                x: boardActiveZone === "right" ? 0 : -50,
                 opacity: boardActiveZone === "right" ? 1 : 0,
               }}
               transition={{ type: "spring", stiffness: 260, damping: 22 }}
-              className="absolute left-full top-8 sm:top-12 z-0 pointer-events-none w-26 sm:w-30 select-none drop-shadow-[0_10px_20px_rgba(0,0,0,0.16)] flex justify-start"
+              className="absolute left-full top-8 sm:top-12 z-0 pointer-events-none w-32 sm:w-36 select-none drop-shadow-[0_10px_20px_rgba(0,0,0,0.16)] flex justify-start"
             >
               <img
                 src="/images/mascot-peek-right.png"
