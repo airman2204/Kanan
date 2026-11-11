@@ -305,10 +305,10 @@ export default function AdminPage() {
     checkAuth();
     fetchCrmData();
 
-    // Sincronización en vivo cada 6 segundos para detectar citas nuevas, sonar campana y actualizar sin recargar F5
+    // Sincronización en vivo cada 30 segundos de respaldo (los eventos principales ya llegan por Realtime Broadcast sin gastar ancho de banda)
     const interval = setInterval(() => {
       fetchCrmData();
-    }, 6000);
+    }, 30000);
 
     // ESCUCHA EN TIEMPO REAL GLOBAL PARA NOTIFICACIONES Y SONIDOS (Canal dedicado para Admin)
     const realtimeChannel = supabase
