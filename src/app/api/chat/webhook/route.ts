@@ -74,7 +74,8 @@ export async function POST(req: NextRequest) {
     }
 
     // Siempre usar el número de teléfono oficial del cliente en el CRM para cualquier respuesta automática
-    const phoneParaResponder = cliente?.whatsapp ? cliente.whatsapp.replace(/\D/g, "") : cleanPhone;
+    // Si el mensaje provino de un LID (@lid), responder al LID para garantizar entrega inmediata sin problemas de cifrado
+    const phoneParaResponder = lid ? `${lid}@lid` : (cliente?.whatsapp ? cliente.whatsapp.replace(/\D/g, "") : cleanPhone);
 
     // 🛡️ REGLA ESTRICTA DE SEGURIDAD / SANDBOX:
     // Solo se ejecutan respuestas automáticas e inteligencia artificial si el número es tu teléfono de pruebas (2221817807)

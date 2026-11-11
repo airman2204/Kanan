@@ -56,20 +56,28 @@ const WHITELIST_TEST_PHONE = "2221817807";
 
 export async function enviarMensajeChat(toPhone: string, message: string): Promise<boolean> {
   try {
-    let cleanPhone = toPhone.replace(/\D/g, "");
-    const last10 = cleanPhone.slice(-10);
+    const isLid = toPhone.includes("@lid") || (toPhone.replace(/\D/g, "").length >= 14 && toPhone.replace(/\D/g, "").startsWith("64"));
+    let cleanPhone = toPhone.trim();
 
-    // FILTRO DE SEGURIDAD: Solo enviar flujos de prueba a tu número (2221817807)
-    if (last10 !== WHITELIST_TEST_PHONE) {
-      console.log(`🛡️ [WhatsApp Sandbox] Envío bloqueado a ${cleanPhone}. Solo autorizado para pruebas al número ${WHITELIST_TEST_PHONE}`);
-      return true; // Retorna true para no romper los flujos internos del CRM
+    if (!isLid) {
+      let digits = toPhone.replace(/\D/g, "");
+      const last10 = digits.slice(-10);
+
+      // FILTRO DE SEGURIDAD: Solo enviar flujos de prueba a tu número (2221817807)
+      if (last10 !== WHITELIST_TEST_PHONE) {
+        console.log(`🛡️ [WhatsApp Sandbox] Envío bloqueado a ${digits}. Solo autorizado para pruebas al número ${WHITELIST_TEST_PHONE}`);
+        return true; // Retorna true para no romper los flujos internos del CRM
+      }
+
+      if (!digits.startsWith("52") && digits.length === 10) {
+        cleanPhone = `521${digits}`;
+      } else if (digits.startsWith("52") && !digits.startsWith("521") && digits.length === 12) {
+        cleanPhone = `521${digits.slice(2)}`;
+      } else {
+        cleanPhone = digits;
+      }
     }
 
-    if (!cleanPhone.startsWith("52") && cleanPhone.length === 10) {
-      cleanPhone = `521${cleanPhone}`;
-    } else if (cleanPhone.startsWith("52") && !cleanPhone.startsWith("521") && cleanPhone.length === 12) {
-      cleanPhone = `521${cleanPhone.slice(2)}`;
-    }
     const res = await fetch(`${CHAT_BRIDGE_URL}/api/send-message`, {
       method: "POST",
       headers: {
