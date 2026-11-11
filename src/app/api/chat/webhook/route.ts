@@ -76,9 +76,18 @@ export async function POST(req: NextRequest) {
     // Siempre usar el número de teléfono oficial del cliente en el CRM para cualquier respuesta automática
     const phoneParaResponder = cliente?.whatsapp ? cliente.whatsapp.replace(/\D/g, "") : cleanPhone;
 
+    // 🛡️ REGLA ESTRICTA DE SEGURIDAD / SANDBOX:
+    // Solo se ejecutan respuestas automáticas e inteligencia artificial si el número es tu teléfono de pruebas (2221817807)
+    // Para cualquier otro cliente real (como Arfaxad), el bot JAMÁS interviene para no estropear conversaciones reales.
+    const WHITELIST_TEST_PHONE = "2221817807";
+    const esNumeroPruebas = phoneParaResponder.slice(-10) === WHITELIST_TEST_PHONE;
+
     if (cliente) {
-      // Verificar si el cliente tiene pausado el modo IA (Modo Manual por el operador en el CRM)
-      let iaHabilitadaParaCliente = true;
+      // Si NO es tu teléfono de pruebas, forzar IA desactivada (Modo Manual obligatorio)
+      let iaHabilitadaParaCliente = esNumeroPruebas;
+      if (!esNumeroPruebas) {
+        console.log(`🛡️ [Webhook Sandbox] Respuestas automáticas bloqueadas para cliente real ${cliente.nombre} (${phoneParaResponder}).`);
+      }
       try {
         const { data: iaRow } = await supabase
           .from("whatsapp_sessions")
