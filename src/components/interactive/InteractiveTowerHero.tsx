@@ -376,17 +376,17 @@ export function InteractiveTowerHero({
           <motion.div
             initial={false}
             animate={{
-              y: boardActiveZone === "top" ? -145 : 40,
+              y: boardActiveZone === "top" ? -110 : 40,
               opacity: boardActiveZone === "top" ? 1 : 0,
             }}
             transition={{ type: "spring", stiffness: 260, damping: 22 }}
-            className="absolute top-0 left-8 z-0 pointer-events-none w-48 sm:w-56 select-none drop-shadow-[0_12px_24px_rgba(0,0,0,0.18)]"
+            className="absolute top-0 left-12 z-0 pointer-events-none w-40 sm:w-44 select-none drop-shadow-[0_12px_24px_rgba(0,0,0,0.18)]"
           >
-            {/* Colita del perrito superior asomándose detrás del hombro izquierdo */}
+            {/* Colita del perrito superior ubicada a la izquierda, asomándose detrás del hombro (exacto como en el boceto) */}
             <motion.div
-              animate={{ rotate: [-8, 14, -8] }}
+              animate={{ rotate: [-6, 12, -6] }}
               transition={{ repeat: Infinity, duration: 1.2, ease: "easeInOut" }}
-              className="absolute -left-6 top-10 w-16 sm:w-20 origin-bottom-right -z-10"
+              className="absolute -left-9 top-12 w-14 sm:w-16 origin-bottom-right -z-10"
             >
               <img
                 src="/images/mascot-peek-tail.png"
@@ -402,15 +402,15 @@ export function InteractiveTowerHero({
             />
           </motion.div>
 
-          {/* 2. ASOMADO POR LA IZQUIERDA (Cuerpo detrás de la tarjeta, línea recta vertical alineada exactamente con el borde) */}
+          {/* 2. ASOMADO POR LA IZQUIERDA (Más arriba y más compacto para que quede al borde de la ficha) */}
           <motion.div
             initial={false}
             animate={{
-              x: boardActiveZone === "left" ? 0 : 70,
+              x: boardActiveZone === "left" ? 0 : 50,
               opacity: boardActiveZone === "left" ? 1 : 0,
             }}
             transition={{ type: "spring", stiffness: 260, damping: 22 }}
-            className="absolute right-full top-1/2 -translate-y-1/2 z-0 pointer-events-none w-44 sm:w-52 select-none drop-shadow-[0_12px_24px_rgba(0,0,0,0.18)] flex justify-end"
+            className="absolute right-full top-32 sm:top-36 z-0 pointer-events-none w-32 sm:w-36 select-none drop-shadow-[0_10px_20px_rgba(0,0,0,0.16)] flex justify-end"
           >
             <img
               src="/images/mascot-peek-left.png"
@@ -419,15 +419,15 @@ export function InteractiveTowerHero({
             />
           </motion.div>
 
-          {/* 3. ASOMADO POR LA DERECHA (Cuerpo detrás de la tarjeta, línea recta vertical alineada exactamente con el borde) */}
+          {/* 3. ASOMADO POR LA DERECHA (Más arriba y más compacto para que quede al borde de la ficha) */}
           <motion.div
             initial={false}
             animate={{
-              x: boardActiveZone === "right" ? 0 : -70,
+              x: boardActiveZone === "right" ? 0 : -50,
               opacity: boardActiveZone === "right" ? 1 : 0,
             }}
             transition={{ type: "spring", stiffness: 260, damping: 22 }}
-            className="absolute left-full top-1/2 -translate-y-1/2 z-0 pointer-events-none w-44 sm:w-52 select-none drop-shadow-[0_12px_24px_rgba(0,0,0,0.18)] flex justify-start"
+            className="absolute left-full top-32 sm:top-36 z-0 pointer-events-none w-32 sm:w-36 select-none drop-shadow-[0_10px_20px_rgba(0,0,0,0.16)] flex justify-start"
           >
             <img
               src="/images/mascot-peek-right.png"
