@@ -139,7 +139,7 @@ async function startWhatsApp() {
       if (key && key.id && messageStore.has(key.id)) {
         return messageStore.get(key.id);
       }
-      return proto.Message.fromObject({});
+      return undefined;
     },
   });
 
