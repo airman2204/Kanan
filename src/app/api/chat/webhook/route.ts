@@ -120,9 +120,12 @@ export async function POST(req: NextRequest) {
       const primerNombre = cliente.nombre.split(" ")[0];
 
       // A) Detección de Aprobación (Confirmar Cita)
+      // REGLA COMERCIAL ESTRICTA: Solo confirmar automáticamente si la cita YA TIENE PRECIO COTIZADO (monto_total > 0).
+      // Si la cita aún no tiene monto_total asignado, el bot NO debe confirmar a ciegas, debe canalizar la cotización primero.
       const esAprobacion = /^(s[ií]+|si|sii|siii|confirmar|confirmo|de acuerdo|adelante|ok|sale|va|perfecto|enterado)\b/i.test(cleanLower);
+      const tienePrecioCotizado = Boolean(ultimaCita && typeof ultimaCita.monto_total === "number" && ultimaCita.monto_total > 0);
 
-      if (iaHabilitadaParaCliente && esAprobacion && ultimaCita && ultimaCita.estatus === "Por Confirmar") {
+      if (iaHabilitadaParaCliente && esAprobacion && ultimaCita && ultimaCita.estatus === "Por Confirmar" && tienePrecioCotizado) {
         updateCitaInDb(ultimaCita.id, {
           estatus: "Confirmada",
         });
