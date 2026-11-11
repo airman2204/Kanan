@@ -372,18 +372,18 @@ export function InteractiveTowerHero({
         >
           {/* PERRITO ASOMADO DETRÁS DE LA TARJETA (Z-INDEX 0) */}
           
-          {/* 1. ASOMADO POR ARRIBA (Solo el perrito asomado apoyando las patitas, sin cola) */}
+          {/* 1. ASOMADO POR ARRIBA (Exacto a tu diseño de referencia con la cola curvada a la izquierda) */}
           <motion.div
             initial={false}
             animate={{
-              y: boardActiveZone === "top" ? -110 : 40,
+              y: boardActiveZone === "top" ? -118 : 40,
               opacity: boardActiveZone === "top" ? 1 : 0,
             }}
             transition={{ type: "spring", stiffness: 260, damping: 22 }}
-            className="absolute top-0 left-12 z-0 pointer-events-none w-40 sm:w-44 select-none drop-shadow-[0_12px_24px_rgba(0,0,0,0.18)]"
+            className="absolute top-0 left-2 z-0 pointer-events-none w-48 sm:w-52 select-none drop-shadow-[0_12px_24px_rgba(0,0,0,0.18)]"
           >
             <img
-              src="/images/mascot-peek-top.png"
+              src="/images/mascot-peek-top-perfect.png"
               alt="Kanan asomándose arriba"
               className="w-full h-auto object-contain"
             />
