@@ -505,6 +505,50 @@ app.post('/api/send-media', authMiddleware, async (req, res) => {
   }
 });
 
+app.post('/api/clear-chat-session', authMiddleware, async (req, res) => {
+  try {
+    const { jid } = req.body;
+    if (!jid) return res.status(400).json({ ok: false, error: 'Falta jid' });
+    if (!sock || connectionStatus !== 'connected') {
+      return res.status(503).json({ ok: false, error: 'Bridge no conectado' });
+    }
+
+    // 1. Limpiar llaves del SignalKeyStore en memoria y authState
+    try {
+      if (sock.authState?.keys?.set) {
+        await sock.authState.keys.set({
+          session: {
+            [jid]: null,
+          },
+        });
+      }
+    } catch (e) {
+      console.warn('Error borrando en sock.authState.keys:', e.message);
+    }
+
+    // 2. Borrar archivos en authDir correspondientes a esa sesión
+    const sanitized1 = jid.replace(/[:@]/g, '_');
+    const sanitized2 = jid.replace(/@.+/, '');
+    if (fs.existsSync(authDir)) {
+      const files = fs.readdirSync(authDir);
+      for (const f of files) {
+        if (f.includes(sanitized1) || f.includes(sanitized2)) {
+          try {
+            fs.unlinkSync(path.join(authDir, f));
+            console.log(`🧹 [Kanan Chat] Archivo de sesión individual eliminado: ${f}`);
+          } catch {}
+        }
+      }
+    }
+
+    scheduleCloudBackup();
+    return res.json({ ok: true, message: `Sesión criptográfica limpiada para ${jid}` });
+  } catch (err) {
+    console.error('Error limpiando sesión individual:', err);
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
 app.post('/api/disconnect', authMiddleware, async (req, res) => {
   try {
     if (sock) {
