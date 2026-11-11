@@ -373,18 +373,18 @@ export function InteractiveTowerHero({
           {/* CONTENEDOR ENVOLVENTE EXACTO A LA TARJETA PARA POSICIONAR LOS ASOMADOS AL BORDE REAL */}
           <div className="w-full relative">
             
-            {/* 1. ASOMADO POR ARRIBA: EL GRÁFICO EXACTO DE TU MOCKUP DE REFERENCIA (PERRO + PATITAS SOBRE LA TARJETA + COLA EN EL LATERAL) */}
+            {/* 1. ASOMADO POR ARRIBA: Perrito más chico, apoyando limpiamente las patitas en el borde superior (sin cola) */}
             <motion.div
               initial={false}
               animate={{
-                y: boardActiveZone === "top" ? -108 : 30,
+                y: boardActiveZone === "top" ? -118 : 20,
                 opacity: boardActiveZone === "top" ? 1 : 0,
               }}
               transition={{ type: "spring", stiffness: 260, damping: 22 }}
-              className="absolute top-0 -left-12 sm:-left-14 z-20 pointer-events-none w-56 sm:w-64 select-none drop-shadow-[0_12px_24px_rgba(0,0,0,0.18)]"
+              className="absolute top-0 left-6 z-0 pointer-events-none w-36 sm:w-40 select-none drop-shadow-[0_10px_20px_rgba(0,0,0,0.16)]"
             >
               <img
-                src="/images/mascot-top-exact-from-mockup-cut.png"
+                src="/images/mascot-peek-top.png"
                 alt="Kanan asomándose arriba"
                 className="w-full h-auto object-contain"
               />
@@ -394,11 +394,11 @@ export function InteractiveTowerHero({
             <motion.div
               initial={false}
               animate={{
-                x: boardActiveZone === "left" ? 0 : 50,
+                x: boardActiveZone === "left" ? 0 : 40,
                 opacity: boardActiveZone === "left" ? 1 : 0,
               }}
               transition={{ type: "spring", stiffness: 260, damping: 22 }}
-              className="absolute right-full top-10 sm:top-14 z-0 pointer-events-none w-28 sm:w-32 select-none drop-shadow-[0_10px_20px_rgba(0,0,0,0.16)] flex justify-end"
+              className="absolute right-full top-8 sm:top-12 z-0 pointer-events-none w-26 sm:w-30 select-none drop-shadow-[0_10px_20px_rgba(0,0,0,0.16)] flex justify-end"
             >
               <img
                 src="/images/mascot-peek-left.png"
@@ -411,11 +411,11 @@ export function InteractiveTowerHero({
             <motion.div
               initial={false}
               animate={{
-                x: boardActiveZone === "right" ? 0 : -50,
+                x: boardActiveZone === "right" ? 0 : -40,
                 opacity: boardActiveZone === "right" ? 1 : 0,
               }}
               transition={{ type: "spring", stiffness: 260, damping: 22 }}
-              className="absolute left-full top-10 sm:top-14 z-0 pointer-events-none w-28 sm:w-32 select-none drop-shadow-[0_10px_20px_rgba(0,0,0,0.16)] flex justify-start"
+              className="absolute left-full top-8 sm:top-12 z-0 pointer-events-none w-26 sm:w-30 select-none drop-shadow-[0_10px_20px_rgba(0,0,0,0.16)] flex justify-start"
             >
               <img
                 src="/images/mascot-peek-right.png"
