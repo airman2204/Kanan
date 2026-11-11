@@ -381,10 +381,10 @@ export function InteractiveTowerHero({
                 opacity: boardActiveZone === "top" ? 1 : 0,
               }}
               transition={{ type: "spring", stiffness: 260, damping: 22 }}
-              className="absolute top-0 left-6 z-0 pointer-events-none w-48 sm:w-52 select-none drop-shadow-[0_12px_24px_rgba(0,0,0,0.18)]"
+              className="absolute top-0 left-6 z-0 pointer-events-none w-52 sm:w-56 select-none drop-shadow-[0_12px_24px_rgba(0,0,0,0.18)]"
             >
               <img
-                src="/images/mascot-top-exact-reference.png"
+                src="/images/mascot-top-reference-match.png"
                 alt="Kanan asomándose arriba"
                 className="w-full h-auto object-contain"
               />
