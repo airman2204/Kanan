@@ -47,9 +47,24 @@ export async function obtenerQrBridge(): Promise<BridgeResponse> {
   }
 }
 
+/**
+ * Modo Pruebas / Sandbox de WhatsApp:
+ * Si está activo o si el número NO es el del desarrollador (2221817807),
+ * bloquea el envío hacia clientes reales para evitar estropear conversaciones.
+ */
+const WHITELIST_TEST_PHONE = "2221817807";
+
 export async function enviarMensajeChat(toPhone: string, message: string): Promise<boolean> {
   try {
     let cleanPhone = toPhone.replace(/\D/g, "");
+    const last10 = cleanPhone.slice(-10);
+
+    // FILTRO DE SEGURIDAD: Solo enviar flujos de prueba a tu número (2221817807)
+    if (last10 !== WHITELIST_TEST_PHONE) {
+      console.log(`🛡️ [WhatsApp Sandbox] Envío bloqueado a ${cleanPhone}. Solo autorizado para pruebas al número ${WHITELIST_TEST_PHONE}`);
+      return true; // Retorna true para no romper los flujos internos del CRM
+    }
+
     if (!cleanPhone.startsWith("52") && cleanPhone.length === 10) {
       cleanPhone = `521${cleanPhone}`;
     } else if (cleanPhone.startsWith("52") && !cleanPhone.startsWith("521") && cleanPhone.length === 12) {
@@ -74,6 +89,14 @@ export async function enviarMensajeChat(toPhone: string, message: string): Promi
 export async function enviarStickerChat(toPhone: string, stickerPath: string): Promise<boolean> {
   try {
     let cleanPhone = toPhone.replace(/\D/g, "");
+    const last10 = cleanPhone.slice(-10);
+
+    // FILTRO DE SEGURIDAD: Solo enviar flujos de prueba a tu número (2221817807)
+    if (last10 !== WHITELIST_TEST_PHONE) {
+      console.log(`🛡️ [WhatsApp Sandbox] Sticker bloqueado a ${cleanPhone}. Solo autorizado al número ${WHITELIST_TEST_PHONE}`);
+      return true;
+    }
+
     if (!cleanPhone.startsWith("52") && cleanPhone.length === 10) {
       cleanPhone = `521${cleanPhone}`;
     } else if (cleanPhone.startsWith("52") && !cleanPhone.startsWith("521") && cleanPhone.length === 12) {
@@ -117,6 +140,14 @@ export async function enviarMediaChat(
 ): Promise<boolean> {
   try {
     const cleanPhone = toPhone.replace(/\D/g, "");
+    const last10 = cleanPhone.slice(-10);
+
+    // FILTRO DE SEGURIDAD: Solo enviar flujos de prueba a tu número (2221817807)
+    if (last10 !== WHITELIST_TEST_PHONE) {
+      console.log(`🛡️ [WhatsApp Sandbox] Media bloqueado a ${cleanPhone}. Solo autorizado al número ${WHITELIST_TEST_PHONE}`);
+      return true;
+    }
+
     const res = await fetch(`${CHAT_BRIDGE_URL}/api/send-media`, {
       method: "POST",
       headers: {

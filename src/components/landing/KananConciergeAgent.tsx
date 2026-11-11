@@ -760,61 +760,44 @@ export function KananConciergeAgent({
     ]);
 
     appendAgentMessage(
-      `Entendido, Col. ${cleanCol}.\n\nAhora, ¿cuál es el nombre de tu Calle o Avenida?`,
+      `Entendido, Col. ${cleanCol}.\n\nAhora, por favor ingresa tu Calle, Número y Coto/Interior (si aplica):\n*(ej. Chula Vista 450 Int 4B o Av. Providencia 2340)*`,
       "ask_calle"
     );
   };
 
-  // 5. Calle
-  const handleSubmitCalle = (calleVal: string) => {
-    const cleanCalle = sanitizeInput(calleVal, true);
-    if (!cleanCalle || cleanCalle.length < 3) {
-      setErrorActivo("Ingresa el nombre real de tu calle o avenida (mínimo 3 letras).");
+  // 5. Calle, Número y Coto unificado en un solo paso
+  const handleSubmitCalle = (direccionVal: string) => {
+    const cleanDir = sanitizeInput(direccionVal, true);
+    if (!cleanDir || cleanDir.length < 5) {
+      setErrorActivo("Por favor ingresa tu calle y número exterior (ej. Av. Vallarta 1250 Int 4).");
       return;
     }
 
-    setCalle(cleanCalle);
-    setErrorActivo(null);
-
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: `user-${Date.now()}`,
-        sender: "user",
-        text: cleanCalle,
-        time: getCurrentTime(),
-      },
-    ]);
-
-    appendAgentMessage(
-      `Perfecto. ¿Cuál es tu Número Exterior y (opcional) número interior o coto? (ej. 2340 Int 4B)`,
-      "ask_num_ext"
-    );
-  };
-
-  // 6. Número Exterior y Validación Integral de Dirección
-  const handleSubmitNumExt = (numVal: string) => {
-    const cleanNum = sanitizeInput(numVal, true);
-    if (!cleanNum || !/\d/.test(cleanNum)) {
-      setErrorActivo("Indica el número exterior de tu domicilio claramente con dígitos (ej. 450 o 1234 Casa 5).");
+    if (!/\d/.test(cleanDir)) {
+      setErrorActivo("Por favor incluye el número exterior de tu domicilio con dígitos (ej. Chula Vista 450).");
       return;
     }
 
-    setNumExt(cleanNum);
-    const calleCompleta = `${calle} ${cleanNum}`;
-    const valid = validarDireccion(calleCompleta);
+    const valid = validarDireccion(cleanDir);
     if (!valid.valida) {
-      setErrorActivo(valid.error || "Dirección inválida. Por favor verifica tu calle y número.");
+      setErrorActivo(valid.error || "Dirección incompleta. Por favor indica calle y número exterior.");
       return;
     }
 
+    // Extraer número y calle para la ficha técnica del CRM
+    const matchNumero = cleanDir.match(/\d+[\w-]*/);
+    const numExtr = matchNumero ? matchNumero[0] : "S/N";
+    
+    setCalle(cleanDir);
+    setNumExt(numExtr);
     setErrorActivo(null);
+
     setMessages((prev) => [
       ...prev,
       {
         id: `user-${Date.now()}`,
         sender: "user",
-        text: `No. ${cleanNum}`,
+        text: cleanDir,
         time: getCurrentTime(),
       },
     ]);
@@ -1538,7 +1521,7 @@ export function KananConciergeAgent({
               </div>
             )}
 
-            {/* 5. Input de Calle */}
+            {/* 5. Input de Calle, Número y Coto (unificado) */}
             {step === "ask_calle" && !isTyping && (
               <form
                 onSubmit={(e) => {
@@ -1554,37 +1537,7 @@ export function KananConciergeAgent({
                     setErrorActivo(null);
                     setInputText(e.target.value);
                   }}
-                  placeholder="Calle o Avenida (ej. Av. Providencia)..."
-                  className="flex-1 px-4 py-2.5 rounded-full bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-cyan-500"
-                  autoFocus
-                />
-                <button
-                  type="submit"
-                  disabled={!inputText.trim()}
-                  className="p-2.5 rounded-full bg-kanan-cyan hover:bg-[#009ec0] disabled:bg-slate-200 text-white transition active:scale-95 shadow-xs"
-                >
-                  <Send className="w-4 h-4" />
-                </button>
-              </form>
-            )}
-
-            {/* 6. Input de Número Exterior / Interior */}
-            {step === "ask_num_ext" && !isTyping && (
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  handleSubmitNumExt(inputText);
-                }}
-                className="flex items-center gap-2 animate-in fade-in"
-              >
-                <input
-                  type="text"
-                  value={inputText}
-                  onChange={(e) => {
-                    setErrorActivo(null);
-                    setInputText(e.target.value);
-                  }}
-                  placeholder="Número exterior y coto (ej. 2340 Int 4B)..."
+                  placeholder="Calle, número y coto (ej. Chula Vista 450 Int 4B)..."
                   className="flex-1 px-4 py-2.5 rounded-full bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-cyan-500 font-medium"
                   autoFocus
                 />
