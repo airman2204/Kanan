@@ -373,37 +373,20 @@ export function InteractiveTowerHero({
           {/* CONTENEDOR ENVOLVENTE EXACTO A LA TARJETA PARA POSICIONAR LOS ASOMADOS AL BORDE REAL */}
           <div className="w-full relative">
             
-            {/* 1. ASOMADO POR ARRIBA: El perrito limpio con sus patitas apoyadas en el borde superior */}
+            {/* 1. ASOMADO POR ARRIBA: EL GRÁFICO EXACTO DE TU MOCKUP DE REFERENCIA (PERRO + PATITAS SOBRE LA TARJETA + COLA EN EL LATERAL) */}
             <motion.div
               initial={false}
               animate={{
-                y: boardActiveZone === "top" ? -148 : 30,
+                y: boardActiveZone === "top" ? -108 : 30,
                 opacity: boardActiveZone === "top" ? 1 : 0,
               }}
               transition={{ type: "spring", stiffness: 260, damping: 22 }}
-              className="absolute top-0 left-6 z-0 pointer-events-none w-48 sm:w-52 select-none drop-shadow-[0_12px_24px_rgba(0,0,0,0.18)]"
+              className="absolute top-0 -left-12 sm:-left-14 z-20 pointer-events-none w-56 sm:w-64 select-none drop-shadow-[0_12px_24px_rgba(0,0,0,0.18)]"
             >
               <img
-                src="/images/mascot-peek-top.png"
+                src="/images/mascot-top-exact-from-mockup-cut.png"
                 alt="Kanan asomándose arriba"
                 className="w-full h-auto object-contain"
-              />
-            </motion.div>
-
-            {/* LA COLITA EN EL LATERAL IZQUIERDO DE LA TARJETA (Exactamente como en tu imagen, asomándose en el borde lateral) */}
-            <motion.div
-              initial={false}
-              animate={{
-                x: boardActiveZone === "top" || boardActiveZone === "left" ? 0 : 35,
-                opacity: boardActiveZone === "top" || boardActiveZone === "left" ? 1 : 0,
-              }}
-              transition={{ type: "spring", stiffness: 260, damping: 22 }}
-              className="absolute right-full top-20 sm:top-24 z-0 pointer-events-none w-16 sm:w-20 select-none drop-shadow-[0_8px_16px_rgba(0,0,0,0.14)] flex justify-end"
-            >
-              <img
-                src="/images/mascot-peek-tail.png"
-                alt="Cola asomada en el lateral"
-                className="w-full h-auto object-contain translate-x-1 rotate-[35deg]"
               />
             </motion.div>
 
