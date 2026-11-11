@@ -443,51 +443,103 @@ export async function POST(req: NextRequest) {
             await enviarMensajeChat(phoneParaResponder, msgErrorCp);
           }
         } else {
-          // Detectar si es saludo inicial, solicitud de cotización o mensaje libre de apertura
-          const esSaludoOContacto = /^(hola|buenas|buen d[ií]a|buenas tardes|buenas noches|cotiz|informes|informacion|servicio|que tal|saludos|ayuda|limpieza|cuanto|precios?)\b/i.test(cleanLower) ||
-            cleanLower.includes("cotizar") ||
-            cleanLower.includes("servicio") ||
-            cleanLower.includes("limpieza") ||
-            cleanLower.includes("presupuesto");
+          // 🧠 CEREBRO IA INTELIGENTE (OpenAI GPT-4o-mini)
+          // Si el cliente hace una pregunta técnica, cotización libre, objeción o duda compleja:
+          const { procesarConCerebroIA } = await import("@/lib/chat/aiBrain");
 
-          // Si el cliente no tiene cita activa por confirmar y el nodo de pedir CP está habilitado
-          if (esSaludoOContacto && nodoWaPedirCp && nodoWaPedirCp.enabled) {
-            const bienvenidaFallback = [
-              `¡Hola, ${primerNombre}! 👋 Bienvenido a *Kanan Limpieza y Desinfección Profunda a Domicilio* 🐾✨`,
-              ``,
-              `Para validar la cobertura en tu zona y verificar disponibilidad de técnicos en Jalisco:`,
-              `¿Cuál es tu *Código Postal (5 dígitos)*?`
-            ].join("\n");
+          // Extraer últimos 6 mensajes del historial para darle memoria contextual a la IA
+          const historialCliente = db.mensajes_automatizacion
+            .filter((m) => m.cliente_id === cliente.id)
+            .slice(-6)
+            .map((m) => {
+              const isUser = m.contenido_mensaje.startsWith("[Cliente]:");
+              return {
+                role: (isUser ? "user" : "assistant") as "user" | "assistant",
+                content: m.contenido_mensaje.replace("[Cliente]:", "").trim(),
+              };
+            });
 
-            const msgBienvenida = getMensajeDesdeFlujo(
-              "nodo_wa_pedir_cp",
-              { nombre: primerNombre },
-              bienvenidaFallback
-            );
+          const aiResult = await procesarConCerebroIA({
+            clienteNombre: cliente.nombre,
+            clienteTelefono: phoneParaResponder,
+            clienteDireccion: cliente.direccion,
+            clienteMunicipio: cliente.municipio,
+            mensajeNuevo: text.trim(),
+            historialReciente: historialCliente,
+            citaActiva: ultimaCita
+              ? {
+                  id: ultimaCita.id,
+                  estatus: ultimaCita.estatus,
+                  fecha: ultimaCita.fecha,
+                  turno: ultimaCita.turno,
+                  items: (ultimaCita.items_contratados || []).map((i) => `${i.cantidad}x ${i.piezaNombre}`).join(", "),
+                }
+              : null,
+          });
 
-            // 1. Enviar mensaje de bienvenida / solicitud de CP
-            await enviarMensajeChat(phoneParaResponder, msgBienvenida);
+          if (aiResult && aiResult.respuestaTexto) {
+            // A) Enviar respuesta generada por la IA inteligente
+            await enviarMensajeChat(phoneParaResponder, aiResult.respuestaTexto);
 
-            // 2. Enviar sticker de bienvenida configurado en el flujo
-            if (nodoWaPedirCp.stickerPath) {
-              await enviarStickerChat(phoneParaResponder, nodoWaPedirCp.stickerPath);
-            }
-
-            const msgInboundRegistro = {
-              id: `auto-${Date.now()}`,
+            const msgAiRegistro = {
+              id: `ai-${Date.now()}`,
               cita_id: ultimaCita ? ultimaCita.id : "sin_cita",
               cliente_id: cliente.id,
               etapa: "1_confirmacion_inmediata",
-              etapa_titulo: "Bienvenida y CP (Agente WhatsApp)",
+              etapa_titulo: "Respuesta IA Inteligente (GPT-4o-mini)",
               destinatario_whatsapp: phoneParaResponder,
-              contenido_mensaje: msgBienvenida,
+              contenido_mensaje: aiResult.respuestaTexto,
               estatus_envio: "Enviado",
               fecha_programada: new Date().toISOString(),
             };
-            db.mensajes_automatizacion.unshift(msgInboundRegistro as any);
+            db.mensajes_automatizacion.unshift(msgAiRegistro as any);
             try {
-              await supabase.from("mensajes_automatizacion").insert(msgInboundRegistro);
+              await supabase.from("mensajes_automatizacion").insert(msgAiRegistro);
             } catch (_) {}
+          } else {
+            // B) FALLBACK DE SEGURIDAD: Si no hay OpenAI API Key o falla la red, usar flujo predeterminado
+            const esSaludoOContacto = /^(hola|buenas|buen d[ií]a|buenas tardes|buenas noches|cotiz|informes|informacion|servicio|que tal|saludos|ayuda|limpieza|cuanto|precios?)\b/i.test(cleanLower) ||
+              cleanLower.includes("cotizar") ||
+              cleanLower.includes("servicio") ||
+              cleanLower.includes("limpieza") ||
+              cleanLower.includes("presupuesto");
+
+            if (esSaludoOContacto && nodoWaPedirCp && nodoWaPedirCp.enabled) {
+              const bienvenidaFallback = [
+                `¡Hola, ${primerNombre}! 👋 Bienvenido a *Kanan Limpieza y Desinfección Profunda a Domicilio* 🐾✨`,
+                ``,
+                `Para validar la cobertura en tu zona y verificar disponibilidad de técnicos en Jalisco:`,
+                `¿Cuál es tu *Código Postal (5 dígitos)*?`
+              ].join("\n");
+
+              const msgBienvenida = getMensajeDesdeFlujo(
+                "nodo_wa_pedir_cp",
+                { nombre: primerNombre },
+                bienvenidaFallback
+              );
+
+              await enviarMensajeChat(phoneParaResponder, msgBienvenida);
+
+              if (nodoWaPedirCp.stickerPath) {
+                await enviarStickerChat(phoneParaResponder, nodoWaPedirCp.stickerPath);
+              }
+
+              const msgInboundRegistro = {
+                id: `auto-${Date.now()}`,
+                cita_id: ultimaCita ? ultimaCita.id : "sin_cita",
+                cliente_id: cliente.id,
+                etapa: "1_confirmacion_inmediata",
+                etapa_titulo: "Bienvenida y CP (Agente WhatsApp)",
+                destinatario_whatsapp: phoneParaResponder,
+                contenido_mensaje: msgBienvenida,
+                estatus_envio: "Enviado",
+                fecha_programada: new Date().toISOString(),
+              };
+              db.mensajes_automatizacion.unshift(msgInboundRegistro as any);
+              try {
+                await supabase.from("mensajes_automatizacion").insert(msgInboundRegistro);
+              } catch (_) {}
+            }
           }
         }
       }
