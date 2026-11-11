@@ -1,17 +1,5 @@
 import OpenAI from "openai";
 
-// Instancia perezosa (lazy) de OpenAI
-let openaiInstance: OpenAI | null = null;
-
-function getOpenAIClient(): OpenAI | null {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) return null;
-  if (!openaiInstance) {
-    openaiInstance = new OpenAI({ apiKey });
-  }
-  return openaiInstance;
-}
-
 export interface MensajeContexto {
   role: "user" | "assistant" | "system";
   content: string;
@@ -37,7 +25,7 @@ export interface KananBrainOutput {
   respuestaTexto: string;
   intencionDetectada: "cotizacion" | "pregunta_tecnica" | "confirmacion_cita" | "cancelacion" | "otro";
   codigoPostalDetectado?: string;
-  accionSugerida?: string;
+  proveedorUtilizado: "gemini" | "openai";
 }
 
 const SYSTEM_PROMPT = `
@@ -79,30 +67,61 @@ OBJETIVO PRINCIPAL EN CADA RESPUESTA:
 `;
 
 /**
- * Procesa el mensaje del cliente con OpenAI GPT-4o-mini
+ * Consulta a Google Gemini (gemini-flash-lite-latest)
  */
-export async function procesarConCerebroIA(input: KananBrainInput): Promise<KananBrainOutput | null> {
-  const openai = getOpenAIClient();
-  if (!openai) {
-    console.log("ℹ️ [Kanan IA] OPENAI_API_KEY no configurada. Usando fallback tradicional.");
-    return null;
-  }
+async function procesarConGemini(promptCompleto: string, mensajeNuevo: string, apiKey: string): Promise<string | null> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 9000);
 
   try {
-    const contextoCliente = `
-DATOS DEL CLIENTE ACTUAL:
-- Nombre: ${input.clienteNombre || "Cliente"}
-- Teléfono: ${input.clienteTelefono}
-- Dirección registrada: ${input.clienteDireccion || "Sin registrar"} (${input.clienteMunicipio || "Jalisco"})
-- Cita activa en sistema: ${
-      input.citaActiva
-        ? `Folio ${input.citaActiva.id}, Estatus: ${input.citaActiva.estatus}, Fecha: ${input.citaActiva.fecha} (${input.citaActiva.turno})`
-        : "Ninguna cita activa por ahora"
-    }
-`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key=${apiKey}`;
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        systemInstruction: {
+          parts: [{ text: promptCompleto }],
+        },
+        contents: [
+          {
+            role: "user",
+            parts: [{ text: mensajeNuevo }],
+          },
+        ],
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 350,
+        },
+      }),
+      signal: controller.signal,
+    });
 
+    if (!res.ok) {
+      console.warn("⚠️ [Kanan Gemini] Error HTTP:", res.status, await res.text());
+      return null;
+    }
+
+    const data = await res.json();
+    const texto = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
+    return texto;
+  } catch (err: any) {
+    console.warn("⚠️ [Kanan Gemini] Error de conexión:", err?.message || err);
+    return null;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+/**
+ * Consulta a OpenAI (gpt-4o-mini)
+ */
+async function procesarConOpenAI(promptCompleto: string, input: KananBrainInput, apiKey: string): Promise<string | null> {
+  try {
+    const openai = new OpenAI({ apiKey });
     const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
-      { role: "system", content: SYSTEM_PROMPT + "\n\n" + contextoCliente },
+      { role: "system", content: promptCompleto },
       ...input.historialReciente.map((h) => ({
         role: h.role,
         content: h.content,
@@ -117,20 +136,64 @@ DATOS DEL CLIENTE ACTUAL:
       max_tokens: 350,
     });
 
-    const respuestaTexto = response.choices[0]?.message?.content?.trim() || "";
-
-    if (!respuestaTexto) return null;
-
-    // Detectar si el usuario envió un código postal de 5 dígitos
-    const cpMatch = input.mensajeNuevo.match(/\b\d{5}\b/);
-
-    return {
-      respuestaTexto,
-      intencionDetectada: "cotizacion",
-      codigoPostalDetectado: cpMatch ? cpMatch[0] : undefined,
-    };
+    return response.choices[0]?.message?.content?.trim() || null;
   } catch (err: any) {
-    console.warn("⚠️ [Kanan IA] Error consultando OpenAI:", err?.message || err);
+    console.warn("⚠️ [Kanan OpenAI] Error:", err?.message || err);
     return null;
   }
+}
+
+/**
+ * Cerebro Inteligente Híbrido:
+ * 1. Prioriza Google Gemini (Gratis y activo con tu clave)
+ * 2. Si falla, intenta OpenAI (GPT-4o-mini)
+ * 3. Si ambos fallan, retorna null para activar el fallback seguro de Kanan
+ */
+export async function procesarConCerebroIA(input: KananBrainInput): Promise<KananBrainOutput | null> {
+  const geminiKey = process.env.GEMINI_API_KEY;
+  const openAiKey = process.env.OPENAI_API_KEY;
+
+  const contextoCliente = `
+DATOS DEL CLIENTE ACTUAL:
+- Nombre: ${input.clienteNombre || "Cliente"}
+- Teléfono: ${input.clienteTelefono}
+- Dirección registrada: ${input.clienteDireccion || "Sin registrar"} (${input.clienteMunicipio || "Jalisco"})
+- Cita activa en sistema: ${
+    input.citaActiva
+      ? `Folio ${input.citaActiva.id}, Estatus: ${input.citaActiva.estatus}, Fecha: ${input.citaActiva.fecha} (${input.citaActiva.turno})`
+      : "Ninguna cita activa por ahora"
+  }
+`;
+
+  const promptCompleto = SYSTEM_PROMPT + "\n\n" + contextoCliente;
+
+  // 1. Intentar con Gemini
+  if (geminiKey) {
+    const respuestaGemini = await procesarConGemini(promptCompleto, input.mensajeNuevo, geminiKey);
+    if (respuestaGemini) {
+      const cpMatch = input.mensajeNuevo.match(/\b\d{5}\b/);
+      return {
+        respuestaTexto: respuestaGemini,
+        intencionDetectada: "cotizacion",
+        codigoPostalDetectado: cpMatch ? cpMatch[0] : undefined,
+        proveedorUtilizado: "gemini",
+      };
+    }
+  }
+
+  // 2. Fallback a OpenAI
+  if (openAiKey) {
+    const respuestaOpenAI = await procesarConOpenAI(promptCompleto, input, openAiKey);
+    if (respuestaOpenAI) {
+      const cpMatch = input.mensajeNuevo.match(/\b\d{5}\b/);
+      return {
+        respuestaTexto: respuestaOpenAI,
+        intencionDetectada: "cotizacion",
+        codigoPostalDetectado: cpMatch ? cpMatch[0] : undefined,
+        proveedorUtilizado: "openai",
+      };
+    }
+  }
+
+  return null;
 }
