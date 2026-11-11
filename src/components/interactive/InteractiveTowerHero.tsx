@@ -370,64 +370,65 @@ export function InteractiveTowerHero({
           onMouseLeave={handleBoardMouseLeave}
           className="lg:col-span-6 relative flex items-center justify-center min-h-[580px] lg:min-h-[660px]"
         >
-          {/* PERRITO ASOMADO DETRÁS DE LA TARJETA (Z-INDEX 0) */}
-          
-          {/* 1. ASOMADO POR ARRIBA (Exacto a tu diseño de referencia con la cola a la izquierda y patitas sobre el borde) */}
-          <motion.div
-            initial={false}
-            animate={{
-              y: boardActiveZone === "top" ? -145 : 40,
-              opacity: boardActiveZone === "top" ? 1 : 0,
-            }}
-            transition={{ type: "spring", stiffness: 260, damping: 22 }}
-            className="absolute top-0 left-2 z-0 pointer-events-none w-52 sm:w-56 select-none drop-shadow-[0_12px_24px_rgba(0,0,0,0.18)]"
-          >
-            <img
-              src="/images/mascot-top-exact-reference.png"
-              alt="Kanan asomándose arriba"
-              className="w-full h-auto object-contain"
-            />
-          </motion.div>
-
-          {/* 2. ASOMADO POR LA IZQUIERDA (Más arriba y más compacto para que quede al borde de la ficha) */}
-          <motion.div
-            initial={false}
-            animate={{
-              x: boardActiveZone === "left" ? 0 : 50,
-              opacity: boardActiveZone === "left" ? 1 : 0,
-            }}
-            transition={{ type: "spring", stiffness: 260, damping: 22 }}
-            className="absolute right-full top-32 sm:top-36 z-0 pointer-events-none w-32 sm:w-36 select-none drop-shadow-[0_10px_20px_rgba(0,0,0,0.16)] flex justify-end"
-          >
-            <img
-              src="/images/mascot-peek-left.png"
-              alt="Kanan asomándose izquierda"
-              className="w-full h-auto object-contain translate-x-1"
-            />
-          </motion.div>
-
-          {/* 3. ASOMADO POR LA DERECHA (Más arriba y más compacto para que quede al borde de la ficha) */}
-          <motion.div
-            initial={false}
-            animate={{
-              x: boardActiveZone === "right" ? 0 : -50,
-              opacity: boardActiveZone === "right" ? 1 : 0,
-            }}
-            transition={{ type: "spring", stiffness: 260, damping: 22 }}
-            className="absolute left-full top-32 sm:top-36 z-0 pointer-events-none w-32 sm:w-36 select-none drop-shadow-[0_10px_20px_rgba(0,0,0,0.16)] flex justify-start"
-          >
-            <img
-              src="/images/mascot-peek-right.png"
-              alt="Kanan asomándose derecha"
-              className="w-full h-auto object-contain -translate-x-1"
-            />
-          </motion.div>
-
-          {/* TARJETA PRINCIPAL DEL EXPEDIENTE (Z-INDEX 10 PARA QUE TAPE EL CUERPO DEL PERRITO) */}
-          <div className="w-full relative z-10 bg-gradient-to-b from-white via-slate-50/90 to-blue-50/30 rounded-3xl p-6 sm:p-7 border-t-2 border-l-2 border-white/90 border-r border-b border-slate-200/80 shadow-[0_30px_70px_-15px_rgba(29,113,181,0.2),0_15px_30px_-10px_rgba(0,0,0,0.06),inset_0_1px_2px_rgba(255,255,255,1)] flex flex-col justify-between overflow-hidden">
+          {/* CONTENEDOR ENVOLVENTE EXACTO A LA TARJETA PARA POSICIONAR LOS ASOMADOS AL BORDE REAL */}
+          <div className="w-full relative">
             
-            {/* Resplandor biselado superior */}
-            <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-cyan-400/60 to-transparent pointer-events-none" />
+            {/* 1. ASOMADO POR ARRIBA (Patitas apoyadas EXACTAMENTE sobre el borde superior de la tarjeta blanca) */}
+            <motion.div
+              initial={false}
+              animate={{
+                y: boardActiveZone === "top" ? -148 : 30,
+                opacity: boardActiveZone === "top" ? 1 : 0,
+              }}
+              transition={{ type: "spring", stiffness: 260, damping: 22 }}
+              className="absolute top-0 left-6 z-0 pointer-events-none w-48 sm:w-52 select-none drop-shadow-[0_12px_24px_rgba(0,0,0,0.18)]"
+            >
+              <img
+                src="/images/mascot-top-exact-reference.png"
+                alt="Kanan asomándose arriba"
+                className="w-full h-auto object-contain"
+              />
+            </motion.div>
+
+            {/* 2. ASOMADO POR LA IZQUIERDA (Alineado al borde izquierdo superior de la tarjeta) */}
+            <motion.div
+              initial={false}
+              animate={{
+                x: boardActiveZone === "left" ? 0 : 50,
+                opacity: boardActiveZone === "left" ? 1 : 0,
+              }}
+              transition={{ type: "spring", stiffness: 260, damping: 22 }}
+              className="absolute right-full top-10 sm:top-14 z-0 pointer-events-none w-28 sm:w-32 select-none drop-shadow-[0_10px_20px_rgba(0,0,0,0.16)] flex justify-end"
+            >
+              <img
+                src="/images/mascot-peek-left.png"
+                alt="Kanan asomándose izquierda"
+                className="w-full h-auto object-contain translate-x-1"
+              />
+            </motion.div>
+
+            {/* 3. ASOMADO POR LA DERECHA (Alineado al borde derecho superior de la tarjeta) */}
+            <motion.div
+              initial={false}
+              animate={{
+                x: boardActiveZone === "right" ? 0 : -50,
+                opacity: boardActiveZone === "right" ? 1 : 0,
+              }}
+              transition={{ type: "spring", stiffness: 260, damping: 22 }}
+              className="absolute left-full top-10 sm:top-14 z-0 pointer-events-none w-28 sm:w-32 select-none drop-shadow-[0_10px_20px_rgba(0,0,0,0.16)] flex justify-start"
+            >
+              <img
+                src="/images/mascot-peek-right.png"
+                alt="Kanan asomándose derecha"
+                className="w-full h-auto object-contain -translate-x-1"
+              />
+            </motion.div>
+
+            {/* TARJETA PRINCIPAL DEL EXPEDIENTE (Z-INDEX 10 PARA QUE TAPE EL CUERPO DEL PERRITO) */}
+            <div className="w-full relative z-10 bg-gradient-to-b from-white via-slate-50/90 to-blue-50/30 rounded-3xl p-6 sm:p-7 border-t-2 border-l-2 border-white/90 border-r border-b border-slate-200/80 shadow-[0_30px_70px_-15px_rgba(29,113,181,0.2),0_15px_30px_-10px_rgba(0,0,0,0.06),inset_0_1px_2px_rgba(255,255,255,1)] flex flex-col justify-between overflow-hidden">
+              
+              {/* Resplandor biselado superior */}
+              <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-cyan-400/60 to-transparent pointer-events-none" />
 
             {/* CABECERA COMPACTA */}
             <div className="flex items-center justify-between pb-4 border-b border-slate-200/80 bg-white/60 -mx-6 -mt-6 px-6 pt-5 rounded-t-3xl backdrop-blur-md">
@@ -673,6 +674,7 @@ export function InteractiveTowerHero({
               )}
             </div>
 
+          </div>
           </div>
         </div>
 
