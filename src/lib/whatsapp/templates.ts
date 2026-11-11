@@ -21,7 +21,6 @@ export function generarMensajeWhatsAppReservaCliente(
     `👤 *Nombre:* ${cliente.nombre}`,
     `📍 *Ubicación:* ${cliente.direccion}, ${cliente.municipio}`,
     `📅 *Fecha y Turno:* ${cita.fecha} — ${cita.turno}`,
-    `🐶 *Hogar con mascotas:* ${cliente.mascotas ? "Sí (100% Pet-Friendly)" : "No"}`,
     ``,
     `🛋️ *Piezas a limpiar y desinfectar:*`,
     resumenPiezas,
