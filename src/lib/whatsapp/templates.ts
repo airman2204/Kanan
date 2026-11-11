@@ -20,7 +20,7 @@ export function generarMensajeWhatsAppReservaCliente(
     ``,
     `👤 *Nombre:* ${cliente.nombre}`,
     `📍 *Ubicación:* ${cliente.direccion}, ${cliente.municipio}`,
-    `📅 *Fecha y Turno:* ${cita.fecha} — ${cita.turno}`,
+    `📅 *Fecha y Horario:* ${cita.fecha}${cita.hora_especifica ? ` a las ${cita.hora_especifica}` : ` (${cita.turno})`}`,
     ``,
     `🛋️ *Piezas a limpiar y desinfectar:*`,
     resumenPiezas,
