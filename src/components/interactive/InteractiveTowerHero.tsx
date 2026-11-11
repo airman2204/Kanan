@@ -373,18 +373,18 @@ export function InteractiveTowerHero({
           {/* CONTENEDOR ENVOLVENTE EXACTO A LA TARJETA PARA POSICIONAR LOS ASOMADOS AL BORDE REAL */}
           <div className="w-full relative">
             
-            {/* 1. ASOMADO POR ARRIBA (Patitas apoyadas EXACTAMENTE sobre el borde superior de la tarjeta blanca) */}
+            {/* 1. ASOMADO POR ARRIBA (Patitas apoyadas EXACTAMENTE sobre el borde superior de la tarjeta blanca con la cola exacta de la referencia) */}
             <motion.div
               initial={false}
               animate={{
-                y: boardActiveZone === "top" ? -148 : 30,
+                y: boardActiveZone === "top" ? -158 : 30,
                 opacity: boardActiveZone === "top" ? 1 : 0,
               }}
               transition={{ type: "spring", stiffness: 260, damping: 22 }}
-              className="absolute top-0 left-6 z-0 pointer-events-none w-52 sm:w-56 select-none drop-shadow-[0_12px_24px_rgba(0,0,0,0.18)]"
+              className="absolute top-0 left-4 z-0 pointer-events-none w-52 sm:w-56 select-none drop-shadow-[0_12px_24px_rgba(0,0,0,0.18)]"
             >
               <img
-                src="/images/mascot-top-reference-match.png"
+                src="/images/mascot-top-exact-calibrated.png"
                 alt="Kanan asomándose arriba"
                 className="w-full h-auto object-contain"
               />
