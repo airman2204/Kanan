@@ -25,7 +25,9 @@ import {
   ChevronRight,
   Plus,
   Globe,
-  MessageSquare
+  MessageSquare,
+  Camera,
+  ExternalLink
 } from "lucide-react";
 import { Cliente, ServicioCita, MensajeAutomatizacion, EstatusCita } from "@/types/crm";
 import { AgentFlowCanvas } from "./agent-flow/AgentFlowCanvas";
@@ -71,6 +73,7 @@ export function ChatInbox({
   const [mostrarPanelCita, setMostrarPanelCita] = useState(false);
   const [editandoMonto, setEditandoMonto] = useState(false);
   const [nuevoMonto, setNuevoMonto] = useState("");
+  const [fotoModal, setFotoModal] = useState<string | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -703,9 +706,45 @@ export function ChatInbox({
                             >
                               {/* Badge de Origen para identificar si vino de la web o directo de WhatsApp */}
                               {isClient && (m.etapa_titulo?.includes("Web") || m.etapa_titulo?.includes("Maqueta") || rawContent.includes("Acabo de registrar mi solicitud de cita en la web")) && (
-                                <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 font-extrabold text-[10px] mb-1">
-                                  <Globe className="w-3 h-3 text-blue-600" />
-                                  <span>Cotización generada desde la Web</span>
+                                <div className="space-y-2 mb-1.5">
+                                  <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 font-extrabold text-[10px]">
+                                    <Globe className="w-3 h-3 text-blue-600" />
+                                    <span>Cotización generada desde la Web</span>
+                                  </div>
+
+                                  {/* Si la cita asociada tiene fotos adjuntas, mostrarlas aquí directamente en la burbuja del mensaje */}
+                                  {(() => {
+                                    const citaMsg = citas.find((c) => c.id === m.cita_id) || activeCitas[0];
+                                    if (citaMsg && citaMsg.fotos_estado_actual && citaMsg.fotos_estado_actual.length > 0) {
+                                      return (
+                                        <div className="mt-1 pt-1.5 border-t border-slate-100">
+                                          <span className="text-[10px] font-bold text-slate-500 block mb-1 flex items-center gap-1">
+                                            <Camera className="w-3 h-3 text-[#1D71B5]" />
+                                            Fotos enviadas por el cliente ({citaMsg.fotos_estado_actual.length}):
+                                          </span>
+                                          <div className="flex items-center gap-1.5 flex-wrap">
+                                            {citaMsg.fotos_estado_actual.map((fotoUrl, fIdx) => (
+                                              <div
+                                                key={fIdx}
+                                                onClick={() => setFotoModal(fotoUrl)}
+                                                className="relative group w-20 h-20 rounded-xl overflow-hidden border border-slate-200 cursor-pointer shadow-xs hover:border-[#1D71B5] transition-all"
+                                              >
+                                                <img
+                                                  src={fotoUrl}
+                                                  alt={`Foto cotización ${fIdx + 1}`}
+                                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                                                />
+                                                <div className="absolute inset-0 bg-black/35 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[10px] font-bold transition-opacity">
+                                                  🔍 Ver
+                                                </div>
+                                              </div>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      );
+                                    }
+                                    return null;
+                                  })()}
                                 </div>
                               )}
                               <p className="whitespace-pre-line font-sans">{rawContent}</p>
@@ -818,6 +857,37 @@ export function ChatInbox({
                                 <span className="font-semibold text-slate-800">{c.tecnico_asignado || "Por asignar"}</span>
                               </div>
                             </div>
+
+                            {/* FOTOS ADJUNTAS EN LA FICHA DEL SERVICIO */}
+                            {c.fotos_estado_actual && c.fotos_estado_actual.length > 0 && (
+                              <div className="pt-2 border-t border-slate-100">
+                                <div className="flex items-center justify-between mb-1.5">
+                                  <span className="text-[11px] font-bold text-slate-700 flex items-center gap-1">
+                                    <Camera className="w-3.5 h-3.5 text-blue-600" />
+                                    Fotos del Mueble ({c.fotos_estado_actual.length})
+                                  </span>
+                                  <span className="text-[10px] text-slate-400">Clic para ampliar</span>
+                                </div>
+                                <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                                  {c.fotos_estado_actual.map((foto, idx) => (
+                                    <div
+                                      key={idx}
+                                      onClick={() => setFotoModal(foto)}
+                                      className="relative group w-16 h-16 rounded-lg overflow-hidden border border-slate-200 shrink-0 cursor-pointer shadow-xs hover:border-blue-500 transition-all"
+                                    >
+                                      <img
+                                        src={foto}
+                                        alt={`Foto ${idx + 1}`}
+                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                                      />
+                                      <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[9px] font-bold transition-opacity">
+                                        🔍
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
 
                             <div className="pt-1 border-t border-slate-100 flex items-center justify-between">
                               <div>
@@ -1028,6 +1098,40 @@ export function ChatInbox({
             )}
           </div>
         </div>
+
+        {/* Modal para visualizar y hacer zoom a las fotos del cliente */}
+        {fotoModal && (
+          <div
+            className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in"
+            onClick={() => setFotoModal(null)}
+          >
+            <div
+              className="relative max-w-3xl max-h-[90vh] bg-white rounded-2xl overflow-hidden shadow-2xl flex flex-col"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="p-3 bg-slate-900 text-white flex items-center justify-between">
+                <span className="font-bold text-xs flex items-center gap-1.5">
+                  <Camera className="w-4 h-4 text-cyan-400" />
+                  Foto adjunta del mueble
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setFotoModal(null)}
+                  className="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center font-bold text-sm"
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="p-2 overflow-auto max-h-[75vh] flex items-center justify-center bg-slate-950">
+                <img
+                  src={fotoModal}
+                  alt="Foto de evaluación"
+                  className="max-h-[72vh] max-w-full object-contain rounded-lg"
+                />
+              </div>
+            </div>
+          </div>
+        )}
     </div>
   );
 }
