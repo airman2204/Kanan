@@ -35,6 +35,7 @@ Eres Kanan Asistente Virtual, el asesor técnico y de atención al cliente de "K
 - Eres cálido, empático, profesional y natural (español de México).
 - JAMÁS suenas como un robot ni usas plantillas predeterminadas ni menús tipo "Marca 1 o 2".
 - Respondes directamente a la duda del cliente primero, y luego guías hacia el siguiente paso con amabilidad.
+- CONTINUIDAD NATURAL: Si en el historial ya hubo interacción o ya saludaste al cliente, NO vuelvas a presentarte ni a decir "¡Hola Mario! Qué gusto saludarte de nuevo por aquí". Ve directo al grano como en una conversación humana continua.
 - Usas emojis con buen gusto (🐾, ✨, 🛋️, 🧼, 📍, 🚐).
 - Siempre mantienes mensajes claros y concisos (ideales para WhatsApp, párrafos cortos de 2 a 4 líneas).
 
@@ -69,12 +70,32 @@ OBJETIVO PRINCIPAL EN CADA RESPUESTA:
 /**
  * Consulta a Google Gemini (gemini-flash-lite-latest)
  */
-async function procesarConGemini(promptCompleto: string, mensajeNuevo: string, apiKey: string): Promise<string | null> {
+async function procesarConGemini(promptCompleto: string, input: KananBrainInput, apiKey: string): Promise<string | null> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 9000);
 
   try {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key=${apiKey}`;
+    
+    // Convertir el historial de la conversación al formato de Gemini
+    const contents: Array<{ role: "user" | "model"; parts: [{ text: string }] }> = [];
+    
+    if (Array.isArray(input.historialReciente) && input.historialReciente.length > 0) {
+      for (const h of input.historialReciente.slice(-6)) {
+        if (!h.content) continue;
+        contents.push({
+          role: h.role === "assistant" ? "model" : "user",
+          parts: [{ text: h.content.replace(/^\[Cliente\]:\s*/i, "") }],
+        });
+      }
+    }
+
+    // Agregar el mensaje nuevo al final
+    contents.push({
+      role: "user",
+      parts: [{ text: input.mensajeNuevo }],
+    });
+
     const res = await fetch(url, {
       method: "POST",
       headers: {
@@ -84,12 +105,7 @@ async function procesarConGemini(promptCompleto: string, mensajeNuevo: string, a
         systemInstruction: {
           parts: [{ text: promptCompleto }],
         },
-        contents: [
-          {
-            role: "user",
-            parts: [{ text: mensajeNuevo }],
-          },
-        ],
+        contents,
         generationConfig: {
           temperature: 0.7,
           maxOutputTokens: 350,
@@ -169,7 +185,7 @@ DATOS DEL CLIENTE ACTUAL:
 
   // 1. Intentar con Gemini
   if (geminiKey) {
-    const respuestaGemini = await procesarConGemini(promptCompleto, input.mensajeNuevo, geminiKey);
+    const respuestaGemini = await procesarConGemini(promptCompleto, input, geminiKey);
     if (respuestaGemini) {
       const cpMatch = input.mensajeNuevo.match(/\b\d{5}\b/);
       return {
