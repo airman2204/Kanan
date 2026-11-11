@@ -382,16 +382,16 @@ export function InteractiveTowerHero({
             transition={{ type: "spring", stiffness: 260, damping: 22 }}
             className="absolute top-0 left-12 z-0 pointer-events-none w-40 sm:w-44 select-none drop-shadow-[0_12px_24px_rgba(0,0,0,0.18)]"
           >
-            {/* Colita del perrito superior ubicada a la izquierda, asomándose detrás del hombro (exacto como en el boceto) */}
+            {/* Colita en el lado izquierdo inferior/espalda con punta hacia arriba */}
             <motion.div
               animate={{ rotate: [-6, 12, -6] }}
               transition={{ repeat: Infinity, duration: 1.2, ease: "easeInOut" }}
-              className="absolute -left-9 top-12 w-14 sm:w-16 origin-bottom-right -z-10"
+              className="absolute -left-6 bottom-3 w-14 sm:w-16 origin-bottom-right -z-10"
             >
               <img
                 src="/images/mascot-peek-tail.png"
                 alt="Cola alegre"
-                className="w-full h-auto object-contain"
+                className="w-full h-auto object-contain scale-x-[-1]"
               />
             </motion.div>
 
