@@ -109,6 +109,8 @@ export function CinematicSofaScroll() {
       }
     };
 
+    const scrollObj = { progress: 0 };
+
     const resizeCanvas = () => {
       if (!canvas) return;
       canvas.width = window.innerWidth;
@@ -117,8 +119,6 @@ export function CinematicSofaScroll() {
     };
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
-
-    const scrollObj = { progress: 0 };
 
     let stInstance: any = null;
     const tl = gsap.timeline({
