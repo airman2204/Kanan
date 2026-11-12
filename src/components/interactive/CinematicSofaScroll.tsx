@@ -1,16 +1,12 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import Lenis from "lenis";
-import { Sparkles, Droplets, Wind, ShieldCheck, ArrowDown } from "lucide-react";
-
-if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger);
-}
+import { Sparkles, Droplets, Wind, ArrowDown } from "lucide-react";
 
 export function CinematicSofaScroll() {
+  const [mounted, setMounted] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -21,18 +17,28 @@ export function CinematicSofaScroll() {
   const phase4Ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // 1. Inicializar Lenis para Scroll Cinemático Suave (Inercia como en el video)
-    const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      smoothWheel: true,
-    });
+    setMounted(true);
+    gsap.registerPlugin(ScrollTrigger);
 
-    function raf(time: number) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
-    requestAnimationFrame(raf);
+    // 1. Inicializar Lenis dinámicamente solo en el cliente
+    let lenisInstance: any = null;
+    let rafId: number | null = null;
+
+    import("lenis").then(({ default: Lenis }) => {
+      lenisInstance = new Lenis({
+        duration: 1.2,
+        easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+        smoothWheel: true,
+      });
+
+      lenisInstance.on("scroll", ScrollTrigger.update);
+
+      function raf(time: number) {
+        if (lenisInstance) lenisInstance.raf(time);
+        rafId = requestAnimationFrame(raf);
+      }
+      rafId = requestAnimationFrame(raf);
+    }).catch((e) => console.warn("Lenis skipped:", e));
 
     // 2. Preparar el Canvas y las imágenes para la transición
     const canvas = canvasRef.current;
@@ -40,9 +46,9 @@ export function CinematicSofaScroll() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // Cargar imagen de Sillón Antes (Sucio con manchas profundas) y Después (Impecable)
-    const imgDirty = new window.Image();
-    const imgClean = new window.Image();
+    // Cargar imagen de Sillón Antes y Después de forma segura
+    const imgDirty = new Image();
+    const imgClean = new Image();
     let imagesLoaded = 0;
 
     const checkLoaded = () => {
@@ -57,7 +63,6 @@ export function CinematicSofaScroll() {
     imgDirty.src = "/assets/portfolio/sillon-cafe-antes.jpg";
     imgClean.src = "/assets/portfolio/sillon-cafe-despues.jpg";
 
-    // Función que renderiza la transición de sucio a limpio con efecto de barrido, vapor y micro-partículas
     const renderFrame = (progress: number) => {
       if (!ctx || !canvas) return;
 
@@ -66,10 +71,10 @@ export function CinematicSofaScroll() {
 
       ctx.clearRect(0, 0, w, h);
 
-      // Dibujar imagen LIMPIA de base
+      // Dibujar imagen limpia de base
       ctx.drawImage(imgClean, 0, 0, w, h);
 
-      // Dibujar capa SUCIA encima con máscara que se desvanece de izquierda a derecha con el scroll
+      // Dibujar capa sucia encima con máscara
       if (progress < 1) {
         ctx.save();
         const splitX = w * (1 - progress);
@@ -80,7 +85,7 @@ export function CinematicSofaScroll() {
         ctx.drawImage(imgDirty, 0, 0, w, h);
         ctx.restore();
 
-        // Efecto visual: Línea de haz de luz/vapor Kärcher en el punto de corte
+        // Efecto visual: Línea de vapor
         if (progress > 0.02 && progress < 0.98) {
           ctx.save();
           const grad = ctx.createLinearGradient(splitX - 30, 0, splitX + 30, 0);
@@ -91,12 +96,11 @@ export function CinematicSofaScroll() {
           ctx.fillStyle = grad;
           ctx.fillRect(splitX - 25, 0, 50, h);
 
-          // Partículas de niebla/vapor de agua
           for (let i = 0; i < 15; i++) {
             const py = (h * ((i * 7 + progress * 50) % 100)) / 100;
             const radius = 3 + (i % 4) * 2;
             ctx.beginPath();
-            ctx.arc(splitX + (Math.sin(py) * 15), py, radius, 0, Math.PI * 2);
+            ctx.arc(splitX + Math.sin(py) * 15, py, radius, 0, Math.PI * 2);
             ctx.fillStyle = "rgba(224, 242, 254, 0.4)";
             ctx.fill();
           }
@@ -105,7 +109,6 @@ export function CinematicSofaScroll() {
       }
     };
 
-    // Ajustar resolución del Canvas
     const resizeCanvas = () => {
       if (!canvas) return;
       canvas.width = window.innerWidth;
@@ -115,14 +118,14 @@ export function CinematicSofaScroll() {
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
 
-    // 3. Objeto animable con GSAP ScrollTrigger
     const scrollObj = { progress: 0 };
 
+    let stInstance: any = null;
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: containerRef.current,
         start: "top top",
-        end: "+=350%",
+        end: "+=300%",
         scrub: 1,
         pin: true,
         anticipatePin: 1,
@@ -132,8 +135,8 @@ export function CinematicSofaScroll() {
         },
       },
     });
+    stInstance = tl.scrollTrigger;
 
-    // Fases cinemáticas de texto sincronizadas con el avance del vapor
     tl.to(phase1Ref.current, { opacity: 0, y: -40, duration: 0.5 }, 0.2)
       .fromTo(phase2Ref.current, { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.5 }, 0.3)
       .to(phase2Ref.current, { opacity: 0, y: -40, duration: 0.5 }, 0.6)
@@ -143,14 +146,16 @@ export function CinematicSofaScroll() {
 
     return () => {
       window.removeEventListener("resize", resizeCanvas);
-      ScrollTrigger.getAll().forEach((t) => t.kill());
-      lenis.destroy();
+      if (stInstance) stInstance.kill();
+      tl.kill();
+      if (rafId) cancelAnimationFrame(rafId);
+      if (lenisInstance) lenisInstance.destroy();
     };
   }, []);
 
   return (
     <div ref={containerRef} className="relative w-full h-screen bg-[#030712] overflow-hidden select-none">
-      {/* Canvas cinematográfico que responde a cada píxel de scroll */}
+      {/* Canvas cinematográfico */}
       <canvas
         ref={canvasRef}
         className="absolute inset-0 w-full h-full object-cover pointer-events-none"
