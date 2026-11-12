@@ -74,6 +74,7 @@ export function ChatInbox({
   const [editandoMonto, setEditandoMonto] = useState(false);
   const [nuevoMonto, setNuevoMonto] = useState("");
   const [fotoModal, setFotoModal] = useState<string | null>(null);
+  const [confirmandoCitaId, setConfirmandoCitaId] = useState<string | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -638,17 +639,30 @@ export function ChatInbox({
                     {(() => {
                       const citaPorConfirmar = activeCitas.find((c) => c.estatus === "Por Confirmar");
                       if (citaPorConfirmar && onConfirmCita) {
+                        const estaCargando = confirmandoCitaId === citaPorConfirmar.id;
                         return (
                           <button
                             type="button"
+                            disabled={estaCargando}
                             onClick={async () => {
-                              await onConfirmCita(citaPorConfirmar.id);
-                              if (onRefresh) onRefresh();
+                              try {
+                                setConfirmandoCitaId(citaPorConfirmar.id);
+                                // Actualización optimista inmediata en la UI para respuesta instantánea
+                                citaPorConfirmar.estatus = "Confirmada";
+                                await onConfirmCita(citaPorConfirmar.id);
+                                if (onRefresh) await onRefresh();
+                              } finally {
+                                setConfirmandoCitaId(null);
+                              }
                             }}
-                            className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1 transition"
+                            className={`px-2.5 py-1 rounded-lg text-white font-bold text-xs flex items-center gap-1 transition ${
+                              estaCargando
+                                ? "bg-emerald-400 cursor-wait opacity-80"
+                                : "bg-emerald-600 hover:bg-emerald-700 active:scale-95 shadow-2xs"
+                            }`}
                           >
-                            <Check className="w-3.5 h-3.5" />
-                            <span>Confirmar Cita</span>
+                            <Check className={`w-3.5 h-3.5 ${estaCargando ? "animate-spin" : ""}`} />
+                            <span>{estaCargando ? "Confirmando..." : "Confirmar Cita"}</span>
                           </button>
                         );
                       }
