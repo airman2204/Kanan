@@ -23,6 +23,7 @@ import { PapelPicado } from "@/components/landing/PapelPicado";
 import { MunicipioZMG } from "@/types/crm";
 import { HeroSection } from "@/components/landing/HeroSection";
 import { InteractiveTowerHero } from "@/components/interactive/InteractiveTowerHero";
+import { CinematicSofaScroll } from "@/components/interactive/CinematicSofaScroll";
 import confetti from "canvas-confetti";
 
 export default function HomePage() {
@@ -154,7 +155,10 @@ export default function HomePage() {
           />
         </section>
 
-        {/* 3. RESULTADOS REALES Y PRUEBA SOCIAL */}
+        {/* 3. EXPERIENCIA CINEMATOGRÁFICA 3D SCROLL (DE SUCIO A LIMPIO CON VAPOR) */}
+        <CinematicSofaScroll />
+
+        {/* 4. RESULTADOS REALES Y PRUEBA SOCIAL */}
         <BeforeAfterGallery onOpenWizard={() => handleOpenChat()} />
 
         <SocialProofAndFAQ />
