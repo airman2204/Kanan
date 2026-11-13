@@ -74,9 +74,9 @@ export function KananPassCard({
             </p>
           </div>
           <img
-            src="/images/kanan-escalador.png"
+            src="/images/kanan-certificado-mascota.jpg"
             alt="Mascota Kanan"
-            className="w-20 h-20 -my-2 object-contain drop-shadow-[0_6px_12px_rgba(0,0,0,0.35)]"
+            className="w-16 h-16 rounded-xl object-cover border border-[#D4AF37]/50 shadow-md"
           />
         </div>
 

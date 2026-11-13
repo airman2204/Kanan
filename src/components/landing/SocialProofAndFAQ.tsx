@@ -70,7 +70,6 @@ const FAQS = [
 
 export function SocialProofAndFAQ() {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
-  const [walletNotice, setWalletNotice] = useState(false);
 
   return (
     <section id="opiniones" className="py-14 sm:py-20 bg-white">
@@ -145,23 +144,23 @@ export function SocialProofAndFAQ() {
           <div className="relative lg:col-span-6 space-y-5">
             <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white border border-kanan-cyan/30 text-xs font-heading font-bold text-kanan-cerulean shadow-sm">
               <Sparkles className="w-3.5 h-3.5 text-kanan-cyan" />
-              <span>Pase Digital Kanan</span>
+              <span>Respaldo Digital Kanan</span>
             </div>
 
             <h3 className="font-heading text-2xl sm:text-4xl font-extrabold text-kanan-deep leading-tight tracking-tight">
-              Tu Garantía y Beneficios Directo en tu Wallet
+              Tu Garantía y Beneficios Siempre a la Mano
             </h3>
 
             <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
-              Al concluir tu servicio te enviamos por WhatsApp un enlace para guardar tu tarjeta oficial en Apple Wallet o Google Wallet en un solo toque, sin instalar aplicaciones.
+              Al concluir tu servicio te enviamos por WhatsApp el enlace a tu certificado digital oficial con tu folio, fecha de garantía y guía de cuidados para consultarlo o guardarlo en tu celular.
             </p>
 
             <ul className="space-y-3 pt-1">
               <li className="flex items-start gap-2.5 text-sm text-slate-700">
                 <CheckCircle2 className="w-5 h-5 text-[#00A8B5] shrink-0 mt-0.5" />
                 <span>
-                  <strong className="text-kanan-deep">Garantía siempre a la mano:</strong>{" "}
-                  Tu folio, fecha de servicio y respaldo directo en tu celular.
+                  <strong className="text-kanan-deep">Garantía por escrito siempre a la mano:</strong>{" "}
+                  Tu folio, fecha de servicio y respaldo directo desde tu enlace personal.
                 </span>
               </li>
               <li className="flex items-start gap-2.5 text-sm text-slate-700">
@@ -180,49 +179,13 @@ export function SocialProofAndFAQ() {
               </li>
             </ul>
 
-            <div className="pt-2 space-y-2.5">
-              <p className="text-xs text-slate-500 font-medium">
-                Se activa y envía por WhatsApp al concluir tu servicio:
-              </p>
-              <div className="flex flex-wrap items-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => setWalletNotice(true)}
-                  className="inline-flex items-center gap-2.5 bg-black hover:bg-slate-900 text-white px-4 py-2.5 rounded-xl border border-slate-700 shadow-md transition-all active:scale-95 cursor-pointer"
-                >
-                  <Smartphone className="w-5 h-5 text-white shrink-0" />
-                  <div className="text-left leading-tight">
-                    <span className="text-[9px] uppercase tracking-wider text-slate-300 block">
-                      Add to
-                    </span>
-                    <span className="text-xs font-heading font-bold">
-                      Apple Wallet
-                    </span>
-                  </div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setWalletNotice(true)}
-                  className="inline-flex items-center gap-2.5 bg-black hover:bg-slate-900 text-white px-4 py-2.5 rounded-xl border border-slate-700 shadow-md transition-all active:scale-95 cursor-pointer"
-                >
-                  <Smartphone className="w-5 h-5 text-emerald-400 shrink-0" />
-                  <div className="text-left leading-tight">
-                    <span className="text-[9px] uppercase tracking-wider text-slate-300 block">
-                      Save to
-                    </span>
-                    <span className="text-xs font-heading font-bold">
-                      Google Wallet
-                    </span>
-                  </div>
-                </button>
-              </div>
-
-              {walletNotice && (
-                <p className="text-xs font-semibold text-[#1D71B5] bg-blue-50 border border-blue-200 rounded-xl px-3.5 py-2">
-                  Tu pase personalizado se activa y envía por WhatsApp al finalizar tu servicio.
-                </p>
-              )}
+            <div className="pt-2">
+              <a
+                href="#faq"
+                className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-heading font-bold text-[#1D71B5] hover:text-[#355581] transition-colors"
+              >
+                <span>Conoce los términos de nuestra garantía →</span>
+              </a>
             </div>
           </div>
 

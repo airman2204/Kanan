@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Download, Smartphone, CheckCircle2 } from "lucide-react";
+import { Download, MessageCircle, CheckCircle2 } from "lucide-react";
 
 interface PaseActionsClientProps {
   clientName: string;
@@ -123,7 +123,11 @@ export function PaseActionsClient({
     setDownloaded(true);
   };
 
-  const encodedFolio = encodeURIComponent(folio.replace(/^#/, ""));
+  const cleanFolio = folio.startsWith("#") ? folio : `#${folio}`;
+  const whatsappText = encodeURIComponent(
+    `Hola Kanan, tengo mi certificado ${cleanFolio} y quiero agendar mi mantenimiento de cliente frecuente.`
+  );
+  const whatsappUrl = `https://wa.me/523343359207?text=${whatsappText}`;
 
   return (
     <div className="space-y-3">
@@ -150,22 +154,15 @@ export function PaseActionsClient({
           )}
         </button>
 
-        {platform !== "ios" && (
-          <a
-            href={`/api/wallet/google?folio=${encodedFolio}`}
-            className="inline-flex items-center gap-2.5 bg-black hover:bg-slate-900 text-white px-5 py-3 rounded-xl border border-slate-700 shadow-lg transition-all active:scale-95"
-          >
-            <Smartphone className="w-5 h-5 text-emerald-400 shrink-0" />
-            <div className="text-left leading-tight">
-              <span className="text-[9px] uppercase tracking-wider text-slate-300 block">
-                Save to
-              </span>
-              <span className="text-xs font-heading font-bold">
-                Google Wallet
-              </span>
-            </div>
-          </a>
-        )}
+        <a
+          href={whatsappUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#1ebe5d] text-white px-5 py-3.5 rounded-xl font-heading font-bold text-sm shadow-lg shadow-emerald-500/25 transition-all active:scale-95"
+        >
+          <MessageCircle className="w-5 h-5 shrink-0" />
+          <span>Agendar Mantenimiento por WhatsApp</span>
+        </a>
       </div>
 
       {platform === "ios" && (
