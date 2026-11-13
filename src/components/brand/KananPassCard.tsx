@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { ShieldCheck, MessageCircle } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 import { KananLogo } from "@/components/brand/KananLogo";
 
 export interface KananPassCardProps {
@@ -119,37 +119,28 @@ export function KananPassCard({
                 </ul>
               </div>
 
-              {/* Pie de tarjeta exacto (sin línea divisoria arriba) */}
-              <div className="pt-1 flex items-end justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-10 h-11 rounded-xl bg-gradient-to-br from-[#FCE79C] via-[#D4AF37] to-[#8C6214] flex items-center justify-center shadow-md shrink-0">
-                    <ShieldCheck className="w-6 h-6 text-[#0B2239]" />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-extrabold text-[#F2C94C] leading-tight uppercase">
-                      {isActive ? (
-                        <>
-                          GARANTÍA
-                          <br />
-                          ACTIVA
-                        </>
-                      ) : (
-                        <>
-                          GARANTÍA
-                          <br />
-                          VENCIDA
-                        </>
-                      )}
-                    </span>
-                    <span className="w-5 h-[1.5px] bg-[#D4AF37] inline-block" />
-                  </div>
+              {/* Pie de tarjeta exacto (sin WhatsApp) */}
+              <div className="pt-1 flex items-center justify-start gap-2">
+                <div className="w-10 h-11 rounded-xl bg-gradient-to-br from-[#FCE79C] via-[#D4AF37] to-[#8C6214] flex items-center justify-center shadow-md shrink-0">
+                  <ShieldCheck className="w-6 h-6 text-[#0B2239]" />
                 </div>
-
-                <div className="flex items-center gap-1.5 text-white text-xs font-bold whitespace-nowrap pb-0.5">
-                  <span>WhatsApp: 33 4335 9207</span>
-                  <span className="w-5 h-5 rounded-full bg-[#25D366] flex items-center justify-center shrink-0">
-                    <MessageCircle className="w-3 h-3 text-white fill-white" />
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-extrabold text-[#F2C94C] leading-tight uppercase">
+                    {isActive ? (
+                      <>
+                        GARANTÍA
+                        <br />
+                        ACTIVA
+                      </>
+                    ) : (
+                      <>
+                        GARANTÍA
+                        <br />
+                        VENCIDA
+                      </>
+                    )}
                   </span>
+                  <span className="w-5 h-[1.5px] bg-[#D4AF37] inline-block" />
                 </div>
               </div>
             </div>
