@@ -685,7 +685,10 @@ export function InteractiveTowerHero({
         <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 text-center mb-2">
           O selecciona un área rápido:
         </p>
-        <div className="grid grid-cols-2 gap-2 pb-1">
+        <div
+          className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar touch-pan-x overscroll-x-contain"
+          style={{ WebkitOverflowScrolling: "touch" }}
+        >
           {Object.values(TOWER_SPOTS).map((spot) => {
             const isSelected = selectedSpotId === spot.id;
             const inCart = cartItems.includes(spot.id);
@@ -694,7 +697,7 @@ export function InteractiveTowerHero({
                 key={spot.id}
                 type="button"
                 onClick={() => onSelectSpot(spot.id)}
-                className={`w-full inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-2xl text-xs font-heading font-bold border transition-all active:scale-95 ${
+                className={`shrink-0 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-heading font-bold border transition-all active:scale-95 ${
                   isSelected
                     ? "bg-[#1D71B5] text-white border-[#1D71B5] shadow-md"
                     : inCart
@@ -703,7 +706,7 @@ export function InteractiveTowerHero({
                 }`}
               >
                 {inCart && <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0" />}
-                <span className="truncate">{spot.name}</span>
+                <span>{spot.name}</span>
               </button>
             );
           })}
