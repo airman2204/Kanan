@@ -87,31 +87,6 @@ export function HeroScrollSequence({ sectionRef }: HeroScrollSequenceProps) {
       {/* Degradado radial blanco suave en el centro para lectura perfecta */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.82)_0%,rgba(255,255,255,0.48)_55%,rgba(244,247,249,0.25)_100%)]" />
       <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-b from-transparent to-[#F4F7F9]" />
-
-      {/* Capa flotante derecha: perrito escalador unido a cuerda vertical */}
-      <div className="hidden sm:block absolute top-0 right-4 md:right-10 z-20 pointer-events-none">
-        {/* Línea vertical delgada estilo cuerda desde la parte superior */}
-        <div
-          className="absolute top-0 left-1/2 -translate-x-1/2 w-[2px] bg-gradient-to-b from-slate-400 via-[#1D71B5] to-slate-700 rounded-full"
-          style={{
-            height: `${climberY + 46}px`,
-          }}
-        />
-
-        {/* Activo del perrito escalador animado con translate3d */}
-        <div
-          className="relative w-16 md:w-20 will-change-transform"
-          style={{
-            transform: `translate3d(0, ${climberY}px, 0)`,
-          }}
-        >
-          <img
-            src="/images/kanan-escalador.png"
-            alt="Kanan escalador"
-            className="w-full h-auto object-contain drop-shadow-[0_10px_18px_rgba(15,36,56,0.22)]"
-          />
-        </div>
-      </div>
     </div>
   );
 }
