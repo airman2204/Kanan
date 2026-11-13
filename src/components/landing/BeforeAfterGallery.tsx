@@ -282,10 +282,22 @@ export function BeforeAfterGallery({ onOpenWizard }: { onOpenWizard: () => void 
                 </div>
               </div>
             </div>
+
+            {/* Botón CTA en móvil justo debajo de la ficha técnica */}
+            <div className="md:hidden pt-1">
+              <button
+                type="button"
+                onClick={onOpenWizard}
+                className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-[#1D71B5] to-[#36A6DE] text-white font-heading font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-500/25 active:scale-98 cursor-pointer"
+              >
+                <Sparkles className="w-4 h-4" />
+                <span>Quiero un Resultado Así en Casa</span>
+              </button>
+            </div>
           </div>
 
-          {/* COLUMNA DERECHA: SELECTOR DE CASOS REALES */}
-          <div className="lg:col-span-5 space-y-4">
+          {/* COLUMNA DERECHA: SELECTOR DE CASOS REALES (oculto en móvil para evitar duplicado) */}
+          <div className="hidden md:block lg:col-span-5 space-y-4">
             <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/90 shadow-kanan space-y-4">
               <div>
                 <span className="text-xs font-heading font-bold uppercase tracking-wider text-kanan-cerulean">
