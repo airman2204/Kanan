@@ -1,8 +1,9 @@
 import React from "react";
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
-import { Smartphone, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { KananPassCard } from "@/components/brand/KananPassCard";
+import { PaseActionsClient } from "@/components/brand/PaseActionsClient";
 
 export const dynamic = "force-dynamic";
 
@@ -98,37 +99,14 @@ export default async function PaseDigitalPage({ params }: PasePageProps) {
           isActive={displayData.isActive}
         />
 
-        <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
-          <a
-            href={`/api/wallet/apple?folio=${encodedFolio}`}
-            className="inline-flex items-center gap-2.5 bg-black hover:bg-slate-900 text-white px-5 py-3 rounded-xl border border-slate-700 shadow-lg transition-all active:scale-95"
-          >
-            <Smartphone className="w-5 h-5 text-white shrink-0" />
-            <div className="text-left leading-tight">
-              <span className="text-[9px] uppercase tracking-wider text-slate-300 block">
-                Add to
-              </span>
-              <span className="text-xs font-heading font-bold">
-                Apple Wallet
-              </span>
-            </div>
-          </a>
-
-          <a
-            href={`/api/wallet/google?folio=${encodedFolio}`}
-            className="inline-flex items-center gap-2.5 bg-black hover:bg-slate-900 text-white px-5 py-3 rounded-xl border border-slate-700 shadow-lg transition-all active:scale-95"
-          >
-            <Smartphone className="w-5 h-5 text-emerald-400 shrink-0" />
-            <div className="text-left leading-tight">
-              <span className="text-[9px] uppercase tracking-wider text-slate-300 block">
-                Save to
-              </span>
-              <span className="text-xs font-heading font-bold">
-                Google Wallet
-              </span>
-            </div>
-          </a>
-        </div>
+        <PaseActionsClient
+          clientName={displayData.clientName}
+          folio={displayData.folio}
+          serviceType={displayData.serviceType}
+          serviceDate={displayData.serviceDate}
+          nextMaintenanceDate={displayData.nextMaintenanceDate}
+          isActive={displayData.isActive}
+        />
 
         <div className="pt-2">
           <Link
