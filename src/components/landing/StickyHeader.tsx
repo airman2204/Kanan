@@ -42,8 +42,8 @@ export function StickyHeader({
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white/85 backdrop-blur-xl border-b border-kanan-cyan/15 shadow-[0_4px_24px_-6px_rgba(15,36,56,0.06)]">
-      {/* Top Banner de Anuncio Dinámico (solo desktop) */}
-      <div className="hidden md:block bg-gradient-to-r from-kanan-deep via-kanan-cerulean to-kanan-deep text-white text-xs py-1.5 overflow-hidden border-b border-kanan-cyan/30">
+      {/* Top Banner de Anuncio Dinámico Tipo Marquee */}
+      <div className="bg-gradient-to-r from-kanan-deep via-kanan-cerulean to-kanan-deep text-white text-[11px] sm:text-xs py-1.5 overflow-hidden border-b border-kanan-cyan/30">
         <div className="flex animate-marquee items-center gap-8 whitespace-nowrap cursor-pointer" onClick={onOpenWizard}>
           {[...Array(4)].map((_, i) => (
             <div key={i} className="flex items-center gap-6">
