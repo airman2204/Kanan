@@ -81,7 +81,7 @@ export function HeroSection({ selectedMunicipio, onOpenWizard }: HeroSectionProp
         <div className="relative z-20">
           {/* Top Bar */}
           <div className="pt-3 px-5 flex items-center justify-between">
-            <KananLogo variant="default" size="sm" />
+            <KananLogo variant="color" size="sm" />
             <span className="inline-flex items-center gap-1 bg-blue-50 border border-blue-100 text-[#0B2239] text-xs font-medium px-3 py-1 rounded-full">
               <MapPin className="w-3.5 h-3.5 text-[#1976D2] shrink-0" />
               <span>Guadalajara y ZMG</span>
