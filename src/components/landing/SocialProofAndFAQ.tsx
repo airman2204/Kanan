@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { KANAN_GOOGLE_MAPS_REVIEW_URL } from "@/lib/whatsapp/templates";
 import { KananLogo } from "@/components/brand/KananLogo";
+import { KananPassCard } from "@/components/brand/KananPassCard";
 
 const GOOGLE_REVIEWS = [
   {
@@ -69,23 +70,7 @@ const FAQS = [
 
 export function SocialProofAndFAQ() {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
-  const [cardTilt, setCardTilt] = useState({ rotateX: 2, rotateY: -8, glowX: 50, glowY: 30 });
-
-  const handleCardMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width;
-    const y = (e.clientY - rect.top) / rect.height;
-    setCardTilt({
-      rotateY: (x - 0.5) * 18,
-      rotateX: (0.5 - y) * 14,
-      glowX: Math.round(x * 100),
-      glowY: Math.round(y * 100),
-    });
-  };
-
-  const handleCardMouseLeave = () => {
-    setCardTilt({ rotateX: 2, rotateY: -8, glowX: 50, glowY: 30 });
-  };
+  const [walletNotice, setWalletNotice] = useState(false);
 
   return (
     <section id="opiniones" className="py-14 sm:py-20 bg-white">
@@ -160,165 +145,90 @@ export function SocialProofAndFAQ() {
           <div className="relative lg:col-span-6 space-y-5">
             <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white border border-kanan-cyan/30 text-xs font-heading font-bold text-kanan-cerulean shadow-sm">
               <Sparkles className="w-3.5 h-3.5 text-kanan-cyan" />
-              <span>Respaldo Oficial Kanan</span>
+              <span>Pase Digital Kanan</span>
             </div>
 
             <h3 className="font-heading text-2xl sm:text-4xl font-extrabold text-kanan-deep leading-tight tracking-tight">
-              Garantía por Escrito y Control de Servicio
+              Tu Garantía y Beneficios Directo en tu Wallet
             </h3>
 
             <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
-              Al concluir tu servicio recibes tu certificado digital con las recomendaciones clave de cuidado y la fecha sugerida para mantener tu garantía vigente.
+              Al concluir tu servicio te enviamos por WhatsApp un enlace para guardar tu tarjeta oficial en Apple Wallet o Google Wallet en un solo toque, sin instalar aplicaciones.
             </p>
 
             <ul className="space-y-3 pt-1">
               <li className="flex items-start gap-2.5 text-sm text-slate-700">
                 <CheckCircle2 className="w-5 h-5 text-[#00A8B5] shrink-0 mt-0.5" />
                 <span>
-                  <strong className="text-kanan-deep">Garantía de satisfacción:</strong>{" "}
-                  Revisión sin costo si surge algún detalle al secar.
+                  <strong className="text-kanan-deep">Garantía siempre a la mano:</strong>{" "}
+                  Tu folio, fecha de servicio y respaldo directo en tu celular.
                 </span>
               </li>
               <li className="flex items-start gap-2.5 text-sm text-slate-700">
                 <CheckCircle2 className="w-5 h-5 text-[#00A8B5] shrink-0 mt-0.5" />
                 <span>
-                  <strong className="text-kanan-deep">Cuidado post-servicio:</strong>{" "}
-                  Guía clara para conservar tus tapicerías.
+                  <strong className="text-kanan-deep">Guía de cuidado rápido:</strong>{" "}
+                  Recomendaciones de secado y conservación post-servicio.
                 </span>
               </li>
               <li className="flex items-start gap-2.5 text-sm text-slate-700">
                 <CheckCircle2 className="w-5 h-5 text-[#00A8B5] shrink-0 mt-0.5" />
                 <span>
-                  <strong className="text-kanan-deep">Precio de cliente frecuente:</strong>{" "}
-                  Tarifa preferencial en mantenimiento cada 6 meses.
+                  <strong className="text-kanan-deep">Beneficio de cliente frecuente:</strong>{" "}
+                  Tarifa preferencial presentando tu folio al agendar tu mantenimiento cada 6 meses.
                 </span>
               </li>
             </ul>
 
-            <div className="pt-2">
-              <a
-                href="#faq"
-                className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-heading font-bold text-[#1D71B5] hover:text-[#355581] transition-colors"
-              >
-                <span>Conoce los términos de nuestra garantía →</span>
-              </a>
+            <div className="pt-2 space-y-2.5">
+              <p className="text-xs text-slate-500 font-medium">
+                Se activa y envía por WhatsApp al concluir tu servicio:
+              </p>
+              <div className="flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setWalletNotice(true)}
+                  className="inline-flex items-center gap-2.5 bg-black hover:bg-slate-900 text-white px-4 py-2.5 rounded-xl border border-slate-700 shadow-md transition-all active:scale-95 cursor-pointer"
+                >
+                  <Smartphone className="w-5 h-5 text-white shrink-0" />
+                  <div className="text-left leading-tight">
+                    <span className="text-[9px] uppercase tracking-wider text-slate-300 block">
+                      Add to
+                    </span>
+                    <span className="text-xs font-heading font-bold">
+                      Apple Wallet
+                    </span>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setWalletNotice(true)}
+                  className="inline-flex items-center gap-2.5 bg-black hover:bg-slate-900 text-white px-4 py-2.5 rounded-xl border border-slate-700 shadow-md transition-all active:scale-95 cursor-pointer"
+                >
+                  <Smartphone className="w-5 h-5 text-emerald-400 shrink-0" />
+                  <div className="text-left leading-tight">
+                    <span className="text-[9px] uppercase tracking-wider text-slate-300 block">
+                      Save to
+                    </span>
+                    <span className="text-xs font-heading font-bold">
+                      Google Wallet
+                    </span>
+                  </div>
+                </button>
+              </div>
+
+              {walletNotice && (
+                <p className="text-xs font-semibold text-[#1D71B5] bg-blue-50 border border-blue-200 rounded-xl px-3.5 py-2">
+                  Tu pase personalizado se activa y envía por WhatsApp al finalizar tu servicio.
+                </p>
+              )}
             </div>
           </div>
 
-          {/* Tarjeta Digital 3D VIP con doble marco dorado metálico */}
-          <div
-            className="relative lg:col-span-6 flex justify-center py-4"
-            style={{ perspective: "1000px" }}
-          >
-            <div
-              onMouseMove={handleCardMouseMove}
-              onMouseLeave={handleCardMouseLeave}
-              className="relative w-full max-w-[350px] sm:max-w-[385px] rounded-2xl bg-[#0B2239] text-white shadow-[0_28px_60px_-15px_rgba(11,34,57,0.55)] border-2 border-[#D4AF37] p-1.5 overflow-hidden transition-transform duration-200 ease-out will-change-transform"
-              style={{
-                transform: `rotateY(${cardTilt.rotateY}deg) rotateX(${cardTilt.rotateX}deg)`,
-              }}
-            >
-              {/* Brillo diagonal / holográfico dorado sutil */}
-              <div
-                className="pointer-events-none absolute inset-0 opacity-35 transition-opacity duration-300"
-                style={{
-                  background: `radial-gradient(circle at ${cardTilt.glowX}% ${cardTilt.glowY}%, rgba(212,175,55,0.45) 0%, rgba(255,255,255,0.12) 28%, transparent 65%)`,
-                }}
-              />
-
-              {/* Filete interior dorado sutil */}
-              <div className="relative rounded-xl border border-[#D4AF37]/45 overflow-hidden bg-[#0B2239]/95">
-                {/* Header: Logo blanco a la izquierda + perrito a la derecha */}
-                <div className="px-5 pt-4 pb-3 flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <span className="font-heading text-2xl font-black tracking-tight text-white block leading-none">
-                      KANAN
-                    </span>
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#E6C767]">
-                      Servicios de Limpieza
-                    </p>
-                  </div>
-                  <img
-                    src="/images/kanan-escalador.png"
-                    alt="Mascota Kanan"
-                    className="w-16 h-16 object-contain drop-shadow-md"
-                  />
-                </div>
-
-                {/* Cintillo con borde dorado */}
-                <div className="bg-gradient-to-r from-[#00A8B5]/90 via-[#00A8B5] to-[#00A8B5]/90 border-y border-[#D4AF37]/70 px-4 py-2 text-center">
-                  <p className="text-[10.5px] font-heading font-extrabold uppercase tracking-[0.15em] text-white">
-                    CERTIFICADO DE SERVICIO Y GARANTÍA
-                  </p>
-                </div>
-
-                {/* Cuerpo */}
-                <div className="p-4 sm:p-5 space-y-3.5">
-                  <div className="grid grid-cols-2 gap-x-3 gap-y-2 text-xs">
-                    <div>
-                      <span className="text-[10px] uppercase tracking-wider text-slate-400 block">
-                        Cliente
-                      </span>
-                      <span className="font-bold text-white">Juan Pérez</span>
-                    </div>
-                    <div>
-                      <span className="text-[10px] uppercase tracking-wider text-slate-400 block">
-                        Folio
-                      </span>
-                      <span className="font-bold text-[#E6C767]">#KAN-9821</span>
-                    </div>
-                    <div>
-                      <span className="text-[10px] uppercase tracking-wider text-slate-400 block">
-                        Servicio
-                      </span>
-                      <span className="font-bold text-cyan-200">
-                        Lavado de Sala y Desinfección
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-[10px] uppercase tracking-wider text-slate-400 block">
-                        Próximo mantenimiento
-                      </span>
-                      <span className="font-bold text-emerald-300">Mayo 2027</span>
-                    </div>
-                  </div>
-
-                  {/* Caja interna oscura con las 3 recomendaciones */}
-                  <div className="rounded-xl bg-[#071728] border border-[#D4AF37]/25 p-3 space-y-1.5">
-                    <p className="text-[10px] font-heading font-extrabold uppercase tracking-wider text-[#E6C767]">
-                      Recomendaciones post-servicio
-                    </p>
-                    <ul className="space-y-1 text-[11px] text-slate-200 leading-snug">
-                      <li>• Dejar ventilar 3-4 horas hasta secado completo</li>
-                      <li>• No aplicar químicos caseros sobre manchas</li>
-                      <li>• Agenda cada 6 meses para tu descuento de cliente frecuente</li>
-                    </ul>
-                  </div>
-                </div>
-
-                {/* Pie de tarjeta: QR limpio en SVG + WhatsApp */}
-                <div className="bg-[#071728]/80 border-t border-[#D4AF37]/30 px-4 py-3 flex items-center gap-3.5">
-                  <div className="bg-white p-1.5 rounded-lg shrink-0">
-                    <svg
-                      viewBox="0 0 36 36"
-                      className="w-10 h-10 text-[#0B2239]"
-                      fill="currentColor"
-                      aria-hidden="true"
-                    >
-                      <path d="M2 2h12v12H2V2zm3 3v6h6V5H5zm2 2h2v2H7V7zM22 2h12v12H22V2zm3 3v6h6V5h-6zm2 2h2v2h-2V7zM2 22h12v12H2V22zm3 3v6h6v-6H5zm2 2h2v2H7v-2zM16 4h4v4h-4V4zm0 6h2v4h-2v-4zm4 4h2v2h-2v-2zm-4 4h4v2h-4v-2zm6 0h4v4h-4v-4zm6 0h4v4h-4v-4zm-6 6h2v4h-2v-4zm4 2h4v2h-4v-2zm2 4h4v4h-4v-4zm-6 2h4v2h-4v-2z" />
-                    </svg>
-                  </div>
-                  <div className="text-xs leading-snug">
-                    <p className="text-slate-300 text-[11px]">
-                      ¿Necesitas aplicar tu garantía?
-                    </p>
-                    <p className="font-heading font-extrabold text-white text-sm mt-0.5">
-                      WhatsApp: <span className="text-[#E6C767]">33 4335 9207</span>
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
+          {/* Columna Derecha — Tarjeta 3D VIP (KananPassCard) */}
+          <div className="relative lg:col-span-6 flex justify-center">
+            <KananPassCard />
           </div>
         </div>
 
