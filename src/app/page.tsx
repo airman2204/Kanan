@@ -22,6 +22,7 @@ import { HalloweenBats } from "@/components/landing/HalloweenBats";
 import { PapelPicado } from "@/components/landing/PapelPicado";
 import { MunicipioZMG } from "@/types/crm";
 import { HeroSection } from "@/components/landing/HeroSection";
+import { ScrollRappelDog } from "@/components/landing/ScrollRappelDog";
 import { InteractiveTowerHero } from "@/components/interactive/InteractiveTowerHero";
 import confetti from "canvas-confetti";
 
@@ -116,6 +117,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-white relative">
+      <ScrollRappelDog />
       {modoHalloween && <HalloweenBats />}
       <StickyHeader
         selectedMunicipio={selectedMunicipio}
