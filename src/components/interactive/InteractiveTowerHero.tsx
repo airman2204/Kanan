@@ -206,7 +206,7 @@ export function InteractiveTowerHero({
                 rotateY,
                 transformStyle: "preserve-3d",
               }}
-              className="relative w-full aspect-[9/16] min-h-[540px] sm:min-h-[660px] lg:min-h-[720px] flex items-center justify-center"
+              className="relative w-full aspect-[9/16] min-h-[420px] sm:min-h-[600px] lg:min-h-[720px] flex items-center justify-center"
             >
               {/* PEDESTAL / BASE ISOMÉTRICA ILUMINADA CON REFLEJO EN EL SUELO */}
               <motion.div
@@ -363,12 +363,12 @@ export function InteractiveTowerHero({
           </div>
         </div>
 
-        {/* MITAD DERECHA: TABLERO DE DIAGNÓSTICO TÉCNICO KANAN (PROPUESTA B CON PERRITO ASOMADO QUE SIGUE AL CURSOR) */}
+        {/* MITAD DERECHA: TABLERO DE DIAGNÓSTICO TÉCNICO KANAN (SOLO DESKTOP PARA EVITAR SCROLL EXCESIVO EN MÓVIL) */}
         <div
           ref={boardRef}
           onMouseMove={handleBoardMouseMove}
           onMouseLeave={handleBoardMouseLeave}
-          className="lg:col-span-6 relative flex items-center justify-center min-h-[580px] lg:min-h-[660px]"
+          className="hidden lg:flex lg:col-span-6 relative items-center justify-center min-h-[580px] lg:min-h-[660px]"
         >
           {/* CONTENEDOR ENVOLVENTE EXACTO A LA TARJETA PARA POSICIONAR LOS ASOMADOS AL BORDE REAL */}
           <div className="w-full relative">
@@ -679,6 +679,150 @@ export function InteractiveTowerHero({
         </div>
 
       </div>
+
+      {/* BARRA RÁPIDA DE ÁREAS EN MÓVIL (EVITA SUBIR Y BAJAR) */}
+      <div className="lg:hidden mt-4">
+        <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 text-center mb-2">
+          O selecciona un área rápido:
+        </p>
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar">
+          {Object.values(TOWER_SPOTS).map((spot) => {
+            const isSelected = selectedSpotId === spot.id;
+            const inCart = cartItems.includes(spot.id);
+            return (
+              <button
+                key={spot.id}
+                type="button"
+                onClick={() => onSelectSpot(spot.id)}
+                className={`shrink-0 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-heading font-bold border transition-all ${
+                  isSelected
+                    ? "bg-[#1D71B5] text-white border-[#1D71B5] shadow-md"
+                    : inCart
+                    ? "bg-emerald-50 text-emerald-700 border-emerald-300"
+                    : "bg-white text-[#355581] border-slate-200 shadow-xs"
+                }`}
+              >
+                {inCart && <Check className="w-3.5 h-3.5 text-emerald-500" />}
+                <span>{spot.name}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {cartItems.length > 0 && (
+          <button
+            type="button"
+            onClick={() => onOpenWizard()}
+            className="mt-3 w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-[#25D366] to-[#1DA851] text-white font-heading font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/25 active:scale-98"
+          >
+            <CalendarCheck className="w-4 h-4" />
+            <span>Cotizar {cartItems.length} {cartItems.length === 1 ? "servicio" : "servicios"} ahora</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        )}
+      </div>
+
+      {/* BOTTOM SHEET MÓVIL AL TOCAR UN ÁREA DE LA CASA */}
+      {currentSpot && (
+        <div
+          className="lg:hidden fixed inset-0 z-50 flex items-end justify-center bg-slate-900/50 backdrop-blur-xs animate-fadeIn"
+          onClick={() => onSelectSpot(null)}
+        >
+          <div
+            className="w-full max-w-lg bg-white rounded-t-3xl p-5 pb-7 shadow-2xl border-t border-slate-200 max-h-[82vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="w-10 h-1 bg-slate-300 rounded-full mx-auto mb-4" />
+
+            <div className="flex items-start justify-between gap-3 mb-3">
+              <div>
+                <span className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-[#1D71B5] bg-blue-50 px-2.5 py-0.5 rounded-full">
+                  <Sparkles className="w-3 h-3" />
+                  {currentSpot.badge}
+                </span>
+                <h3 className="font-heading text-xl font-extrabold text-[#0F2438] mt-1.5">
+                  {currentSpot.name}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => onSelectSpot(null)}
+                aria-label="Cerrar detalle"
+                className="p-2 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <p className="text-slate-600 text-xs leading-relaxed mb-4">
+              {currentSpot.descripcion}
+            </p>
+
+            <div className="grid grid-cols-2 gap-2.5 mb-4">
+              <div className="bg-slate-50 rounded-2xl p-3 border border-slate-100">
+                <span className="text-[10px] font-bold uppercase text-slate-400 block">
+                  Servicio
+                </span>
+                <span className="font-heading font-extrabold text-sm text-[#0F2438]">
+                  {currentSpot.servicio}
+                </span>
+              </div>
+              <div className="bg-slate-50 rounded-2xl p-3 border border-slate-100">
+                <span className="text-[10px] font-bold uppercase text-slate-400 block">
+                  Secado
+                </span>
+                <span className="font-heading font-extrabold text-sm text-[#1D71B5] flex items-center gap-1">
+                  <Timer className="w-3.5 h-3.5" />
+                  {currentSpot.tiempoSecado}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2.5">
+              {(() => {
+                const inCart = cartItems.includes(currentSpot.id);
+                return (
+                  <button
+                    type="button"
+                    onClick={() => onToggleCart(currentSpot.id)}
+                    className={`w-full py-3.5 px-5 rounded-2xl font-heading font-extrabold text-sm flex items-center justify-center gap-2 transition-all active:scale-98 ${
+                      inCart
+                        ? "bg-emerald-50 text-emerald-700 border-2 border-emerald-400"
+                        : "bg-gradient-to-r from-[#1D71B5] to-[#36A6DE] text-white shadow-lg shadow-blue-500/25"
+                    }`}
+                  >
+                    {inCart ? (
+                      <>
+                        <Check className="w-4 h-4" />
+                        <span>Agregado (Toca para quitar)</span>
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="w-4 h-4" />
+                        <span>Agregar a mi cotización</span>
+                      </>
+                    )}
+                  </button>
+                );
+              })()}
+
+              <button
+                type="button"
+                onClick={() => {
+                  const catId = currentSpot.id;
+                  onSelectSpot(null);
+                  onOpenWizard(catId);
+                }}
+                className="w-full py-3 px-5 rounded-2xl bg-slate-100 text-[#355581] font-heading font-bold text-xs flex items-center justify-center gap-1.5"
+              >
+                <CalendarCheck className="w-4 h-4" />
+                <span>Cotizar este servicio ahora</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
