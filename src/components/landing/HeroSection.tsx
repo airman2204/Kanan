@@ -55,11 +55,86 @@ export function HeroSection({ selectedMunicipio, onOpenWizard }: HeroSectionProp
   const currentVisual = VISUALS[activeTabVisual];
 
   return (
-    <section
-      ref={sectionRef}
-      id="inicio"
-      className="relative overflow-hidden bg-gradient-to-b from-[#F0F5FA] via-white to-[#F4F7F9] pt-8 pb-16 sm:pt-14 sm:pb-24 lg:pt-16 lg:pb-28"
-    >
+    <>
+      {/* ============================================================== */}
+      {/* VERSIÓN MÓVIL (< md): HERO FULL-BLEED CON DEGRADADO VERTICAL   */}
+      {/* ============================================================== */}
+      <section
+        id="inicio-movil"
+        className="block md:hidden relative min-h-[100svh] w-full flex flex-col justify-between overflow-hidden pb-24"
+      >
+        {/* Video de fondo posicionado abajo a la izquierda */}
+        <video
+          src="/videos/hero-sofa-kanan.mp4"
+          poster="/images/hero-sofa-kanan.webp"
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute bottom-0 left-0 w-full h-[65%] object-cover object-left-bottom z-0 opacity-100"
+        />
+
+        {/* Degradado vertical exacto */}
+        <div className="absolute inset-0 z-10 pointer-events-none bg-[linear-gradient(180deg,#0E2942_0%,#254D70_12%,#EBF3FA_26%,#FFFFFF_48%,rgba(255,255,255,0.85)_60%,rgba(255,255,255,0)_74%)]" />
+
+        {/* Cabecera y Textos */}
+        <div className="relative z-20">
+          {/* Top Bar */}
+          <div className="pt-4 px-5 flex items-center justify-between">
+            <KananLogo variant="white" size="sm" />
+            <span className="inline-flex items-center gap-1 bg-white/20 backdrop-blur-md text-white text-xs font-medium px-3 py-1 rounded-full">
+              <MapPin className="w-3.5 h-3.5 text-cyan-300 shrink-0" />
+              <span>Guadalajara y ZMG</span>
+            </span>
+          </div>
+
+          {/* Bloque Central alineado a la izquierda */}
+          <div className="px-5 mt-6">
+            <h1 className="text-[34px] leading-[1.08] font-extrabold tracking-tight font-heading">
+              <span className="text-[#0B2239] block">
+                Limpieza y desinfección profunda
+              </span>
+              <span className="text-[#1976D2] block">
+                para tus salas, colchones y auto a domicilio
+              </span>
+            </h1>
+
+            <p className="text-slate-700 text-[15px] leading-snug mt-3 font-medium">
+              Eliminamos manchas, ácaros y malos olores por inyección-succión. ¡Secado rápido en horas!
+            </p>
+
+            <button
+              type="button"
+              onClick={() => onOpenWizard()}
+              className="mt-4 w-full py-3.5 rounded-full bg-gradient-to-r from-[#0284C7] to-[#2563EB] text-white font-bold text-base shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 active:scale-[0.98] transition-transform cursor-pointer"
+            >
+              <CalendarCheck className="w-5 h-5 shrink-0" />
+              <span>Cotizar y Agendar en Línea</span>
+              <ArrowRight className="w-4 h-4 shrink-0" />
+            </button>
+
+            <div className="mt-2.5 flex items-center justify-between text-[11px] font-semibold text-slate-600 px-1 gap-2">
+              <span className="flex items-center gap-1">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                Cotización al instante sin compromiso
+              </span>
+              <span className="flex items-center gap-1">
+                <CheckCircle2 className="w-3.5 h-3.5 text-[#1976D2] shrink-0" />
+                Productos biodegradables seguros
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================== */}
+      {/* VERSIÓN DESKTOP (md+): HERO CON VIDEO SCROLL-SCRUBBED           */}
+      {/* ============================================================== */}
+      <section
+        ref={sectionRef}
+        id="inicio"
+        className="hidden md:block relative overflow-hidden bg-gradient-to-b from-[#F0F5FA] via-white to-[#F4F7F9] pt-8 pb-16 sm:pt-14 sm:pb-24 lg:pt-16 lg:pb-28"
+      >
       {/* Secuencia de video controlada por scroll en el fondo */}
       <HeroScrollSequence sectionRef={sectionRef} />
 
@@ -171,5 +246,6 @@ export function HeroSection({ selectedMunicipio, onOpenWizard }: HeroSectionProp
         </div>
       </div>
     </section>
+    </>
   );
 }
