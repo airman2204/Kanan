@@ -69,7 +69,7 @@ const FAQS = [
 ];
 
 export function SocialProofAndFAQ() {
-  const [openFaq, setOpenFaq] = useState<number | null>(0);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   return (
     <section id="opiniones" className="py-14 sm:py-20 bg-white">
@@ -141,7 +141,7 @@ export function SocialProofAndFAQ() {
           <div className="absolute -top-24 -left-24 w-80 h-80 rounded-full bg-kanan-cyan/15 blur-3xl pointer-events-none" />
           <div className="absolute -bottom-24 -right-24 w-80 h-80 rounded-full bg-kanan-cerulean/10 blur-3xl pointer-events-none" />
 
-          <div className="relative lg:col-span-6 space-y-3 sm:space-y-5">
+          <div className="relative order-2 lg:order-1 lg:col-span-6 space-y-3 sm:space-y-5">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-kanan-cyan/30 text-[11px] sm:text-xs font-heading font-bold text-kanan-cerulean shadow-sm">
               <Sparkles className="w-3.5 h-3.5 text-kanan-cyan" />
               <span>Respaldo Digital Kanan</span>
@@ -189,8 +189,8 @@ export function SocialProofAndFAQ() {
             </div>
           </div>
 
-          {/* Columna Derecha — Tarjeta 3D VIP (KananPassCard) */}
-          <div className="relative lg:col-span-6 flex justify-center">
+          {/* Columna Derecha — Tarjeta 3D VIP (KananPassCard) - primero en móvil */}
+          <div className="relative order-1 lg:order-2 lg:col-span-6 flex justify-center">
             <KananPassCard />
           </div>
         </div>
