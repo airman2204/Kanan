@@ -290,7 +290,6 @@ export function BeforeAfterGallery({ onOpenWizard }: { onOpenWizard: () => void 
                 onClick={onOpenWizard}
                 className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-[#1D71B5] to-[#36A6DE] text-white font-heading font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-500/25 active:scale-98 cursor-pointer"
               >
-                <Sparkles className="w-4 h-4" />
                 <span>Quiero un Resultado Así en Casa</span>
               </button>
             </div>
