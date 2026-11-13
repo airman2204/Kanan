@@ -69,41 +69,27 @@ export function HeroSection({ selectedMunicipio, onOpenWizard }: HeroSectionProp
 
       <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 z-10 text-center">
         <div className="space-y-6">
-          {/* Badges de Cobertura y Actividad en Vivo */}
+          {/* Badges de Cobertura */}
           <div className="flex flex-wrap items-center justify-center gap-2.5">
             <div className="inline-flex items-center gap-1.5 bg-white/90 backdrop-blur-md border border-[#36A6DE]/40 rounded-full px-3.5 py-1.5 shadow-sm text-xs font-heading font-bold text-[#1D71B5]">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping inline-block" />
               <MapPin className="w-3.5 h-3.5 text-[#36A6DE]" />
-              <span>Rutas activas hoy en {selectedMunicipio}</span>
+              <span>Servicio a domicilio en Puebla y Cholula</span>
             </div>
-
-            <a
-              href="#opiniones"
-              className="inline-flex items-center gap-1.5 bg-white/90 backdrop-blur-md border border-amber-200/80 rounded-full px-3.5 py-1.5 shadow-sm text-xs font-semibold text-amber-700 hover:bg-amber-50/50 transition-colors"
-            >
-              <div className="flex items-center text-amber-400">
-                <Star className="w-3.5 h-3.5 fill-amber-400" />
-                <Star className="w-3.5 h-3.5 fill-amber-400" />
-                <Star className="w-3.5 h-3.5 fill-amber-400" />
-                <Star className="w-3.5 h-3.5 fill-amber-400" />
-                <Star className="w-3.5 h-3.5 fill-amber-400" />
-              </div>
-              <span>4.9 / 5 en Google Maps</span>
-            </a>
           </div>
 
           {/* Titular Principal de Alto Impacto */}
           <div className="space-y-4">
-            <h1 className="font-heading text-4xl sm:text-5xl lg:text-[56px] font-extrabold text-[#355581] tracking-tight leading-[1.08]">
-              Protegemos lo que más tocas.{" "}
+            <h1 className="font-heading text-4xl sm:text-5xl lg:text-[54px] font-extrabold text-[#355581] tracking-tight leading-[1.08]">
+              Limpieza y desinfección profunda{" "}
               <span className="block mt-1 bg-gradient-to-r from-[#1D71B5] via-[#36A6DE] to-[#355581] bg-clip-text text-transparent">
-                Limpieza y desinfección profunda a domicilio.
+                para tus salas, colchones y auto a domicilio.
               </span>
             </h1>
             <p className="text-slate-600 text-base sm:text-lg lg:text-xl leading-relaxed max-w-2xl mx-auto">
-              Renovamos tus salas, colchones y vestiduras con tecnología alemana de{" "}
-              <strong className="text-[#355581] font-bold">inyección-succión industrial</strong>.
-              Eliminamos el 90% de la humedad, manchas profundas y ácaros en minutos.
+              Lavado profundo por{" "}
+              <strong className="text-[#355581] font-bold">inyección-succión</strong>{" "}
+              que elimina manchas, ácaros y malos olores. Extraemos la mayor parte de la humedad para que tus muebles queden limpios, frescos y listos el mismo día.
             </p>
           </div>
 
@@ -122,11 +108,11 @@ export function HeroSection({ selectedMunicipio, onOpenWizard }: HeroSectionProp
             <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-slate-500 pt-1">
               <span className="flex items-center gap-1.5 font-medium">
                 <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                Cotización al instante sin llamadas forzadas
+                Cotización al instante y sin compromiso
               </span>
               <span className="flex items-center gap-1.5 font-medium">
                 <ShieldCheck className="w-4 h-4 text-[#1D71B5] shrink-0" />
-                Garantía de satisfacción por escrito
+                Productos biodegradables seguros para niños y mascotas
               </span>
             </div>
           </div>
@@ -138,10 +124,10 @@ export function HeroSection({ selectedMunicipio, onOpenWizard }: HeroSectionProp
                 <Timer className="w-5 h-5 text-[#36A6DE]" />
               </div>
               <h3 className="font-heading font-bold text-sm text-[#355581]">
-                Secado en 3-4 horas*
+                Secado rápido el mismo día
               </h3>
               <p className="text-[11px] text-slate-500 leading-snug mt-1">
-                Usa tus muebles el mismo día con alto poder de extracción de vacío.
+                Vuelve a usar tus muebles en pocas horas gracias a nuestro sistema de extracción profunda.
               </p>
             </div>
 
@@ -150,10 +136,10 @@ export function HeroSection({ selectedMunicipio, onOpenWizard }: HeroSectionProp
                 <Award className="w-5 h-5 text-emerald-600" />
               </div>
               <h3 className="font-heading font-bold text-sm text-[#355581]">
-                Desinfección Hospitalaria
+                Desinfección segura
               </h3>
               <p className="text-[11px] text-slate-500 leading-snug mt-1">
-                Fórmulas biodegradables sin residuos químicos tóxicos ni cloro.
+                Fórmulas biodegradables libres de cloro y químicos tóxicos. Cuidamos a tu familia y mascotas.
               </p>
             </div>
 
@@ -162,10 +148,10 @@ export function HeroSection({ selectedMunicipio, onOpenWizard }: HeroSectionProp
                 <FileCheck2 className="w-5 h-5 text-[#1D71B5]" />
               </div>
               <h3 className="font-heading font-bold text-sm text-[#355581]">
-                Garantía Kanan Card
+                Servicio 100% a domicilio
               </h3>
               <p className="text-[11px] text-slate-500 leading-snug mt-1">
-                Tarjeta digital con Wallet y 15% de beneficio permanente.
+                Llevamos todo el equipo necesario hasta tu hogar con puntualidad y total cuidado de tus espacios.
               </p>
             </div>
           </div>

@@ -34,28 +34,28 @@ const TOWER_SPOTS: Record<string, TowerHotspot> = {
   colchones: {
     id: "colchones",
     name: "Colchones & Cunas",
-    badge: "Sanitización Antiácaros UV",
-    servicio: "Desinfección Profunda de Colchón",
+    badge: "Lavado Profundo y Desinfección",
+    servicio: "Lavado profundo y desinfección",
     tiempoSecado: "Listo para dormir hoy",
-    tecnologia: "Luz UV Germicida 254nm + Succión HEPA",
+    tecnologia: "Inyección-succión + Productos Biodegradables",
     descripcion:
-      "Eliminación total de ácaros microscópicos, bacterias y alérgenos en colchón y almohadas sin químicos agresivos.",
-    extraccionHumedad: "92% succión en seco",
-    esterilizacionAcaros: "100% esterilizado UV",
+      "Lavado profundo que elimina ácaros, manchas, sudor y malos olores en colchones y almohadas con fórmulas seguras para tu familia.",
+    extraccionHumedad: "Extracción profunda de humedad",
+    esterilizacionAcaros: "Desinfección segura sin cloro",
     pinX: 48,
     pinY: 26,
   },
   salas: {
     id: "salas",
     name: "Salas & Sillones",
-    badge: "Inyección-Succión Alemana",
-    servicio: "Lavado de Salas y Tapicería",
-    tiempoSecado: "3 a 4 horas*",
-    tecnologia: "Kärcher Industrial de Doble Turbina",
+    badge: "Inyección-Succión Profunda",
+    servicio: "Extracción profunda y desmanchado",
+    tiempoSecado: "3 a 5 horas*",
+    tecnologia: "Inyección-Succión de Alta Extracción",
     descripcion:
-      "Desincrustamos suciedad acumulada y manchas de alimentos extrayendo el agua sucia en tiempo real a alta presión.",
-    extraccionHumedad: "90% humedad extraída",
-    esterilizacionAcaros: "99.8% biocida neutro",
+      "Desincrustamos suciedad acumulada y manchas de alimentos extrayendo el agua sucia al momento con productos biodegradables.",
+    extraccionHumedad: "Extracción profunda de humedad",
+    esterilizacionAcaros: "Fórmula biodegradable segura",
     pinX: 30,
     pinY: 54,
   },
@@ -63,27 +63,27 @@ const TOWER_SPOTS: Record<string, TowerHotspot> = {
     id: "comedor",
     name: "Sillas de Comedor",
     badge: "Cuidado Fino de Fibras",
-    servicio: "Lavado Artesanal de Sillas",
-    tiempoSecado: "2 a 3 horas*",
+    servicio: "Limpieza detallada por pieza",
+    tiempoSecado: "2 a 4 horas*",
     tecnologia: "Fórmulas biodegradables de pH neutro",
     descripcion:
-      "Cuidado artesanal para sillas de tela, terciopelo o vinipiel sin decolorar las fibras ni dejar cercos de humedad.",
-    extraccionHumedad: "88% humedad extraída",
-    esterilizacionAcaros: "100% libre de residuos",
+      "Limpieza detallada por pieza para sillas de tela, terciopelo o vinipiel sin decolorar las fibras ni dejar cercos de humedad.",
+    extraccionHumedad: "Extracción profunda de humedad",
+    esterilizacionAcaros: "100% libre de residuos tóxicos",
     pinX: 72,
     pinY: 53,
   },
   autos: {
     id: "autos",
     name: "Vestiduras de Auto",
-    badge: "Unidad Móvil a Domicilio",
-    servicio: "Detallado de Interiores de Auto",
-    tiempoSecado: "2 a 3 horas*",
-    tecnologia: "Extracción industrial en tu cochera",
+    badge: "Servicio a Domicilio",
+    servicio: "Asientos, cielo, alfombra y cajuela",
+    tiempoSecado: "2 a 4 horas*",
+    tecnologia: "Inyección-succión en tu cochera",
     descripcion:
-      "Limpieza de asientos, alfombra y cajuela sin mover tu auto de casa. Restauramos la frescura y el aroma a nuevo.",
-    extraccionHumedad: "90% humedad extraída",
-    esterilizacionAcaros: "100% aroma a nuevo",
+      "Lavado profundo de asientos, cielo, alfombra y cajuela sin mover tu auto de casa. Eliminamos manchas y malos olores.",
+    extraccionHumedad: "Extracción profunda de humedad",
+    esterilizacionAcaros: "Fresco y listo el mismo día",
     pinX: 52,
     pinY: 82,
   },
@@ -439,15 +439,15 @@ export function InteractiveTowerHero({
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="text-[10px] font-heading font-extrabold uppercase tracking-widest text-[#1D71B5] bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200">
-                      Técnico Especialista Kanan
+                      SERVICIO A DOMICILIO
                     </span>
                     <span className="flex items-center gap-1 text-[11px] font-bold text-emerald-600">
                       <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping inline-block" />
-                      En Línea
+                      Disponible
                     </span>
                   </div>
                   <h4 className="font-heading text-sm sm:text-base font-extrabold text-[#0F2438] leading-tight mt-0.5">
-                    Expediente Técnico de Limpieza
+                    Detalle de Nuestros Servicios
                   </h4>
                 </div>
               </div>
@@ -588,7 +588,7 @@ export function InteractiveTowerHero({
                         ¿Qué área de tu casa deseas renovar hoy?
                       </h4>
                       <p className="text-slate-500 text-xs sm:text-sm leading-relaxed max-w-sm mx-auto">
-                        Toca las píldoras en la maqueta 3D para desplegar el diagnóstico de fibras, maquinaria alemana y nivel de extracción.
+                        Selecciona cualquier área en la casa para conocer nuestro proceso de lavado, productos seguros y tiempo estimado de secado.
                       </p>
                     </div>
 
@@ -668,7 +668,7 @@ export function InteractiveTowerHero({
                   className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-[#1D71B5] to-[#36A6DE] hover:from-[#165a91] hover:to-[#1D71B5] text-white font-heading font-extrabold text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-500/25 active:scale-98 cursor-pointer"
                 >
                   <CalendarCheck className="w-4 h-4" />
-                  <span>Cotizar mi casa completa en línea</span>
+                  <span>Cotizar mi servicio en línea</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               )}
