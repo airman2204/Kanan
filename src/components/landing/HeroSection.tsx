@@ -82,16 +82,8 @@ export function HeroSection({ selectedMunicipio, onOpenWizard }: HeroSectionProp
 
         {/* Cabecera y Textos */}
         <div className="relative z-20">
-          {/* Píldora de ubicación (sin duplicar el logo del Navbar) */}
-          <div className="pt-3 px-5 flex items-center justify-end">
-            <span className="inline-flex items-center gap-1 bg-blue-50 border border-blue-100 text-[#0B2239] text-xs font-medium px-3 py-1 rounded-full">
-              <MapPin className="w-3.5 h-3.5 text-[#1976D2] shrink-0" />
-              <span>Guadalajara y ZMG</span>
-            </span>
-          </div>
-
           {/* Bloque Central alineado a la izquierda */}
-          <div className="px-5 mt-2">
+          <div className="px-5 mt-4">
             <h1 className="text-[31px] leading-[1.05] font-extrabold tracking-tight font-heading">
               <span className="text-[#0B2239] block">
                 Limpieza y desinfección profunda

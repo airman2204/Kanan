@@ -44,14 +44,14 @@ export function StickyHeader({
     <header className="sticky top-0 z-50 w-full bg-white/85 backdrop-blur-xl border-b border-kanan-cyan/15 shadow-[0_4px_24px_-6px_rgba(15,36,56,0.06)]">
       {/* Top Banner de Anuncio Dinámico */}
       <div className="bg-gradient-to-r from-kanan-deep via-kanan-cerulean to-kanan-deep text-white text-[11px] sm:text-xs py-1.5 overflow-hidden border-b border-kanan-cyan/30">
-        {/* Móvil: texto compacto sin cortes */}
+        {/* Móvil: texto compacto sin WhatsApp */}
         <div
           className="md:hidden px-3 truncate text-center font-medium cursor-pointer"
           onClick={onOpenWizard}
         >
-          <span className="text-emerald-300 font-bold">WhatsApp: 33 4335 9207</span>
+          <span>✨ Secado rápido en 3 a 4 hrs</span>
           <span className="mx-1.5 text-white/50">•</span>
-          <span>Secado rápido en 3-4 hrs</span>
+          <span className="text-cyan-200 font-semibold">Garantía escrita</span>
         </div>
 
         {/* Desktop: marquee completo */}
