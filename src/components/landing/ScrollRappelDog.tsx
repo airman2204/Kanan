@@ -9,7 +9,7 @@ export function ScrollRappelDog() {
 
   useEffect(() => {
     let rafId: number | null = null;
-    let currentY = window.innerHeight * 0.12;
+    let currentY = window.innerHeight * 0.18;
     let targetY = currentY;
     let isRunning = true;
 
@@ -18,7 +18,7 @@ export function ScrollRappelDog() {
       const maxScroll = Math.max(doc.scrollHeight - window.innerHeight, 1);
       const progress = Math.min(1, Math.max(0, window.scrollY / maxScroll));
 
-      const minY = window.innerHeight * 0.12;
+      const minY = window.innerHeight * 0.18;
       const maxY = window.innerHeight * 0.75;
       targetY = minY + progress * (maxY - minY);
 
@@ -63,26 +63,26 @@ export function ScrollRappelDog() {
   return (
     <div
       ref={containerRef}
-      className="fixed top-0 right-4 md:right-8 z-30 pointer-events-none select-none transition-opacity duration-200"
+      className="fixed top-0 right-10 lg:right-14 z-30 pointer-events-none select-none transition-opacity duration-200"
       aria-hidden="true"
     >
       {/* Línea vertical oscura estilo cuerda anclada arriba hasta las manos del perrito */}
       <div
         ref={ropeRef}
-        className="absolute top-0 left-[28%] w-[2.5px] bg-slate-800 rounded-full"
-        style={{ height: "12vh" }}
+        className="absolute top-0 left-[26%] w-[2.5px] bg-slate-800 rounded-full"
+        style={{ height: "18vh" }}
       />
 
       {/* Perrito escalador con proporción igual al de la aspiradora */}
       <div
         ref={dogRef}
-        className="relative w-36 md:w-44 lg:w-48 will-change-transform"
-        style={{ transform: "translate3d(0, 12vh, 0)" }}
+        className="relative w-44 lg:w-48 will-change-transform"
+        style={{ transform: "translate3d(0, 18vh, 0)" }}
       >
         <img
           src="/images/kanan-escalador.png"
           alt="Kanan escalador"
-          className="w-full h-auto object-contain drop-shadow-[0_12px_22px_rgba(15,36,56,0.2)]"
+          className="w-full h-auto object-contain drop-shadow-md"
         />
       </div>
     </div>
