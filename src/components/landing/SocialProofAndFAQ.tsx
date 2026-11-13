@@ -194,7 +194,9 @@ export function SocialProofAndFAQ() {
 
           {/* Columna Derecha — Tarjeta 3D VIP (KananPassCard) - primero en móvil */}
           <div className="relative order-1 lg:order-2 lg:col-span-6 flex justify-center">
-            <KananPassCard />
+            <div className="scale-[0.75] origin-top h-[350px] md:scale-100 md:h-auto flex justify-center">
+              <KananPassCard />
+            </div>
           </div>
         </div>
 
