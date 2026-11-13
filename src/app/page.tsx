@@ -183,7 +183,7 @@ export default function HomePage() {
         >
           <div className="bg-white/95 backdrop-blur-md px-4 py-2.5 rounded-2xl shadow-xl border border-slate-200/90 text-xs sm:text-sm font-bold text-slate-800 flex items-center gap-2.5 hover:border-cyan-300 transition-colors">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span>¿Cotizamos tus muebles en vivo? 🐾✨</span>
+            <span>Cotiza tu servicio en 1 minuto</span>
           </div>
 
           <button
