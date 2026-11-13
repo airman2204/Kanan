@@ -42,9 +42,20 @@ export function StickyHeader({
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white/85 backdrop-blur-xl border-b border-kanan-cyan/15 shadow-[0_4px_24px_-6px_rgba(15,36,56,0.06)]">
-      {/* Top Banner de Anuncio Dinámico Tipo Marquee */}
+      {/* Top Banner de Anuncio Dinámico */}
       <div className="bg-gradient-to-r from-kanan-deep via-kanan-cerulean to-kanan-deep text-white text-[11px] sm:text-xs py-1.5 overflow-hidden border-b border-kanan-cyan/30">
-        <div className="animate-marquee flex items-center gap-8 whitespace-nowrap cursor-pointer" onClick={onOpenWizard}>
+        {/* Móvil: texto compacto sin cortes */}
+        <div
+          className="md:hidden px-3 truncate text-center font-medium cursor-pointer"
+          onClick={onOpenWizard}
+        >
+          <span className="text-emerald-300 font-bold">WhatsApp: 33 4335 9207</span>
+          <span className="mx-1.5 text-white/50">•</span>
+          <span>Secado rápido en 3-4 hrs</span>
+        </div>
+
+        {/* Desktop: marquee completo */}
+        <div className="hidden md:flex animate-marquee items-center gap-8 whitespace-nowrap cursor-pointer" onClick={onOpenWizard}>
           {[...Array(4)].map((_, i) => (
             <div key={i} className="flex items-center gap-6">
               <span className="inline-flex items-center gap-1.5 font-heading font-extrabold uppercase tracking-wider text-cyan-200">

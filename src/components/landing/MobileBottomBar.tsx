@@ -46,9 +46,9 @@ export function MobileBottomBar({ onOpenWizard }: MobileBottomBarProps) {
         <img
           src="/assets/brand/kanan-dog.png"
           alt="Kanan"
-          className="absolute -top-7 right-2 w-12 h-12 rounded-full border-2 border-[#0E2942] bg-[#1976D2] shadow-md object-cover pointer-events-none"
+          className="absolute -top-8 right-2 w-11 h-11 rounded-full border-2 border-[#0E2942] bg-[#1976D2] shadow-md object-cover pointer-events-none"
         />
-        <span>Cotizar</span>
+        <span className="pr-3">Cotizar</span>
       </button>
     </aside>
   );
