@@ -61,63 +61,58 @@ export function HeroSection({ selectedMunicipio, onOpenWizard }: HeroSectionProp
       {/* ============================================================== */}
       <section
         id="inicio-movil"
-        className="block md:hidden relative w-full bg-white flex flex-col justify-between overflow-hidden pb-6"
+        className="block md:hidden relative w-full bg-white flex flex-col overflow-hidden pb-2"
       >
-        {/* Video de fondo posicionado abajo a la izquierda */}
-        <video
-          src="/videos/hero-sofa-kanan.mp4"
-          poster="/images/hero-sofa-kanan.webp"
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="absolute bottom-0 left-0 w-full h-[65%] object-cover object-left-bottom z-0 opacity-100"
-        />
-
-        {/* Degradado vertical exacto */}
-        <div className="absolute inset-0 z-10 pointer-events-none bg-[linear-gradient(180deg,#FFFFFF_0%,#FFFFFF_44%,rgba(255,255,255,0.75)_53%,rgba(255,255,255,0)_62%)]" />
-
-        {/* Transición suave hacia blanco en el borde inferior del video */}
-        <div className="absolute bottom-0 inset-x-0 h-24 bg-gradient-to-t from-white via-white/70 to-transparent pointer-events-none z-10" />
-
         {/* Cabecera y Textos */}
-        <div className="relative z-20">
-          {/* Bloque Central alineado a la izquierda */}
-          <div className="px-5 mt-4">
-            <h1 className="text-[31px] leading-[1.05] font-extrabold tracking-tight font-heading">
-              <span className="text-[#0B2239] block">
-                Limpieza y desinfección profunda
-              </span>
-              <span className="text-[#1976D2] block">
-                para tus salas, colchones y auto a domicilio
-              </span>
-            </h1>
+        <div className="relative z-20 px-5 pt-4">
+          <h1 className="text-[31px] leading-[1.05] font-extrabold tracking-tight font-heading">
+            <span className="text-[#0B2239] block">
+              Limpieza y desinfección profunda
+            </span>
+            <span className="text-[#1976D2] block">
+              para tus salas, colchones y auto a domicilio
+            </span>
+          </h1>
 
-            <p className="text-slate-700 text-[15px] leading-snug mt-3 font-medium">
-              Eliminamos manchas, ácaros y malos olores por inyección-succión. ¡Secado rápido en horas!
-            </p>
+          <p className="text-slate-700 text-[15px] leading-snug mt-3 font-medium">
+            Eliminamos manchas, ácaros y malos olores por inyección-succión. ¡Secado rápido en horas!
+          </p>
 
-            <button
-              type="button"
-              onClick={() => onOpenWizard()}
-              className="mt-4 w-full py-3.5 rounded-full bg-gradient-to-r from-[#0284C7] to-[#2563EB] text-white font-bold text-base shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 active:scale-[0.98] transition-transform cursor-pointer"
-            >
-              <CalendarCheck className="w-5 h-5 shrink-0" />
-              <span>Cotizar y Agendar en Línea</span>
-              <ArrowRight className="w-4 h-4 shrink-0" />
-            </button>
+          <button
+            type="button"
+            onClick={() => onOpenWizard()}
+            className="mt-4 w-full py-3.5 rounded-full bg-gradient-to-r from-[#0284C7] to-[#2563EB] text-white font-bold text-base shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 active:scale-[0.98] transition-transform cursor-pointer"
+          >
+            <CalendarCheck className="w-5 h-5 shrink-0" />
+            <span>Cotizar y Agendar en Línea</span>
+            <ArrowRight className="w-4 h-4 shrink-0" />
+          </button>
 
-            <div className="mt-2.5 flex items-center justify-between text-[11px] font-semibold text-slate-600 px-1 gap-2">
-              <span className="flex items-center gap-1">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-                Cotización al instante sin compromiso
-              </span>
-              <span className="flex items-center gap-1">
-                <CheckCircle2 className="w-3.5 h-3.5 text-[#1976D2] shrink-0" />
-                Productos biodegradables seguros
-              </span>
-            </div>
+          <div className="mt-2.5 flex items-center justify-between text-[11px] font-semibold text-slate-600 px-1 gap-2">
+            <span className="flex items-center gap-1">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+              Cotización al instante sin compromiso
+            </span>
+            <span className="flex items-center gap-1">
+              <CheckCircle2 className="w-3.5 h-3.5 text-[#1976D2] shrink-0" />
+              Productos biodegradables seguros
+            </span>
           </div>
+        </div>
+
+        {/* Video limpio debajo de los checks con degradado superior e inferior hacia blanco */}
+        <div className="relative w-full aspect-video -mt-2 bg-white overflow-hidden">
+          <video
+            src="/videos/hero-sofa-kanan.mp4"
+            poster="/images/hero-sofa-kanan.webp"
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-cover object-left-bottom opacity-100"
+          />
+          <div className="absolute top-0 inset-x-0 h-10 bg-gradient-to-b from-white to-transparent pointer-events-none" />
+          <div className="absolute bottom-0 inset-x-0 h-14 bg-gradient-to-t from-white via-white/75 to-transparent pointer-events-none" />
         </div>
       </section>
 

@@ -104,11 +104,14 @@ export function SocialProofAndFAQ() {
             </a>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div
+            className="flex md:grid md:grid-cols-3 overflow-x-auto snap-x snap-mandatory gap-4 pb-2 md:overflow-visible md:pb-0 touch-pan-x no-scrollbar"
+            style={{ WebkitOverflowScrolling: "touch" }}
+          >
             {GOOGLE_REVIEWS.map((rev) => (
               <div
                 key={rev.id}
-                className="bg-kanan-ice rounded-3xl p-6 border border-slate-200/80 flex flex-col justify-between space-y-4"
+                className="min-w-[85%] md:min-w-0 snap-center bg-kanan-ice rounded-3xl p-5 sm:p-6 border border-slate-200/80 flex flex-col justify-between space-y-4"
               >
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
