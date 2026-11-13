@@ -50,7 +50,7 @@ export function KananPassCard({
       <div
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
-        className="relative w-full max-w-[325px] sm:max-w-[375px] scale-[0.88] sm:scale-100 -my-4 sm:my-0 p-[3.5px] rounded-2xl bg-gradient-to-br from-[#FCE79C] via-[#C89D3C] to-[#8C6214] border-r-[6px] border-[#071524] shadow-[18px_22px_40px_rgba(11,34,57,0.35)] transition-transform duration-200 ease-out will-change-transform"
+        className="relative w-full max-w-[260px] mx-auto md:max-w-[340px] scale-95 md:scale-100 -my-2 md:my-0 p-[3.5px] rounded-2xl bg-gradient-to-br from-[#FCE79C] via-[#C89D3C] to-[#8C6214] border-r-[6px] border-[#071524] shadow-[18px_22px_40px_rgba(11,34,57,0.35)] transition-transform duration-200 ease-out will-change-transform"
         style={{
           transform: `perspective(1000px) rotateY(${cardTilt.rotateY}deg) rotateX(${cardTilt.rotateX}deg)`,
         }}
