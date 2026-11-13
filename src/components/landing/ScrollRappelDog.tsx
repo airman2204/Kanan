@@ -4,13 +4,24 @@ import React, { useEffect, useRef, useState } from "react";
 
 export function ScrollRappelDog() {
   const [progress, setProgress] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
   const rafRef = useRef<number | null>(null);
 
   useEffect(() => {
     const updateProgress = () => {
       const doc = document.documentElement;
-      const maxScroll = Math.max(doc.scrollHeight - window.innerHeight, 1);
-      const next = Math.min(1, Math.max(0, window.scrollY / maxScroll));
+      const hero = document.getElementById("inicio");
+      const heroHeight = hero ? hero.offsetHeight : 500;
+      const startScroll = Math.max(120, heroHeight * 0.45);
+      const maxScroll = Math.max(doc.scrollHeight - window.innerHeight, startScroll + 1);
+
+      const visible = window.scrollY >= startScroll;
+      setIsVisible(visible);
+
+      const next = Math.min(
+        1,
+        Math.max(0, (window.scrollY - startScroll) / (maxScroll - startScroll))
+      );
       setProgress(next);
     };
 
@@ -40,7 +51,9 @@ export function ScrollRappelDog() {
 
   return (
     <div
-      className="fixed left-1 sm:left-3 lg:left-6 top-0 bottom-0 z-30 pointer-events-none select-none"
+      className={`fixed left-1 sm:left-3 lg:left-6 top-0 bottom-0 z-30 pointer-events-none select-none transition-opacity duration-300 ${
+        isVisible ? "opacity-100" : "opacity-0"
+      }`}
       aria-hidden="true"
     >
       {/* Cable vertical que se alarga desde arriba hasta las patitas del perrito */}
