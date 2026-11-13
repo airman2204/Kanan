@@ -140,9 +140,16 @@ export function HeroScrollSequence({ sectionRef }: HeroScrollSequenceProps) {
       className="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none"
       aria-hidden="true"
     >
-      <canvas ref={canvasRef} className="w-full h-full block" />
-      {/* Velo suave para mantener legibilidad del texto del hero */}
-      <div className="absolute inset-0 bg-gradient-to-b from-white/75 via-white/65 to-[#F4F7F9]/85" />
+      <canvas
+        ref={canvasRef}
+        className="w-full h-full block"
+        style={{
+          maskImage: "linear-gradient(to bottom, black 0%, black 55%, transparent 96%)",
+          WebkitMaskImage: "linear-gradient(to bottom, black 0%, black 55%, transparent 96%)",
+        }}
+      />
+      {/* Velo suave para legibilidad + fusión total con la sección de la casita (#F4F7F9) */}
+      <div className="absolute inset-0 bg-gradient-to-b from-white/55 via-white/45 to-[#F4F7F9]" />
     </div>
   );
 }
