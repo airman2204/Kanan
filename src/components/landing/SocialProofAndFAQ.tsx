@@ -136,42 +136,42 @@ export function SocialProofAndFAQ() {
         </div>
 
         {/* BLOQUE 2: TARJETA DE GARANTÍA Y SERVICIOS */}
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#F0F7FB] via-white to-[#E8F4FA] p-6 sm:p-12 border border-kanan-cyan/25 shadow-kanan-lg grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#F0F7FB] via-white to-[#E8F4FA] p-4 sm:p-12 border border-kanan-cyan/25 shadow-kanan-lg grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-8 lg:gap-12 items-center">
           {/* Orbes sutiles luminosos de fondo */}
           <div className="absolute -top-24 -left-24 w-80 h-80 rounded-full bg-kanan-cyan/15 blur-3xl pointer-events-none" />
           <div className="absolute -bottom-24 -right-24 w-80 h-80 rounded-full bg-kanan-cerulean/10 blur-3xl pointer-events-none" />
 
-          <div className="relative lg:col-span-6 space-y-5">
-            <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white border border-kanan-cyan/30 text-xs font-heading font-bold text-kanan-cerulean shadow-sm">
+          <div className="relative lg:col-span-6 space-y-3 sm:space-y-5">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-kanan-cyan/30 text-[11px] sm:text-xs font-heading font-bold text-kanan-cerulean shadow-sm">
               <Sparkles className="w-3.5 h-3.5 text-kanan-cyan" />
               <span>Respaldo Digital Kanan</span>
             </div>
 
-            <h3 className="font-heading text-2xl sm:text-4xl font-extrabold text-kanan-deep leading-tight tracking-tight">
+            <h3 className="font-heading text-xl sm:text-4xl font-extrabold text-kanan-deep leading-tight tracking-tight">
               Tu Garantía y Beneficios Siempre a la Mano
             </h3>
 
-            <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
+            <p className="text-slate-600 text-xs sm:text-base leading-relaxed">
               Al concluir tu servicio te enviamos por WhatsApp el enlace a tu certificado digital oficial con tu folio, fecha de garantía y guía de cuidados para consultarlo o guardarlo en tu celular.
             </p>
 
-            <ul className="space-y-3 pt-1">
-              <li className="flex items-start gap-2.5 text-sm text-slate-700">
-                <CheckCircle2 className="w-5 h-5 text-[#00A8B5] shrink-0 mt-0.5" />
+            <ul className="space-y-2 sm:space-y-3 pt-0.5">
+              <li className="flex items-start gap-2 text-xs sm:text-sm text-slate-700">
+                <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-[#00A8B5] shrink-0 mt-0.5" />
                 <span>
                   <strong className="text-kanan-deep">Garantía por escrito siempre a la mano:</strong>{" "}
                   Tu folio, fecha de servicio y respaldo directo desde tu enlace personal.
                 </span>
               </li>
-              <li className="flex items-start gap-2.5 text-sm text-slate-700">
-                <CheckCircle2 className="w-5 h-5 text-[#00A8B5] shrink-0 mt-0.5" />
+              <li className="flex items-start gap-2 text-xs sm:text-sm text-slate-700">
+                <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-[#00A8B5] shrink-0 mt-0.5" />
                 <span>
                   <strong className="text-kanan-deep">Guía de cuidado rápido:</strong>{" "}
                   Recomendaciones de secado y conservación post-servicio.
                 </span>
               </li>
-              <li className="flex items-start gap-2.5 text-sm text-slate-700">
-                <CheckCircle2 className="w-5 h-5 text-[#00A8B5] shrink-0 mt-0.5" />
+              <li className="flex items-start gap-2 text-xs sm:text-sm text-slate-700">
+                <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-[#00A8B5] shrink-0 mt-0.5" />
                 <span>
                   <strong className="text-kanan-deep">Beneficio de cliente frecuente:</strong>{" "}
                   Tarifa preferencial presentando tu folio al agendar tu mantenimiento cada 6 meses.
