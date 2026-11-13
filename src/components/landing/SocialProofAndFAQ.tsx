@@ -150,7 +150,7 @@ export function SocialProofAndFAQ() {
             </h3>
 
             <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
-              Al concluir tu servicio recibes tu tarjeta oficial con las recomendaciones clave de cuidado pos-servicio y la fecha sugerida para tu próximo mantenimiento preventivo.
+              Al concluir tu servicio recibes tu tarjeta oficial con las recomendaciones clave de cuidado post-servicio y la fecha sugerida para tu próximo mantenimiento preventivo.
             </p>
 
             <div className="pt-2 flex flex-wrap items-center gap-3">

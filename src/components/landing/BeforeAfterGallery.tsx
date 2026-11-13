@@ -32,7 +32,7 @@ const COMPARISONS: ComparisonItem[] = [
       "Extracción profunda de suciedad, polvo incrustado y aureolas oscuras en tapicería de microfibra.",
     stainType: "Uso diario y polvo profundo",
     dryingTime: "3 a 4 hrs*",
-    formula: "Inyección-Succión Industrial",
+    formula: "Lavado por Inyección-Succión",
     beforeImg: "/assets/portfolio/sofacama-antes.jpg",
     afterImg: "/assets/portfolio/sofacama-despues.jpg",
   },
@@ -53,7 +53,7 @@ const COMPARISONS: ComparisonItem[] = [
     id: "comp-3",
     category: "salas",
     categoryLabel: "Salas y Sillas",
-    title: "Silla de Comedor con Brazos de Madera",
+    title: "Silla con Brazos",
     subtitle:
       "Restauración completa de tapicería clara en asiento y respaldo sin dejar cercos de humedad.",
     stainType: "Manchas por alimentos y polvo",
@@ -66,7 +66,7 @@ const COMPARISONS: ComparisonItem[] = [
     id: "comp-4",
     category: "salas",
     categoryLabel: "Salas y Sillas",
-    title: "Silla de Comedor Respaldo Alto",
+    title: "Silla Respaldo Alto",
     subtitle:
       "Extracción profunda en tejido fino eliminando manchas oscuras por fricción y polvo.",
     stainType: "Suciedad concentrada y grasa",
