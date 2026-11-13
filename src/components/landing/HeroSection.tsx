@@ -61,7 +61,7 @@ export function HeroSection({ selectedMunicipio, onOpenWizard }: HeroSectionProp
       {/* ============================================================== */}
       <section
         id="inicio-movil"
-        className="block md:hidden relative min-h-[100svh] w-full flex flex-col justify-between overflow-hidden pb-24"
+        className="block md:hidden relative w-full bg-white flex flex-col justify-between overflow-hidden pb-6"
       >
         {/* Video de fondo posicionado abajo a la izquierda */}
         <video
