@@ -69,6 +69,23 @@ const FAQS = [
 
 export function SocialProofAndFAQ() {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
+  const [cardTilt, setCardTilt] = useState({ rotateX: 2, rotateY: -8, glowX: 50, glowY: 30 });
+
+  const handleCardMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width;
+    const y = (e.clientY - rect.top) / rect.height;
+    setCardTilt({
+      rotateY: (x - 0.5) * 18,
+      rotateX: (0.5 - y) * 14,
+      glowX: Math.round(x * 100),
+      glowY: Math.round(y * 100),
+    });
+  };
+
+  const handleCardMouseLeave = () => {
+    setCardTilt({ rotateX: 2, rotateY: -8, glowX: 50, glowY: 30 });
+  };
 
   return (
     <section id="opiniones" className="py-14 sm:py-20 bg-white">
@@ -151,7 +168,7 @@ export function SocialProofAndFAQ() {
             </h3>
 
             <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
-              Al concluir cada servicio te entregamos tu comprobante digital con el registro de tu mueble, guía de cuidado y respaldo directo por WhatsApp.
+              Al concluir tu servicio recibes tu certificado digital con las recomendaciones clave de cuidado y la fecha sugerida para mantener tu garantía vigente.
             </p>
 
             <ul className="space-y-3 pt-1">
@@ -159,127 +176,146 @@ export function SocialProofAndFAQ() {
                 <CheckCircle2 className="w-5 h-5 text-[#00A8B5] shrink-0 mt-0.5" />
                 <span>
                   <strong className="text-kanan-deep">Garantía de satisfacción:</strong>{" "}
-                  Si surge algún detalle al secar la tela, lo revisamos sin costo.
+                  Revisión sin costo si surge algún detalle al secar.
                 </span>
               </li>
               <li className="flex items-start gap-2.5 text-sm text-slate-700">
                 <CheckCircle2 className="w-5 h-5 text-[#00A8B5] shrink-0 mt-0.5" />
                 <span>
                   <strong className="text-kanan-deep">Cuidado post-servicio:</strong>{" "}
-                  Recomendaciones claras para conservar tus tapicerías impecables.
+                  Guía clara para conservar tus tapicerías.
                 </span>
               </li>
               <li className="flex items-start gap-2.5 text-sm text-slate-700">
                 <CheckCircle2 className="w-5 h-5 text-[#00A8B5] shrink-0 mt-0.5" />
                 <span>
                   <strong className="text-kanan-deep">Precio de cliente frecuente:</strong>{" "}
-                  Tarifa preferencial al agendar tu mantenimiento cada 6 meses.
+                  Tarifa preferencial en mantenimiento cada 6 meses.
                 </span>
               </li>
             </ul>
 
-            <div className="pt-2 flex flex-wrap items-center gap-3">
+            <div className="pt-2">
               <a
-                href="#explora-torre"
-                className="inline-flex items-center gap-2 bg-gradient-to-r from-[#1D71B5] to-[#36A6DE] hover:from-[#165a91] hover:to-[#1D71B5] text-white text-xs sm:text-sm font-heading font-bold px-6 py-3.5 rounded-full shadow-lg shadow-blue-500/25 transition-all active:scale-95"
+                href="#faq"
+                className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-heading font-bold text-[#1D71B5] hover:text-[#355581] transition-colors"
               >
-                <span>Cotizar mi servicio →</span>
+                <span>Conoce los términos de nuestra garantía →</span>
               </a>
             </div>
           </div>
 
-          {/* Tarjeta Digital diseñada 100% en HTML/Tailwind */}
-          <div className="relative lg:col-span-6 flex justify-center">
-            <div className="w-full max-w-[350px] sm:max-w-[380px] rounded-2xl bg-[#0B2239] text-white shadow-2xl border border-slate-700/50 overflow-hidden transition-all hover:scale-[1.02] duration-300">
-              {/* Header: Logo blanco a la izquierda + perrito a la derecha */}
-              <div className="px-5 pt-5 pb-3 flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <div className="flex items-center gap-1.5">
-                    <span className="font-heading text-2xl font-black tracking-tight text-white">
+          {/* Tarjeta Digital 3D VIP con doble marco dorado metálico */}
+          <div
+            className="relative lg:col-span-6 flex justify-center py-4"
+            style={{ perspective: "1000px" }}
+          >
+            <div
+              onMouseMove={handleCardMouseMove}
+              onMouseLeave={handleCardMouseLeave}
+              className="relative w-full max-w-[350px] sm:max-w-[385px] rounded-2xl bg-[#0B2239] text-white shadow-[0_28px_60px_-15px_rgba(11,34,57,0.55)] border-2 border-[#D4AF37] p-1.5 overflow-hidden transition-transform duration-200 ease-out will-change-transform"
+              style={{
+                transform: `rotateY(${cardTilt.rotateY}deg) rotateX(${cardTilt.rotateX}deg)`,
+              }}
+            >
+              {/* Brillo diagonal / holográfico dorado sutil */}
+              <div
+                className="pointer-events-none absolute inset-0 opacity-35 transition-opacity duration-300"
+                style={{
+                  background: `radial-gradient(circle at ${cardTilt.glowX}% ${cardTilt.glowY}%, rgba(212,175,55,0.45) 0%, rgba(255,255,255,0.12) 28%, transparent 65%)`,
+                }}
+              />
+
+              {/* Filete interior dorado sutil */}
+              <div className="relative rounded-xl border border-[#D4AF37]/45 overflow-hidden bg-[#0B2239]/95">
+                {/* Header: Logo blanco a la izquierda + perrito a la derecha */}
+                <div className="px-5 pt-4 pb-3 flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <span className="font-heading text-2xl font-black tracking-tight text-white block leading-none">
                       KANAN
                     </span>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#E6C767]">
+                      Servicios de Limpieza
+                    </p>
                   </div>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-300">
-                    Servicios de Limpieza
-                  </p>
-                </div>
-                <img
-                  src="/images/kanan-escalador.png"
-                  alt="Mascota Kanan"
-                  className="w-16 h-16 object-contain drop-shadow-md"
-                />
-              </div>
-
-              {/* Franja turquesa */}
-              <div className="bg-[#00A8B5] px-4 py-2 text-center">
-                <p className="text-[11px] font-heading font-extrabold uppercase tracking-[0.14em] text-white">
-                  CERTIFICADO DE SERVICIO Y GARANTÍA
-                </p>
-              </div>
-
-              {/* Cuerpo */}
-              <div className="p-5 space-y-4">
-                <div className="grid grid-cols-2 gap-x-3 gap-y-2.5 text-xs">
-                  <div>
-                    <span className="text-[10px] uppercase tracking-wider text-slate-400 block">
-                      Cliente
-                    </span>
-                    <span className="font-bold text-white">Juan Pérez</span>
-                  </div>
-                  <div>
-                    <span className="text-[10px] uppercase tracking-wider text-slate-400 block">
-                      Fecha
-                    </span>
-                    <span className="font-bold text-white">12 Nov 2026</span>
-                  </div>
-                  <div>
-                    <span className="text-[10px] uppercase tracking-wider text-slate-400 block">
-                      Servicio
-                    </span>
-                    <span className="font-bold text-cyan-200">
-                      Lavado de Sala y Desinfección
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-[10px] uppercase tracking-wider text-slate-400 block">
-                      Próximo sugerido
-                    </span>
-                    <span className="font-bold text-emerald-300">Mayo 2027</span>
-                  </div>
+                  <img
+                    src="/images/kanan-escalador.png"
+                    alt="Mascota Kanan"
+                    className="w-16 h-16 object-contain drop-shadow-md"
+                  />
                 </div>
 
-                {/* Recuadro oscuro con 3 recomendaciones post-servicio */}
-                <div className="rounded-xl bg-[#071728] border border-slate-700/70 p-3.5 space-y-2">
-                  <p className="text-[10px] font-heading font-extrabold uppercase tracking-wider text-cyan-300">
-                    Recomendaciones post-servicio
+                {/* Cintillo con borde dorado */}
+                <div className="bg-gradient-to-r from-[#00A8B5]/90 via-[#00A8B5] to-[#00A8B5]/90 border-y border-[#D4AF37]/70 px-4 py-2 text-center">
+                  <p className="text-[10.5px] font-heading font-extrabold uppercase tracking-[0.15em] text-white">
+                    CERTIFICADO DE SERVICIO Y GARANTÍA
                   </p>
-                  <ul className="space-y-1.5 text-[11px] text-slate-200 leading-snug">
-                    <li>• Dejar ventilar 3-4 horas hasta secado completo</li>
-                    <li>• No aplicar químicos caseros sobre manchas</li>
-                    <li>• Agenda cada 6 meses para tu descuento de cliente frecuente</li>
-                  </ul>
                 </div>
-              </div>
 
-              {/* Footer de la tarjeta: QR limpio en SVG + WhatsApp */}
-              <div className="bg-[#00A8B5]/15 border-t border-slate-700/60 px-5 py-3.5 flex items-center gap-3.5">
-                <div className="bg-white p-1.5 rounded-lg shrink-0">
-                  <svg
-                    viewBox="0 0 36 36"
-                    className="w-11 h-11 text-[#0B2239]"
-                    fill="currentColor"
-                    aria-hidden="true"
-                  >
-                    <path d="M2 2h12v12H2V2zm3 3v6h6V5H5zm2 2h2v2H7V7zM22 2h12v12H22V2zm3 3v6h6V5h-6zm2 2h2v2h-2V7zM2 22h12v12H2V22zm3 3v6h6v-6H5zm2 2h2v2H7v-2zM16 4h4v4h-4V4zm0 6h2v4h-2v-4zm4 4h2v2h-2v-2zm-4 4h4v2h-4v-2zm6 0h4v4h-4v-4zm6 0h4v4h-4v-4zm-6 6h2v4h-2v-4zm4 2h4v2h-4v-2zm2 4h4v4h-4v-4zm-6 2h4v2h-4v-2z" />
-                  </svg>
+                {/* Cuerpo */}
+                <div className="p-4 sm:p-5 space-y-3.5">
+                  <div className="grid grid-cols-2 gap-x-3 gap-y-2 text-xs">
+                    <div>
+                      <span className="text-[10px] uppercase tracking-wider text-slate-400 block">
+                        Cliente
+                      </span>
+                      <span className="font-bold text-white">Juan Pérez</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] uppercase tracking-wider text-slate-400 block">
+                        Folio
+                      </span>
+                      <span className="font-bold text-[#E6C767]">#KAN-9821</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] uppercase tracking-wider text-slate-400 block">
+                        Servicio
+                      </span>
+                      <span className="font-bold text-cyan-200">
+                        Lavado de Sala y Desinfección
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] uppercase tracking-wider text-slate-400 block">
+                        Próximo mantenimiento
+                      </span>
+                      <span className="font-bold text-emerald-300">Mayo 2027</span>
+                    </div>
+                  </div>
+
+                  {/* Caja interna oscura con las 3 recomendaciones */}
+                  <div className="rounded-xl bg-[#071728] border border-[#D4AF37]/25 p-3 space-y-1.5">
+                    <p className="text-[10px] font-heading font-extrabold uppercase tracking-wider text-[#E6C767]">
+                      Recomendaciones post-servicio
+                    </p>
+                    <ul className="space-y-1 text-[11px] text-slate-200 leading-snug">
+                      <li>• Dejar ventilar 3-4 horas hasta secado completo</li>
+                      <li>• No aplicar químicos caseros sobre manchas</li>
+                      <li>• Agenda cada 6 meses para tu descuento de cliente frecuente</li>
+                    </ul>
+                  </div>
                 </div>
-                <div className="text-xs leading-snug">
-                  <p className="text-slate-300 text-[11px]">
-                    ¿Necesitas aplicar tu garantía?
-                  </p>
-                  <p className="font-heading font-extrabold text-white text-sm mt-0.5">
-                    WhatsApp: 33 4335 9207
-                  </p>
+
+                {/* Pie de tarjeta: QR limpio en SVG + WhatsApp */}
+                <div className="bg-[#071728]/80 border-t border-[#D4AF37]/30 px-4 py-3 flex items-center gap-3.5">
+                  <div className="bg-white p-1.5 rounded-lg shrink-0">
+                    <svg
+                      viewBox="0 0 36 36"
+                      className="w-10 h-10 text-[#0B2239]"
+                      fill="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path d="M2 2h12v12H2V2zm3 3v6h6V5H5zm2 2h2v2H7V7zM22 2h12v12H22V2zm3 3v6h6V5h-6zm2 2h2v2h-2V7zM2 22h12v12H2V22zm3 3v6h6v-6H5zm2 2h2v2H7v-2zM16 4h4v4h-4V4zm0 6h2v4h-2v-4zm4 4h2v2h-2v-2zm-4 4h4v2h-4v-2zm6 0h4v4h-4v-4zm6 0h4v4h-4v-4zm-6 6h2v4h-2v-4zm4 2h4v2h-4v-2zm2 4h4v4h-4v-4zm-6 2h4v2h-4v-2z" />
+                    </svg>
+                  </div>
+                  <div className="text-xs leading-snug">
+                    <p className="text-slate-300 text-[11px]">
+                      ¿Necesitas aplicar tu garantía?
+                    </p>
+                    <p className="font-heading font-extrabold text-white text-sm mt-0.5">
+                      WhatsApp: <span className="text-[#E6C767]">33 4335 9207</span>
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
