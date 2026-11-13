@@ -61,8 +61,23 @@ export function HeroSection({ selectedMunicipio, onOpenWizard }: HeroSectionProp
       {/* ============================================================== */}
       <section
         id="inicio-movil"
-        className="block md:hidden relative w-full bg-white flex flex-col overflow-hidden pb-2"
+        className="block md:hidden relative min-h-[88svh] w-full bg-white flex flex-col justify-between overflow-hidden"
       >
+        {/* Video ocupando todo el fondo inferior (65%) */}
+        <video
+          src="/videos/hero-sofa-kanan.mp4"
+          poster="/images/hero-sofa-kanan.webp"
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute bottom-0 left-0 w-full h-[65%] object-cover object-left-bottom z-0 opacity-100"
+        />
+
+        {/* Degradado vertical superior e inferior hacia blanco */}
+        <div className="absolute inset-0 z-10 pointer-events-none bg-[linear-gradient(180deg,#FFFFFF_0%,#FFFFFF_42%,rgba(255,255,255,0.75)_52%,rgba(255,255,255,0)_62%)]" />
+        <div className="absolute bottom-0 inset-x-0 h-16 bg-gradient-to-t from-white via-white/75 to-transparent pointer-events-none z-10" />
+
         {/* Cabecera y Textos */}
         <div className="relative z-20 px-5 pt-4">
           <h1 className="text-[31px] leading-[1.05] font-extrabold tracking-tight font-heading">
@@ -98,21 +113,6 @@ export function HeroSection({ selectedMunicipio, onOpenWizard }: HeroSectionProp
               Productos biodegradables seguros
             </span>
           </div>
-        </div>
-
-        {/* Video limpio debajo de los checks con degradado superior e inferior hacia blanco */}
-        <div className="relative w-full aspect-video -mt-2 bg-white overflow-hidden">
-          <video
-            src="/videos/hero-sofa-kanan.mp4"
-            poster="/images/hero-sofa-kanan.webp"
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="w-full h-full object-cover object-left-bottom opacity-100"
-          />
-          <div className="absolute top-0 inset-x-0 h-10 bg-gradient-to-b from-white to-transparent pointer-events-none" />
-          <div className="absolute bottom-0 inset-x-0 h-14 bg-gradient-to-t from-white via-white/75 to-transparent pointer-events-none" />
         </div>
       </section>
 
