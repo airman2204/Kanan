@@ -69,14 +69,8 @@ export function KananPassCard({
           <div className="relative z-10 m-2 rounded-xl border-[1.5px] border-[#D4AF37]/85 overflow-hidden">
             {/* Cabecera grande: Isotipo K + KANAN a la izquierda + Perrito grande a la derecha */}
             <div className="px-4 pt-3 pb-0 flex items-end justify-between">
-              <div className="pb-3 flex flex-col items-start">
-                <KananLogo variant="white" size="md" className="h-14 w-auto" />
-                <span className="text-2xl font-extrabold tracking-wide text-white leading-none mt-1">
-                  KANAN
-                </span>
-                <span className="text-[10px] tracking-[0.18em] text-slate-300 uppercase mt-0.5">
-                  SERVICIOS DE LIMPIEZA
-                </span>
+              <div className="pb-4 flex flex-col items-start">
+                <KananLogo variant="white" size="md" className="h-16 w-auto" />
               </div>
               <img
                 src="/images/kanan-mascot.png"
