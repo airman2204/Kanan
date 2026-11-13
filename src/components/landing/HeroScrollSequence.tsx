@@ -78,8 +78,11 @@ export function HeroScrollSequence({ sectionRef }: HeroScrollSequenceProps) {
         }}
       />
 
-      {/* Degradado horizontal asimétrico: deja el lado izquierdo 100% vivo y protege el texto central */}
-      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0)_0%,rgba(255,255,255,0)_30%,rgba(255,255,255,0.88)_45%,rgba(255,255,255,0.88)_65%,rgba(255,255,255,0.25)_100%)]" />
+      {/* Velo móvil para legibilidad total en pantallas angostas */}
+      <div className="md:hidden absolute inset-0 bg-white/75" />
+
+      {/* Degradado horizontal asimétrico en desktop: deja el lado izquierdo 100% vivo y protege el texto central */}
+      <div className="hidden md:block absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0)_0%,rgba(255,255,255,0)_30%,rgba(255,255,255,0.88)_45%,rgba(255,255,255,0.88)_65%,rgba(255,255,255,0.25)_100%)]" />
       <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-b from-transparent to-[#F4F7F9]" />
     </div>
   );

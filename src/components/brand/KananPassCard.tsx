@@ -50,7 +50,7 @@ export function KananPassCard({
       <div
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
-        className="relative w-full max-w-[350px] sm:max-w-[375px] p-[3.5px] rounded-2xl bg-gradient-to-br from-[#FCE79C] via-[#C89D3C] to-[#8C6214] border-r-[6px] border-[#071524] shadow-[18px_22px_40px_rgba(11,34,57,0.35)] transition-transform duration-200 ease-out will-change-transform"
+        className="relative w-full max-w-[325px] sm:max-w-[375px] p-[3.5px] rounded-2xl bg-gradient-to-br from-[#FCE79C] via-[#C89D3C] to-[#8C6214] border-r-[6px] border-[#071524] shadow-[18px_22px_40px_rgba(11,34,57,0.35)] transition-transform duration-200 ease-out will-change-transform"
         style={{
           transform: `perspective(1000px) rotateY(${cardTilt.rotateY}deg) rotateX(${cardTilt.rotateX}deg)`,
         }}
@@ -75,7 +75,7 @@ export function KananPassCard({
               <img
                 src="/images/kanan-mascot.png"
                 alt="Mascota Kanan"
-                className="w-36 h-36 object-contain object-bottom -mb-1 drop-shadow-[0_6px_12px_rgba(0,0,0,0.4)]"
+                className="w-28 h-28 sm:w-36 sm:h-36 object-contain object-bottom -mb-1 drop-shadow-[0_6px_12px_rgba(0,0,0,0.4)]"
               />
             </div>
 
