@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { ShieldCheck } from "lucide-react";
+import { KananLogo } from "@/components/brand/KananLogo";
 
 export interface KananPassCardProps {
   clientName?: string;
@@ -50,35 +51,33 @@ export function KananPassCard({
       <div
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
-        className="relative w-full max-w-[355px] sm:max-w-[390px] rounded-2xl bg-[#0B2239] text-white shadow-[0_28px_60px_-15px_rgba(11,34,57,0.55)] border-2 border-[#D4AF37] overflow-hidden transition-transform duration-200 ease-out will-change-transform after:content-[''] after:pointer-events-none after:absolute after:inset-1 after:rounded-[12px] after:border after:border-[#FFDF73]/40"
+        className="relative w-full max-w-[355px] sm:max-w-[390px] p-[3px] rounded-2xl bg-gradient-to-br from-[#F9E29C] via-[#D4AF37] to-[#996515] shadow-[0_20px_50px_rgba(11,34,57,0.45)] transition-transform duration-200 ease-out will-change-transform"
         style={{
           transform: `rotateY(${cardTilt.rotateY}deg) rotateX(${cardTilt.rotateX}deg)`,
         }}
       >
-        {/* Brillo dorado suave al mover el mouse */}
-        <div
-          className="pointer-events-none absolute inset-0 opacity-35 transition-opacity duration-300 z-10"
-          style={{
-            background: `radial-gradient(circle at ${cardTilt.glowX}% ${cardTilt.glowY}%, rgba(255,223,115,0.45) 0%, rgba(212,175,55,0.14) 30%, transparent 65%)`,
-          }}
-        />
-
-        {/* Cabecera: Logo blanco KANAN a la izquierda + perrito Kanan a la derecha */}
-        <div className="relative z-10 px-5 pt-5 pb-3 flex items-center justify-between">
-          <div className="space-y-0.5">
-            <span className="font-heading text-2xl sm:text-[26px] font-black tracking-tight text-white block leading-none">
-              KANAN
-            </span>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#FFDF73]">
-              Servicios de Limpieza
-            </p>
-          </div>
-          <img
-            src="/images/kanan-certificado-mascota.jpg"
-            alt="Mascota Kanan"
-            className="w-16 h-16 rounded-xl object-cover border border-[#D4AF37]/50 shadow-md"
+        <div className="relative bg-gradient-to-b from-[#0E2942] to-[#081829] text-white rounded-[13px] overflow-hidden">
+          {/* Brillo dorado suave al mover el mouse */}
+          <div
+            className="pointer-events-none absolute inset-0 opacity-35 transition-opacity duration-300 z-10"
+            style={{
+              background: `radial-gradient(circle at ${cardTilt.glowX}% ${cardTilt.glowY}%, rgba(255,223,115,0.45) 0%, rgba(212,175,55,0.14) 30%, transparent 65%)`,
+            }}
           />
-        </div>
+
+          {/* Segundo marco interior dorado separado */}
+          <div className="relative z-10 border border-[#D4AF37]/70 m-2 rounded-xl overflow-hidden">
+            {/* Cabecera: Isotipo K + KANAN a la izquierda + perrito silueteado a la derecha */}
+            <div className="px-4 pt-4 pb-0 flex items-end justify-between">
+              <div className="pb-3">
+                <KananLogo variant="white" size="sm" />
+              </div>
+              <img
+                src="/images/kanan-mascot.png"
+                alt="Mascota Kanan"
+                className="w-28 h-28 object-contain drop-shadow-[0_6px_12px_rgba(0,0,0,0.4)] -mb-1"
+              />
+            </div>
 
         {/* Cintillo verde azulado con filete dorado */}
         <div className="relative z-10 bg-gradient-to-r from-[#008C99] via-[#00A8B5] to-[#008C99] border-y border-[#D4AF37]/80 px-4 py-2 text-center">
@@ -151,6 +150,8 @@ export function KananPassCard({
           <span className="font-heading font-bold text-xs text-white whitespace-nowrap">
             WhatsApp: <span className="text-cyan-300">33 4335 9207</span>
           </span>
+        </div>
+          </div>
         </div>
       </div>
     </div>
