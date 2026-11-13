@@ -18,7 +18,7 @@ export function HeroScrollSequence({ sectionRef }: HeroScrollSequenceProps) {
   const imagesRef = useRef<(HTMLImageElement | null)[]>(
     Array(TOTAL_FRAMES).fill(null)
   );
-  const currentFrameRef = useRef<number>(0);
+  const currentFrameRef = useRef<number>(TOTAL_FRAMES - 1);
   const rafRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -66,17 +66,18 @@ export function HeroScrollSequence({ sectionRef }: HeroScrollSequenceProps) {
       ctx.drawImage(img, offsetX, offsetY, drawW, drawH);
     };
 
-    // Cargar el primer frame inmediatamente
+    // Cargar el frame inicial inmediatamente (último frame = arriba)
+    const initialFrame = TOTAL_FRAMES - 1;
     const firstImg = new Image();
-    firstImg.src = getFramePath(0);
+    firstImg.src = getFramePath(initialFrame);
     firstImg.onload = () => {
       if (!isMounted) return;
-      imagesRef.current[0] = firstImg;
+      imagesRef.current[initialFrame] = firstImg;
       drawFrame(currentFrameRef.current);
     };
 
     // Precargar el resto de frames en segundo plano
-    for (let i = 1; i < TOTAL_FRAMES; i++) {
+    for (let i = 0; i < TOTAL_FRAMES - 1; i++) {
       const img = new Image();
       img.src = getFramePath(i);
       img.onload = () => {
@@ -98,9 +99,9 @@ export function HeroScrollSequence({ sectionRef }: HeroScrollSequenceProps) {
       const rawProgress = -rect.top / scrollableDistance;
       const progress = Math.min(1, Math.max(0, rawProgress));
 
-      const targetFrame = Math.min(
-        TOTAL_FRAMES - 1,
-        Math.floor(progress * (TOTAL_FRAMES - 1))
+      const targetFrame = Math.max(
+        0,
+        TOTAL_FRAMES - 1 - Math.floor(progress * (TOTAL_FRAMES - 1))
       );
 
       if (targetFrame !== currentFrameRef.current) {
