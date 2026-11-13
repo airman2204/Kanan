@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   Timer,
   FileCheck2,
@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { MunicipioZMG } from "@/types/crm";
 import { KananLogo } from "@/components/brand/KananLogo";
+import { HeroScrollSequence } from "@/components/landing/HeroScrollSequence";
 
 interface HeroSectionProps {
   selectedMunicipio: MunicipioZMG;
@@ -24,6 +25,7 @@ interface HeroSectionProps {
 }
 
 export function HeroSection({ selectedMunicipio, onOpenWizard }: HeroSectionProps) {
+  const sectionRef = useRef<HTMLElement | null>(null);
   const [activeTabVisual, setActiveTabVisual] = useState<"salas" | "colchones" | "tapetes">("salas");
 
   const VISUALS = {
@@ -54,9 +56,13 @@ export function HeroSection({ selectedMunicipio, onOpenWizard }: HeroSectionProp
 
   return (
     <section
+      ref={sectionRef}
       id="inicio"
       className="relative overflow-hidden bg-gradient-to-b from-[#F0F5FA] via-white to-[#F4F7F9] pt-8 pb-16 sm:pt-14 sm:pb-24 lg:pt-16 lg:pb-28"
     >
+      {/* Secuencia de video controlada por scroll en el fondo */}
+      <HeroScrollSequence sectionRef={sectionRef} />
+
       {/* Luces difusas de fondo (Glow Glassmorphism) */}
       <div className="absolute top-0 right-1/4 w-[500px] h-[500px] rounded-full bg-gradient-to-br from-[#36A6DE]/20 to-[#1D71B5]/10 blur-3xl pointer-events-none -z-0" />
       <div className="absolute bottom-10 left-10 w-[420px] h-[420px] rounded-full bg-gradient-to-tr from-[#355581]/15 to-[#36A6DE]/10 blur-3xl pointer-events-none -z-0" />
