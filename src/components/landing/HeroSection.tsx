@@ -117,6 +117,19 @@ export function HeroSection({ selectedMunicipio, onOpenWizard }: HeroSectionProp
             </div>
           </div>
 
+          {/* Tarjeta visual de video en móvil (reproducción automática con colores vivos) */}
+          <div className="block md:hidden mt-6 rounded-2xl overflow-hidden shadow-xl border border-slate-200/80 aspect-video bg-slate-900">
+            <video
+              src="/videos/hero-sofa-kanan.mp4"
+              poster="/images/hero-sofa-kanan.webp"
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-full h-full object-cover opacity-100"
+            />
+          </div>
+
           {/* 3 Pilares de Confianza y Calidad */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 pt-4 max-w-3xl mx-auto text-left">
             <div className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm hover:border-[#36A6DE] transition-colors">

@@ -60,7 +60,7 @@ export function HeroScrollSequence({ sectionRef }: HeroScrollSequenceProps) {
 
   return (
     <div
-      className="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none"
+      className="hidden md:block absolute inset-0 z-0 overflow-hidden pointer-events-none select-none"
       aria-hidden="true"
     >
       {/* Video optimizado con keyframes en cada fotograma (-g 1) */}

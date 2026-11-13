@@ -47,12 +47,15 @@ export function MobileBottomBar({ onOpenWizard }: MobileBottomBarProps) {
           aria-label="Cotizar con el asistente Kanan"
           className="py-2.5 px-2 rounded-2xl bg-gradient-to-r from-[#1D71B5] to-[#36A6DE] hover:from-[#355581] hover:to-[#1D71B5] text-white font-heading font-extrabold text-[11px] flex flex-col items-center justify-center gap-1 shadow-md shadow-blue-500/20 active:scale-95 transition-transform relative overflow-hidden"
         >
-          <div className="flex items-center gap-1">
-            <img
-              src="/assets/brand/kanan-dog.png"
-              alt="Kanan"
-              className="w-4 h-4 rounded-full border border-white/60 object-cover"
-            />
+          <div className="relative flex items-center gap-1">
+            <span className="relative inline-flex">
+              <span className="absolute -inset-0.5 rounded-full bg-cyan-200/70 animate-ping [animation-duration:4s]" />
+              <img
+                src="/assets/brand/kanan-dog.png"
+                alt="Kanan"
+                className="relative w-4 h-4 rounded-full border border-white/80 object-cover"
+              />
+            </span>
             <Sparkles className="w-3 h-3 text-cyan-200 animate-pulse" />
           </div>
           <span>Cotizar</span>
