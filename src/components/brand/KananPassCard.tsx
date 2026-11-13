@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { ShieldCheck } from "lucide-react";
+import { ShieldCheck, MessageCircle } from "lucide-react";
 import { KananLogo } from "@/components/brand/KananLogo";
 
 export interface KananPassCardProps {
@@ -17,13 +17,12 @@ export function KananPassCard({
   clientName = "Juan Pérez",
   folio = "#KAN-9821",
   serviceType = "Lavado de Sala y Desinfección",
-  serviceDate = "12 Nov 2026",
   nextMaintenanceDate = "Mayo 2027",
   isActive = true,
 }: KananPassCardProps) {
   const [cardTilt, setCardTilt] = useState({
-    rotateX: 2,
-    rotateY: -8,
+    rotateX: 3,
+    rotateY: -14,
     glowX: 50,
     glowY: 30,
   });
@@ -33,15 +32,15 @@ export function KananPassCard({
     const x = (e.clientX - rect.left) / rect.width;
     const y = (e.clientY - rect.top) / rect.height;
     setCardTilt({
-      rotateY: (x - 0.5) * 18,
-      rotateX: (0.5 - y) * 14,
+      rotateY: -14 + (x - 0.5) * 12,
+      rotateX: 3 + (0.5 - y) * 10,
       glowX: Math.round(x * 100),
       glowY: Math.round(y * 100),
     });
   };
 
   const handleMouseLeave = () => {
-    setCardTilt({ rotateX: 2, rotateY: -8, glowX: 50, glowY: 30 });
+    setCardTilt({ rotateX: 3, rotateY: -14, glowX: 50, glowY: 30 });
   };
 
   const formattedFolio = folio.startsWith("#") ? folio : `#${folio}`;
@@ -51,106 +50,115 @@ export function KananPassCard({
       <div
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
-        className="relative w-full max-w-[355px] sm:max-w-[390px] p-[3px] rounded-2xl bg-gradient-to-br from-[#F9E29C] via-[#D4AF37] to-[#996515] shadow-[0_20px_50px_rgba(11,34,57,0.45)] transition-transform duration-200 ease-out will-change-transform"
+        className="relative w-full max-w-[350px] sm:max-w-[375px] p-[3.5px] rounded-2xl bg-gradient-to-br from-[#FCE79C] via-[#C89D3C] to-[#8C6214] border-r-[6px] border-[#071524] shadow-[18px_22px_40px_rgba(11,34,57,0.35)] transition-transform duration-200 ease-out will-change-transform"
         style={{
-          transform: `rotateY(${cardTilt.rotateY}deg) rotateX(${cardTilt.rotateX}deg)`,
+          transform: `perspective(1000px) rotateY(${cardTilt.rotateY}deg) rotateX(${cardTilt.rotateX}deg)`,
         }}
       >
-        <div className="relative bg-gradient-to-b from-[#0E2942] to-[#081829] text-white rounded-[13px] overflow-hidden">
+        {/* Fondo azul marino oscuro */}
+        <div className="relative bg-[#0B2239] text-white rounded-[13px] overflow-hidden">
           {/* Brillo dorado suave al mover el mouse */}
           <div
-            className="pointer-events-none absolute inset-0 opacity-35 transition-opacity duration-300 z-10"
+            className="pointer-events-none absolute inset-0 opacity-30 transition-opacity duration-300 z-10"
             style={{
-              background: `radial-gradient(circle at ${cardTilt.glowX}% ${cardTilt.glowY}%, rgba(255,223,115,0.45) 0%, rgba(212,175,55,0.14) 30%, transparent 65%)`,
+              background: `radial-gradient(circle at ${cardTilt.glowX}% ${cardTilt.glowY}%, rgba(252,231,156,0.45) 0%, rgba(212,175,55,0.12) 30%, transparent 65%)`,
             }}
           />
 
-          {/* Segundo marco interior dorado separado */}
-          <div className="relative z-10 border border-[#D4AF37]/70 m-2 rounded-xl overflow-hidden">
-            {/* Cabecera: Isotipo K + KANAN a la izquierda + perrito silueteado a la derecha */}
-            <div className="px-4 pt-4 pb-0 flex items-end justify-between">
-              <div className="pb-3">
-                <KananLogo variant="white" size="sm" />
+          {/* Segundo marco dorado interior separado */}
+          <div className="relative z-10 m-2 rounded-xl border-[1.5px] border-[#D4AF37]/85 overflow-hidden">
+            {/* Cabecera grande: Isotipo K + KANAN a la izquierda + Perrito grande a la derecha */}
+            <div className="px-4 pt-3 pb-0 flex items-end justify-between">
+              <div className="pb-3 flex flex-col items-start">
+                <KananLogo variant="white" size="md" className="h-14 w-auto" />
+                <span className="text-2xl font-extrabold tracking-wide text-white leading-none mt-1">
+                  KANAN
+                </span>
+                <span className="text-[10px] tracking-[0.18em] text-slate-300 uppercase mt-0.5">
+                  SERVICIOS DE LIMPIEZA
+                </span>
               </div>
               <img
                 src="/images/kanan-mascot.png"
                 alt="Mascota Kanan"
-                className="w-28 h-28 object-contain drop-shadow-[0_6px_12px_rgba(0,0,0,0.4)] -mb-1"
+                className="w-36 h-36 object-contain object-bottom -mb-1 drop-shadow-[0_6px_12px_rgba(0,0,0,0.4)]"
               />
             </div>
 
-        {/* Cintillo verde azulado con filete dorado */}
-        <div className="relative z-10 bg-gradient-to-r from-[#008C99] via-[#00A8B5] to-[#008C99] border-y border-[#D4AF37]/80 px-4 py-2 text-center">
-          <p className="text-[10.5px] font-heading font-extrabold uppercase tracking-[0.15em] text-white">
-            CERTIFICADO DE SERVICIO Y GARANTÍA
-          </p>
-        </div>
+            {/* Cintillo verde petróleo profundo con filetes dorados */}
+            <div className="bg-[#164A46] border-y-[1.5px] border-[#D4AF37] py-1.5 px-3">
+              <p className="text-xs font-bold tracking-wider text-white text-center uppercase">
+                CERTIFICADO DE SERVICIO Y GARANTÍA
+              </p>
+            </div>
 
-        {/* Datos estructurados */}
-        <div className="relative z-10 p-5 space-y-3.5">
-          <div className="grid grid-cols-2 gap-x-3 gap-y-2.5 text-xs">
-            <div>
-              <span className="text-[10px] uppercase tracking-wider text-slate-400 block">
-                Cliente
-              </span>
-              <span className="font-bold text-white">{clientName}</span>
-            </div>
-            <div>
-              <span className="text-[10px] uppercase tracking-wider text-slate-400 block">
-                Folio
-              </span>
-              <span className="font-bold text-[#FFDF73]">{formattedFolio}</span>
-            </div>
-            <div>
-              <span className="text-[10px] uppercase tracking-wider text-slate-400 block">
-                Servicio
-              </span>
-              <span className="font-bold text-cyan-200">{serviceType}</span>
-            </div>
-            <div>
-              <span className="text-[10px] uppercase tracking-wider text-slate-400 block">
-                Próximo mantenimiento
-              </span>
-              <span className="font-bold text-emerald-300">
-                {nextMaintenanceDate}
-              </span>
-            </div>
-          </div>
+            {/* Datos en 1 sola columna con mayor tamaño */}
+            <div className="p-4 space-y-3">
+              <div className="text-[13px] leading-snug space-y-1.5">
+                <div>
+                  <span className="text-slate-300">CLIENTE:</span>{" "}
+                  <strong className="text-white font-semibold">{clientName}</strong>
+                </div>
+                <div>
+                  <span className="text-slate-300">FOLIO:</span>{" "}
+                  <strong className="text-white font-semibold">{formattedFolio}</strong>
+                </div>
+                <div>
+                  <span className="text-slate-300">SERVICIO:</span>{" "}
+                  <strong className="text-white font-semibold">{serviceType}</strong>
+                </div>
+                <div>
+                  <strong className="text-white font-bold">PRÓXIMO MANTENIMIENTO:</strong>{" "}
+                  <strong className="text-[#F2C94C] font-bold">{nextMaintenanceDate}</strong>
+                </div>
+              </div>
 
-          {serviceDate && (
-            <div className="text-[10.5px] text-slate-400">
-              Fecha de servicio:{" "}
-              <span className="text-slate-200 font-semibold">{serviceDate}</span>
-            </div>
-          )}
+              {/* Caja de Recomendaciones */}
+              <div className="border border-[#D4AF37]/60 rounded-lg bg-[#08192B]/90 px-3 py-2 space-y-1">
+                <p className="text-[11px] font-bold text-[#F2C94C] uppercase tracking-wide">
+                  RECOMENDACIONES POST-SERVICIO
+                </p>
+                <ul className="space-y-0.5 text-[11px] text-white leading-snug">
+                  <li>• Dejar ventilar 3-4 horas hasta secado completo</li>
+                  <li>• No aplicar químicos caseros sobre manchas</li>
+                  <li>• Agenda cada 6 meses para tu descuento frecuente</li>
+                </ul>
+              </div>
 
-          {/* Caja de recomendaciones post-servicio */}
-          <div className="rounded-xl bg-[#071728] border border-[#D4AF37]/30 p-3 space-y-1.5">
-            <p className="text-[10px] font-heading font-extrabold uppercase tracking-wider text-[#FFDF73]">
-              Recomendaciones post-servicio
-            </p>
-            <ul className="space-y-1 text-[11px] text-slate-200 leading-snug">
-              <li>• Dejar ventilar 3-4 horas hasta secado completo</li>
-              <li>• No aplicar químicos caseros sobre manchas</li>
-              <li>• Agenda cada 6 meses para tu descuento de cliente frecuente</li>
-            </ul>
-          </div>
-        </div>
+              {/* Pie de tarjeta exacto (sin línea divisoria arriba) */}
+              <div className="pt-1 flex items-end justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-10 h-11 rounded-xl bg-gradient-to-br from-[#FCE79C] via-[#D4AF37] to-[#8C6214] flex items-center justify-center shadow-md shrink-0">
+                    <ShieldCheck className="w-6 h-6 text-[#0B2239]" />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-extrabold text-[#F2C94C] leading-tight uppercase">
+                      {isActive ? (
+                        <>
+                          GARANTÍA
+                          <br />
+                          ACTIVA
+                        </>
+                      ) : (
+                        <>
+                          GARANTÍA
+                          <br />
+                          VENCIDA
+                        </>
+                      )}
+                    </span>
+                    <span className="w-5 h-[1.5px] bg-[#D4AF37] inline-block" />
+                  </div>
+                </div>
 
-        {/* Pie de tarjeta limpio (sin código QR): Escudo dorado + GARANTÍA ACTIVA a la izquierda, WhatsApp a la derecha */}
-        <div className="relative z-10 bg-[#071728]/90 border-t border-[#D4AF37]/40 px-5 py-3.5 flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#FFDF73] to-[#B8860B] flex items-center justify-center shadow-sm shrink-0">
-              <ShieldCheck className="w-4 h-4 text-[#0B2239]" />
+                <div className="flex items-center gap-1.5 text-white text-xs font-bold whitespace-nowrap pb-0.5">
+                  <span>WhatsApp: 33 4335 9207</span>
+                  <span className="w-5 h-5 rounded-full bg-[#25D366] flex items-center justify-center shrink-0">
+                    <MessageCircle className="w-3 h-3 text-white fill-white" />
+                  </span>
+                </div>
+              </div>
             </div>
-            <span className="font-heading font-extrabold text-[11px] uppercase tracking-wider text-[#FFDF73]">
-              {isActive ? "GARANTÍA ACTIVA" : "GARANTÍA VENCIDA"}
-            </span>
-          </div>
-          <span className="font-heading font-bold text-xs text-white whitespace-nowrap">
-            WhatsApp: <span className="text-cyan-300">33 4335 9207</span>
-          </span>
-        </div>
           </div>
         </div>
       </div>
