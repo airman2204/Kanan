@@ -58,15 +58,15 @@ export function ScrollRappelDog() {
     >
       {/* Cable vertical que se alarga desde arriba hasta las patitas del perrito */}
       <div
-        className="absolute top-0 left-[22px] sm:left-[28px] lg:left-[34px] w-[2.5px] bg-gradient-to-b from-slate-400 via-[#1D71B5] to-slate-700 rounded-full shadow-xs"
+        className="absolute top-0 left-[15px] sm:left-[18px] lg:left-[21px] w-[2px] bg-gradient-to-b from-slate-400 via-[#1D71B5] to-slate-700 rounded-full shadow-xs"
         style={{
-          height: `calc(${topPercent}vh + 34px)`,
+          height: `calc(${topPercent}vh + 24px)`,
         }}
       />
 
       {/* Perrito bajando por el cable */}
       <div
-        className="relative w-14 sm:w-20 lg:w-24 transition-transform duration-75 ease-out will-change-transform"
+        className="relative w-10 sm:w-12 lg:w-14 transition-transform duration-75 ease-out will-change-transform"
         style={{
           transform: `translateY(${topPercent}vh)`,
         }}
