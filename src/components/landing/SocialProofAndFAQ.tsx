@@ -12,6 +12,7 @@ import {
   Smartphone,
   Sparkles,
   Download,
+  CheckCircle2,
 } from "lucide-react";
 import { KANAN_GOOGLE_MAPS_REVIEW_URL } from "@/lib/whatsapp/templates";
 import { KananLogo } from "@/components/brand/KananLogo";
