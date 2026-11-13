@@ -77,11 +77,13 @@ export function HeroSection({ selectedMunicipio, onOpenWizard }: HeroSectionProp
         {/* Degradado vertical exacto */}
         <div className="absolute inset-0 z-10 pointer-events-none bg-[linear-gradient(180deg,#FFFFFF_0%,#FFFFFF_44%,rgba(255,255,255,0.75)_53%,rgba(255,255,255,0)_62%)]" />
 
+        {/* Transición suave hacia blanco en el borde inferior del video */}
+        <div className="absolute bottom-0 inset-x-0 h-24 bg-gradient-to-t from-white via-white/70 to-transparent pointer-events-none z-10" />
+
         {/* Cabecera y Textos */}
         <div className="relative z-20">
-          {/* Top Bar */}
-          <div className="pt-3 px-5 flex items-center justify-between">
-            <KananLogo variant="color" size="sm" />
+          {/* Píldora de ubicación (sin duplicar el logo del Navbar) */}
+          <div className="pt-3 px-5 flex items-center justify-end">
             <span className="inline-flex items-center gap-1 bg-blue-50 border border-blue-100 text-[#0B2239] text-xs font-medium px-3 py-1 rounded-full">
               <MapPin className="w-3.5 h-3.5 text-[#1976D2] shrink-0" />
               <span>Guadalajara y ZMG</span>
