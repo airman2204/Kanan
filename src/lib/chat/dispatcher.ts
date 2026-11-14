@@ -112,6 +112,33 @@ export async function despacharConfirmacionReservaAutomatica(
 }
 
 /**
+ * Envía el mensaje oficial de CITA CONFIRMADA cuando el admin aprueba la cita
+ */
+export async function despacharCitaConfirmada(
+  cita: ServicioCita,
+  cliente: Cliente
+) {
+  const cleanPhone = cliente.whatsapp.replace(/\D/g, "");
+  const primerNombre = cliente.nombre.split(" ")[0];
+  const fechaAmigable = formatearFechaEspanol(cita.fecha);
+  const horarioAmigable = cita.hora_especifica || formatearTurnoHorario(cita.turno);
+
+  const mensaje = [
+    `¡Hola ${primerNombre}! ✅🐾`,
+    `Tu cita en *Kanan Servicios de Limpieza* ha sido *CONFIRMADA*.`,
+    ``,
+    `📋 *Folio:* ${cita.id}`,
+    `📅 *Fecha:* ${fechaAmigable}`,
+    `⏰ *Horario:* ${horarioAmigable}`,
+    `📍 *Dirección:* ${cliente.direccion}, ${cliente.municipio}`,
+    ``,
+    `El día de tu servicio te avisaremos por aquí cuando nuestro técnico vaya en camino. ¡Gracias por confiar en Kanan! 💙✨`,
+  ].join("\n");
+
+  return await enviarMensajeChat(cleanPhone, mensaje);
+}
+
+/**
  * HITO 1: Notificación de técnico en camino + Sticker de Kanan Móvil
  */
 export async function despacharEventoEnCamino(

@@ -18,7 +18,7 @@ import {
   saveDatabase,
 } from "@/lib/db/store";
 import { generarMensajeWhatsAppReservaCliente, KANAN_WHATSAPP_NUMBER } from "@/lib/whatsapp/templates";
-import { despacharConfirmacionReservaAutomatica } from "@/lib/chat/dispatcher";
+import { despacharConfirmacionReservaAutomatica, despacharCitaConfirmada } from "@/lib/chat/dispatcher";
 import { verifySessionToken } from "@/lib/auth/security";
 import {
   validarDireccion,
@@ -384,8 +384,8 @@ export async function PATCH(req: NextRequest) {
         const cli = db.clientes.find((c) => c.id === updated.cliente_id);
         await sincronizarCitaConSupabase(updated, cli).catch((e) => console.error("Error sync Supabase PATCH:", e));
         if (body.estatus === "Confirmada" && cli) {
-          await despacharConfirmacionReservaAutomatica(updated, cli).catch((e) =>
-            console.error("Error despachando confirmación automática:", e)
+          await despacharCitaConfirmada(updated, cli).catch((e) =>
+            console.error("Error despachando cita confirmada:", e)
           );
         }
       }
