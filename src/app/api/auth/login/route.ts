@@ -32,8 +32,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const admin = await getAdminUser();
     const cleanEmail = email.trim().toLowerCase();
+    const admin = await getAdminUser(cleanEmail);
 
     if (cleanEmail !== admin.email.toLowerCase()) {
       const { remainingAttempts, retryAfterSec } = registerFailedAttempt(rateKey);
