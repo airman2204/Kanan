@@ -63,10 +63,18 @@ export function HeroSection({ selectedMunicipio, onOpenWizard }: HeroSectionProp
         id="inicio-movil"
         className="block md:hidden relative min-h-[88svh] w-full bg-white flex flex-col justify-between overflow-hidden"
       >
-        {/* Video ocupando todo el fondo inferior (65%) */}
+        {/* Imagen LCP instantánea + Video en segundo plano ocupando el fondo inferior (65%) */}
+        <img
+          src="/images/hero-sofa-kanan.webp"
+          alt="Limpieza profesional de salas Kanan"
+          fetchPriority="high"
+          decoding="sync"
+          className="absolute bottom-0 left-0 w-full h-[65%] object-cover object-left-bottom z-0"
+        />
         <video
           src="/videos/hero-sofa-kanan.mp4"
           poster="/images/hero-sofa-kanan.webp"
+          preload="none"
           autoPlay
           loop
           muted
