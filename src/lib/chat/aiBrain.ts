@@ -26,28 +26,36 @@ export interface KananBrainOutput {
   intencionDetectada: "cotizacion" | "pregunta_tecnica" | "confirmacion_cita" | "cancelacion" | "otro";
   codigoPostalDetectado?: string;
   proveedorUtilizado: "gemini" | "openai";
+  stage: "recolectando_info" | "listo_para_cotizar" | "escalar_urgente";
+  pause_ai: boolean;
+  summary_for_owner: string;
 }
 
 const SYSTEM_PROMPT = `
-Eres Kanan Asistente Virtual, el asesor técnico y de atención al cliente de "Kanan Servicios de Limpieza y Desinfección Profunda a Domicilio", operando en la Zona Metropolitana de Guadalajara (Zapopan, Guadalajara, Tlajomulco, Tlaquepaque).
+Eres el recepcionista humano de "Kanan Limpieza" en Guadalajara y ZMG (Zapopan, Guadalajara, Tlajomulco, Tlaquepaque). Tu único objetivo es atender al cliente con calidez, pre-calificarlo y dejar el chat listo para que el dueño le dé su cotización exacta.
 
-🐾 PERSONALIDAD Y TONO:
-- Eres cálido, empático, profesional y natural (español de México).
-- JAMÁS suenas como un robot ni usas plantillas predeterminadas ni menús tipo "Marca 1 o 2".
-- Respondes directamente a la duda del cliente primero, y luego guías hacia el siguiente paso con amabilidad.
-- CONTINUIDAD NATURAL: Si en el historial ya hubo interacción o ya saludaste al cliente, NO vuelvas a presentarte ni a decir "¡Hola Mario! Qué gusto saludarte de nuevo por aquí". Ve directo al grano como en una conversación humana continua.
-- Usas emojis con buen gusto (🐾, ✨, 🛋️, 🧼, 📍, 🚐).
-- Siempre mantienes mensajes claros y concisos (ideales para WhatsApp, párrafos cortos de 2 a 4 líneas).
+REGLAS ESTRICTAS DE ESTILO (WHATSAPP HUMANO):
+- Responde como una persona real en WhatsApp: máximo 1 a 2 líneas cortas.
+- PROHIBIDO usar viñetas, listas, asteriscos/negritas o menús robóticos.
+- Usa máximo 1 emoji natural por mensaje (o ninguno).
+- Lee el historial y NUNCA repitas saludos ("¡Hola!", "¿En qué te puedo ayudar?") si la conversación ya empezó.
+- PROHIBIDO dar precios, rangos o estimados. Si preguntan cuánto cuesta, explica amablemente que el precio depende del tamaño, tela y estado del mueble, y pídele los 3 datos indispensables: qué mueble o área quiere lavar, una foto del mueble, y su colonia o zona en Guadalajara/ZMG.
 
-🧼 CONOCIMIENTO TÉCNICO DE KANAN:
-1. SERVICIOS:
-   - Lavado y desinfección profunda de Salas, Sillones, Colchones, Cunas, Sillas de Comedor, Tapetes y Vestiduras de Autos.
-2. TECNOLOGÍA:
-   - Sistema de Inyección-Succión profunda alemana Kärcher.
-   - Sanitización antiácaros y eliminación de alérgenos / bacterias.
-   - Productos 100% biodegradables y seguros para niños y mascotas (Pet-Friendly).
-3. TIEMPO DE SECADO:
-   - Toma aproximadamente de 3 a 4 horas gracias a la turbina de alto vacío (dependiendo del clima y ventilación). ¡Los muebles se usan el mismo día!
+CUÁNDO PASAR A "listo_para_cotizar" (pause_ai: true):
+- En cuanto el cliente envíe una foto (o ya haya explicado qué mueble/área necesita lavar junto con su colonia/zona), responde con un mensaje cálido y breve confirmando que ya recibiste su información y que en unos minutos le envían su cotización exacta.
+- En ese mismo turno devuelve stage: "listo_para_cotizar", pause_ai: true y un summary_for_owner corto (ej. "Sala 3 piezas con mancha de mascota en Zapopan").
+- Si es una queja urgente o garantía, usa stage: "escalar_urgente" y pause_ai: true.
+- Si aún faltan datos, usa stage: "recolectando_info", pause_ai: false y summary_for_owner: "".
+
+FORMATO DE SALIDA OBLIGATORIO (JSON):
+Responde ÚNICAMENTE con un JSON válido con esta estructura exacta:
+{
+  "reply": "tu respuesta corta de 1-2 líneas",
+  "stage": "recolectando_info" | "listo_para_cotizar" | "escalar_urgente",
+  "pause_ai": boolean,
+  "summary_for_owner": "resumen corto para el dueño o cadena vacía"
+}
+`;
 4. MANCHAS DIFÍCILES:
    - Orina de mascotas: se aplica tratamiento enzimático para desintegrar el ácido úrico y neutralizar olores de raíz.
    - Grasa, comida, sudor y maquillaje: emulsión biodegradable de alta extracción.
@@ -107,8 +115,9 @@ async function procesarConGemini(promptCompleto: string, input: KananBrainInput,
         },
         contents,
         generationConfig: {
-          temperature: 0.7,
+          temperature: 0.5,
           maxOutputTokens: 350,
+          responseMimeType: "application/json",
         },
       }),
       signal: controller.signal,
@@ -183,17 +192,42 @@ DATOS DEL CLIENTE ACTUAL:
 
   const promptCompleto = SYSTEM_PROMPT + "\n\n" + contextoCliente;
 
+  const parseStructured = (raw: string, proveedor: "gemini" | "openai"): KananBrainOutput => {
+    const cpMatch = input.mensajeNuevo.match(/\b\d{5}\b/);
+    try {
+      const cleaned = raw.replace(/^```json\s*/i, "").replace(/```$/i, "").trim();
+      const parsed = JSON.parse(cleaned);
+      const stage =
+        parsed.stage === "listo_para_cotizar" || parsed.stage === "escalar_urgente"
+          ? parsed.stage
+          : "recolectando_info";
+      return {
+        respuestaTexto: String(parsed.reply || raw).trim(),
+        intencionDetectada: "cotizacion",
+        codigoPostalDetectado: cpMatch ? cpMatch[0] : undefined,
+        proveedorUtilizado: proveedor,
+        stage,
+        pause_ai: Boolean(parsed.pause_ai),
+        summary_for_owner: String(parsed.summary_for_owner || "").trim(),
+      };
+    } catch {
+      return {
+        respuestaTexto: raw,
+        intencionDetectada: "cotizacion",
+        codigoPostalDetectado: cpMatch ? cpMatch[0] : undefined,
+        proveedorUtilizado: proveedor,
+        stage: "recolectando_info",
+        pause_ai: false,
+        summary_for_owner: "",
+      };
+    }
+  };
+
   // 1. Intentar con Gemini
   if (geminiKey) {
     const respuestaGemini = await procesarConGemini(promptCompleto, input, geminiKey);
     if (respuestaGemini) {
-      const cpMatch = input.mensajeNuevo.match(/\b\d{5}\b/);
-      return {
-        respuestaTexto: respuestaGemini,
-        intencionDetectada: "cotizacion",
-        codigoPostalDetectado: cpMatch ? cpMatch[0] : undefined,
-        proveedorUtilizado: "gemini",
-      };
+      return parseStructured(respuestaGemini, "gemini");
     }
   }
 
@@ -201,13 +235,7 @@ DATOS DEL CLIENTE ACTUAL:
   if (openAiKey) {
     const respuestaOpenAI = await procesarConOpenAI(promptCompleto, input, openAiKey);
     if (respuestaOpenAI) {
-      const cpMatch = input.mensajeNuevo.match(/\b\d{5}\b/);
-      return {
-        respuestaTexto: respuestaOpenAI,
-        intencionDetectada: "cotizacion",
-        codigoPostalDetectado: cpMatch ? cpMatch[0] : undefined,
-        proveedorUtilizado: "openai",
-      };
+      return parseStructured(respuestaOpenAI, "openai");
     }
   }
 

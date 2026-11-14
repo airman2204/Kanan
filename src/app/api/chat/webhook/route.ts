@@ -497,6 +497,21 @@ export async function POST(req: NextRequest) {
             // A) Enviar respuesta generada por la IA inteligente
             await enviarMensajeChat(phoneParaResponder, aiResult.respuestaTexto);
 
+            // B) Si la IA detectó que ya tiene foto/datos suficientes (pause_ai: true), apagar IA y guardar resumen para el dueño
+            if (aiResult.pause_ai) {
+              try {
+                await supabase
+                  .from("clientes")
+                  .update({
+                    ia_pausada: true,
+                    ...(aiResult.summary_for_owner ? { notas_internas: `[${aiResult.stage}] ${aiResult.summary_for_owner}` } : {}),
+                  })
+                  .eq("id", cliente.id);
+              } catch (pauseErr) {
+                console.warn("⚠️ Error pausando IA automáticamente:", pauseErr);
+              }
+            }
+
             const msgAiRegistro = {
               id: `ai-${Date.now()}`,
               cita_id: ultimaCita ? ultimaCita.id : "sin_cita",
