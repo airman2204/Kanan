@@ -207,7 +207,7 @@ export function SocialProofAndFAQ() {
               Preguntas Frecuentes
             </h3>
             <p className="text-xs sm:text-sm text-slate-500">
-              Resolvemos tus dudas sobre nuestros procesos, tiempos y logística en Guadalajara y municipios.
+              Resolvemos tus dudas sobre nuestros procesos, tiempos y logística en Tlajomulco y ZMG.
             </p>
           </div>
 

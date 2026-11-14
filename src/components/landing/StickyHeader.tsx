@@ -53,7 +53,7 @@ export function StickyHeader({
               </span>
               <span className="text-white/40">•</span>
               <span className="font-medium text-slate-100">
-                Unidades móviles activas en <strong className="text-cyan-300 font-bold">{selectedMunicipio}</strong> y municipios
+                Unidades móviles activas en <strong className="text-cyan-300 font-bold">Tlajomulco</strong> y ZMG
               </span>
               <span className="text-white/40">•</span>
               <span className="font-semibold text-white bg-white/15 px-2.5 py-0.5 rounded-full border border-white/20">
