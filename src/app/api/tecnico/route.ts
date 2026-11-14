@@ -27,8 +27,10 @@ export async function GET(req: NextRequest) {
     }
 
     const db = await getDatabaseAsync();
-    // Obtener la fecha de hoy en formato YYYY-MM-DD
-    const hoyStr = new Date().toISOString().split("T")[0];
+    // Obtener la fecha de hoy en Guadalajara/México (YYYY-MM-DD) para evitar desfase UTC en Vercel
+    const hoyStr = new Date().toLocaleDateString("en-CA", {
+      timeZone: "America/Mexico_City",
+    });
 
     // Citas activas para hoy (no canceladas)
     const citasHoy = db.servicios_citas.filter(

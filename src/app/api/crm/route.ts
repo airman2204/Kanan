@@ -382,6 +382,11 @@ export async function PATCH(req: NextRequest) {
         const db = getDatabase();
         const cli = db.clientes.find((c) => c.id === updated.cliente_id);
         sincronizarCitaConSupabase(updated, cli).catch((e) => console.error("Error sync Supabase PATCH:", e));
+        if (body.estatus === "Confirmada" && cli) {
+          despacharConfirmacionReservaAutomatica(updated, cli).catch((e) =>
+            console.error("Error despachando confirmación automática:", e)
+          );
+        }
       }
 
       return NextResponse.json({
