@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: false, error: "La sesión de verificación ha expirado. Inicia sesión nuevamente." }, { status: 401 });
     }
 
-    const admin = await getAdminUser();
+    const admin = await getAdminUser(pendingSession.email);
     const cleanToken = token.toString().replace(/\s+/g, "");
 
     const isValidToken = verifyMfaToken(cleanToken, admin.mfaSecret);
