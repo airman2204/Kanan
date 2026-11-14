@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
     let imagenGeneradaUrl = "/assets/services/hero-fresh.jpg";
     if (falKey) {
       try {
-        const falRes = await fetch("https://queue.fal.run/fal-ai/flux/schnell", {
+        const falRes = await fetch("https://fal.run/fal-ai/flux/schnell", {
           method: "POST",
           headers: {
             Authorization: `Key ${falKey}`,
