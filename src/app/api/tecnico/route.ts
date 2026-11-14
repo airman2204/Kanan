@@ -32,9 +32,12 @@ export async function GET(req: NextRequest) {
       timeZone: "America/Mexico_City",
     });
 
-    // Citas activas para hoy, próximas o sin fecha asignada (no canceladas)
+    // Citas activas para hoy, próximas o sin fecha asignada (excluyendo Cancelada y Por Confirmar)
     const citasHoy = db.servicios_citas.filter(
-      (c) => c.estatus !== "Cancelada" && (!c.fecha || c.fecha >= hoyStr)
+      (c) =>
+        c.estatus !== "Cancelada" &&
+        c.estatus !== "Por Confirmar" &&
+        (!c.fecha || c.fecha >= hoyStr)
     );
 
     // Mapear cada cita con los datos de su cliente
@@ -140,14 +143,14 @@ export async function PATCH(req: NextRequest) {
       updatePayload.estatus = "En Ruta";
       updatePayload.hora_en_camino = nowIso;
       if (citaActual && cliente) {
-        despacharEventoEnCamino(citaActual, cliente, rango_tiempo).catch(console.warn);
+        await despacharEventoEnCamino(citaActual, cliente, rango_tiempo).catch(console.warn);
       }
     } else if (accion === "INICIAR_SERVICIO" || estatus === "En Proceso") {
       nuevoEstatus = "En Proceso";
       updatePayload.estatus = "En Proceso";
       updatePayload.hora_inicio = nowIso;
       if (citaActual && cliente) {
-        despacharEventoInicioServicio(citaActual, cliente).catch(console.warn);
+        await despacharEventoInicioServicio(citaActual, cliente).catch(console.warn);
       }
     } else if (accion === "CONCLUIR_SERVICIO" || estatus === "Completada") {
       nuevoEstatus = "Completada";
