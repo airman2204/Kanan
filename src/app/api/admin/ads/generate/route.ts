@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
 
     const db = getDatabase();
     const apiConfig = (db as any).marketing_api_config || {};
-    const falKey = apiConfig.fal_key || process.env.FAL_KEY;
+    const falKey = process.env.FAL_KEY || apiConfig.fal_key;
     const geminiKey = apiConfig.gemini_api_key || process.env.GEMINI_API_KEY;
 
     // 1. Redacción Estratégica Adaptada al Negocio Kanan Limpieza
