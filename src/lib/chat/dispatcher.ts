@@ -1,5 +1,35 @@
 import { ServicioCita, Cliente } from "@/types/crm";
 import { enviarMensajeChat, enviarStickerChat, enviarMediaChat } from "./bridgeClient";
+import { getDatabase, saveDatabase } from "@/lib/db/store";
+import { supabase } from "@/lib/supabase";
+
+async function registrarMensajeEnChat(
+  citaId: string,
+  cliente: Cliente,
+  contenido: string,
+  etapaTitulo: string,
+  sent: boolean
+) {
+  try {
+    const db = getDatabase();
+    const nuevoMsg = {
+      id: `auto-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      cita_id: citaId,
+      cliente_id: cliente.id,
+      etapa: "1_confirmacion_inmediata" as const,
+      etapa_titulo: etapaTitulo,
+      destinatario_whatsapp: cliente.whatsapp.replace(/\D/g, ""),
+      contenido_mensaje: contenido,
+      estatus_envio: (sent ? "Enviado" : "Programado") as "Enviado" | "Programado",
+      fecha_programada: new Date().toISOString(),
+    };
+    db.mensajes_automatizacion.unshift(nuevoMsg);
+    saveDatabase(db);
+    await supabase.from("mensajes_automatizacion").insert(nuevoMsg);
+  } catch (e) {
+    console.warn("No se pudo registrar mensaje automático en chat:", e);
+  }
+}
 
 /**
  * Cálculo gratuito de ruta en tiempo real con OSRM (OpenStreetMap).
@@ -108,7 +138,9 @@ export async function despacharConfirmacionReservaAutomatica(
     `¡Muchas gracias por tu preferencia! 💙✨`,
   ].join("\n");
 
-  return await enviarMensajeChat(cleanPhone, mensaje);
+  const sent = await enviarMensajeChat(cleanPhone, mensaje);
+  await registrarMensajeEnChat(cita.id, cliente, mensaje, "Cita Confirmada (Auto)", sent);
+  return sent;
 }
 
 /**
@@ -135,7 +167,9 @@ export async function despacharCitaConfirmada(
     `El día de tu servicio te avisaremos por aquí cuando nuestro técnico vaya en camino. ¡Gracias por confiar en Kanan! 💙✨`,
   ].join("\n");
 
-  return await enviarMensajeChat(cleanPhone, mensaje);
+  const sent = await enviarMensajeChat(cleanPhone, mensaje);
+  await registrarMensajeEnChat(cita.id, cliente, mensaje, "Cita Confirmada (Auto)", sent);
+  return sent;
 }
 
 /**
