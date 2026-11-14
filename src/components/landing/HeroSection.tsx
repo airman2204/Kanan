@@ -146,7 +146,7 @@ export function HeroSection({ selectedMunicipio, onOpenWizard }: HeroSectionProp
             <div className="inline-flex items-center gap-1.5 bg-white/90 backdrop-blur-md border border-[#36A6DE]/40 rounded-full px-3.5 py-1.5 shadow-sm text-xs font-heading font-bold text-[#1D71B5]">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping inline-block" />
               <MapPin className="w-3.5 h-3.5 text-[#36A6DE]" />
-              <span>Servicio a domicilio en Guadalajara y ZMG</span>
+              <span>Servicio a domicilio en Tlajomulco, Guadalajara y ZMG</span>
             </div>
           </div>
 
