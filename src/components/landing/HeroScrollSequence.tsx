@@ -1,73 +1,23 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React from "react";
 
 interface HeroScrollSequenceProps {
-  sectionRef: React.RefObject<HTMLElement | null>;
+  sectionRef?: React.RefObject<HTMLElement | null>;
 }
 
-export function HeroScrollSequence({ sectionRef }: HeroScrollSequenceProps) {
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-  const rafRef = useRef<number | null>(null);
-
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    const updateFromScroll = () => {
-      const section = sectionRef.current;
-      if (!section) return;
-
-      const rect = section.getBoundingClientRect();
-      const scrollableDistance = Math.max(rect.height, 1);
-      const rawProgress = -rect.top / scrollableDistance;
-      const progress = Math.min(1, Math.max(0, rawProgress));
-
-      if (video.readyState >= 1 && Number.isFinite(video.duration) && video.duration > 0) {
-        const targetTime = progress * video.duration;
-        if (Math.abs(video.currentTime - targetTime) > 0.015) {
-          video.currentTime = targetTime;
-        }
-      }
-    };
-
-    const onScroll = () => {
-      if (rafRef.current !== null) return;
-      rafRef.current = window.requestAnimationFrame(() => {
-        rafRef.current = null;
-        updateFromScroll();
-      });
-    };
-
-    const onLoadedMetadata = () => {
-      updateFromScroll();
-    };
-
-    video.addEventListener("loadedmetadata", onLoadedMetadata);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", updateFromScroll, { passive: true });
-    updateFromScroll();
-
-    return () => {
-      video.removeEventListener("loadedmetadata", onLoadedMetadata);
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", updateFromScroll);
-      if (rafRef.current !== null) {
-        window.cancelAnimationFrame(rafRef.current);
-      }
-    };
-  }, [sectionRef]);
-
+export function HeroScrollSequence({}: HeroScrollSequenceProps) {
   return (
     <div
       className="hidden md:block absolute inset-0 z-0 overflow-hidden pointer-events-none select-none"
       aria-hidden="true"
     >
-      {/* Video optimizado con keyframes en cada fotograma (-g 1) */}
+      {/* Video en reproducción automática continua (sin depender del scroll) */}
       <video
-        ref={videoRef}
         src="/videos/hero-sofa-kanan.mp4"
         poster="/images/hero-sofa-kanan.webp"
+        autoPlay
+        loop
         muted
         playsInline
         preload="auto"
@@ -77,9 +27,6 @@ export function HeroScrollSequence({ sectionRef }: HeroScrollSequenceProps) {
           WebkitMaskImage: "linear-gradient(to bottom, black 0%, black 60%, transparent 98%)",
         }}
       />
-
-      {/* Velo móvil para legibilidad total en pantallas angostas */}
-      <div className="md:hidden absolute inset-0 bg-white/75" />
 
       {/* Degradado horizontal asimétrico en desktop: deja el lado izquierdo 100% vivo y protege el texto central */}
       <div className="hidden md:block absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0)_0%,rgba(255,255,255,0)_30%,rgba(255,255,255,0.88)_45%,rgba(255,255,255,0.88)_65%,rgba(255,255,255,0.25)_100%)]" />
