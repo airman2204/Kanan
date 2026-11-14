@@ -173,7 +173,7 @@ export default function HomePage() {
       </main>
 
       <Footer onOpenWizard={() => handleOpenChat()} />
-      <MobileBottomBar onOpenWizard={() => handleOpenChat()} />
+      {!isChatOpen && <MobileBottomBar onOpenWizard={() => handleOpenChat()} />}
 
       {/* BURBUJA FLOTANTE EN DESKTOP (ESQUINA INFERIOR DERECHA - MÁS GRANDE Y PROTAGÓNICA) */}
       {!isChatOpen && (
