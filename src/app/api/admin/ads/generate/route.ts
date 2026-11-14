@@ -46,12 +46,13 @@ export async function POST(req: NextRequest) {
 
     // Simular o invocar FLUX si hay FAL_KEY configurada
     let imagenGeneradaUrl = "/assets/services/hero-fresh.jpg";
+    let falDebug = falKey ? "key_present" : "no_fal_key";
     if (falKey) {
       try {
         const falRes = await fetch("https://fal.run/fal-ai/flux/schnell", {
           method: "POST",
           headers: {
-            Authorization: `Key ${falKey}`,
+            Authorization: `Key ${falKey.trim()}`,
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
@@ -66,9 +67,15 @@ export async function POST(req: NextRequest) {
           const falData = await falRes.json();
           if (falData.images && falData.images[0]?.url) {
             imagenGeneradaUrl = falData.images[0].url;
+            falDebug = "ok";
+          } else {
+            falDebug = "ok_no_images";
           }
+        } else {
+          falDebug = `http_${falRes.status}`;
         }
       } catch (e) {
+        falDebug = e instanceof Error ? e.message : "fetch_error";
         console.warn("FAL.ai invocation fallback:", e);
       }
     }
