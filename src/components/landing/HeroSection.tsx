@@ -122,7 +122,7 @@ export function HeroSection({ selectedMunicipio, onOpenWizard }: HeroSectionProp
       <section
         ref={sectionRef}
         id="inicio"
-        className="hidden md:block relative overflow-hidden bg-gradient-to-b from-[#F0F5FA] via-white to-[#F4F7F9] pt-8 pb-16 sm:pt-14 sm:pb-24 lg:pt-16 lg:pb-28"
+        className="hidden md:flex flex-col justify-start md:justify-center min-h-[680px] relative overflow-hidden bg-gradient-to-b from-[#F0F5FA] via-white to-[#F4F7F9] pt-8 pb-16 sm:pt-14 sm:pb-24 md:pt-28 lg:pt-32 lg:pb-28 2xl:pt-16"
       >
       {/* Secuencia de video controlada por scroll en el fondo */}
       <HeroScrollSequence sectionRef={sectionRef} />
@@ -131,7 +131,7 @@ export function HeroSection({ selectedMunicipio, onOpenWizard }: HeroSectionProp
       <div className="absolute top-0 right-1/4 w-[500px] h-[500px] rounded-full bg-gradient-to-br from-[#36A6DE]/20 to-[#1D71B5]/10 blur-3xl pointer-events-none -z-0" />
       <div className="absolute bottom-10 left-10 w-[420px] h-[420px] rounded-full bg-gradient-to-tr from-[#355581]/15 to-[#36A6DE]/10 blur-3xl pointer-events-none -z-0" />
 
-      <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 z-10 text-center">
+      <div className="relative w-full max-w-4xl mx-auto md:ml-auto md:mr-8 lg:mr-16 md:max-w-[540px] 2xl:mx-auto 2xl:max-w-3xl bg-white/60 backdrop-blur-[2px] rounded-3xl p-6 2xl:bg-transparent 2xl:backdrop-blur-none 2xl:p-0 px-4 sm:px-6 lg:px-8 z-10 text-center">
         <div className="space-y-6">
           {/* Badges de Cobertura */}
           <div className="flex flex-wrap items-center justify-center gap-2.5">
