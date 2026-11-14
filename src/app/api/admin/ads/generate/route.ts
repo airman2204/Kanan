@@ -118,7 +118,7 @@ export async function POST(req: NextRequest) {
     (db as any).campanas_marketing.unshift(campana);
     saveDatabase(db);
 
-    return NextResponse.json({ ok: true, campana });
+    return NextResponse.json({ ok: true, campana, falDebug });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : "Error al generar campaña de marketing";
     return NextResponse.json({ ok: false, error: msg }, { status: 500 });
