@@ -32,9 +32,9 @@ export async function GET(req: NextRequest) {
       timeZone: "America/Mexico_City",
     });
 
-    // Citas activas para hoy (no canceladas)
+    // Citas activas para hoy, próximas o sin fecha asignada (no canceladas)
     const citasHoy = db.servicios_citas.filter(
-      (c) => c.fecha === hoyStr && c.estatus !== "Cancelada"
+      (c) => c.estatus !== "Cancelada" && (!c.fecha || c.fecha >= hoyStr)
     );
 
     // Mapear cada cita con los datos de su cliente
