@@ -80,10 +80,10 @@ export async function POST(req: NextRequest) {
     // 🛡️ REGLA ESTRICTA DE SEGURIDAD / SANDBOX:
     // Solo se ejecutan respuestas automáticas e inteligencia artificial si el número es tu teléfono de pruebas (2221817807)
     // Para cualquier otro cliente real (como Arfaxad), el bot JAMÁS interviene para no estropear conversaciones reales.
-    const WHITELIST_TEST_PHONE = "2221817807";
+    const WHITELIST_TEST_PHONES = ["2221817807", "7351050554"];
     const esNumeroPruebas =
-      (cliente?.whatsapp && cliente.whatsapp.replace(/\D/g, "").slice(-10) === WHITELIST_TEST_PHONE) ||
-      (cleanPhone && cleanPhone.slice(-10) === WHITELIST_TEST_PHONE) ||
+      (cliente?.whatsapp && WHITELIST_TEST_PHONES.includes(cliente.whatsapp.replace(/\D/g, "").slice(-10))) ||
+      (cleanPhone && WHITELIST_TEST_PHONES.includes(cleanPhone.slice(-10))) ||
       (lid && String(lid) === "64312974520340");
 
     if (cliente) {
