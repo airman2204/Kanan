@@ -47,9 +47,9 @@ export function StickyHeader({
         <div className="flex animate-marquee items-center gap-8 whitespace-nowrap cursor-pointer" onClick={onOpenWizard}>
           {[...Array(4)].map((_, i) => (
             <div key={i} className="flex items-center gap-6">
-              <span className="inline-flex items-center gap-1.5 font-heading font-extrabold uppercase tracking-wider text-cyan-200">
-                <Sparkles className="w-3.5 h-3.5 text-kanan-cyan animate-spin" style={{ animationDuration: "6s" }} />
-                ¡Agenda tu cita a domicilio hoy mismo!
+              <span className="inline-flex items-center gap-1.5 font-heading font-semibold text-cyan-200">
+                <Sparkles className="w-3.5 h-3.5 text-kanan-cyan" />
+                Agenda tu cita a domicilio hoy mismo
               </span>
               <span className="text-white/40">•</span>
               <span className="font-medium text-slate-100">

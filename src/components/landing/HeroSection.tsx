@@ -98,13 +98,13 @@ export function HeroSection({ selectedMunicipio, onOpenWizard }: HeroSectionProp
           </h1>
 
           <p className="text-slate-700 text-[15px] leading-snug mt-3 font-medium">
-            Eliminamos manchas, ácaros y malos olores por inyección-succión. ¡Secado rápido en horas!
+            Eliminamos manchas, ácaros y malos olores por inyección-succión. Secado rápido en horas.
           </p>
 
           <button
             type="button"
             onClick={() => onOpenWizard()}
-            className="mt-4 w-full py-3.5 rounded-full bg-gradient-to-r from-[#0284C7] to-[#2563EB] text-white font-bold text-base shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 active:scale-[0.98] transition-transform cursor-pointer"
+            className="mt-4 w-full py-3.5 rounded-full bg-[#1D71B5] hover:bg-[#0B2239] text-white font-semibold text-base shadow-md flex items-center justify-center gap-2 active:scale-[0.98] transition-colors cursor-pointer"
           >
             <CalendarCheck className="w-5 h-5 shrink-0" />
             <span>Cotizar y Agendar en Línea</span>
@@ -135,27 +135,23 @@ export function HeroSection({ selectedMunicipio, onOpenWizard }: HeroSectionProp
       {/* Secuencia de video controlada por scroll en el fondo */}
       <HeroScrollSequence sectionRef={sectionRef} />
 
-      {/* Luces difusas de fondo (Glow Glassmorphism) */}
-      <div className="absolute top-0 right-1/4 w-[500px] h-[500px] rounded-full bg-gradient-to-br from-[#36A6DE]/20 to-[#1D71B5]/10 blur-3xl pointer-events-none -z-0" />
-      <div className="absolute bottom-10 left-10 w-[420px] h-[420px] rounded-full bg-gradient-to-tr from-[#355581]/15 to-[#36A6DE]/10 blur-3xl pointer-events-none -z-0" />
-
-      <div className="relative w-full max-w-4xl mx-auto md:ml-auto md:mr-8 lg:mr-16 md:max-w-[540px] 2xl:mx-auto 2xl:max-w-3xl bg-white/60 backdrop-blur-[2px] rounded-3xl p-6 2xl:bg-transparent 2xl:backdrop-blur-none 2xl:p-0 px-4 sm:px-6 lg:px-8 z-10 text-center">
+      <div className="relative w-full max-w-4xl mx-auto md:ml-auto md:mr-8 lg:mr-16 md:max-w-[540px] 2xl:mx-auto 2xl:max-w-3xl bg-white/75 backdrop-blur-[2px] rounded-3xl p-6 2xl:bg-transparent 2xl:backdrop-blur-none 2xl:p-0 px-4 sm:px-6 lg:px-8 z-10 text-center">
         <div className="space-y-6">
           {/* Badges de Cobertura */}
           <div className="flex flex-wrap items-center justify-center gap-2.5">
-            <div className="inline-flex items-center gap-1.5 bg-white/90 backdrop-blur-md border border-[#36A6DE]/40 rounded-full px-3.5 py-1.5 shadow-sm text-xs font-heading font-bold text-[#1D71B5]">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping inline-block" />
-              <MapPin className="w-3.5 h-3.5 text-[#36A6DE]" />
+            <div className="inline-flex items-center gap-1.5 bg-white/95 border border-slate-200 rounded-full px-3.5 py-1.5 shadow-sm text-xs font-heading font-semibold text-[#1D71B5]">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
+              <MapPin className="w-3.5 h-3.5 text-[#1D71B5]" />
               <span>Servicio a domicilio en Tlajomulco y ZMG</span>
             </div>
           </div>
 
           {/* Titular Principal de Alto Impacto */}
           <div className="space-y-4">
-            <h1 className="font-heading text-4xl sm:text-5xl lg:text-[54px] font-extrabold text-[#355581] tracking-tight leading-[1.08]">
+            <h1 className="font-heading text-4xl sm:text-5xl lg:text-[54px] font-bold text-[#0B2239] tracking-tight leading-[1.08]">
               Limpieza y desinfección profunda{" "}
-              <span className="block mt-1 bg-gradient-to-r from-[#1D71B5] via-[#36A6DE] to-[#355581] bg-clip-text text-transparent">
-                para tus salas, colchones y auto a domicilio.
+              <span className="block mt-1 text-[#1D71B5]">
+                para tus salas, colchones y auto a domicilio
               </span>
             </h1>
             <p className="text-slate-600 text-base sm:text-lg lg:text-xl leading-relaxed max-w-2xl mx-auto">
@@ -170,7 +166,7 @@ export function HeroSection({ selectedMunicipio, onOpenWizard }: HeroSectionProp
             <button
               type="button"
               onClick={() => onOpenWizard()}
-              className="w-full inline-flex items-center justify-center gap-2.5 bg-gradient-to-r from-[#1D71B5] to-[#36A6DE] hover:from-[#355581] hover:to-[#1D71B5] text-white font-heading font-extrabold text-base px-8 py-4 rounded-2xl shadow-xl shadow-blue-500/25 transition-all active:scale-[0.98] cursor-pointer"
+              className="w-full inline-flex items-center justify-center gap-2.5 bg-[#1D71B5] hover:bg-[#0B2239] text-white font-heading font-semibold text-base px-8 py-4 rounded-2xl shadow-md transition-all active:scale-[0.98] cursor-pointer"
             >
               <CalendarCheck className="w-5 h-5 shrink-0" />
               <span>Cotizar y Agendar en Línea</span>
